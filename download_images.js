@@ -20,7 +20,7 @@ const images = [
   { name: 'city-concepcion.jpg', url: 'https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?auto=format&fit=crop&q=80&w=800' },
   { name: 'city-federacion.jpg', url: 'https://images.unsplash.com/photo-1540555700478-4be289fbecef?auto=format&fit=crop&q=80&w=800' },
   { name: 'city-villaelisa.jpg', url: 'https://images.unsplash.com/photo-1506377247377-2a5b3b417ebb?auto=format&fit=crop&q=80&w=800' },
-  { name: 'city-chajari.jpg', url: 'https://images.unsplash.com/photo-1587049352847-4a222e784d38?auto=format&fit=crop&q=80&w=800' },
+  { name: 'city-chajari.jpg', url: 'https://images.unsplash.com/photo-1523348837708-15d4a09cfac2?auto=format&fit=crop&q=80&w=800' },
 
   // 3. Bento Rows Opción A
   { name: 'bento-1.jpg', url: 'https://images.unsplash.com/photo-1472851294608-062f824d29cc?auto=format&fit=crop&q=80&w=800' }, // Comercio Digital
@@ -43,7 +43,7 @@ const images = [
   { name: 'prod-mate.jpg', url: 'https://images.unsplash.com/photo-1578849278619-e73505e9610f?auto=format&fit=crop&q=80&w=800' }, // Mate y Bombilla
   { name: 'prod-dorado.jpg', url: 'https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?auto=format&fit=crop&q=80&w=800' }, // Pescado Asado Parrilla
   { name: 'prod-vino-tannat.jpg', url: 'https://images.unsplash.com/photo-1506377247377-2a5b3b417ebb?auto=format&fit=crop&q=80&w=800' }, // Estuche Vinos
-  { name: 'prod-dulces.jpg', url: 'https://images.unsplash.com/photo-1587049352847-4a222e784d38?auto=format&fit=crop&q=80&w=800' }, // Frascos Dulces y Miel
+  { name: 'prod-dulces.jpg', url: 'https://images.unsplash.com/photo-1558961363-fa8fdf82db35?auto=format&fit=crop&q=80&w=800' }, // Frascos Dulces y Miel
   { name: 'prod-lancha.jpg', url: 'https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&q=80&w=800' }, // Paseo en Lancha
   { name: 'prod-cuchillo.jpg', url: 'https://images.unsplash.com/photo-1593642632823-8f785ba67e45?auto=format&fit=crop&q=80&w=800' }, // Cuchillo Criollo Artesanal
 
