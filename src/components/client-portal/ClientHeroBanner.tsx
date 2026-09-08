@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { ArrowRight, ChevronLeft, ChevronRight, Pause, Play, MapPin } from 'lucide-react';
+import { ArrowRight, ChevronLeft, ChevronRight, MapPin } from 'lucide-react';
 
 const HERO_SLIDES = [
   {
@@ -58,7 +58,6 @@ const HERO_SLIDES = [
 
 export function ClientHeroBanner() {
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [isPlaying, setIsPlaying] = useState(true);
 
   const nextSlide = useCallback(() => {
     setCurrentIndex((prev) => (prev + 1) % HERO_SLIDES.length);
@@ -69,10 +68,9 @@ export function ClientHeroBanner() {
   }, []);
 
   useEffect(() => {
-    if (!isPlaying) return;
     const interval = setInterval(nextSlide, 5000);
     return () => clearInterval(interval);
-  }, [isPlaying, nextSlide]);
+  }, [nextSlide]);
 
   const activeSlide = HERO_SLIDES[currentIndex];
 
@@ -80,8 +78,6 @@ export function ClientHeroBanner() {
     <section 
       aria-label="Carrusel Destacado de Entre Ríos"
       className="relative w-full overflow-hidden bg-slate-950 min-h-[420px] sm:min-h-[480px] flex items-center shadow-lg group"
-      onMouseEnter={() => setIsPlaying(false)}
-      onMouseLeave={() => setIsPlaying(true)}
     >
       {/* Background Images with Fade Transition */}
       {HERO_SLIDES.map((slide, idx) => (
@@ -141,7 +137,7 @@ export function ClientHeroBanner() {
                 <ArrowRight className="w-5 h-5" />
               </Link>
 
-              {/* Controls */}
+              {/* Clean Nav Controls (Without Play/Pause) */}
               <div className="flex items-center gap-2 bg-black/40 backdrop-blur-md px-3 py-1.5 rounded-2xl border border-white/20">
                 <button
                   onClick={prevSlide}
@@ -170,14 +166,6 @@ export function ClientHeroBanner() {
                   aria-label="Slide siguiente"
                 >
                   <ChevronRight className="w-5 h-5" />
-                </button>
-
-                <button
-                  onClick={() => setIsPlaying(!isPlaying)}
-                  className="ml-1 text-white/80 hover:text-white p-1.5 rounded-full hover:bg-white/20 transition-colors"
-                  aria-label={isPlaying ? 'Pausar carrusel' : 'Iniciar carrusel'}
-                >
-                  {isPlaying ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
                 </button>
               </div>
             </div>

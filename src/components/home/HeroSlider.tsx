@@ -112,15 +112,6 @@ export function HeroSlider({ slides, featuredCommerce, weekendEvent }: HeroSlide
                 {activeSlide.cityTag}
               </span>
             </div>
-
-            {/* Play/Pause Button */}
-            <button
-              onClick={() => setIsPlaying(!isPlaying)}
-              className="bg-black/40 hover:bg-black/60 text-white p-2 rounded-full backdrop-blur-md transition-colors focus:outline-hidden"
-              aria-label={isPlaying ? 'Pausar diapositivas' : 'Iniciar reproducción de diapositivas'}
-            >
-              {isPlaying ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
-            </button>
           </div>
 
           {/* Bottom Editorial Content */}
