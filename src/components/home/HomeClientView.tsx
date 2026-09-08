@@ -57,7 +57,7 @@ export function HomeClientView({
   }, [selectedCity, initialProducts, events]);
 
   return (
-    <div className="space-y-12 pt-2 sm:pt-4 pb-16">
+    <div className="space-y-12 pt-8 sm:pt-12 pb-16">
       {/* 1. Hero Section Híbrida Editorial */}
       <HeroSlider
         slides={slides}
