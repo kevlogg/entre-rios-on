@@ -42,14 +42,11 @@ export function Header({ selectedCityId = 'all' }: HeaderProps) {
     setIsCityDropdownOpen(false);
     trackCitySelect(cityId, cityName);
     
-    const url = new URL(window.location.href);
     if (cityId === 'all') {
-      url.searchParams.delete('city');
+      window.location.href = '/editorial#catalogo';
     } else {
-      url.searchParams.set('city', cityId);
+      window.location.href = `/ciudad/${cityId}`;
     }
-    window.history.pushState({}, '', url.toString());
-    window.dispatchEvent(new Event('popstate'));
   };
 
   const handleSearchSubmit = (e: React.FormEvent) => {
@@ -126,42 +123,47 @@ export function Header({ selectedCityId = 'all' }: HeaderProps) {
           {/* Global Search Bar */}
           <form 
             onSubmit={handleSearchSubmit}
-            className="hidden lg:flex flex-1 max-w-md relative items-center"
+            className="hidden lg:flex flex-1 max-w-sm relative items-center"
           >
             <input
               type="text"
-              placeholder="Buscar productos, comercios, artesanías o gastronomía..."
+              placeholder="Buscar productos, comercios, artesanías..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-10 pr-10 py-2.5 text-sm text-slate-800 placeholder-slate-400 focus:outline-hidden focus:ring-2 focus:ring-[#00a859] focus:bg-white transition-all shadow-xs"
+              className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-10 pr-10 py-2 text-sm text-slate-800 placeholder-slate-400 focus:outline-hidden focus:ring-2 focus:ring-[#00a859] focus:bg-white transition-all shadow-xs"
             />
             <Search className="w-4 h-4 text-slate-400 absolute left-3.5 pointer-events-none" />
-            {searchQuery && (
-              <button
-                type="button"
-                onClick={() => setSearchQuery('')}
-                className="absolute right-3 text-slate-400 hover:text-slate-600 text-xs bg-slate-200 rounded-full w-4 h-4 flex items-center justify-center"
-              >
-                ✕
-              </button>
-            )}
           </form>
 
-          {/* Action CTAs */}
-          <div className="hidden sm:flex items-center gap-3">
+          {/* Action CTAs & Subpage Shortcuts */}
+          <div className="hidden md:flex items-center gap-2">
             <Link
-              href="#comunidad"
-              className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-sm font-bold text-[#004b87] hover:bg-slate-100 transition-colors"
+              href="/comercios"
+              className="px-3 py-2 rounded-xl text-xs font-extrabold text-[#004b87] hover:bg-slate-100 transition-colors"
             >
-              <Newspaper className="w-4 h-4 text-[#00a859]" />
-              <span>Comunidad</span>
+              Comercios
+            </Link>
+
+            <Link
+              href="/clasificados"
+              className="px-3 py-2 rounded-xl text-xs font-extrabold text-[#004b87] hover:bg-slate-100 transition-colors"
+            >
+              Clasificados
+            </Link>
+
+            <Link
+              href="/sorteos"
+              className="px-3 py-2 rounded-xl text-xs font-extrabold text-[#004b87] hover:bg-slate-100 transition-colors flex items-center gap-1"
+            >
+              <Sparkles className="w-3.5 h-3.5 text-amber-500" />
+              <span>Sorteos</span>
             </Link>
 
             <Link
               href="#sumar-comercio"
-              className="flex items-center gap-2 bg-[#00a859] hover:bg-[#008746] text-white px-4 py-2.5 rounded-xl text-sm font-extrabold shadow-md transition-all active:scale-95"
+              className="flex items-center gap-1.5 bg-[#00a859] hover:bg-[#008746] text-white px-3.5 py-2 rounded-xl text-xs font-extrabold shadow-md transition-all active:scale-95"
             >
-              <Store className="w-4 h-4 text-white" />
+              <Store className="w-3.5 h-3.5 text-white" />
               <span>Publicá tu Negocio</span>
             </Link>
           </div>

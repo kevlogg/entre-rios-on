@@ -66,6 +66,9 @@ export function CityExploreBar() {
   const handleSelect = (city: CityCard) => {
     setSelectedCity(city.id);
     trackCitySelect(city.id, city.name);
+    if (city.id !== 'all') {
+      window.location.href = `/ciudad/${city.id}`;
+    }
   };
 
   return (

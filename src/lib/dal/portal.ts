@@ -369,6 +369,11 @@ export async function getCities(): Promise<City[]> {
   return CITIES_MOCK;
 }
 
+export async function getCityBySlug(slug: string): Promise<City | undefined> {
+  await simulateNetworkDelay();
+  return CITIES_MOCK.find((c) => c.slug === slug || c.id === slug);
+}
+
 export async function getHeroSlides(): Promise<BannerSlide[]> {
   await simulateNetworkDelay();
   return HERO_SLIDES_MOCK;
@@ -382,12 +387,37 @@ export async function getFeaturedProducts(cityId?: string): Promise<Product[]> {
   return PRODUCTS_MOCK.filter((product) => product.cityId.toLowerCase() === cityId.toLowerCase());
 }
 
+export async function getProductBySlug(slug: string): Promise<Product | undefined> {
+  await simulateNetworkDelay();
+  return PRODUCTS_MOCK.find((p) => p.slug === slug || p.id === slug);
+}
+
+export async function getAllCommerces(): Promise<Commerce[]> {
+  await simulateNetworkDelay();
+  return Object.values(COMMERCES_MOCK);
+}
+
+export async function getCommerceBySlug(slug: string): Promise<Commerce | undefined> {
+  await simulateNetworkDelay();
+  return Object.values(COMMERCES_MOCK).find((c) => c.slug === slug || c.id === slug);
+}
+
+export async function getProductsByCommerce(commerceId: string): Promise<Product[]> {
+  await simulateNetworkDelay();
+  return PRODUCTS_MOCK.filter((p) => p.commerceId === commerceId);
+}
+
 export async function getUpcomingEvents(cityId?: string): Promise<CommunityEvent[]> {
   await simulateNetworkDelay();
   if (!cityId || cityId === 'all') {
     return COMMUNITY_EVENTS_MOCK;
   }
   return COMMUNITY_EVENTS_MOCK.filter((event) => event.cityId.toLowerCase() === cityId.toLowerCase());
+}
+
+export async function getEventById(id: string): Promise<CommunityEvent | undefined> {
+  await simulateNetworkDelay();
+  return COMMUNITY_EVENTS_MOCK.find((e) => e.id === id);
 }
 
 export async function getBentoHighlights(): Promise<{

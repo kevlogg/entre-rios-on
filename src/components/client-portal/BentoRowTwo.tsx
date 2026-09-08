@@ -12,7 +12,7 @@ export function BentoRowTwo() {
       title: 'INDUSTRIA Y NEGOCIOS',
       subtitle: 'Empresas, producción y desarrollo en Entre Ríos.',
       cta: 'Conocé más',
-      href: '#industria',
+      href: '/comercios',
       image: '/images/bento-4.jpg',
     },
     {
@@ -20,7 +20,7 @@ export function BentoRowTwo() {
       title: 'TURISMO',
       subtitle: 'Descubrí experiencias únicas en Entre Ríos.',
       cta: 'Explorá',
-      href: '#turismo',
+      href: '/ciudad/colon',
       image: '/images/bento-5.jpg',
     },
     {
@@ -28,7 +28,7 @@ export function BentoRowTwo() {
       title: 'CLASIFICADOS ON',
       subtitle: 'Comprá o vendé de forma simple y segura.',
       cta: 'Ver clasificados',
-      href: '#clasificados',
+      href: '/clasificados',
       image: '/images/bento-6.jpg',
     },
     {

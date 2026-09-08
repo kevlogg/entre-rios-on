@@ -2,6 +2,7 @@
 
 import React from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
 import { MapPin, CheckCircle, MessageCircle, Store, Tag } from 'lucide-react';
 import { Product } from '@/types';
 import { trackWhatsAppClick } from '@/lib/analytics/events';
@@ -42,64 +43,68 @@ export function ProductCard({ product }: ProductCardProps) {
     window.open(waUrl, '_blank', 'noopener,noreferrer');
   };
 
+  const commerceSlug = product.commerceId === 'c1' ? 'alfareria-ceramica-delta'
+    : product.commerceId === 'c2' ? 'comedor-costanera-el-dorado'
+    : product.commerceId === 'c3' ? 'la-candelaria-vinedos'
+    : 'citrus-dulces-del-uruguay';
+
   return (
-    <article className="group bg-white rounded-3xl overflow-hidden border border-[#eae3d2] shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col justify-between hover:-translate-y-1">
+    <article className="group bg-white rounded-2xl overflow-hidden border border-slate-200 shadow-2xs hover:shadow-lg transition-all duration-300 flex flex-col justify-between hover:-translate-y-0.5">
       <div>
         {/* Product Image Container */}
-        <div className="relative h-52 w-full overflow-hidden bg-slate-100">
+        <Link href={`/producto/${product.slug}`} className="block relative h-40 sm:h-44 w-full overflow-hidden bg-slate-100">
           <Image
             src={product.imageUrl}
             alt={product.title}
             fill
-            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
             className="object-cover object-center group-hover:scale-105 transition-transform duration-500"
           />
 
           {/* City & Category Badges */}
-          <div className="absolute top-3 left-3 flex flex-wrap items-center gap-1.5 z-10">
-            <span className="bg-[#0f3443]/85 backdrop-blur-md text-white text-[11px] font-bold px-2.5 py-1 rounded-full flex items-center gap-1 shadow-md">
-              <MapPin className="w-3 h-3 text-[#52b788]" />
+          <div className="absolute top-2 left-2 flex flex-wrap items-center gap-1 z-10">
+            <span className="bg-[#004b87]/90 backdrop-blur-md text-white text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-0.5 shadow-xs">
+              <MapPin className="w-2.5 h-2.5 text-[#00a859]" />
               {product.cityName}
-            </span>
-            <span className="bg-white/90 backdrop-blur-md text-slate-700 text-[11px] font-semibold px-2.5 py-1 rounded-full shadow-xs">
-              {product.category}
             </span>
           </div>
 
           {product.isFeatured && (
-            <div className="absolute top-3 right-3 bg-amber-500 text-white text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-md shadow-md flex items-center gap-1">
-              <Tag className="w-3 h-3" />
+            <div className="absolute top-2 right-2 bg-amber-500 text-white text-[9px] font-extrabold uppercase px-1.5 py-0.5 rounded-md shadow-xs flex items-center gap-0.5">
+              <Tag className="w-2.5 h-2.5" />
               Destacado
             </div>
           )}
-        </div>
+        </Link>
 
         {/* Content Details */}
-        <div className="p-5 space-y-3">
+        <div className="p-3.5 space-y-2">
           {/* Commerce Header Info */}
-          <div className="flex items-center gap-1.5 text-xs font-semibold text-[#1d5b79]">
-            <Store className="w-3.5 h-3.5 text-[#2d6a4f]" />
+          <Link href={`/comercio/${commerceSlug}`} className="flex items-center gap-1 text-[11px] font-bold text-[#004b87] hover:underline">
+            <Store className="w-3 h-3 text-[#00a859] shrink-0" />
             <span className="truncate">{product.commerceName}</span>
-            <CheckCircle className="w-3.5 h-3.5 text-[#2d6a4f] shrink-0" aria-label="Comercio Verificado en Entre Ríos ON" />
-          </div>
+            <CheckCircle className="w-3 h-3 text-[#00a859] shrink-0" />
+          </Link>
 
-          {/* Title */}
-          <h3 className="text-base font-bold text-slate-800 line-clamp-2 leading-snug group-hover:text-[#1d5b79] transition-colors">
-            {product.title}
-          </h3>
+          {/* Title Link */}
+          <Link href={`/producto/${product.slug}`} className="block">
+            <h3 className="text-xs sm:text-sm font-extrabold text-slate-800 line-clamp-2 leading-snug group-hover:text-[#00a859] transition-colors">
+              {product.title}
+            </h3>
+          </Link>
 
           {/* Description */}
-          <p className="text-xs text-slate-600 line-clamp-2 leading-relaxed">
+          <p className="text-[11px] text-slate-500 line-clamp-2 leading-tight">
             {product.description}
           </p>
         </div>
       </div>
 
       {/* Footer Price & WhatsApp CTA */}
-      <div className="p-5 pt-0 space-y-3">
-        <div className="flex items-baseline justify-between pt-3 border-t border-slate-100">
-          <span className="text-xs text-slate-400 font-medium">Precio estimado</span>
-          <span className="text-lg font-extrabold text-[#0f3443]">
+      <div className="p-3.5 pt-0 space-y-2">
+        <div className="flex items-baseline justify-between pt-2 border-t border-slate-100">
+          <span className="text-[10px] text-slate-400 font-semibold uppercase">Precio</span>
+          <span className="text-sm font-black text-[#004b87]">
             {formatPrice(product.price, product.currency)}
           </span>
         </div>
@@ -107,10 +112,10 @@ export function ProductCard({ product }: ProductCardProps) {
         {/* Key WhatsApp Direct CTA */}
         <button
           onClick={handleWhatsAppClick}
-          className="w-full bg-[#25D366] hover:bg-[#20ba5a] active:bg-[#1ca650] text-white py-3 px-4 rounded-2xl font-extrabold text-sm flex items-center justify-center gap-2 shadow-md hover:shadow-lg transition-all transform active:scale-98 focus:outline-hidden focus:ring-2 focus:ring-[#25D366] focus:ring-offset-2"
-          aria-label={`Pedir por WhatsApp ${product.title} de ${product.commerceName}`}
+          className="w-full bg-[#25D366] hover:bg-[#20ba5a] active:bg-[#1ca650] text-white py-2 px-3 rounded-xl font-extrabold text-xs flex items-center justify-center gap-1.5 shadow-xs transition-all transform active:scale-98"
+          aria-label={`Pedir por WhatsApp ${product.title}`}
         >
-          <MessageCircle className="w-4 h-4 fill-current" />
+          <MessageCircle className="w-3.5 h-3.5 fill-current" />
           <span>Pedir por WhatsApp</span>
         </button>
       </div>

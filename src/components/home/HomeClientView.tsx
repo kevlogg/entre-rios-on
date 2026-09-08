@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import Link from 'next/link';
 import { City, Product, CommunityEvent, BannerSlide, Commerce } from '@/types';
 import { HeroSlider } from '@/components/home/HeroSlider';
 import { CityFilterBar } from '@/components/home/CityFilterBar';
@@ -74,26 +75,35 @@ export function HomeClientView({
           onSelectCity={(cityId) => setSelectedCity(cityId)}
         />
 
-        {/* 3. Comercios & Catálogo Destacado Section */}
+        {/* 3. Comercios & Catálogo Destacado Section (Formato Tienda Compacta) */}
         <section id="catalogo" className="space-y-6">
           <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-slate-200 pb-4">
             <div>
               <span className="text-xs font-extrabold uppercase tracking-widest text-[#004b87] flex items-center gap-1.5">
                 <Store className="w-4 h-4 text-[#00a859]" />
-                Directorio Comercial B2B & Catálogo
+                Tienda Regional & Catálogo B2B
               </span>
               <h2 className="text-2xl sm:text-3xl font-extrabold text-[#004b87] tracking-tight mt-1">
                 Catálogo con Pedido Directo a WhatsApp
               </h2>
             </div>
-            <span className="text-sm font-bold text-slate-500">
-              {filteredProducts.length} productos / servicios en exhibición
-            </span>
+            <div className="flex items-center gap-3">
+              <span className="text-xs font-bold text-slate-500">
+                {filteredProducts.length} exhibidos
+              </span>
+              <Link
+                href="/comercios"
+                className="bg-slate-100 hover:bg-slate-200 text-[#004b87] px-3 py-1.5 rounded-xl text-xs font-extrabold flex items-center gap-1 transition-colors"
+              >
+                <span>Ver Directorio Completo</span>
+                <ArrowRight className="w-3.5 h-3.5 text-[#00a859]" />
+              </Link>
+            </div>
           </div>
 
-          {/* Product Grid */}
+          {/* Compact Store Grid (4 columns) */}
           {filteredProducts.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
               {filteredProducts.map((product) => (
                 <ProductCard key={product.id} product={product} />
               ))}

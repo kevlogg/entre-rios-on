@@ -29,15 +29,16 @@ export function ClientHeader() {
     }
   };
 
-  const navLinks = [
-    { name: 'Inicio', href: '#inicio' },
-    { name: 'Comercio Digital', href: '#comercio-digital' },
-    { name: 'Ofertas', href: '#ofertas-destacadas' },
-    { name: 'Comunidad', href: '#comunidad' },
-    { name: 'Sorteos ON', href: '#sorteos-on' },
-    { name: 'Clasificados', href: '#clasificados' },
-    { name: 'Ciudades y Localidades', href: '#ciudades', hasDropdown: true },
-    { name: 'Industria', href: '#industria' },
+  const navLinks: { name: string; href: string; hasDropdown?: boolean }[] = [
+    { name: 'Inicio', href: '/' },
+    { name: 'Directorio B2B', href: '/comercios' },
+    { name: 'Ofertas Destacadas', href: '#ofertas-destacadas' },
+    { name: 'Sorteos ON', href: '/sorteos' },
+    { name: 'Clasificados', href: '/clasificados' },
+    { name: 'Paraná', href: '/ciudad/parana' },
+    { name: 'Colón', href: '/ciudad/colon' },
+    { name: 'Concordia', href: '/ciudad/concordia' },
+    { name: 'Gualeguaychú', href: '/ciudad/gualeguaychu' },
   ];
 
   return (
