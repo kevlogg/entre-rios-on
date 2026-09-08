@@ -41,6 +41,7 @@ export interface Product {
   cityName: string;
   imageUrl: string;
   category: string;
+  categoryId?: string;
   isFeatured: boolean;
   description: string;
   phoneWhatsApp: string;

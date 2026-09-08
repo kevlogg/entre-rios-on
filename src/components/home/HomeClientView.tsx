@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { City, Product, CommunityEvent, BannerSlide, Commerce } from '@/types';
 import { HeroSlider } from '@/components/home/HeroSlider';
 import { CityFilterBar } from '@/components/home/CityFilterBar';
+import { CategoryFilterBar } from '@/components/home/CategoryFilterBar';
 import { ProductCard } from '@/components/home/ProductCard';
 import { CommunityEvents } from '@/components/home/CommunityEvents';
 import { Store, MessageCircle, ShieldCheck, Zap, ArrowRight, Sparkles } from 'lucide-react';
@@ -27,6 +28,7 @@ export function HomeClientView({
   weekendEvent,
 }: HomeClientViewProps) {
   const [selectedCity, setSelectedCity] = useState<string>('all');
+  const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [filteredProducts, setFilteredProducts] = useState<Product[]>(initialProducts);
   const [filteredEvents, setFilteredEvents] = useState<CommunityEvent[]>(events);
 
@@ -34,7 +36,9 @@ export function HomeClientView({
     const handleUrlChange = () => {
       const params = new URLSearchParams(window.location.search);
       const cityParam = params.get('city') || 'all';
+      const catParam = params.get('category') || 'all';
       setSelectedCity(cityParam);
+      setSelectedCategory(catParam);
     };
 
     handleUrlChange();
@@ -43,18 +47,30 @@ export function HomeClientView({
   }, []);
 
   useEffect(() => {
+    let prods = initialProducts;
+
+    if (selectedCity !== 'all') {
+      prods = prods.filter((p) => p.cityId.toLowerCase() === selectedCity.toLowerCase());
+    }
+
+    if (selectedCategory !== 'all') {
+      prods = prods.filter(
+        (p) =>
+          (p.categoryId && p.categoryId.toLowerCase() === selectedCategory.toLowerCase()) ||
+          p.category.toLowerCase().includes(selectedCategory.toLowerCase())
+      );
+    }
+
+    setFilteredProducts(prods);
+
     if (selectedCity === 'all') {
-      setFilteredProducts(initialProducts);
       setFilteredEvents(events);
     } else {
-      setFilteredProducts(
-        initialProducts.filter((p) => p.cityId.toLowerCase() === selectedCity.toLowerCase())
-      );
       setFilteredEvents(
         events.filter((e) => e.cityId.toLowerCase() === selectedCity.toLowerCase())
       );
     }
-  }, [selectedCity, initialProducts, events]);
+  }, [selectedCity, selectedCategory, initialProducts, events]);
 
   return (
     <div className="space-y-12 pt-8 sm:pt-12 pb-16">
@@ -68,12 +84,18 @@ export function HomeClientView({
       {/* Main Container */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
         
-        {/* 2. Persistent City Filter Bar */}
-        <CityFilterBar
-          cities={cities}
-          selectedCity={selectedCity}
-          onSelectCity={(cityId) => setSelectedCity(cityId)}
-        />
+        {/* 2. Persistent City & Category Filter Bars */}
+        <div className="space-y-4">
+          <CityFilterBar
+            cities={cities}
+            selectedCity={selectedCity}
+            onSelectCity={(cityId) => setSelectedCity(cityId)}
+          />
+          <CategoryFilterBar
+            selectedCategory={selectedCategory}
+            onSelectCategory={(catId) => setSelectedCategory(catId)}
+          />
+        </div>
 
         {/* 3. Comercios & Catálogo Destacado Section (Formato Tienda Compacta) */}
         <section id="catalogo" className="space-y-6">

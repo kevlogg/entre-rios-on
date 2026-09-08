@@ -179,6 +179,60 @@ export function Header({ selectedCityId = 'all' }: HeaderProps) {
         </div>
       </div>
 
+      {/* Secondary Horizontal Nav Bar para alineación total */}
+      <nav className="hidden md:block border-t border-slate-100 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <ul className="flex items-center gap-1 sm:gap-2 overflow-x-auto text-xs font-bold text-slate-700 scrollbar-none py-1">
+            <li>
+              <Link href="/editorial" className="px-3 py-1.5 rounded-lg hover:bg-slate-100 text-slate-800">
+                Inicio Editorial
+              </Link>
+            </li>
+            <li>
+              <Link href="/comercios" className="px-3 py-1.5 rounded-lg hover:bg-slate-100 text-slate-800">
+                Comercios B2B
+              </Link>
+            </li>
+            <li>
+              <Link href="/editorial#catalogo" className="px-3 py-1.5 rounded-lg hover:bg-slate-100 text-slate-800">
+                Catálogo & Ofertas
+              </Link>
+            </li>
+            <li>
+              <Link href="/sorteos" className="px-3 py-1.5 rounded-lg hover:bg-slate-100 text-slate-800 flex items-center gap-1">
+                <Sparkles className="w-3.5 h-3.5 text-amber-500" />
+                <span>Sorteos ON</span>
+              </Link>
+            </li>
+            <li>
+              <Link href="/clasificados" className="px-3 py-1.5 rounded-lg hover:bg-slate-100 text-slate-800">
+                Clasificados
+              </Link>
+            </li>
+            <li>
+              <Link href="/ciudad/parana" className="px-3 py-1.5 rounded-lg hover:bg-slate-100 text-slate-500">
+                Paraná
+              </Link>
+            </li>
+            <li>
+              <Link href="/ciudad/colon" className="px-3 py-1.5 rounded-lg hover:bg-slate-100 text-slate-500">
+                Colón
+              </Link>
+            </li>
+            <li>
+              <Link href="/ciudad/concordia" className="px-3 py-1.5 rounded-lg hover:bg-slate-100 text-slate-500">
+                Concordia
+              </Link>
+            </li>
+            <li>
+              <Link href="/ciudad/gualeguaychu" className="px-3 py-1.5 rounded-lg hover:bg-slate-100 text-slate-500">
+                Gualeguaychú
+              </Link>
+            </li>
+          </ul>
+        </div>
+      </nav>
+
       {/* Mobile Drawer Menu */}
       {isMobileMenuOpen && (
         <div className="sm:hidden bg-white border-b border-slate-200 px-4 pt-3 pb-6 space-y-4 animate-in fade-in duration-200">
