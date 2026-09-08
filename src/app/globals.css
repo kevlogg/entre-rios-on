@@ -23,6 +23,11 @@
   --foreground: #1e293b;
 }
 
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 140px;
+}
+
 body {
   background-color: var(--background);
   color: var(--foreground);
