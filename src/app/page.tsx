@@ -1,64 +1,41 @@
-import { Suspense } from 'react';
-import { 
-  getHeroSlides, 
-  getCities, 
-  getFeaturedProducts, 
-  getUpcomingEvents,
-  getBentoHighlights
-} from '@/lib/dal/portal';
-import { HomeClientView } from '@/components/home/HomeClientView';
+import React from 'react';
+import { ClientHeader } from '@/components/layout/ClientHeader';
+import { ClientHeroBanner } from '@/components/client-portal/ClientHeroBanner';
+import { CategoryIconBar } from '@/components/client-portal/CategoryIconBar';
+import { BentoRowOne } from '@/components/client-portal/BentoRowOne';
+import { FeaturedOffersGrid } from '@/components/client-portal/FeaturedOffersGrid';
+import { CityExploreBar } from '@/components/client-portal/CityExploreBar';
+import { BentoRowTwo } from '@/components/client-portal/BentoRowTwo';
+import { ClientFooter } from '@/components/layout/ClientFooter';
 
-export const revalidate = 60; // Incremental Static Regeneration (ISR)
+export const revalidate = 60;
 
-async function HomeContent() {
-  // Fetch initial data in parallel from Data Access Layer
-  const [
-    slides, 
-    cities, 
-    initialProducts, 
-    events, 
-    { featuredCommerce, weekendEvent }
-  ] = await Promise.all([
-    getHeroSlides(),
-    getCities(),
-    getFeaturedProducts(),
-    getUpcomingEvents(),
-    getBentoHighlights(),
-  ]);
-
+export default function ClientHomePage() {
   return (
-    <HomeClientView
-      slides={slides}
-      cities={cities}
-      initialProducts={initialProducts}
-      events={events}
-      featuredCommerce={featuredCommerce}
-      weekendEvent={weekendEvent}
-    />
-  );
-}
+    <div className="min-h-screen flex flex-col bg-[#f8fafc]">
+      {/* Header oficial del cliente */}
+      <ClientHeader />
 
-function HomeLoadingFallback() {
-  return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-8 animate-pulse">
-      {/* Hero Skeleton */}
-      <div className="h-[450px] bg-slate-200 rounded-3xl w-full" />
-      {/* City Bar Skeleton */}
-      <div className="h-16 bg-slate-200 rounded-2xl w-full" />
-      {/* Grid Skeleton */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        {[1, 2, 3, 4, 5, 6].map((n) => (
-          <div key={n} className="h-80 bg-slate-200 rounded-3xl" />
-        ))}
-      </div>
+      {/* Hero panorámico "ENTRE RÍOS SIEMPRE ON" */}
+      <ClientHeroBanner />
+
+      {/* Barra de 12 categorías por íconos */}
+      <CategoryIconBar />
+
+      {/* Primer Bento: Comercio Digital, Comunidad ON, Sorteos ON */}
+      <BentoRowOne />
+
+      {/* Ofertas destacadas con pedido a WhatsApp */}
+      <FeaturedOffersGrid />
+
+      {/* Explorá por ciudad (Carrusel de fotos) */}
+      <CityExploreBar />
+
+      {/* Segundo Bento: Industria, Turismo, Clasificados, Publicá tu Negocio */}
+      <BentoRowTwo />
+
+      {/* Footer oficial con silueta del mapa de Entre Ríos */}
+      <ClientFooter />
     </div>
-  );
-}
-
-export default function HomePage() {
-  return (
-    <Suspense fallback={<HomeLoadingFallback />}>
-      <HomeContent />
-    </Suspense>
   );
 }
