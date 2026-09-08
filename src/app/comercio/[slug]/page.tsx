@@ -4,8 +4,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { getCommerceBySlug, getProductsByCommerce } from '@/lib/dal/portal';
 import { MapPin, CheckCircle, MessageCircle, ArrowLeft, Store, ShieldCheck, Tag } from 'lucide-react';
-import { Header } from '@/components/layout/Header';
-import { Footer } from '@/components/layout/Footer';
+import { DynamicLayoutWrapper } from '@/components/layout/DynamicLayoutWrapper';
 
 export const revalidate = 60;
 
@@ -24,10 +23,8 @@ export default async function CommerceDetailPage({ params }: PageProps) {
   const products = await getProductsByCommerce(commerce.id);
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#f8fafc]">
-      <Header />
-
-      <main className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 w-full">
+    <DynamicLayoutWrapper>
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 w-full">
         {/* Breadcrumb Navigation */}
         <div className="flex items-center gap-2 text-xs font-bold text-slate-500">
           <Link href="/" className="hover:text-[#00a859] flex items-center gap-1">
@@ -176,8 +173,6 @@ export default async function CommerceDetailPage({ params }: PageProps) {
           </div>
         </section>
       </main>
-
-      <Footer />
-    </div>
+    </DynamicLayoutWrapper>
   );
 }

@@ -4,8 +4,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { getEventById } from '@/lib/dal/portal';
 import { Calendar, MapPin, Clock, ArrowLeft, Share2, Newspaper } from 'lucide-react';
-import { Header } from '@/components/layout/Header';
-import { Footer } from '@/components/layout/Footer';
+import { DynamicLayoutWrapper } from '@/components/layout/DynamicLayoutWrapper';
 
 export const revalidate = 60;
 
@@ -22,10 +21,8 @@ export default async function ArticleDetailPage({ params }: PageProps) {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#f8fafc]">
-      <Header />
-
-      <main className="flex-1 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 w-full">
+    <DynamicLayoutWrapper>
+      <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 w-full">
         {/* Breadcrumb Navigation */}
         <div className="flex items-center gap-2 text-xs font-bold text-slate-500">
           <Link href="/" className="hover:text-[#00a859] flex items-center gap-1">
@@ -111,8 +108,6 @@ export default async function ArticleDetailPage({ params }: PageProps) {
           </div>
         </article>
       </main>
-
-      <Footer />
-    </div>
+    </DynamicLayoutWrapper>
   );
 }
