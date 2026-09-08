@@ -1,16 +1,18 @@
 @import "tailwindcss";
 
 @theme {
-  --color-rio-dark: #071e28;
-  --color-rio-navy: #0f3443;
-  --color-rio-blue: #005691;
-  --color-rio-[#00a859]: #00a859;
-  --color-rio-light: #29b6f6;
+  /* Logo Official Brand Colors */
+  --color-brand-green: #00a859;
+  --color-brand-green-light: #8cc63f;
+  --color-brand-green-dark: #008746;
   
-  --color-delta-dark: #1b4332;
-  --color-delta-green: #2d6a4f;
-  --color-delta-leaf: #52b788;
+  --color-brand-blue: #004b87;
+  --color-brand-blue-light: #009fe3;
+  --color-brand-blue-dark: #003663;
 
+  --color-brand-dark: #1e293b;
+  --color-brand-muted: #64748b;
+  
   --color-warm-bg: #f8fafc;
   --color-warm-card: #ffffff;
   --color-warm-border: #e2e8f0;
