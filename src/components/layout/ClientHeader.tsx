@@ -11,7 +11,8 @@ import {
   X, 
   ChevronDown,
   Sparkles,
-  Store
+  Store,
+  Crown
 } from 'lucide-react';
 import { trackSearchQuery } from '@/lib/analytics/events';
 
@@ -82,9 +83,19 @@ export function ClientHeader() {
             </button>
           </form>
 
-          {/* User Actions: Ingresar, Carrito, Mobile Menu */}
-          <div className="flex items-center gap-5 sm:gap-6">
+          {/* User Actions: SuperAdmin, Panel Comercio, Ingresar, Carrito */}
+          <div className="flex items-center gap-4 sm:gap-6">
             
+            {/* SuperAdmin Provincial */}
+            <Link 
+              href="/superadmin" 
+              className="flex flex-col items-center text-amber-600 hover:text-amber-700 transition-colors"
+              title="Centro de Control SuperAdmin Provincial"
+            >
+              <Crown className="w-5 h-5 text-amber-500 fill-current" />
+              <span className="text-[11px] font-black mt-0.5">SuperAdmin</span>
+            </Link>
+
             {/* Panel B2B Comercio */}
             <Link 
               href="/admin" 

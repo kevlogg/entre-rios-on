@@ -11,7 +11,8 @@ import {
   Menu, 
   X, 
   ChevronDown,
-  Sparkles
+  Sparkles,
+  Crown
 } from 'lucide-react';
 import { trackCitySelect, trackSearchQuery } from '@/lib/analytics/events';
 
@@ -137,6 +138,14 @@ export function Header({ selectedCityId = 'all' }: HeaderProps) {
 
           {/* Action CTAs & Subpage Shortcuts */}
           <div className="hidden md:flex items-center gap-2">
+            <Link
+              href="/superadmin"
+              className="px-3 py-2 rounded-xl text-xs font-black text-amber-600 hover:bg-amber-50 transition-colors flex items-center gap-1 border border-amber-300"
+            >
+              <Crown className="w-3.5 h-3.5 text-amber-500 fill-current" />
+              <span>SuperAdmin</span>
+            </Link>
+
             <Link
               href="/admin"
               className="px-3 py-2 rounded-xl text-xs font-extrabold text-[#00a859] hover:bg-emerald-50 transition-colors flex items-center gap-1 border border-emerald-200"
