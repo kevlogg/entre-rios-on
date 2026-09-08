@@ -65,7 +65,7 @@ export function Header({ selectedCityId = 'all' }: HeaderProps) {
   };
 
   return (
-    <header className="sticky top-0 z-50 glass-header border-b border-[#eae3d2] transition-all shadow-xs">
+    <header className="sticky top-11 z-40 glass-header border-b border-[#eae3d2] transition-all shadow-xs">
       {/* Top Banner Ribbon */}
       <div className="bg-[#0f3443] text-white text-xs py-1.5 px-4 text-center font-medium flex items-center justify-center gap-2">
         <Sparkles className="w-3.5 h-3.5 text-amber-400 animate-pulse" />
