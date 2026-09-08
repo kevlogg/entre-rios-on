@@ -138,6 +138,14 @@ export function Header({ selectedCityId = 'all' }: HeaderProps) {
           {/* Action CTAs & Subpage Shortcuts */}
           <div className="hidden md:flex items-center gap-2">
             <Link
+              href="/admin"
+              className="px-3 py-2 rounded-xl text-xs font-extrabold text-[#00a859] hover:bg-emerald-50 transition-colors flex items-center gap-1 border border-emerald-200"
+            >
+              <Store className="w-3.5 h-3.5 text-[#00a859]" />
+              <span>Mi Negocio</span>
+            </Link>
+
+            <Link
               href="/comercios"
               className="px-3 py-2 rounded-xl text-xs font-extrabold text-[#004b87] hover:bg-slate-100 transition-colors"
             >

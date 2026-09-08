@@ -10,7 +10,8 @@ import {
   Menu, 
   X, 
   ChevronDown,
-  Sparkles
+  Sparkles,
+  Store
 } from 'lucide-react';
 import { trackSearchQuery } from '@/lib/analytics/events';
 
@@ -84,6 +85,16 @@ export function ClientHeader() {
           {/* User Actions: Ingresar, Carrito, Mobile Menu */}
           <div className="flex items-center gap-5 sm:gap-6">
             
+            {/* Panel B2B Comercio */}
+            <Link 
+              href="/admin" 
+              className="flex flex-col items-center text-[#004b87] hover:text-[#00a859] transition-colors"
+              title="Panel de Administración del Comercio"
+            >
+              <Store className="w-5 h-5 text-[#00a859]" />
+              <span className="text-[11px] font-extrabold mt-0.5">Mi Negocio</span>
+            </Link>
+
             {/* Ingresar */}
             <Link 
               href="#ingresar" 
