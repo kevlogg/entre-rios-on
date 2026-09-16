@@ -69,6 +69,10 @@ export function ClientFooter() {
               <Link href="#privacidad" className="hover:text-[#00ADB5]">Privacidad</Link>
               <span>|</span>
               <Link href="#contacto" className="hover:text-[#00ADB5]">Contacto</Link>
+              <span>|</span>
+              <Link href="/superadmin" className="hover:text-amber-500 text-slate-400 font-bold flex items-center gap-1 transition-colors" title="Acceso Panel SuperAdmin">
+                <span>SuperAdmin</span>
+              </Link>
             </div>
           </div>
 

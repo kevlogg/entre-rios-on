@@ -75,6 +75,13 @@ export async function createClassifiedAction(data: {
   phoneWhatsApp: string;
 }): Promise<{ success: boolean; message: string }> {
   try {
+    if (data.category.toLowerCase().includes('vehíc') || data.category.toLowerCase().includes('auto')) {
+      return {
+        success: false,
+        message: 'No se permite la publicación de autos o vehículos en Clasificados ON. Te invitamos a hacerlo en nuestro socio comercial Sitio Automotor (https://sitio-automotor.vercel.app/).',
+      };
+    }
+
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 
     if (supabaseUrl && !supabaseUrl.includes('your-supabase-project')) {
@@ -111,3 +118,4 @@ export async function createClassifiedAction(data: {
     return { success: false, message: `Error inesperado: ${(err as Error).message}` };
   }
 }
+

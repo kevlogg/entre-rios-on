@@ -62,6 +62,8 @@ export function Header({ selectedCityId = 'all' }: HeaderProps) {
     { name: 'Catálogo & Ofertas', href: '#catalogo' },
     { name: 'Sorteos ON MÁS', href: '/sorteos' },
     { name: 'Clasificados', href: '/clasificados' },
+    { name: 'Comunidad', href: '/#comunidad' },
+    { name: 'Turismo', href: '/comercios?category=Turismo' },
   ];
 
   return (
@@ -194,41 +196,11 @@ export function Header({ selectedCityId = 'all' }: HeaderProps) {
           {/* Action CTAs */}
           <div className="hidden md:flex items-center gap-2">
             <Link
-              href="/superadmin"
-              className="px-3 py-2 rounded-xl text-xs font-black text-amber-600 hover:bg-amber-50 transition-colors flex items-center gap-1 border border-amber-300"
-            >
-              <Crown className="w-3.5 h-3.5 text-amber-500 fill-current" />
-              <span>SuperAdmin</span>
-            </Link>
-
-            <Link
               href="/admin"
-              className="px-3 py-2 rounded-xl text-xs font-extrabold text-[#00ADB5] hover:bg-cyan-50 transition-colors flex items-center gap-1 border border-cyan-200"
+              className="px-3.5 py-2 rounded-xl text-xs font-extrabold text-[#00ADB5] hover:bg-cyan-50 transition-colors flex items-center gap-1.5 border border-cyan-200"
             >
               <Store className="w-3.5 h-3.5 text-[#00ADB5]" />
               <span>Mi Negocio</span>
-            </Link>
-
-            <Link
-              href="/comercios"
-              className="px-3 py-2 rounded-xl text-xs font-extrabold text-[#0047BA] hover:bg-slate-100 transition-colors"
-            >
-              Comercios
-            </Link>
-
-            <Link
-              href="/clasificados"
-              className="px-3 py-2 rounded-xl text-xs font-extrabold text-[#0047BA] hover:bg-slate-100 transition-colors"
-            >
-              Clasificados
-            </Link>
-
-            <Link
-              href="/sorteos"
-              className="px-3 py-2 rounded-xl text-xs font-extrabold text-[#0047BA] hover:bg-slate-100 transition-colors flex items-center gap-1"
-            >
-              <Sparkles className="w-3.5 h-3.5 text-amber-500" />
-              <span>Sorteos</span>
             </Link>
 
             <Link

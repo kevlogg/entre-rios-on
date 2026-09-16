@@ -88,10 +88,15 @@ export function Footer() {
         {/* Bottom Bar */}
         <div className="pt-8 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-300 gap-4">
           <p>© {new Date().getFullYear()} Entre Ríos ON MÁS Portal. Todos los derechos reservados.</p>
-          <p className="flex items-center gap-1 font-medium">
-            <span>Desarrollado para potenciar Entre Ríos con</span>
-            <Heart className="w-3.5 h-3.5 text-cyan-400 fill-current" />
-          </p>
+          <div className="flex items-center gap-4">
+            <p className="flex items-center gap-1 font-medium">
+              <span>Desarrollado para potenciar la región con</span>
+              <Heart className="w-3.5 h-3.5 text-cyan-400 fill-current" />
+            </p>
+            <Link href="/superadmin" className="text-slate-500 hover:text-amber-400 transition-colors text-[11px] font-semibold" title="Acceso Panel SuperAdmin">
+              SuperAdmin
+            </Link>
+          </div>
         </div>
 
       </div>

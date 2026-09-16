@@ -54,13 +54,15 @@ export function ClientHeader() {
     }
   };
 
-  // Exactly 5 primary navigation links up to Clasificados (NO city links)
+  // Navigation links including Comunidad and Turismo
   const navLinks: { name: string; href: string }[] = [
     { name: 'Inicio', href: '/' },
     { name: 'Comercios Adheridos', href: '/comercios' },
     { name: 'Catálogo & Ofertas', href: '#catalogo' },
     { name: 'Sorteos ON MÁS', href: '/sorteos' },
     { name: 'Clasificados', href: '/clasificados' },
+    { name: 'Comunidad', href: '/#comunidad' },
+    { name: 'Turismo', href: '/comercios?category=Turismo' },
   ];
 
   return (
@@ -190,36 +192,16 @@ export function ClientHeader() {
             </button>
           </form>
 
-          {/* User Actions: SuperAdmin, Panel Comercio, Ingresar, Carrito */}
+          {/* User Actions: Panel Comercio (Mi Negocio) & Carrito */}
           <div className="flex items-center gap-3 sm:gap-5">
-            
-            {/* SuperAdmin */}
-            <Link 
-              href="/superadmin" 
-              className="flex flex-col items-center text-amber-600 hover:text-amber-700 transition-colors"
-              title="Centro de Control SuperAdmin Provincial"
-            >
-              <Crown className="w-4 h-4 text-amber-500 fill-current" />
-              <span className="text-[10px] font-black mt-0.5">SuperAdmin</span>
-            </Link>
-
             {/* Panel B2B Comercio */}
             <Link 
               href="/admin" 
               className="flex flex-col items-center text-[#0047BA] hover:text-[#00ADB5] transition-colors"
               title="Panel de Administración del Comercio"
             >
-              <Store className="w-4 h-4 text-[#00ADB5]" />
-              <span className="text-[10px] font-extrabold mt-0.5">Mi Negocio</span>
-            </Link>
-
-            {/* Ingresar */}
-            <Link 
-              href="/login" 
-              className="flex flex-col items-center text-slate-700 hover:text-[#00ADB5] transition-colors"
-            >
-              <User className="w-4 h-4" />
-              <span className="text-[10px] font-semibold mt-0.5">Ingresar</span>
+              <Store className="w-5 h-5 text-[#00ADB5]" />
+              <span className="text-[11px] font-extrabold mt-0.5">Mi Negocio</span>
             </Link>
 
             {/* Mobile Hamburger Toggle */}
