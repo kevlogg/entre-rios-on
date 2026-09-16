@@ -198,7 +198,7 @@ export function FeaturedOffersGrid({ selectedCategory = 'all' }: FeaturedOffersG
   const handleWhatsApp = (item: OfferItem) => {
     trackWhatsAppClick(item.id, 'commerce-client', item.title, item.location);
     const cleanPhone = item.phoneWhatsApp.replace(/[^\d]/g, '');
-    const msg = encodeURIComponent(`Hola, vi en el Portal Entre Ríos ON el producto "${item.title}" por ${formatPrice(item.price)} y me gustaría comprarlo.`);
+    const msg = encodeURIComponent(`Hola, vi en el Portal Entre Ríos ON MÁS el producto "${item.title}" por ${formatPrice(item.price)} y me gustaría comprarlo.`);
     window.open(`https://wa.me/${cleanPhone}?text=${msg}`, '_blank', 'noopener,noreferrer');
   };
 
@@ -214,7 +214,7 @@ export function FeaturedOffersGrid({ selectedCategory = 'all' }: FeaturedOffersG
         <div>
           <h2 className="text-2xl font-extrabold text-slate-800 flex items-center gap-2">
             <span>Catálogo u Ofertas</span>
-            <span className="text-[#00a859]">
+            <span className="text-[#00ADB5]">
               {selectedCategory !== 'all' && activeCategoryObj ? `• ${activeCategoryObj.label}` : 'Destacadas'}
             </span>
           </h2>
@@ -229,7 +229,7 @@ export function FeaturedOffersGrid({ selectedCategory = 'all' }: FeaturedOffersG
           <span className="text-xs font-bold text-slate-500 bg-slate-100 px-2.5 py-1 rounded-lg">
             {displayedOffers.length} {displayedOffers.length === 1 ? 'resultado' : 'resultados'}
           </span>
-          <Link href="/comercios" className="text-xs font-bold text-[#004b87] hover:text-[#00a859] flex items-center gap-1">
+          <Link href="/comercios" className="text-xs font-bold text-[#0047BA] hover:text-[#00ADB5] flex items-center gap-1">
             <span>Ver todo</span>
             <ArrowRight className="w-3.5 h-3.5" />
           </Link>
@@ -266,7 +266,7 @@ export function FeaturedOffersGrid({ selectedCategory = 'all' }: FeaturedOffersG
 
                 <div className="p-3 space-y-1">
                   <Link href={item.slug ? `/producto/${item.slug}` : '#'}>
-                    <h3 className="text-xs font-bold text-slate-800 line-clamp-2 group-hover:text-[#00a859] transition-colors leading-snug">
+                    <h3 className="text-xs font-bold text-slate-800 line-clamp-2 group-hover:text-[#00ADB5] transition-colors leading-snug">
                       {item.title}
                     </h3>
                   </Link>
@@ -283,7 +283,7 @@ export function FeaturedOffersGrid({ selectedCategory = 'all' }: FeaturedOffersG
 
                 <button
                   onClick={() => handleWhatsApp(item)}
-                  className="bg-[#00a859] hover:bg-[#008746] text-white p-2 rounded-xl transition-all active:scale-95 shadow-xs"
+                  className="bg-gradient-to-r from-[#00ADB5] to-[#007C8A] hover:from-[#00E5E8] hover:to-[#00ADB5] text-white p-2 rounded-xl transition-all active:scale-95 shadow-xs"
                   title="Pedir por WhatsApp"
                 >
                   <ShoppingCart className="w-4 h-4" />

@@ -7,7 +7,7 @@ import { Store, MessageCircle, MapPin, Mail, Heart } from 'lucide-react';
 
 export function Footer() {
   return (
-    <footer className="bg-[#004b87] text-slate-200 border-t border-slate-700 pt-12 pb-8">
+    <footer className="bg-gradient-to-br from-[#002878] via-[#0047BA] to-slate-950 text-slate-200 border-t border-slate-700 pt-12 pb-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
         
         {/* Top Grid */}
@@ -15,10 +15,10 @@ export function Footer() {
           
           {/* Brand Col (2 cols) */}
           <div className="lg:col-span-2 space-y-4">
-            <div className="relative w-44 h-14 bg-white rounded-xl p-2 inline-block">
+            <div className="relative w-48 h-14 bg-white/95 rounded-2xl p-2 inline-block shadow-md">
               <Image
-                src="/logo.jpeg"
-                alt="Entre Ríos ON Portal"
+                src="/logo.png"
+                alt="Entre Ríos ON MÁS Portal"
                 fill
                 className="object-contain p-1"
               />
@@ -31,7 +31,7 @@ export function Footer() {
             <div className="flex items-center gap-3 pt-2">
               <Link
                 href="#sumar-comercio"
-                className="bg-[#00a859] hover:bg-[#008746] text-white text-xs font-extrabold px-4 py-2.5 rounded-xl transition-colors inline-flex items-center gap-1.5 shadow-md"
+                className="bg-gradient-to-r from-[#00E5E8] to-[#00ADB5] hover:from-[#00ADB5] hover:to-[#007C8A] text-slate-950 font-black text-xs px-5 py-2.5 rounded-xl transition-all inline-flex items-center gap-1.5 shadow-md cursor-pointer"
               >
                 <Store className="w-3.5 h-3.5" />
                 <span>Adherir mi Comercio</span>
@@ -43,12 +43,12 @@ export function Footer() {
           <div className="space-y-3">
             <h4 className="text-xs font-extrabold text-white uppercase tracking-wider">Nodos Regionales</h4>
             <ul className="space-y-2 text-xs text-slate-200 font-medium">
-              <li><Link href="/?city=parana" className="hover:text-[#8cc63f] transition-colors">Paraná (Capital)</Link></li>
-              <li><Link href="/?city=concordia" className="hover:text-[#8cc63f] transition-colors">Concordia</Link></li>
-              <li><Link href="/?city=colon" className="hover:text-[#8cc63f] transition-colors">Colón</Link></li>
-              <li><Link href="/?city=gualeguaychu" className="hover:text-[#8cc63f] transition-colors">Gualeguaychú</Link></li>
-              <li><Link href="/?city=concepcion-del-uruguay" className="hover:text-[#8cc63f] transition-colors">Concepción del Uruguay</Link></li>
-              <li><Link href="/?city=federacion" className="hover:text-[#8cc63f] transition-colors">Federación</Link></li>
+              <li><Link href="/ciudad/parana" className="hover:text-[#00E5E8] transition-colors">Paraná (Capital)</Link></li>
+              <li><Link href="/ciudad/concordia" className="hover:text-[#00E5E8] transition-colors">Concordia</Link></li>
+              <li><Link href="/ciudad/colon" className="hover:text-[#00E5E8] transition-colors">Colón</Link></li>
+              <li><Link href="/ciudad/gualeguaychu" className="hover:text-[#00E5E8] transition-colors">Gualeguaychú</Link></li>
+              <li><Link href="/ciudad/concepcion-del-uruguay" className="hover:text-[#00E5E8] transition-colors">Concepción del Uruguay</Link></li>
+              <li><Link href="/ciudad/federacion" className="hover:text-[#00E5E8] transition-colors">Federación</Link></li>
             </ul>
           </div>
 
@@ -56,11 +56,11 @@ export function Footer() {
           <div className="space-y-3">
             <h4 className="text-xs font-extrabold text-white uppercase tracking-wider">Sectores Destacados</h4>
             <ul className="space-y-2 text-xs text-slate-200 font-medium">
-              <li><Link href="#catalogo" className="hover:text-[#8cc63f] transition-colors">Artesanías Regionales</Link></li>
-              <li><Link href="#catalogo" className="hover:text-[#8cc63f] transition-colors">Gastronomía del Litoral</Link></li>
-              <li><Link href="#catalogo" className="hover:text-[#8cc63f] transition-colors">Vinos & Bodegas Entre Ríos</Link></li>
-              <li><Link href="#catalogo" className="hover:text-[#8cc63f] transition-colors">Productores Citrícolas & Miel</Link></li>
-              <li><Link href="#catalogo" className="hover:text-[#8cc63f] transition-colors">Turismo Aventura & Paseos</Link></li>
+              <li><Link href="/#catalogo" className="hover:text-[#00E5E8] transition-colors">Artesanías Regionales</Link></li>
+              <li><Link href="/#catalogo" className="hover:text-[#00E5E8] transition-colors">Gastronomía del Litoral</Link></li>
+              <li><Link href="/#catalogo" className="hover:text-[#00E5E8] transition-colors">Vinos & Bodegas Entre Ríos</Link></li>
+              <li><Link href="/#catalogo" className="hover:text-[#00E5E8] transition-colors">Productores Citrícolas & Miel</Link></li>
+              <li><Link href="/#catalogo" className="hover:text-[#00E5E8] transition-colors">Turismo Aventura & Paseos</Link></li>
             </ul>
           </div>
 
@@ -69,12 +69,12 @@ export function Footer() {
             <h4 className="text-xs font-extrabold text-white uppercase tracking-wider">Atención B2B</h4>
             <div className="space-y-2 text-xs text-slate-200 font-medium">
               <p className="flex items-center gap-2">
-                <MapPin className="w-4 h-4 text-[#8cc63f]" />
+                <MapPin className="w-4 h-4 text-[#00E5E8]" />
                 <span>Casa de Gobierno, Paraná, ER</span>
               </p>
               <p className="flex items-center gap-2">
-                <Mail className="w-4 h-4 text-[#8cc63f]" />
-                <span>contacto@entrerioson.com.ar</span>
+                <Mail className="w-4 h-4 text-[#00E5E8]" />
+                <span>contacto@entreriosonmas.gob.ar</span>
               </p>
               <p className="flex items-center gap-2">
                 <MessageCircle className="w-4 h-4 text-[#25D366]" />
@@ -87,10 +87,10 @@ export function Footer() {
 
         {/* Bottom Bar */}
         <div className="pt-8 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-300 gap-4">
-          <p>© {new Date().getFullYear()} Entre Ríos ON Portal. Todos los derechos reservados.</p>
+          <p>© {new Date().getFullYear()} Entre Ríos ON MÁS Portal. Todos los derechos reservados.</p>
           <p className="flex items-center gap-1 font-medium">
             <span>Desarrollado para potenciar Entre Ríos con</span>
-            <Heart className="w-3.5 h-3.5 text-red-400 fill-current" />
+            <Heart className="w-3.5 h-3.5 text-cyan-400 fill-current" />
           </p>
         </div>
 

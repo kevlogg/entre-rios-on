@@ -49,9 +49,9 @@ export function RafflesManager() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-4">
         <div>
-          <h3 className="text-xl font-black text-[#004b87] flex items-center gap-2">
-            <Gift className="w-5 h-5 text-[#00a859]" />
-            <span>Gestión de Sorteos ON & Selección de Ganadores</span>
+          <h3 className="text-xl font-black text-[#0047BA] flex items-center gap-2">
+            <Gift className="w-5 h-5 text-[#00ADB5]" />
+            <span>Gestión de Sorteos ON MÁS & Selección de Ganadores</span>
           </h3>
           <p className="text-xs text-slate-500 font-medium mt-1">
             Plataforma oficial de auditoría y ejecución de sorteos provinciales.
@@ -68,16 +68,16 @@ export function RafflesManager() {
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
         <div className="bg-slate-50 p-5 rounded-2xl border border-slate-200 space-y-1">
           <span className="text-xs font-bold text-slate-400 uppercase flex items-center gap-1">
-            <Users className="w-3.5 h-3.5 text-[#004b87]" />
+            <Users className="w-3.5 h-3.5 text-[#0047BA]" />
             <span>Inscriptos Registrados</span>
           </span>
-          <p className="text-3xl font-black text-[#004b87]">3.420</p>
+          <p className="text-3xl font-black text-[#0047BA]">3.420</p>
           <p className="text-xs text-slate-500 font-medium">Vecinos de 17 departamentos</p>
         </div>
 
         <div className="bg-slate-50 p-5 rounded-2xl border border-slate-200 space-y-1">
           <span className="text-xs font-bold text-slate-400 uppercase flex items-center gap-1">
-            <Gift className="w-3.5 h-3.5 text-[#00a859]" />
+            <Gift className="w-3.5 h-3.5 text-[#00ADB5]" />
             <span>Premio Principal</span>
           </span>
           <p className="text-lg font-black text-slate-900 leading-snug">Estancia Termal 3D/2N</p>
@@ -95,7 +95,7 @@ export function RafflesManager() {
       </div>
 
       {/* Winner Draw Selector Card */}
-      <div className="bg-gradient-to-br from-slate-900 to-[#004b87] rounded-3xl p-6 sm:p-8 text-white space-y-6 shadow-md">
+      <div className="bg-gradient-to-br from-slate-900 to-[#0047BA] rounded-3xl p-6 sm:p-8 text-white space-y-6 shadow-md">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <span className="bg-amber-400 text-slate-950 text-xs font-black px-3 py-1 rounded-full uppercase">
@@ -110,7 +110,7 @@ export function RafflesManager() {
           <button
             onClick={drawWinner}
             disabled={isDrawing}
-            className="bg-[#00a859] hover:bg-[#008746] disabled:opacity-50 text-white px-6 py-3.5 rounded-2xl font-extrabold text-sm shadow-xl flex items-center justify-center gap-2 transition-transform active:scale-95 shrink-0 cursor-pointer"
+            className="bg-gradient-to-r from-[#00ADB5] to-[#007C8A] hover:from-[#00E5E8] hover:to-[#00ADB5] disabled:opacity-50 text-white px-6 py-3.5 rounded-2xl font-extrabold text-sm shadow-xl flex items-center justify-center gap-2 transition-transform active:scale-95 shrink-0 cursor-pointer"
           >
             <RefreshCw className={`w-4 h-4 ${isDrawing ? 'animate-spin' : ''}`} />
             <span>{isDrawing ? 'Sorteando...' : 'Sustraer Cupón Ganador'}</span>
@@ -133,8 +133,8 @@ export function RafflesManager() {
 
               <div>
                 <span className="text-[10px] text-slate-400 font-extrabold uppercase block">Localidad</span>
-                <p className="text-sm font-bold text-[#004b87] flex items-center gap-1">
-                  <MapPin className="w-3.5 h-3.5 text-[#00a859]" />
+                <p className="text-sm font-bold text-[#0047BA] flex items-center gap-1">
+                  <MapPin className="w-3.5 h-3.5 text-[#00ADB5]" />
                   {winner.city}
                 </p>
               </div>
@@ -149,13 +149,13 @@ export function RafflesManager() {
             </div>
 
             <div className="flex items-center justify-between text-xs font-bold pt-1">
-              <span className="text-emerald-700 flex items-center gap-1">
-                <CheckCircle2 className="w-4 h-4 text-[#00a859]" />
-                Registrado y verificado en la base de Entre Ríos ON
+              <span className="text-cyan-700 flex items-center gap-1">
+                <CheckCircle2 className="w-4 h-4 text-[#00ADB5]" />
+                Registrado y verificado en la base de Entre Ríos ON MÁS
               </span>
 
               <a
-                href={`https://wa.me/549${winner.phone.replace(/[^\d]/g, '')}?text=${encodeURIComponent(`Hola ${winner.name}! Te contactamos oficialmente del portal Entre Ríos ON para avisarte que sos el GANADOR del sorteo termal en Federación.`)}`}
+                href={`https://wa.me/549${winner.phone.replace(/[^\d]/g, '')}?text=${encodeURIComponent(`Hola ${winner.name}! Te contactamos oficialmente del portal Entre Ríos ON MÁS para avisarte que sos el GANADOR del sorteo termal en Federación.`)}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="bg-[#25D366] hover:bg-[#20ba5a] text-white px-4 py-2 rounded-xl text-xs font-extrabold shadow-sm"

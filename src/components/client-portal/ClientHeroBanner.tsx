@@ -9,7 +9,7 @@ const HERO_SLIDES = [
   {
     id: 'parana',
     titleLine1: 'ENTRE RÍOS,',
-    titleLine2: 'SIEMPRE ON',
+    titleLine2: 'SIEMPRE ON MÁS',
     subtitle: 'Comprá. Vendé. Publicá. Conectá.',
     caption: 'Toda la provincia en un solo lugar.',
     handwriting: '“Nuestra gente, nuestros lugares, más oportunidades”',
@@ -103,7 +103,7 @@ export function ClientHeroBanner() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
           
           <div className="lg:col-span-8 space-y-5">
-            <div className="inline-flex items-center gap-1.5 bg-[#00a859] text-white text-xs font-extrabold px-3 py-1 rounded-full uppercase tracking-wider shadow-md">
+            <div className="inline-flex items-center gap-1.5 bg-gradient-to-r from-[#00ADB5] to-[#007C8A] text-white text-xs font-extrabold px-3 py-1 rounded-full uppercase tracking-wider shadow-md">
               <MapPin className="w-3.5 h-3.5" />
               <span>{activeSlide.location}</span>
             </div>
@@ -114,9 +114,9 @@ export function ClientHeroBanner() {
               </h1>
               <h2 className="text-4xl sm:text-6xl font-black tracking-tight text-white uppercase drop-shadow-md flex items-center gap-3">
                 {activeSlide.titleLine2.includes('ON') ? (
-                  <>SIEMPRE <span className="text-[#00a859] drop-shadow-lg">ON</span></>
+                  <>SIEMPRE <span className="text-[#00E5E8] drop-shadow-lg">ON</span> <span className="text-[#0B66FF] drop-shadow-lg">MÁS</span></>
                 ) : (
-                  <span className="text-[#009fe3] drop-shadow-lg">{activeSlide.titleLine2}</span>
+                  <span className="text-[#00E5E8] drop-shadow-lg">{activeSlide.titleLine2}</span>
                 )}
               </h2>
             </div>
@@ -131,7 +131,7 @@ export function ClientHeroBanner() {
             <div className="pt-3 flex flex-wrap items-center gap-4">
               <Link
                 href={activeSlide.ctaHref}
-                className="inline-flex items-center gap-3 bg-gradient-to-r from-[#00a859] to-[#008746] hover:from-[#008746] hover:to-[#004b87] text-white px-7 py-3.5 rounded-2xl font-extrabold text-base shadow-xl hover:shadow-2xl transition-all transform hover:-translate-y-0.5 active:scale-95"
+                className="inline-flex items-center gap-3 bg-gradient-to-r from-[#00ADB5] via-[#007C8A] to-[#0047BA] hover:from-[#00E5E8] hover:to-[#0B66FF] text-white px-7 py-3.5 rounded-2xl font-extrabold text-base shadow-xl hover:shadow-2xl transition-all transform hover:-translate-y-0.5 active:scale-95"
               >
                 <span>{activeSlide.ctaText}</span>
                 <ArrowRight className="w-5 h-5" />
@@ -153,7 +153,7 @@ export function ClientHeroBanner() {
                       key={idx}
                       onClick={() => setCurrentIndex(idx)}
                       className={`h-2.5 rounded-full transition-all duration-300 ${
-                        idx === currentIndex ? 'w-7 bg-[#00a859]' : 'w-2.5 bg-white/50 hover:bg-white/80'
+                        idx === currentIndex ? 'w-7 bg-[#00E5E8]' : 'w-2.5 bg-white/50 hover:bg-white/80'
                       }`}
                       aria-label={`Ir a slide ${idx + 1}`}
                     />

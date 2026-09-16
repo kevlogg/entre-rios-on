@@ -64,9 +64,9 @@ export function Header({ selectedCityId = 'all' }: HeaderProps) {
   return (
     <header className="sticky top-11 z-40 bg-white border-b border-slate-200 transition-all shadow-xs">
       {/* Top Banner Ribbon */}
-      <div className="bg-[#004b87] text-white text-xs py-1.5 px-4 text-center font-semibold flex items-center justify-center gap-2">
-        <Sparkles className="w-3.5 h-3.5 text-amber-300 animate-pulse" />
-        <span> Portal Oficial del Comercio, Turismo y Medios de Entre Ríos </span>
+      <div className="bg-gradient-to-r from-[#002878] via-[#0047BA] to-[#00ADB5] text-white text-xs py-1.5 px-4 text-center font-semibold flex items-center justify-center gap-2">
+        <Sparkles className="w-3.5 h-3.5 text-cyan-300 animate-pulse" />
+        <span> Portal Oficial del Comercio, Turismo y Medios: Entre Ríos ON MÁS </span>
         <span className="hidden sm:inline-block opacity-85">• Impulsando la economía del Litoral</span>
       </div>
 
@@ -74,11 +74,11 @@ export function Header({ selectedCityId = 'all' }: HeaderProps) {
         <div className="flex items-center justify-between h-20 gap-4">
           
           {/* Brand Logo Oficial */}
-          <Link href="/editorial" className="flex items-center gap-3 shrink-0">
-            <div className="relative w-36 h-12 sm:w-44 sm:h-14">
+          <Link href="/" className="flex items-center gap-3 shrink-0">
+            <div className="relative w-40 h-12 sm:w-48 sm:h-14">
               <Image
-                src="/logo.jpeg"
-                alt="Entre Ríos ON Portal"
+                src="/logo.png"
+                alt="Entre Ríos ON MÁS Portal"
                 fill
                 priority
                 className="object-contain object-left"
@@ -90,12 +90,12 @@ export function Header({ selectedCityId = 'all' }: HeaderProps) {
           <div className="relative hidden md:block">
             <button
               onClick={() => setIsCityDropdownOpen(!isCityDropdownOpen)}
-              className="flex items-center gap-2 bg-slate-100 hover:bg-slate-200 text-[#004b87] px-3.5 py-2 rounded-xl text-sm font-bold border border-slate-200 transition-colors"
+              className="flex items-center gap-2 bg-slate-100 hover:bg-slate-200 text-[#0047BA] px-3.5 py-2 rounded-xl text-sm font-bold border border-slate-200 transition-colors"
               aria-expanded={isCityDropdownOpen}
               aria-haspopup="true"
               aria-label="Seleccionar ciudad de Entre Ríos"
             >
-              <MapPin className="w-4 h-4 text-[#00a859]" />
+              <MapPin className="w-4 h-4 text-[#00ADB5]" />
               <span>{selectedCityObj.name}</span>
               <ChevronDown className={`w-4 h-4 text-slate-500 transition-transform duration-200 ${isCityDropdownOpen ? 'rotate-180' : ''}`} />
             </button>
@@ -110,11 +110,11 @@ export function Header({ selectedCityId = 'all' }: HeaderProps) {
                     key={city.id}
                     onClick={() => handleCitySelect(city.id, city.name)}
                     className={`w-full text-left px-3.5 py-2 text-sm flex items-center justify-between hover:bg-slate-50 transition-colors ${
-                      currentCity === city.id ? 'font-bold text-[#004b87] bg-slate-100' : 'text-slate-700'
+                      currentCity === city.id ? 'font-bold text-[#0047BA] bg-slate-100' : 'text-slate-700'
                     }`}
                   >
                     <span>{city.name}</span>
-                    {currentCity === city.id && <span className="w-2 h-2 rounded-full bg-[#00a859]" />}
+                    {currentCity === city.id && <span className="w-2 h-2 rounded-full bg-[#00ADB5]" />}
                   </button>
                 ))}
               </div>
@@ -131,7 +131,7 @@ export function Header({ selectedCityId = 'all' }: HeaderProps) {
               placeholder="Buscar productos, comercios, artesanías..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-10 pr-10 py-2 text-sm text-slate-800 placeholder-slate-400 focus:outline-hidden focus:ring-2 focus:ring-[#00a859] focus:bg-white transition-all shadow-xs"
+              className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-10 pr-10 py-2 text-sm text-slate-800 placeholder-slate-400 focus:outline-hidden focus:ring-2 focus:ring-[#00ADB5] focus:bg-white transition-all shadow-xs"
             />
             <Search className="w-4 h-4 text-slate-400 absolute left-3.5 pointer-events-none" />
           </form>
@@ -148,29 +148,29 @@ export function Header({ selectedCityId = 'all' }: HeaderProps) {
 
             <Link
               href="/admin"
-              className="px-3 py-2 rounded-xl text-xs font-extrabold text-[#00a859] hover:bg-emerald-50 transition-colors flex items-center gap-1 border border-emerald-200"
+              className="px-3 py-2 rounded-xl text-xs font-extrabold text-[#00ADB5] hover:bg-cyan-50 transition-colors flex items-center gap-1 border border-cyan-200"
             >
-              <Store className="w-3.5 h-3.5 text-[#00a859]" />
+              <Store className="w-3.5 h-3.5 text-[#00ADB5]" />
               <span>Mi Negocio</span>
             </Link>
 
             <Link
               href="/comercios"
-              className="px-3 py-2 rounded-xl text-xs font-extrabold text-[#004b87] hover:bg-slate-100 transition-colors"
+              className="px-3 py-2 rounded-xl text-xs font-extrabold text-[#0047BA] hover:bg-slate-100 transition-colors"
             >
               Comercios
             </Link>
 
             <Link
               href="/clasificados"
-              className="px-3 py-2 rounded-xl text-xs font-extrabold text-[#004b87] hover:bg-slate-100 transition-colors"
+              className="px-3 py-2 rounded-xl text-xs font-extrabold text-[#0047BA] hover:bg-slate-100 transition-colors"
             >
               Clasificados
             </Link>
 
             <Link
               href="/sorteos"
-              className="px-3 py-2 rounded-xl text-xs font-extrabold text-[#004b87] hover:bg-slate-100 transition-colors flex items-center gap-1"
+              className="px-3 py-2 rounded-xl text-xs font-extrabold text-[#0047BA] hover:bg-slate-100 transition-colors flex items-center gap-1"
             >
               <Sparkles className="w-3.5 h-3.5 text-amber-500" />
               <span>Sorteos</span>
@@ -178,7 +178,7 @@ export function Header({ selectedCityId = 'all' }: HeaderProps) {
 
             <Link
               href="#sumar-comercio"
-              className="flex items-center gap-1.5 bg-[#00a859] hover:bg-[#008746] text-white px-3.5 py-2 rounded-xl text-xs font-extrabold shadow-md transition-all active:scale-95"
+              className="flex items-center gap-1.5 bg-gradient-to-r from-[#00ADB5] to-[#0047BA] hover:from-[#007C8A] hover:to-[#002878] text-white px-3.5 py-2 rounded-xl text-xs font-extrabold shadow-md transition-all active:scale-95 cursor-pointer"
             >
               <Store className="w-3.5 h-3.5 text-white" />
               <span>Publicá tu Negocio</span>
@@ -188,7 +188,7 @@ export function Header({ selectedCityId = 'all' }: HeaderProps) {
           {/* Mobile menu button */}
           <button
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            className="sm:hidden p-2 rounded-xl bg-slate-100 text-[#004b87] hover:bg-slate-200 focus:outline-hidden"
+            className="sm:hidden p-2 rounded-xl bg-slate-100 text-[#0047BA] hover:bg-slate-200 focus:outline-hidden"
             aria-label="Toggle menu"
           >
             {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
@@ -304,10 +304,10 @@ export function Header({ selectedCityId = 'all' }: HeaderProps) {
             <Link
               href="#sumar-comercio"
               onClick={() => setIsMobileMenuOpen(false)}
-              className="flex items-center justify-center gap-2 bg-[#00a859] text-white py-3 rounded-xl font-extrabold text-sm"
+              className="flex items-center justify-center gap-2 bg-gradient-to-r from-[#00ADB5] to-[#007C8A] text-white py-3 rounded-xl font-extrabold text-sm shadow-md"
             >
               <Store className="w-4 h-4" />
-              Publicá tu Negocio en Entre Ríos ON
+              Publicá tu Negocio en Entre Ríos ON MÁS
             </Link>
           </div>
         </div>

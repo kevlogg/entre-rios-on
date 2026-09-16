@@ -1,16 +1,29 @@
 @import "tailwindcss";
 
 @theme {
-  /* Logo Official Brand Colors */
-  --color-brand-green: #00a859;
-  --color-brand-green-light: #8cc63f;
-  --color-brand-green-dark: #008746;
-  
-  --color-brand-blue: #004b87;
-  --color-brand-blue-light: #009fe3;
-  --color-brand-blue-dark: #003663;
+  /* Brand Official Palette: ON MÁS */
+  --color-brand-cyan: #00E5E8;
+  --color-brand-turquoise: #00ADB5;
+  --color-brand-teal: #007C8A;
 
-  --color-brand-dark: #1e293b;
+  --color-brand-electric: #0B66FF;
+  --color-brand-cobalt: #0047BA;
+  --color-brand-navy: #002878;
+
+  /* Primary Accent Shortcuts */
+  --color-brand-primary: #00ADB5;
+  --color-brand-secondary: #0047BA;
+
+  /* Legacy Fallbacks mapped to new brand */
+  --color-brand-green: #00ADB5;
+  --color-brand-green-light: #00E5E8;
+  --color-brand-green-dark: #007C8A;
+
+  --color-brand-blue: #0047BA;
+  --color-brand-blue-light: #0B66FF;
+  --color-brand-blue-dark: #002878;
+
+  --color-brand-dark: #002878;
   --color-brand-muted: #64748b;
   
   --color-warm-bg: #f8fafc;
@@ -20,7 +33,7 @@
 
 :root {
   --background: #f8fafc;
-  --foreground: #1e293b;
+  --foreground: #002878;
 }
 
 html {
@@ -41,6 +54,21 @@ body {
   font-family: var(--font-caveat), cursive, sans-serif;
 }
 
+/* Brand Gradient Utilities */
+.bg-gradient-brand {
+  background: linear-gradient(135deg, #00ADB5 0%, #0047BA 100%);
+}
+
+.bg-gradient-on-mas {
+  background: linear-gradient(135deg, #00E5E8 0%, #00ADB5 40%, #0047BA 75%, #002878 100%);
+}
+
+.text-gradient-brand {
+  background: linear-gradient(135deg, #00E5E8 0%, #0B66FF 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
 /* Custom Scrollbar */
 ::-webkit-scrollbar {
   width: 8px;
@@ -52,12 +80,12 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #00a859;
+  background: #00ADB5;
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #008746;
+  background: #007C8A;
 }
 
 /* Hide scrollbar utility */

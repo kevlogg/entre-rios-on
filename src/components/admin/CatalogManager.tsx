@@ -93,8 +93,8 @@ export function CatalogManager({ products, onAddProduct, onDeleteProduct }: Cata
       {/* Section Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-4">
         <div>
-          <h3 className="text-xl font-extrabold text-[#004b87] flex items-center gap-2">
-            <ShoppingBag className="w-5 h-5 text-[#00a859]" />
+          <h3 className="text-xl font-extrabold text-[#0047BA] flex items-center gap-2">
+            <ShoppingBag className="w-5 h-5 text-[#00ADB5]" />
             <span>Gestión del Catálogo de Productos</span>
           </h3>
           <p className="text-xs text-slate-500 font-medium mt-1">
@@ -104,7 +104,7 @@ export function CatalogManager({ products, onAddProduct, onDeleteProduct }: Cata
 
         <button
           onClick={() => setIsModalOpen(true)}
-          className="bg-[#00a859] hover:bg-[#008746] text-white px-5 py-2.5 rounded-2xl font-extrabold text-xs shadow-md flex items-center justify-center gap-2 transition-transform active:scale-95 cursor-pointer"
+          className="bg-gradient-to-r from-[#00ADB5] to-[#007C8A] hover:from-[#00E5E8] hover:to-[#00ADB5] text-white px-5 py-2.5 rounded-2xl font-extrabold text-xs shadow-md flex items-center justify-center gap-2 transition-transform active:scale-95 cursor-pointer"
         >
           <Plus className="w-4 h-4" />
           <span>Publicar Nuevo Producto</span>
@@ -146,7 +146,7 @@ export function CatalogManager({ products, onAddProduct, onDeleteProduct }: Cata
               <div className="pt-3 border-t border-slate-100 flex items-center justify-between">
                 <div>
                   <span className="text-[10px] text-slate-400 block font-semibold">Precio</span>
-                  <span className="text-sm font-extrabold text-[#004b87]">
+                  <span className="text-sm font-extrabold text-[#0047BA]">
                     {formatPrice(prod.price)}
                   </span>
                 </div>
@@ -181,9 +181,9 @@ export function CatalogManager({ products, onAddProduct, onDeleteProduct }: Cata
         <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
           <div className="bg-white rounded-3xl max-w-lg w-full p-6 space-y-5 shadow-2xl animate-in fade-in zoom-in-95 duration-200">
             <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-              <h3 className="text-lg font-extrabold text-[#004b87] flex items-center gap-2">
-                <Sparkles className="w-5 h-5 text-[#00a859]" />
-                <span>Publicar Nuevo Producto en Entre Ríos ON</span>
+              <h3 className="text-lg font-extrabold text-[#0047BA] flex items-center gap-2">
+                <Sparkles className="w-5 h-5 text-[#00ADB5]" />
+                <span>Publicar Nuevo Producto en Entre Ríos ON MÁS</span>
               </h3>
               <button
                 onClick={() => setIsModalOpen(false)}
@@ -202,7 +202,7 @@ export function CatalogManager({ products, onAddProduct, onDeleteProduct }: Cata
                   placeholder="Ej. Juego de Mates de Cerámica y Alpaca"
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
-                  className="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-2.5 text-sm text-slate-800 focus:ring-2 focus:ring-[#00a859]"
+                  className="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-2.5 text-sm text-slate-800 focus:ring-2 focus:ring-[#00ADB5]"
                 />
               </div>
 
@@ -215,7 +215,7 @@ export function CatalogManager({ products, onAddProduct, onDeleteProduct }: Cata
                     placeholder="34500"
                     value={price}
                     onChange={(e) => setPrice(e.target.value)}
-                    className="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-2.5 text-sm text-slate-800 focus:ring-2 focus:ring-[#00a859]"
+                    className="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-2.5 text-sm text-slate-800 focus:ring-2 focus:ring-[#00ADB5]"
                   />
                 </div>
 
@@ -224,7 +224,7 @@ export function CatalogManager({ products, onAddProduct, onDeleteProduct }: Cata
                   <select
                     value={category}
                     onChange={(e) => setCategory(e.target.value)}
-                    className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2.5 text-xs font-bold text-slate-800 focus:ring-2 focus:ring-[#00a859]"
+                    className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2.5 text-xs font-bold text-slate-800 focus:ring-2 focus:ring-[#00ADB5]"
                   >
                     {CATEGORIES_LIST.map((cat) => (
                       <option key={cat.id} value={cat.id}>{cat.label}</option>
@@ -240,7 +240,7 @@ export function CatalogManager({ products, onAddProduct, onDeleteProduct }: Cata
                   placeholder="Describí las características, materiales, dimensiones o modalidad del servicio..."
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
-                  className="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-2.5 text-sm text-slate-800 focus:ring-2 focus:ring-[#00a859]"
+                  className="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-2.5 text-sm text-slate-800 focus:ring-2 focus:ring-[#00ADB5]"
                 />
               </div>
 
@@ -258,8 +258,8 @@ export function CatalogManager({ products, onAddProduct, onDeleteProduct }: Cata
                 ]}
               />
 
-              <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-3 text-xs text-emerald-800 font-semibold flex items-center gap-2">
-                <MessageCircle className="w-4 h-4 text-[#00a859] shrink-0" />
+              <div className="bg-cyan-50 border border-cyan-200 rounded-2xl p-3 text-xs text-[#007C8A] font-semibold flex items-center gap-2">
+                <MessageCircle className="w-4 h-4 text-[#00ADB5] shrink-0" />
                 <span>Los compradores podrán solicitar este producto directamente por WhatsApp sin comisión.</span>
               </div>
 
@@ -274,7 +274,7 @@ export function CatalogManager({ products, onAddProduct, onDeleteProduct }: Cata
 
                 <button
                   type="submit"
-                  className="bg-[#00a859] hover:bg-[#008746] text-white px-6 py-2.5 rounded-xl font-extrabold text-xs shadow-md"
+                  className="bg-gradient-to-r from-[#00ADB5] to-[#007C8A] hover:from-[#00E5E8] hover:to-[#00ADB5] text-white px-6 py-2.5 rounded-xl font-extrabold text-xs shadow-md"
                 >
                   Publicar Producto Ahora
                 </button>

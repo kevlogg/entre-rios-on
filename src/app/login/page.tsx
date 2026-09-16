@@ -93,11 +93,11 @@ function LoginFormContent() {
           onClick={() => setActiveTab('merchant')}
           className={`py-2.5 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
             activeTab === 'merchant'
-              ? 'bg-white text-[#004b87] shadow-sm font-extrabold'
+              ? 'bg-white text-[#0047BA] shadow-sm font-extrabold'
               : 'text-slate-500 hover:text-slate-900'
           }`}
         >
-          <Store className="w-4 h-4 text-[#00a859]" />
+          <Store className="w-4 h-4 text-[#00ADB5]" />
           <span>Soy Comercio</span>
         </button>
 
@@ -106,7 +106,7 @@ function LoginFormContent() {
           onClick={() => setActiveTab('superadmin')}
           className={`py-2.5 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
             activeTab === 'superadmin'
-              ? 'bg-white text-[#004b87] shadow-sm font-extrabold'
+              ? 'bg-white text-[#0047BA] shadow-sm font-extrabold'
               : 'text-slate-500 hover:text-slate-900'
           }`}
         >
@@ -117,7 +117,7 @@ function LoginFormContent() {
 
       {/* Dynamic Banner Note */}
       <div className="bg-slate-50 border border-slate-200 rounded-2xl p-3.5 text-xs text-slate-600 font-medium flex items-center gap-2">
-        <Sparkles className="w-4 h-4 text-[#00a859] shrink-0" />
+        <Sparkles className="w-4 h-4 text-[#00ADB5] shrink-0" />
         <span>
           {activeTab === 'merchant'
             ? 'Gestioná tus productos, ofertas y canal de WhatsApp.'
@@ -130,7 +130,7 @@ function LoginFormContent() {
         <div
           className={`p-3.5 rounded-2xl text-xs font-extrabold border ${
             message.type === 'success'
-              ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
+              ? 'bg-cyan-50 text-[#007C8A] border-cyan-200'
               : 'bg-rose-50 text-rose-800 border-rose-200'
           }`}
         >
@@ -150,7 +150,7 @@ function LoginFormContent() {
               placeholder="comercio@entrerios.gob.ar"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-xs text-slate-800 focus:ring-2 focus:ring-[#00a859] focus:bg-white"
+              className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-xs text-slate-800 focus:ring-2 focus:ring-[#00ADB5] focus:bg-white"
             />
           </div>
         </div>
@@ -164,7 +164,7 @@ function LoginFormContent() {
               placeholder="••••••••"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-xs text-slate-800 focus:ring-2 focus:ring-[#00a859] focus:bg-white"
+              className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-xs text-slate-800 focus:ring-2 focus:ring-[#00ADB5] focus:bg-white"
             />
           </div>
         </div>
@@ -172,7 +172,7 @@ function LoginFormContent() {
         <button
           type="submit"
           disabled={loading}
-          className="w-full bg-[#004b87] hover:bg-[#003663] text-white py-3 rounded-2xl font-extrabold text-xs flex items-center justify-center gap-2 shadow-md transition-transform active:scale-95 cursor-pointer disabled:opacity-50"
+          className="w-full bg-gradient-to-r from-[#0047BA] to-[#002878] hover:from-[#0B66FF] hover:to-[#0047BA] text-white py-3 rounded-2xl font-extrabold text-xs flex items-center justify-center gap-2 shadow-md transition-transform active:scale-95 cursor-pointer disabled:opacity-50"
         >
           <span>{loading ? 'Iniciando sesión...' : 'Ingresar al Panel'}</span>
           <ArrowRight className="w-4 h-4" />
@@ -185,7 +185,7 @@ function LoginFormContent() {
           type="button"
           onClick={handleMagicLink}
           disabled={loading}
-          className="text-xs font-bold text-[#00a859] hover:underline cursor-pointer"
+          className="text-xs font-bold text-[#00ADB5] hover:underline cursor-pointer"
         >
           ¿Ingresar sin contraseña con Enlace Mágico por Email?
         </button>
@@ -193,10 +193,10 @@ function LoginFormContent() {
         <div className="text-[11px] text-slate-400 font-medium">
           ¿Todavía no sumaste tu negocio?{' '}
           <a
-            href="https://wa.me/5493434567890?text=Hola,%20quiero%20adherir%20mi%20comercio%20a%20Entre%20R%C3%ADos%20ON"
+            href="https://wa.me/5493434567890?text=Hola,%20quiero%20adherir%20mi%20comercio%20a%20Entre%20R%C3%ADos%20ON%20M%C3%81S"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-[#004b87] font-bold hover:underline"
+            className="text-[#0047BA] font-bold hover:underline"
           >
             Solicitar Adhesión Comercial →
           </a>
@@ -208,19 +208,19 @@ function LoginFormContent() {
 
 export default function LoginPage() {
   return (
-    <div className="min-h-screen flex flex-col justify-center bg-gradient-to-br from-slate-900 via-[#004b87] to-slate-950 px-4 py-12 sm:px-6 lg:px-8">
+    <div className="min-h-screen flex flex-col justify-center bg-gradient-to-br from-slate-950 via-[#0047BA] to-[#002878] px-4 py-12 sm:px-6 lg:px-8">
       {/* Background Ambient Glow */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-40 -right-40 w-96 h-96 bg-[#00a859]/20 rounded-full blur-3xl" />
-        <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-[#004b87]/30 rounded-full blur-3xl" />
+        <div className="absolute -top-40 -right-40 w-96 h-96 bg-[#00ADB5]/20 rounded-full blur-3xl" />
+        <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-[#0047BA]/30 rounded-full blur-3xl" />
       </div>
 
       <div className="sm:mx-auto sm:w-full sm:max-w-md relative z-10 space-y-6">
         {/* Brand Header */}
         <div className="text-center space-y-3">
           <Link href="/" className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-md px-4 py-2 rounded-2xl border border-white/20 text-white font-extrabold text-sm">
-            <MapPin className="w-4 h-4 text-[#00a859]" />
-            <span>Entre Ríos ON • Portal Provincial</span>
+            <MapPin className="w-4 h-4 text-[#00E5E8]" />
+            <span>Entre Ríos ON MÁS • Portal Provincial</span>
           </Link>
           
           <h1 className="text-3xl sm:text-4xl font-black text-white tracking-tight">

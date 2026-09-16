@@ -33,7 +33,7 @@ export function ProductCard({ product }: ProductCardProps) {
     // 2. Generate tracking API URL
     const defaultMsg = product.whatsappMessageCustom 
       ? product.whatsappMessageCustom 
-      : `Hola ${product.commerceName}, encontré su producto "${product.title}" en el portal Entre Ríos ON y me gustaría realizar una consulta.`;
+      : `Hola ${product.commerceName}, encontré su producto "${product.title}" en el portal Entre Ríos ON MÁS y me gustaría realizar una consulta.`;
 
     const trackingUrl = `/api/lead/whatsapp?phone=${encodeURIComponent(product.phoneWhatsApp)}&message=${encodeURIComponent(defaultMsg)}&commerceId=${encodeURIComponent(product.commerceId)}&productId=${encodeURIComponent(product.id)}&cityId=${encodeURIComponent(product.cityId)}`;
 
@@ -61,8 +61,8 @@ export function ProductCard({ product }: ProductCardProps) {
 
           {/* City & Category Badges */}
           <div className="absolute top-2 left-2 flex flex-wrap items-center gap-1 z-10">
-            <span className="bg-[#004b87]/90 backdrop-blur-md text-white text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-0.5 shadow-xs">
-              <MapPin className="w-2.5 h-2.5 text-[#00a859]" />
+            <span className="bg-[#0047BA]/90 backdrop-blur-md text-white text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-0.5 shadow-xs">
+              <MapPin className="w-2.5 h-2.5 text-[#00E5E8]" />
               {product.cityName}
             </span>
           </div>
@@ -78,15 +78,15 @@ export function ProductCard({ product }: ProductCardProps) {
         {/* Content Details */}
         <div className="p-3.5 space-y-2">
           {/* Commerce Header Info */}
-          <Link href={`/comercio/${commerceSlug}`} className="flex items-center gap-1 text-[11px] font-bold text-[#004b87] hover:underline">
-            <Store className="w-3 h-3 text-[#00a859] shrink-0" />
+          <Link href={`/comercio/${commerceSlug}`} className="flex items-center gap-1 text-[11px] font-bold text-[#0047BA] hover:underline">
+            <Store className="w-3 h-3 text-[#00ADB5] shrink-0" />
             <span className="truncate">{product.commerceName}</span>
-            <CheckCircle className="w-3 h-3 text-[#00a859] shrink-0" />
+            <CheckCircle className="w-3 h-3 text-[#00ADB5] shrink-0" />
           </Link>
 
           {/* Title Link */}
           <Link href={`/producto/${product.slug}`} className="block">
-            <h3 className="text-xs sm:text-sm font-extrabold text-slate-800 line-clamp-2 leading-snug group-hover:text-[#00a859] transition-colors">
+            <h3 className="text-xs sm:text-sm font-extrabold text-slate-800 line-clamp-2 leading-snug group-hover:text-[#00ADB5] transition-colors">
               {product.title}
             </h3>
           </Link>
@@ -102,7 +102,7 @@ export function ProductCard({ product }: ProductCardProps) {
       <div className="p-3.5 pt-0 space-y-2">
         <div className="flex items-baseline justify-between pt-2 border-t border-slate-100">
           <span className="text-[10px] text-slate-400 font-semibold uppercase">Precio</span>
-          <span className="text-sm font-black text-[#004b87]">
+          <span className="text-sm font-black text-[#0047BA]">
             {formatPrice(product.price, product.currency)}
           </span>
         </div>

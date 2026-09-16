@@ -15,7 +15,7 @@ export function KpiCardsRow({ productCount }: KpiCardsRowProps) {
       change: '+18% este mes',
       isPositive: true,
       icon: MessageCircle,
-      iconBg: 'bg-emerald-100 text-[#00a859]',
+      iconBg: 'bg-cyan-100 text-[#00ADB5]',
       description: 'Clicks directos a tu chat comercial',
     },
     {
@@ -24,7 +24,7 @@ export function KpiCardsRow({ productCount }: KpiCardsRowProps) {
       change: '+24% este mes',
       isPositive: true,
       icon: Eye,
-      iconBg: 'bg-blue-100 text-[#004b87]',
+      iconBg: 'bg-blue-100 text-[#0047BA]',
       description: 'Visitas a la ficha del negocio',
     },
     {
@@ -42,8 +42,8 @@ export function KpiCardsRow({ productCount }: KpiCardsRowProps) {
       change: 'Sin Comisiones 0%',
       isPositive: true,
       icon: ShieldCheck,
-      iconBg: 'bg-emerald-500 text-white',
-      description: 'Plan Pionero Entre Ríos ON',
+      iconBg: 'bg-[#00ADB5] text-white',
+      description: 'Plan Pionero Entre Ríos ON MÁS',
     },
   ];
 

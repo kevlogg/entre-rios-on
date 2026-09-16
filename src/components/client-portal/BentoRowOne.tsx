@@ -18,7 +18,7 @@ export function BentoRowOne() {
     },
     {
       id: 'comunidad-on',
-      title: 'COMUNIDAD ON',
+      title: 'COMUNIDAD ON MÁS',
       subtitle: 'Conectate, compartí y hacé crecer lo nuestro.',
       cta: 'Sumate',
       href: '/comunidad/evt-1',
@@ -27,7 +27,7 @@ export function BentoRowOne() {
     },
     {
       id: 'sorteos-on',
-      title: 'SORTEOS ON',
+      title: 'SORTEOS ON MÁS',
       subtitle: 'Todos los meses, nuevos premios.',
       cta: 'Quiero participar',
       href: '/sorteos',
@@ -64,7 +64,7 @@ export function BentoRowOne() {
               <div className="pt-2">
                 <Link
                   href={card.href}
-                  className="inline-flex items-center gap-1.5 bg-white/20 hover:bg-[#00a859] backdrop-blur-md text-white text-xs font-extrabold px-4 py-2 rounded-xl transition-all border border-white/30"
+                  className="inline-flex items-center gap-1.5 bg-white/20 hover:bg-gradient-to-r hover:from-[#00ADB5] hover:to-[#007C8A] backdrop-blur-md text-white text-xs font-extrabold px-4 py-2 rounded-xl transition-all border border-white/30"
                 >
                   <span>{card.cta}</span>
                   <ArrowRight className="w-3.5 h-3.5" />

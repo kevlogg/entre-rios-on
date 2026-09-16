@@ -25,7 +25,7 @@ export function BentoRowTwo() {
     },
     {
       id: 'clasificados',
-      title: 'CLASIFICADOS ON',
+      title: 'CLASIFICADOS ON MÁS',
       subtitle: 'Comprá o vendé de forma simple y segura.',
       cta: 'Ver clasificados',
       href: '/clasificados',
@@ -69,7 +69,7 @@ export function BentoRowTwo() {
               <div className="pt-2">
                 <Link
                   href={card.href}
-                  className="inline-flex items-center gap-1.5 bg-white/20 hover:bg-[#00a859] backdrop-blur-md text-white text-xs font-extrabold px-3.5 py-1.5 rounded-xl transition-all border border-white/30"
+                  className="inline-flex items-center gap-1.5 bg-white/20 hover:bg-gradient-to-r hover:from-[#00ADB5] hover:to-[#007C8A] backdrop-blur-md text-white text-xs font-extrabold px-3.5 py-1.5 rounded-xl transition-all border border-white/30"
                 >
                   <span>{card.cta}</span>
                   <ArrowRight className="w-3.5 h-3.5" />

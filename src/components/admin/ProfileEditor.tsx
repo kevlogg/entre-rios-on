@@ -46,8 +46,8 @@ export function ProfileEditor({ commerce }: ProfileEditorProps) {
       {/* Section Header */}
       <div className="flex items-center justify-between border-b border-slate-100 pb-4">
         <div>
-          <h3 className="text-xl font-extrabold text-[#004b87] flex items-center gap-2">
-            <Store className="w-5 h-5 text-[#00a859]" />
+          <h3 className="text-xl font-extrabold text-[#0047BA] flex items-center gap-2">
+            <Store className="w-5 h-5 text-[#00ADB5]" />
             <span>Perfil Comercial & Datos del Negocio</span>
           </h3>
           <p className="text-xs text-slate-500 font-medium mt-1">
@@ -55,7 +55,7 @@ export function ProfileEditor({ commerce }: ProfileEditorProps) {
           </p>
         </div>
 
-        <div className="bg-emerald-50 border border-emerald-200 text-[#00a859] px-3.5 py-1.5 rounded-2xl text-xs font-extrabold flex items-center gap-1.5">
+        <div className="bg-cyan-50 border border-cyan-200 text-[#00ADB5] px-3.5 py-1.5 rounded-2xl text-xs font-extrabold flex items-center gap-1.5">
           <ShieldCheck className="w-4 h-4" />
           <span>Comercio Verificado</span>
         </div>
@@ -70,7 +70,7 @@ export function ProfileEditor({ commerce }: ProfileEditorProps) {
           <div>
             <span className="text-xs font-bold text-slate-800 block">Logo Oficial</span>
             <span className="text-[11px] text-slate-400 block">Recomendado 400x400 px</span>
-            <button className="text-xs font-bold text-[#00a859] hover:underline mt-1">Cambiar Logo</button>
+            <button className="text-xs font-bold text-[#00ADB5] hover:underline mt-1">Cambiar Logo</button>
           </div>
         </div>
 
@@ -78,7 +78,7 @@ export function ProfileEditor({ commerce }: ProfileEditorProps) {
           <div className="relative h-20 w-full rounded-2xl overflow-hidden bg-slate-300 border border-slate-300 shadow-sm">
             <Image src={commerce.coverUrl} alt="Portada" fill className="object-cover" />
           </div>
-          <button className="text-xs font-bold text-[#00a859] hover:underline shrink-0">Cambiar Portada</button>
+          <button className="text-xs font-bold text-[#00ADB5] hover:underline shrink-0">Cambiar Portada</button>
         </div>
       </div>
 
@@ -92,7 +92,7 @@ export function ProfileEditor({ commerce }: ProfileEditorProps) {
               required
               value={formData.name}
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-              className="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-2.5 text-sm text-slate-800 focus:ring-2 focus:ring-[#00a859]"
+              className="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-2.5 text-sm text-slate-800 focus:ring-2 focus:ring-[#00ADB5]"
             />
           </div>
 
@@ -102,7 +102,7 @@ export function ProfileEditor({ commerce }: ProfileEditorProps) {
               type="text"
               value={formData.cuit}
               onChange={(e) => setFormData({ ...formData, cuit: e.target.value })}
-              className="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-2.5 text-sm text-slate-800 focus:ring-2 focus:ring-[#00a859]"
+              className="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-2.5 text-sm text-slate-800 focus:ring-2 focus:ring-[#00ADB5]"
             />
           </div>
         </div>
@@ -114,7 +114,7 @@ export function ProfileEditor({ commerce }: ProfileEditorProps) {
               type="text"
               value={formData.category}
               onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-              className="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-2.5 text-sm text-slate-800 focus:ring-2 focus:ring-[#00a859]"
+              className="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-2.5 text-sm text-slate-800 focus:ring-2 focus:ring-[#00ADB5]"
             />
           </div>
 
@@ -124,7 +124,7 @@ export function ProfileEditor({ commerce }: ProfileEditorProps) {
               type="text"
               value={formData.cityName}
               onChange={(e) => setFormData({ ...formData, cityName: e.target.value })}
-              className="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-2.5 text-sm text-slate-800 focus:ring-2 focus:ring-[#00a859]"
+              className="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-2.5 text-sm text-slate-800 focus:ring-2 focus:ring-[#00ADB5]"
             />
           </div>
 
@@ -134,7 +134,7 @@ export function ProfileEditor({ commerce }: ProfileEditorProps) {
               type="text"
               value={formData.address}
               onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-              className="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-2.5 text-sm text-slate-800 focus:ring-2 focus:ring-[#00a859]"
+              className="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-2.5 text-sm text-slate-800 focus:ring-2 focus:ring-[#00ADB5]"
             />
           </div>
         </div>
@@ -148,7 +148,7 @@ export function ProfileEditor({ commerce }: ProfileEditorProps) {
                 required
                 value={formData.phoneWhatsApp}
                 onChange={(e) => setFormData({ ...formData, phoneWhatsApp: e.target.value })}
-                className="w-full bg-slate-50 border border-slate-300 rounded-xl pl-10 pr-4 py-2.5 text-sm text-slate-800 focus:ring-2 focus:ring-[#00a859]"
+                className="w-full bg-slate-50 border border-slate-300 rounded-xl pl-10 pr-4 py-2.5 text-sm text-slate-800 focus:ring-2 focus:ring-[#00ADB5]"
               />
               <MessageCircle className="w-4 h-4 text-[#25D366] absolute left-3.5 top-3" />
             </div>
@@ -161,7 +161,7 @@ export function ProfileEditor({ commerce }: ProfileEditorProps) {
                 type="text"
                 value={formData.instagram}
                 onChange={(e) => setFormData({ ...formData, instagram: e.target.value })}
-                className="w-full bg-slate-50 border border-slate-300 rounded-xl pl-10 pr-4 py-2.5 text-sm text-slate-800 focus:ring-2 focus:ring-[#00a859]"
+                className="w-full bg-slate-50 border border-slate-300 rounded-xl pl-10 pr-4 py-2.5 text-sm text-slate-800 focus:ring-2 focus:ring-[#00ADB5]"
               />
               <Camera className="w-4 h-4 text-pink-600 absolute left-3.5 top-3" />
             </div>
@@ -174,13 +174,13 @@ export function ProfileEditor({ commerce }: ProfileEditorProps) {
             rows={4}
             value={formData.description}
             onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-            className="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-2.5 text-sm text-slate-800 focus:ring-2 focus:ring-[#00a859]"
+            className="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-2.5 text-sm text-slate-800 focus:ring-2 focus:ring-[#00ADB5]"
           />
         </div>
 
         {isSaved && (
-          <div className="bg-emerald-50 border border-emerald-200 text-emerald-800 p-3 rounded-2xl text-xs font-bold flex items-center gap-2 animate-in fade-in duration-200">
-            <CheckCircle className="w-4 h-4 text-[#00a859]" />
+          <div className="bg-cyan-50 border border-cyan-200 text-[#007C8A] p-3 rounded-2xl text-xs font-bold flex items-center gap-2 animate-in fade-in duration-200">
+            <CheckCircle className="w-4 h-4 text-[#00ADB5]" />
             <span>Los datos de tu comercio han sido actualizados con éxito.</span>
           </div>
         )}
@@ -188,7 +188,7 @@ export function ProfileEditor({ commerce }: ProfileEditorProps) {
         <div className="pt-2 flex justify-end">
           <button
             type="submit"
-            className="bg-[#004b87] hover:bg-[#003663] text-white px-8 py-3 rounded-2xl font-extrabold text-sm shadow-md flex items-center gap-2 transition-transform active:scale-95 cursor-pointer"
+            className="bg-gradient-to-r from-[#0047BA] to-[#002878] hover:from-[#0B66FF] hover:to-[#0047BA] text-white px-8 py-3 rounded-2xl font-extrabold text-sm shadow-md flex items-center gap-2 transition-transform active:scale-95 cursor-pointer"
           >
             <Save className="w-4 h-4" />
             <span>Guardar Cambios del Perfil</span>

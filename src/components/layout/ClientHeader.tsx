@@ -51,10 +51,10 @@ export function ClientHeader() {
           
           {/* Logo Oficial */}
           <Link href="/" className="flex items-center gap-3 shrink-0">
-            <div className="relative w-36 h-12 sm:w-44 sm:h-14">
+            <div className="relative w-40 h-12 sm:w-48 sm:h-14">
               <Image
-                src="/logo.jpeg"
-                alt="Entre Ríos ON Portal"
+                src="/logo.png"
+                alt="Entre Ríos ON MÁS Portal"
                 fill
                 priority
                 className="object-contain object-left"
@@ -69,14 +69,14 @@ export function ClientHeader() {
           >
             <input
               type="text"
-              placeholder="Buscá productos, servicios, comercios..."
+              placeholder="Buscá productos, servicios, comercios en Entre Ríos..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-slate-50 border border-slate-300 rounded-xl pl-4 pr-12 py-2.5 text-sm text-slate-800 placeholder-slate-400 focus:outline-hidden focus:ring-2 focus:ring-[#00a859] focus:bg-white transition-all"
+              className="w-full bg-slate-50 border border-slate-300 rounded-xl pl-4 pr-12 py-2.5 text-sm text-slate-800 placeholder-slate-400 focus:outline-hidden focus:ring-2 focus:ring-[#00ADB5] focus:bg-white transition-all"
             />
             <button
               type="submit"
-              className="absolute right-1 top-1 bottom-1 bg-[#00a859] hover:bg-[#008746] text-white px-3.5 rounded-lg flex items-center justify-center transition-colors"
+              className="absolute right-1 top-1 bottom-1 bg-gradient-to-r from-[#00ADB5] to-[#0047BA] hover:from-[#007C8A] hover:to-[#002878] text-white px-3.5 rounded-lg flex items-center justify-center transition-all shadow-xs cursor-pointer"
               aria-label="Buscar"
             >
               <Search className="w-4 h-4" />
@@ -99,17 +99,17 @@ export function ClientHeader() {
             {/* Panel B2B Comercio */}
             <Link 
               href="/admin" 
-              className="flex flex-col items-center text-[#004b87] hover:text-[#00a859] transition-colors"
+              className="flex flex-col items-center text-[#0047BA] hover:text-[#00ADB5] transition-colors"
               title="Panel de Administración del Comercio"
             >
-              <Store className="w-5 h-5 text-[#00a859]" />
+              <Store className="w-5 h-5 text-[#00ADB5]" />
               <span className="text-[11px] font-extrabold mt-0.5">Mi Negocio</span>
             </Link>
 
             {/* Ingresar */}
             <Link 
-              href="#ingresar" 
-              className="flex flex-col items-center text-slate-700 hover:text-[#00a859] transition-colors"
+              href="/login" 
+              className="flex flex-col items-center text-slate-700 hover:text-[#00ADB5] transition-colors"
             >
               <User className="w-5 h-5" />
               <span className="text-[11px] font-semibold mt-0.5">Ingresar</span>
@@ -118,11 +118,11 @@ export function ClientHeader() {
             {/* Carrito */}
             <Link 
               href="#carrito" 
-              className="flex flex-col items-center text-slate-700 hover:text-[#00a859] transition-colors relative"
+              className="flex flex-col items-center text-slate-700 hover:text-[#00ADB5] transition-colors relative"
             >
               <div className="relative">
                 <ShoppingCart className="w-5 h-5" />
-                <span className="absolute -top-1.5 -right-2 bg-[#00a859] text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center border-2 border-white">
+                <span className="absolute -top-1.5 -right-2 bg-[#00ADB5] text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center border-2 border-white">
                   0
                 </span>
               </div>
@@ -132,7 +132,7 @@ export function ClientHeader() {
             {/* Mobile Hamburger Toggle */}
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="md:hidden p-2 text-slate-700 hover:text-[#00a859] focus:outline-hidden"
+              className="md:hidden p-2 text-slate-700 hover:text-[#00ADB5] focus:outline-hidden"
               aria-label="Toggle Navigation Menu"
             >
               {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
@@ -153,10 +153,10 @@ export function ClientHeader() {
                   <Link
                     href={link.href}
                     onClick={() => setActiveTab(link.name)}
-                    className={`px-3 py-2 rounded-lg flex items-center gap-1 transition-all whitespace-nowrap ${
+                    className={`px-3.5 py-2 rounded-xl flex items-center gap-1 transition-all whitespace-nowrap ${
                       isActive
-                        ? 'bg-[#00a859] text-white shadow-xs'
-                        : 'hover:bg-slate-100 hover:text-[#00a859]'
+                        ? 'bg-gradient-to-r from-[#00ADB5] to-[#0047BA] text-white shadow-xs'
+                        : 'hover:bg-cyan-50/60 hover:text-[#00ADB5]'
                     }`}
                   >
                     <span>{link.name}</span>
@@ -180,7 +180,7 @@ export function ClientHeader() {
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full bg-slate-100 border border-slate-200 rounded-xl pl-4 pr-10 py-2 text-sm"
             />
-            <button type="submit" className="absolute right-2 top-2 bg-[#00a859] text-white p-1.5 rounded-lg">
+            <button type="submit" className="absolute right-2 top-2 bg-gradient-to-r from-[#00ADB5] to-[#007C8A] text-white p-1.5 rounded-lg">
               <Search className="w-4 h-4" />
             </button>
           </form>

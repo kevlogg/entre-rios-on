@@ -16,8 +16,8 @@ export function SuperAdminHeader() {
             <Link href="/" className="flex items-center gap-2">
               <div className="relative w-36 h-10">
                 <Image
-                  src="/logo.jpeg"
-                  alt="Entre Ríos ON"
+                  src="/logo.png"
+                  alt="Entre Ríos ON MÁS"
                   fill
                   className="object-contain object-left brightness-200"
                 />
@@ -26,7 +26,7 @@ export function SuperAdminHeader() {
 
             <span className="hidden md:inline-block h-6 w-px bg-slate-800" />
 
-            <div className="hidden sm:flex items-center gap-2 bg-gradient-to-r from-amber-500/20 to-emerald-500/20 border border-amber-500/40 px-3.5 py-1 rounded-xl text-xs font-black text-amber-300">
+            <div className="hidden sm:flex items-center gap-2 bg-gradient-to-r from-amber-500/20 to-cyan-500/20 border border-amber-500/40 px-3.5 py-1 rounded-xl text-xs font-black text-amber-300">
               <Crown className="w-4 h-4 text-amber-400 fill-current animate-pulse" />
               <span>SuperAdmin Provincial</span>
               <span className="text-slate-400 text-[10px] uppercase font-bold">• 17 Departamentos</span>
@@ -38,7 +38,7 @@ export function SuperAdminHeader() {
             <Link
               href="/"
               target="_blank"
-              className="bg-[#00a859] hover:bg-[#008746] text-white px-3.5 py-1.5 rounded-xl text-xs font-extrabold flex items-center gap-1.5 transition-all shadow-xs"
+              className="bg-gradient-to-r from-[#00ADB5] to-[#007C8A] hover:from-[#00E5E8] hover:to-[#00ADB5] text-white px-3.5 py-1.5 rounded-xl text-xs font-extrabold flex items-center gap-1.5 transition-all shadow-xs"
             >
               <span>Ver Portal Opción A</span>
               <ExternalLink className="w-3.5 h-3.5" />
@@ -47,7 +47,7 @@ export function SuperAdminHeader() {
             <Link
               href="/editorial"
               target="_blank"
-              className="bg-[#004b87] hover:bg-[#003663] text-white px-3.5 py-1.5 rounded-xl text-xs font-extrabold flex items-center gap-1.5 transition-all shadow-xs hidden sm:flex"
+              className="bg-gradient-to-r from-[#0047BA] to-[#002878] hover:from-[#0B66FF] hover:to-[#0047BA] text-white px-3.5 py-1.5 rounded-xl text-xs font-extrabold flex items-center gap-1.5 transition-all shadow-xs hidden sm:flex"
             >
               <span>Ver Portal Opción B</span>
               <ExternalLink className="w-3.5 h-3.5" />

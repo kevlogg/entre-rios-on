@@ -35,7 +35,7 @@ export function AdminSidebar({ activeTab, onTabChange, productCount }: AdminSide
         <span className="text-[10px] font-extrabold uppercase tracking-widest text-slate-400 block">
           Panel Comercial B2B
         </span>
-        <h2 className="text-base font-black text-[#004b87] leading-tight mt-0.5">
+        <h2 className="text-base font-black text-[#0047BA] leading-tight mt-0.5">
           Gestión del Comercio
         </h2>
       </div>
@@ -50,12 +50,12 @@ export function AdminSidebar({ activeTab, onTabChange, productCount }: AdminSide
               onClick={() => onTabChange(item.id)}
               className={`w-full flex items-center justify-between p-3 rounded-2xl text-xs font-extrabold transition-all cursor-pointer ${
                 isActive
-                  ? 'bg-[#004b87] text-white shadow-xs'
-                  : 'text-slate-700 hover:bg-slate-100 hover:text-[#004b87]'
+                  ? 'bg-gradient-to-r from-[#0047BA] to-[#002878] text-white shadow-xs'
+                  : 'text-slate-700 hover:bg-slate-100 hover:text-[#0047BA]'
               }`}
             >
               <div className="flex items-center gap-2.5">
-                <IconComponent className={`w-4 h-4 ${isActive ? 'text-[#00a859]' : 'text-slate-500'}`} />
+                <IconComponent className={`w-4 h-4 ${isActive ? 'text-[#00E5E8]' : 'text-slate-500'}`} />
                 <span>{item.label}</span>
               </div>
               {item.badge && (
@@ -71,17 +71,17 @@ export function AdminSidebar({ activeTab, onTabChange, productCount }: AdminSide
       </nav>
 
       {/* Sorteos & Beneficios Banner Card */}
-      <div className="bg-gradient-to-br from-emerald-50 to-teal-50 border border-emerald-200/60 rounded-2xl p-4 space-y-2">
-        <div className="flex items-center gap-1.5 text-xs font-black text-emerald-800">
-          <Gift className="w-4 h-4 text-[#00a859]" />
-          <span>Sorteos ON Mensual</span>
+      <div className="bg-gradient-to-br from-cyan-50 to-teal-50 border border-cyan-200/60 rounded-2xl p-4 space-y-2">
+        <div className="flex items-center gap-1.5 text-xs font-black text-[#007C8A]">
+          <Gift className="w-4 h-4 text-[#00ADB5]" />
+          <span>Sorteos ON MÁS Mensual</span>
         </div>
         <p className="text-[11px] text-slate-600 font-medium leading-relaxed">
-          Postulá un producto o voucher para salir destacado en los Sorteos ON de la provincia.
+          Postulá un producto o voucher para salir destacado en los Sorteos ON MÁS de la provincia.
         </p>
         <button
           onClick={() => onTabChange('catalog')}
-          className="text-xs font-bold text-[#00a859] hover:underline block pt-1"
+          className="text-xs font-bold text-[#00ADB5] hover:underline block pt-1"
         >
           Destacar un Producto →
         </button>

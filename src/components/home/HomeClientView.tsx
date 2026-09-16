@@ -101,11 +101,11 @@ export function HomeClientView({
         <section id="catalogo" className="space-y-6">
           <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-slate-200 pb-4">
             <div>
-              <span className="text-xs font-extrabold uppercase tracking-widest text-[#004b87] flex items-center gap-1.5">
-                <Store className="w-4 h-4 text-[#00a859]" />
-                Tienda Regional & Catálogo B2B
+              <span className="text-xs font-extrabold uppercase tracking-widest text-[#0047BA] flex items-center gap-1.5">
+                <Store className="w-4 h-4 text-[#00ADB5]" />
+                Tienda Regional & Catálogo B2B ON MÁS
               </span>
-              <h2 className="text-2xl sm:text-3xl font-extrabold text-[#004b87] tracking-tight mt-1">
+              <h2 className="text-2xl sm:text-3xl font-extrabold text-[#0047BA] tracking-tight mt-1">
                 Catálogo con Pedido Directo a WhatsApp
               </h2>
             </div>
@@ -115,10 +115,10 @@ export function HomeClientView({
               </span>
               <Link
                 href="/comercios"
-                className="bg-slate-100 hover:bg-slate-200 text-[#004b87] px-3 py-1.5 rounded-xl text-xs font-extrabold flex items-center gap-1 transition-colors"
+                className="bg-slate-100 hover:bg-slate-200 text-[#0047BA] px-3 py-1.5 rounded-xl text-xs font-extrabold flex items-center gap-1 transition-colors"
               >
                 <span>Ver Directorio Completo</span>
-                <ArrowRight className="w-3.5 h-3.5 text-[#00a859]" />
+                <ArrowRight className="w-3.5 h-3.5 text-[#00ADB5]" />
               </Link>
             </div>
           </div>
@@ -132,16 +132,16 @@ export function HomeClientView({
             </div>
           ) : (
             <div className="bg-white rounded-3xl p-12 text-center border border-slate-200 space-y-4">
-              <div className="w-12 h-12 rounded-full bg-slate-100 text-[#004b87] mx-auto flex items-center justify-center">
-                <Store className="w-6 h-6 text-[#00a859]" />
+              <div className="w-12 h-12 rounded-full bg-slate-100 text-[#0047BA] mx-auto flex items-center justify-center">
+                <Store className="w-6 h-6 text-[#00ADB5]" />
               </div>
               <h3 className="text-lg font-bold text-slate-800">No hay productos exhibidos para esta localidad por el momento</h3>
               <p className="text-sm text-slate-500 max-w-md mx-auto">
-                ¿Tenés un comercio en esta zona? Sumate como socio pionero en Entre Ríos ON.
+                ¿Tenés un comercio en esta zona? Sumate como socio pionero en Entre Ríos ON MÁS.
               </p>
               <button
                 onClick={() => setSelectedCity('all')}
-                className="bg-[#00a859] hover:bg-[#008746] text-white px-5 py-2.5 rounded-xl font-bold text-xs"
+                className="bg-gradient-to-r from-[#00ADB5] to-[#007C8A] hover:from-[#00E5E8] hover:to-[#00ADB5] text-white px-5 py-2.5 rounded-xl font-bold text-xs shadow-md"
               >
                 Ver todos los productos de Entre Ríos
               </button>
@@ -149,13 +149,13 @@ export function HomeClientView({
           )}
         </section>
 
-        {/* 4. B2B Subscription CTA Banner en colores del logo */}
-        <section id="sumar-comercio" className="relative rounded-3xl overflow-hidden bg-gradient-to-r from-[#004b87] via-[#003663] to-[#00a859] text-white p-8 sm:p-12 shadow-xl">
+        {/* 4. B2B Subscription CTA Banner en colores del logo ON MAS */}
+        <section id="sumar-comercio" className="relative rounded-3xl overflow-hidden bg-gradient-to-r from-[#002878] via-[#0047BA] to-[#00ADB5] text-white p-8 sm:p-12 shadow-xl">
           <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
             <div className="lg:col-span-8 space-y-4">
-              <div className="inline-flex items-center gap-2 bg-white/10 border border-white/20 text-emerald-300 text-xs font-extrabold px-3 py-1.5 rounded-full">
+              <div className="inline-flex items-center gap-2 bg-white/10 border border-white/20 text-[#00E5E8] text-xs font-extrabold px-3 py-1.5 rounded-full">
                 <Sparkles className="w-3.5 h-3.5" />
-                Suscripción Comercial B2B Entre Ríos ON
+                Suscripción Comercial B2B Entre Ríos ON MÁS
               </div>
               <h2 className="text-2xl sm:text-4xl font-black tracking-tight">
                 ¿Tenés un negocio, posada o taller artesanal en Entre Ríos?
@@ -166,7 +166,7 @@ export function HomeClientView({
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2">
                 <div className="flex items-center gap-2 text-xs font-bold text-slate-100">
-                  <ShieldCheck className="w-4 h-4 text-[#8cc63f]" />
+                  <ShieldCheck className="w-4 h-4 text-[#00E5E8]" />
                   <span>Perfil Verificado Regional</span>
                 </div>
                 <div className="flex items-center gap-2 text-xs font-bold text-slate-100">
@@ -174,7 +174,7 @@ export function HomeClientView({
                   <span>Sin comisión por ventas</span>
                 </div>
                 <div className="flex items-center gap-2 text-xs font-bold text-slate-100">
-                  <Zap className="w-4 h-4 text-amber-300" />
+                  <Zap className="w-4 h-4 text-[#00E5E8]" />
                   <span>Publicación Ilimitada</span>
                 </div>
               </div>
@@ -182,10 +182,10 @@ export function HomeClientView({
 
             <div className="lg:col-span-4 flex justify-start lg:justify-end">
               <a
-                href="https://wa.me/5493434567890?text=Hola%20equipo%20Entre%20R%C3%ADos%20ON,%20quiero%20sumar%20mi%20comercio%20al%20directorio."
+                href="https://wa.me/5493434567890?text=Hola%20equipo%20Entre%20R%C3%ADos%20ON%20M%C3%81S,%20quiero%20sumar%20mi%20comercio%20al%20directorio."
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-full sm:w-auto bg-[#00a859] hover:bg-[#008746] text-white px-8 py-4 rounded-2xl font-extrabold text-base shadow-xl flex items-center justify-center gap-3 transition-transform active:scale-95 text-center"
+                className="w-full sm:w-auto bg-gradient-to-r from-[#00ADB5] to-[#007C8A] hover:from-[#00E5E8] hover:to-[#00ADB5] text-white px-8 py-4 rounded-2xl font-extrabold text-base shadow-xl flex items-center justify-center gap-3 transition-transform active:scale-95 text-center"
               >
                 <MessageCircle className="w-5 h-5 fill-current" />
                 <span>Sumar Mi Negocio Ahora</span>

@@ -62,9 +62,9 @@ export function NewsManager({ events: initialEvents }: NewsManagerProps) {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-4">
         <div>
-          <h3 className="text-xl font-black text-[#004b87] flex items-center gap-2">
-            <Newspaper className="w-5 h-5 text-[#00a859]" />
-            <span>Gestión de Prensa, Comunidad ON & Agenda Cultural</span>
+          <h3 className="text-xl font-black text-[#0047BA] flex items-center gap-2">
+            <Newspaper className="w-5 h-5 text-[#00ADB5]" />
+            <span>Gestión de Prensa, Comunidad ON MÁS & Agenda Cultural</span>
           </h3>
           <p className="text-xs text-slate-500 font-medium mt-1">
             Publicá artículos, notas de enoturismo y comunicados oficiales para toda la provincia.
@@ -73,7 +73,7 @@ export function NewsManager({ events: initialEvents }: NewsManagerProps) {
 
         <button
           onClick={() => setIsModalOpen(true)}
-          className="bg-[#00a859] hover:bg-[#008746] text-white px-5 py-2.5 rounded-2xl font-extrabold text-xs shadow-md flex items-center justify-center gap-2 transition-transform active:scale-95 cursor-pointer"
+          className="bg-gradient-to-r from-[#00ADB5] to-[#007C8A] hover:from-[#00E5E8] hover:to-[#00ADB5] text-white px-5 py-2.5 rounded-2xl font-extrabold text-xs shadow-md flex items-center justify-center gap-2 transition-transform active:scale-95 cursor-pointer"
         >
           <Plus className="w-4 h-4" />
           <span>Redactar Nueva Noticia</span>
@@ -86,11 +86,11 @@ export function NewsManager({ events: initialEvents }: NewsManagerProps) {
           <div key={evt.id} className="bg-slate-50 rounded-2xl p-5 border border-slate-200 flex flex-col justify-between space-y-4">
             <div className="space-y-3">
               <div className="flex items-center justify-between">
-                <span className="bg-[#004b87] text-white text-[10px] font-extrabold px-2.5 py-0.5 rounded-md uppercase">
+                <span className="bg-[#0047BA] text-white text-[10px] font-extrabold px-2.5 py-0.5 rounded-md uppercase">
                   {evt.category}
                 </span>
                 <span className="text-[11px] font-bold text-slate-400 flex items-center gap-1">
-                  <MapPin className="w-3 h-3 text-[#00a859]" />
+                  <MapPin className="w-3 h-3 text-[#00ADB5]" />
                   {evt.cityName}
                 </span>
               </div>
@@ -122,8 +122,8 @@ export function NewsManager({ events: initialEvents }: NewsManagerProps) {
         <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
           <div className="bg-white rounded-3xl max-w-lg w-full p-6 space-y-5 shadow-2xl animate-in fade-in zoom-in-95 duration-200">
             <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-              <h3 className="text-lg font-extrabold text-[#004b87] flex items-center gap-2">
-                <Sparkles className="w-5 h-5 text-[#00a859]" />
+              <h3 className="text-lg font-extrabold text-[#0047BA] flex items-center gap-2">
+                <Sparkles className="w-5 h-5 text-[#00ADB5]" />
                 <span>Publicar Nota Editorial Provincial</span>
               </h3>
               <button onClick={() => setIsModalOpen(false)} className="p-1 text-slate-400 hover:text-slate-600">
@@ -140,7 +140,7 @@ export function NewsManager({ events: initialEvents }: NewsManagerProps) {
                   placeholder="Ej. El auge del Enoturismo en Gualeguaychú"
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
-                  className="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-2.5 text-sm text-slate-800 focus:ring-2 focus:ring-[#00a859]"
+                  className="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-2.5 text-sm text-slate-800 focus:ring-2 focus:ring-[#00ADB5]"
                 />
               </div>
 
@@ -208,7 +208,7 @@ export function NewsManager({ events: initialEvents }: NewsManagerProps) {
 
                 <button
                   type="submit"
-                  className="bg-[#00a859] hover:bg-[#008746] text-white px-6 py-2.5 rounded-xl font-extrabold text-xs shadow-md"
+                  className="bg-gradient-to-r from-[#00ADB5] to-[#007C8A] hover:from-[#00E5E8] hover:to-[#00ADB5] text-white px-6 py-2.5 rounded-xl font-extrabold text-xs shadow-md"
                 >
                   Publicar Nota en Portal
                 </button>

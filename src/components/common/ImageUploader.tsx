@@ -62,7 +62,7 @@ export function ImageUploader({ value, onChange, label = 'Imagen del Producto / 
         onDrop={handleDrop}
         className={`relative border-2 border-dashed rounded-2xl p-4 transition-all flex flex-col items-center justify-center text-center space-y-2 cursor-pointer ${
           dragActive
-            ? 'border-[#00a859] bg-emerald-50/50'
+            ? 'border-[#00ADB5] bg-cyan-50/50'
             : 'border-slate-300 bg-slate-50 hover:bg-slate-100/80'
         }`}
       >
@@ -77,14 +77,14 @@ export function ImageUploader({ value, onChange, label = 'Imagen del Producto / 
           <div className="relative w-full h-36 rounded-xl overflow-hidden bg-slate-200 border border-slate-300">
             <Image src={value} alt="Previsualización" fill className="object-cover" />
             <div className="absolute top-2 right-2 bg-slate-900/70 text-white text-[10px] font-extrabold px-2 py-1 rounded-md backdrop-blur-xs flex items-center gap-1">
-              <Check className="w-3 h-3 text-[#00a859]" />
+              <Check className="w-3 h-3 text-[#00ADB5]" />
               <span>Imagen Cargada</span>
             </div>
           </div>
         ) : (
           <>
-            <div className="p-3 rounded-full bg-white text-[#004b87] shadow-sm">
-              <Upload className="w-5 h-5 text-[#00a859]" />
+            <div className="p-3 rounded-full bg-white text-[#0047BA] shadow-sm">
+              <Upload className="w-5 h-5 text-[#00ADB5]" />
             </div>
             <div>
               <p className="text-xs font-bold text-slate-800">
@@ -108,7 +108,7 @@ export function ImageUploader({ value, onChange, label = 'Imagen del Producto / 
                 onClick={() => onChange(opt.url)}
                 className={`py-1.5 px-2 rounded-xl text-[11px] font-bold text-left truncate transition-colors border cursor-pointer ${
                   value === opt.url
-                    ? 'bg-[#004b87] text-white border-[#004b87]'
+                    ? 'bg-[#0047BA] text-white border-[#0047BA]'
                     : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-100'
                 }`}
               >

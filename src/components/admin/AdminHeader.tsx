@@ -22,8 +22,8 @@ export function AdminHeader({ commerceName, commerceSlug, cityName }: AdminHeade
             <Link href="/" className="flex items-center gap-2">
               <div className="relative w-32 h-10">
                 <Image
-                  src="/logo.jpeg"
-                  alt="Entre Ríos ON"
+                  src="/logo.png"
+                  alt="Entre Ríos ON MÁS"
                   fill
                   className="object-contain object-left brightness-200"
                 />
@@ -33,10 +33,10 @@ export function AdminHeader({ commerceName, commerceSlug, cityName }: AdminHeade
             <span className="hidden md:inline-block h-6 w-px bg-slate-700" />
 
             <div className="hidden sm:flex items-center gap-2 bg-slate-800 border border-slate-700 px-3 py-1 rounded-xl text-xs">
-              <Store className="w-3.5 h-3.5 text-[#00a859]" />
+              <Store className="w-3.5 h-3.5 text-[#00ADB5]" />
               <span className="font-extrabold text-slate-100">{commerceName}</span>
               <span className="text-slate-400">({cityName})</span>
-              <ShieldCheck className="w-3.5 h-3.5 text-[#00a859]" />
+              <ShieldCheck className="w-3.5 h-3.5 text-[#00ADB5]" />
             </div>
           </div>
 
@@ -45,7 +45,7 @@ export function AdminHeader({ commerceName, commerceSlug, cityName }: AdminHeade
             <Link
               href={`/comercio/${commerceSlug}`}
               target="_blank"
-              className="bg-[#00a859] hover:bg-[#008746] text-white px-3.5 py-1.5 rounded-xl text-xs font-extrabold flex items-center gap-1.5 transition-all shadow-xs"
+              className="bg-gradient-to-r from-[#00ADB5] to-[#007C8A] hover:from-[#00E5E8] hover:to-[#00ADB5] text-white px-3.5 py-1.5 rounded-xl text-xs font-extrabold flex items-center gap-1.5 transition-all shadow-xs"
             >
               <span>Ver Perfil Público</span>
               <ExternalLink className="w-3.5 h-3.5" />
@@ -56,16 +56,16 @@ export function AdminHeader({ commerceName, commerceSlug, cityName }: AdminHeade
               title="Notificaciones de Consultas"
             >
               <Bell className="w-4 h-4" />
-              <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-[#00a859] animate-pulse" />
+              <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-[#00E5E8] animate-pulse" />
             </button>
 
             <div className="flex items-center gap-2 pl-2 border-l border-slate-800">
-              <div className="w-8 h-8 rounded-full bg-[#004b87] text-white flex items-center justify-center font-bold text-xs">
+              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#0047BA] to-[#002878] text-white flex items-center justify-center font-bold text-xs shadow-xs">
                 ED
               </div>
               <div className="hidden lg:block text-left text-xs">
                 <p className="font-extrabold leading-none text-slate-200">Admin Delta</p>
-                <p className="text-[10px] text-emerald-400 font-semibold mt-0.5">Socio Verificado</p>
+                <p className="text-[10px] text-cyan-400 font-semibold mt-0.5">Socio Verificado</p>
               </div>
             </div>
           </div>

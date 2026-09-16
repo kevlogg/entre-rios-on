@@ -69,7 +69,7 @@ export function HeroSlider({ slides, featuredCommerce, weekendEvent }: HeroSlide
         
         {/* Left/Center: Editorial Hero Banner Slider (8 Cols) */}
         <div 
-          className="lg:col-span-8 relative rounded-3xl overflow-hidden shadow-md border border-slate-200 min-h-[400px] sm:min-h-[460px] flex flex-col justify-between group focus:outline-hidden focus:ring-4 focus:ring-[#004b87]"
+          className="lg:col-span-8 relative rounded-3xl overflow-hidden shadow-md border border-slate-200 min-h-[400px] sm:min-h-[460px] flex flex-col justify-between group focus:outline-hidden focus:ring-4 focus:ring-[#0047BA]"
           onMouseEnter={() => setIsPlaying(false)}
           onMouseLeave={() => setIsPlaying(true)}
           onKeyDown={handleKeyDown}
@@ -95,20 +95,20 @@ export function HeroSlider({ slides, featuredCommerce, weekendEvent }: HeroSlide
                 sizes="(max-width: 1024px) 100vw, 66vw"
                 className="object-cover object-center transform scale-102 group-hover:scale-100 transition-transform duration-1000"
               />
-              {/* Clean Editorial Light/Dark Natural Gradient */}
-              <div className="absolute inset-0 bg-gradient-to-t from-[#004b87]/90 via-[#004b87]/40 to-transparent" />
+              {/* Clean Editorial Gradient with Deep Navy/Cobalt Overlay */}
+              <div className="absolute inset-0 bg-gradient-to-t from-[#002878]/95 via-[#0047BA]/50 to-transparent" />
             </div>
           ))}
 
           {/* Top Floating Badge & Autoplay Control */}
           <div className="relative z-20 p-6 flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <span className="inline-flex items-center gap-1.5 bg-[#00a859] text-white text-xs font-extrabold px-3.5 py-1.5 rounded-full shadow-md uppercase tracking-wider">
-                <Sparkles className="w-3.5 h-3.5 text-amber-200" />
+              <span className="inline-flex items-center gap-1.5 bg-gradient-to-r from-[#00ADB5] to-[#007C8A] text-white text-xs font-extrabold px-3.5 py-1.5 rounded-full shadow-md uppercase tracking-wider">
+                <Sparkles className="w-3.5 h-3.5 text-[#00E5E8]" />
                 {activeSlide.badgeText}
               </span>
               <span className="hidden sm:inline-flex items-center gap-1 bg-black/40 backdrop-blur-md text-white text-xs font-semibold px-3 py-1 rounded-full">
-                <MapPin className="w-3.5 h-3.5 text-[#8cc63f]" />
+                <MapPin className="w-3.5 h-3.5 text-[#00E5E8]" />
                 {activeSlide.cityTag}
               </span>
             </div>
@@ -128,7 +128,7 @@ export function HeroSlider({ slides, featuredCommerce, weekendEvent }: HeroSlide
             <div className="flex flex-wrap items-center justify-between gap-4 pt-2">
               <Link
                 href={activeSlide.ctaUrl}
-                className="inline-flex items-center gap-2 bg-[#00a859] hover:bg-[#008746] text-white px-6 py-3 rounded-2xl font-extrabold text-sm shadow-lg transition-all transform hover:scale-105 active:scale-95"
+                className="inline-flex items-center gap-2 bg-gradient-to-r from-[#00ADB5] via-[#007C8A] to-[#0047BA] hover:from-[#00E5E8] hover:to-[#0B66FF] text-white px-6 py-3 rounded-2xl font-extrabold text-sm shadow-lg transition-all transform hover:scale-105 active:scale-95"
               >
                 <span>{activeSlide.ctaText}</span>
                 <ArrowRight className="w-4 h-4" />
@@ -150,7 +150,7 @@ export function HeroSlider({ slides, featuredCommerce, weekendEvent }: HeroSlide
                       key={idx}
                       onClick={() => setCurrentIndex(idx)}
                       className={`h-2 rounded-full transition-all duration-300 ${
-                        idx === currentIndex ? 'w-6 bg-[#00a859]' : 'w-2 bg-white/50 hover:bg-white/80'
+                        idx === currentIndex ? 'w-6 bg-[#00E5E8]' : 'w-2 bg-white/50 hover:bg-white/80'
                       }`}
                       aria-label={`Ir a la diapositiva ${idx + 1}`}
                     />
@@ -183,12 +183,12 @@ export function HeroSlider({ slides, featuredCommerce, weekendEvent }: HeroSlide
                 className="object-cover group-hover:scale-105 transition-transform duration-500"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
-              <div className="absolute top-3 left-3 bg-[#00a859] text-white text-[11px] font-extrabold uppercase px-2.5 py-1 rounded-lg flex items-center gap-1 shadow-md">
+              <div className="absolute top-3 left-3 bg-gradient-to-r from-[#00ADB5] to-[#007C8A] text-white text-[11px] font-extrabold uppercase px-2.5 py-1 rounded-lg flex items-center gap-1 shadow-md">
                 <Award className="w-3.5 h-3.5" />
                 Comercio de la Semana
               </div>
               <div className="absolute bottom-3 left-3 right-3 text-white">
-                <span className="text-xs text-emerald-300 font-semibold">{featuredCommerce.category}</span>
+                <span className="text-xs text-cyan-300 font-semibold">{featuredCommerce.category}</span>
                 <h3 className="text-base font-bold line-clamp-1">{featuredCommerce.name}</h3>
               </div>
             </div>
@@ -198,13 +198,13 @@ export function HeroSlider({ slides, featuredCommerce, weekendEvent }: HeroSlide
                 {featuredCommerce.description}
               </p>
               <div className="flex items-center justify-between pt-2 border-t border-slate-100">
-                <span className="text-xs font-bold text-[#004b87] flex items-center gap-1">
-                  <MapPin className="w-3.5 h-3.5 text-[#00a859]" />
+                <span className="text-xs font-bold text-[#0047BA] flex items-center gap-1">
+                  <MapPin className="w-3.5 h-3.5 text-[#00ADB5]" />
                   {featuredCommerce.cityName}
                 </span>
                 <Link
                   href="#catalogo"
-                  className="text-xs font-extrabold text-[#00a859] hover:underline flex items-center gap-1"
+                  className="text-xs font-extrabold text-[#00ADB5] hover:underline flex items-center gap-1"
                 >
                   <span>Ver Catálogo</span>
                   <ExternalLink className="w-3 h-3" />
@@ -224,7 +224,7 @@ export function HeroSlider({ slides, featuredCommerce, weekendEvent }: HeroSlide
                 className="object-cover group-hover:scale-105 transition-transform duration-500"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
-              <div className="absolute top-3 left-3 bg-[#004b87] text-white text-[11px] font-extrabold uppercase px-2.5 py-1 rounded-lg flex items-center gap-1 shadow-md">
+              <div className="absolute top-3 left-3 bg-gradient-to-r from-[#0047BA] to-[#002878] text-white text-[11px] font-extrabold uppercase px-2.5 py-1 rounded-lg flex items-center gap-1 shadow-md">
                 <Calendar className="w-3.5 h-3.5" />
                 Agenda del Finde
               </div>
@@ -244,7 +244,7 @@ export function HeroSlider({ slides, featuredCommerce, weekendEvent }: HeroSlide
                 </span>
                 <Link
                   href="#comunidad"
-                  className="text-xs font-extrabold text-[#004b87] hover:underline flex items-center gap-1"
+                  className="text-xs font-extrabold text-[#0047BA] hover:underline flex items-center gap-1"
                 >
                   <span>Leer Noticia</span>
                   <ArrowRight className="w-3 h-3" />
