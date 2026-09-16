@@ -68,10 +68,16 @@ export default function ClasificadosPage() {
         </div>
 
         {/* Notice Banner: No Car Publishing - Redirect to Sitio Automotor Partner */}
-        <div className="bg-gradient-to-r from-slate-900 via-[#002878] to-[#0047BA] rounded-3xl p-6 sm:p-8 text-white border border-slate-700 shadow-xl flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
-          <div className="flex items-start gap-4">
-            <div className="p-3 bg-[#00ADB5]/20 rounded-2xl text-[#00E5E8] shrink-0 border border-[#00E5E8]/30">
-              <Car className="w-7 h-7" />
+        <div className="bg-gradient-to-r from-slate-900 via-[#002878] to-[#0047BA] rounded-3xl p-6 sm:p-8 text-white border border-slate-700 shadow-xl flex flex-col md:flex-row items-center justify-between gap-6">
+          <div className="flex flex-col sm:flex-row items-center gap-5 text-center sm:text-left">
+            {/* Logo Sitio Automotor centrado verticalmente en la card */}
+            <div className="relative w-36 h-20 sm:w-44 sm:h-24 bg-white/10 backdrop-blur-xs rounded-2xl p-2 shrink-0 border border-white/20 flex items-center justify-center shadow-md">
+              <Image
+                src="/logosa.png"
+                alt="Sitio Automotor Logo"
+                fill
+                className="object-contain p-2"
+              />
             </div>
             <div className="space-y-1.5">
               <div className="inline-flex items-center gap-1.5 bg-amber-400/20 border border-amber-300/40 text-amber-300 text-[11px] font-extrabold px-3 py-0.5 rounded-full uppercase tracking-wider">
@@ -91,7 +97,7 @@ export default function ClasificadosPage() {
             href="https://sitio-automotor.vercel.app/"
             target="_blank"
             rel="noopener noreferrer"
-            className="bg-gradient-to-r from-[#00E5E8] to-[#00ADB5] hover:from-[#00ADB5] hover:to-[#007C8A] text-slate-950 px-6 py-3.5 rounded-2xl font-extrabold text-xs shadow-xl shrink-0 transition-transform active:scale-95 text-center flex items-center gap-2"
+            className="bg-gradient-to-r from-[#00E5E8] to-[#00ADB5] hover:from-[#00ADB5] hover:to-[#007C8A] text-slate-950 px-6 py-3.5 rounded-2xl font-extrabold text-xs shadow-xl shrink-0 transition-transform active:scale-95 text-center flex items-center gap-2 cursor-pointer"
           >
             <span>Ir a Sitio Automotor</span>
             <ExternalLink className="w-4 h-4" />

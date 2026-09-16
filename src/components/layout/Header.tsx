@@ -59,11 +59,11 @@ export function Header({ selectedCityId = 'all' }: HeaderProps) {
   const navLinks = [
     { name: 'Inicio', href: '/' },
     { name: 'Comercios Adheridos', href: '/comercios' },
-    { name: 'Catálogo & Ofertas', href: '#catalogo' },
+    { name: 'Catálogo & Ofertas', href: '/catalogo' },
     { name: 'Sorteos ON MÁS', href: '/sorteos' },
     { name: 'Clasificados', href: '/clasificados' },
-    { name: 'Comunidad', href: '/#comunidad' },
-    { name: 'Turismo', href: '/comercios?category=Turismo' },
+    { name: 'Comunidad', href: '/comunidad' },
+    { name: 'Turismo', href: '/turismo' },
   ];
 
   return (

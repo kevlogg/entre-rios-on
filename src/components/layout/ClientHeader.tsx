@@ -54,15 +54,15 @@ export function ClientHeader() {
     }
   };
 
-  // Navigation links including Comunidad and Turismo
+  // Navigation links leading to dedicated URLs for every menu option
   const navLinks: { name: string; href: string }[] = [
     { name: 'Inicio', href: '/' },
     { name: 'Comercios Adheridos', href: '/comercios' },
-    { name: 'Catálogo & Ofertas', href: '#catalogo' },
+    { name: 'Catálogo & Ofertas', href: '/catalogo' },
     { name: 'Sorteos ON MÁS', href: '/sorteos' },
     { name: 'Clasificados', href: '/clasificados' },
-    { name: 'Comunidad', href: '/#comunidad' },
-    { name: 'Turismo', href: '/comercios?category=Turismo' },
+    { name: 'Comunidad', href: '/comunidad' },
+    { name: 'Turismo', href: '/turismo' },
   ];
 
   return (

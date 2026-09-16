@@ -62,32 +62,35 @@ export default function NuevoClasificadoPage() {
         </div>
 
         {/* Warning Alert: No Car Publishing - Redirect to Sitio Automotor Partner */}
-        <div className="bg-gradient-to-r from-amber-500/10 via-amber-50 to-orange-50 border border-amber-300/80 rounded-3xl p-6 text-slate-800 space-y-3 shadow-xs">
-          <div className="flex items-start gap-3">
-            <div className="p-2.5 bg-amber-500/20 text-amber-700 rounded-2xl shrink-0">
-              <Car className="w-6 h-6" />
+        <div className="bg-gradient-to-r from-amber-500/10 via-amber-50 to-orange-50 border border-amber-300/80 rounded-3xl p-6 text-slate-800 shadow-xs flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="flex flex-col sm:flex-row items-center gap-4 text-center sm:text-left">
+            <div className="relative w-32 h-16 bg-white/80 rounded-2xl p-2 shrink-0 border border-amber-200 flex items-center justify-center shadow-xs">
+              <Image
+                src="/logosa.png"
+                alt="Sitio Automotor Logo"
+                fill
+                className="object-contain p-1"
+              />
             </div>
             <div className="space-y-1">
-              <h2 className="text-base font-extrabold text-amber-900 flex items-center gap-1.5">
+              <h2 className="text-base font-extrabold text-amber-900 flex items-center gap-1.5 justify-center sm:justify-start">
                 <span>¿Buscás publicar un Auto o Vehículo?</span>
               </h2>
-              <p className="text-xs text-amber-800 leading-relaxed font-medium">
-                Por políticas de la plataforma, <strong>no se permite publicar autos en Clasificados ON</strong>. La publicación de vehículos se realiza únicamente a través de nuestro sitio socio comercial especializado <strong>Sitio Automotor</strong>.
+              <p className="text-xs text-amber-800 leading-relaxed font-medium max-w-xl">
+                Por políticas de la plataforma, <strong>no se permite publicar autos en Clasificados ON</strong>. La publicación de vehículos se realiza únicamente a través de nuestro portal socio comercial especializado <strong>Sitio Automotor</strong>.
               </p>
             </div>
           </div>
 
-          <div className="pt-2 flex justify-end">
-            <a
-              href="https://sitio-automotor.vercel.app/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="bg-amber-600 hover:bg-amber-700 text-white px-5 py-2.5 rounded-xl font-extrabold text-xs flex items-center gap-2 shadow-sm transition-transform active:scale-95 cursor-pointer"
-            >
-              <span>Publicar mi Auto en Sitio Automotor</span>
-              <ExternalLink className="w-3.5 h-3.5" />
-            </a>
-          </div>
+          <a
+            href="https://sitio-automotor.vercel.app/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="bg-amber-600 hover:bg-amber-700 text-white px-5 py-2.5 rounded-xl font-extrabold text-xs flex items-center gap-2 shadow-sm transition-transform active:scale-95 cursor-pointer shrink-0 whitespace-nowrap"
+          >
+            <span>Publicar mi Auto en Sitio Automotor</span>
+            <ExternalLink className="w-3.5 h-3.5" />
+          </a>
         </div>
 
         {/* Page Form Card */}
