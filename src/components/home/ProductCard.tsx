@@ -22,7 +22,7 @@ export function ProductCard({ product }: ProductCardProps) {
   };
 
   const handleWhatsAppClick = (e: React.MouseEvent) => {
-    // 1. Dispatch analytics tracking in snake_case
+    // 1. Dispatch analytics tracking
     trackWhatsAppClick(
       product.id,
       product.commerceId,
@@ -30,17 +30,15 @@ export function ProductCard({ product }: ProductCardProps) {
       product.commerceName
     );
 
-    // 2. Generate official WhatsApp wa.me URL
-    const cleanPhone = product.phoneWhatsApp.replace(/[^\d]/g, '');
+    // 2. Generate tracking API URL
     const defaultMsg = product.whatsappMessageCustom 
       ? product.whatsappMessageCustom 
       : `Hola ${product.commerceName}, encontré su producto "${product.title}" en el portal Entre Ríos ON y me gustaría realizar una consulta.`;
 
-    const encodedMsg = encodeURIComponent(defaultMsg);
-    const waUrl = `https://wa.me/${cleanPhone}?text=${encodedMsg}`;
+    const trackingUrl = `/api/lead/whatsapp?phone=${encodeURIComponent(product.phoneWhatsApp)}&message=${encodeURIComponent(defaultMsg)}&commerceId=${encodeURIComponent(product.commerceId)}&productId=${encodeURIComponent(product.id)}&cityId=${encodeURIComponent(product.cityId)}`;
 
-    // 3. Open WhatsApp target
-    window.open(waUrl, '_blank', 'noopener,noreferrer');
+    // 3. Open target with tracking
+    window.open(trackingUrl, '_blank', 'noopener,noreferrer');
   };
 
   const commerceSlug = product.commerceId === 'c1' ? 'alfareria-ceramica-delta'

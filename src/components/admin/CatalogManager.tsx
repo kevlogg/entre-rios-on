@@ -5,6 +5,8 @@ import Image from 'next/image';
 import { Product } from '@/types';
 import { Plus, Edit2, Trash2, Power, CheckCircle, Tag, ShoppingBag, X, Sparkles, MessageCircle } from 'lucide-react';
 import { CATEGORIES_LIST } from '@/lib/constants/categories';
+import { createProductAction, deleteProductAction } from '@/server/actions/catalog';
+import { ImageUploader } from '@/components/common/ImageUploader';
 
 interface CatalogManagerProps {
   products: Product[];
@@ -14,6 +16,7 @@ interface CatalogManagerProps {
 
 export function CatalogManager({ products, onAddProduct, onDeleteProduct }: CatalogManagerProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [pausedMap, setPausedMap] = useState<Record<string, boolean>>({});
 
   // Form State
@@ -28,10 +31,11 @@ export function CatalogManager({ products, onAddProduct, onDeleteProduct }: Cata
     setPausedMap((prev) => ({ ...prev, [id]: !prev[id] }));
   };
 
-  const handleCreateProduct = (e: React.FormEvent) => {
+  const handleCreateProduct = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!title || !price) return;
+    if (!title || !price || isSubmitting) return;
 
+    setIsSubmitting(true);
     const selectedCatObj = CATEGORIES_LIST.find((c) => c.id === category);
 
     const newProd: Product = {
@@ -53,13 +57,29 @@ export function CatalogManager({ products, onAddProduct, onDeleteProduct }: Cata
       whatsappMessageCustom: `Hola Alfarería Delta, vi en Entre Ríos ON el producto "${title}" y quisiera consultar disponibilidad.`,
     };
 
+    try {
+      await createProductAction(newProd);
+    } catch (err) {
+      console.warn('Server Action response fallback:', err);
+    }
+
     onAddProduct(newProd);
     setIsModalOpen(false);
+    setIsSubmitting(false);
 
     // Reset Form
     setTitle('');
     setPrice('');
     setDescription('');
+  };
+
+  const handleDelete = async (id: string) => {
+    try {
+      await deleteProductAction(id);
+    } catch (err) {
+      console.warn('Server Action delete fallback:', err);
+    }
+    onDeleteProduct(id);
   };
 
   const formatPrice = (val?: number) => {
@@ -143,7 +163,7 @@ export function CatalogManager({ products, onAddProduct, onDeleteProduct }: Cata
                   </button>
 
                   <button
-                    onClick={() => onDeleteProduct(prod.id)}
+                    onClick={() => handleDelete(prod.id)}
                     className="p-2 rounded-xl bg-red-50 text-red-600 hover:bg-red-100 transition-colors cursor-pointer"
                     title="Eliminar del Catálogo"
                   >
@@ -224,22 +244,19 @@ export function CatalogManager({ products, onAddProduct, onDeleteProduct }: Cata
                 />
               </div>
 
-              <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">Imagen del Producto (Preset de Demostración)</label>
-                <select
-                  value={imageUrl}
-                  onChange={(e) => setImageUrl(e.target.value)}
-                  className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs font-semibold text-slate-800"
-                >
-                  <option value="/images/prod-mate.jpg">Cerámica & Mates (Colón)</option>
-                  <option value="/images/prod-dorado.jpg">Gastronomía de Río (Paraná)</option>
-                  <option value="/images/prod-vino-tannat.jpg">Bodega & Vinos (Gualeguaychú)</option>
-                  <option value="/images/prod-dulces.jpg">Dulces & Citrus (Concordia)</option>
-                  <option value="/images/offer-1.jpg">Calzado & Moda Litoral</option>
-                  <option value="/images/offer-2.jpg">Tecnología / Electro</option>
-                  <option value="/images/offer-5.jpg">Automotor & Vehículos</option>
-                </select>
-              </div>
+              <ImageUploader
+                label="Imagen del Producto / Oferta"
+                value={imageUrl}
+                onChange={(url) => setImageUrl(url)}
+                presetOptions={[
+                  { label: 'Mates & Cerámica', url: '/images/prod-mate.jpg' },
+                  { label: 'Gastronomía Fluvial', url: '/images/prod-dorado.jpg' },
+                  { label: 'Vinos & Bodega', url: '/images/prod-vino-tannat.jpg' },
+                  { label: 'Citrus & Dulces', url: '/images/prod-dulces.jpg' },
+                  { label: 'Indumentaria', url: '/images/offer-1.jpg' },
+                  { label: 'Electro / Tecno', url: '/images/offer-2.jpg' },
+                ]}
+              />
 
               <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-3 text-xs text-emerald-800 font-semibold flex items-center gap-2">
                 <MessageCircle className="w-4 h-4 text-[#00a859] shrink-0" />

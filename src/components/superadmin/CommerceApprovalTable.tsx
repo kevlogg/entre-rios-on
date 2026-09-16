@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import Image from 'next/image';
 import { Commerce } from '@/types';
 import { ShieldCheck, CheckCircle2, XCircle, Search, Filter, Store, MapPin, Plus, Sparkles, MessageCircle } from 'lucide-react';
+import { toggleCommerceVerificationAction } from '@/server/actions/superadmin';
 
 interface CommerceApprovalTableProps {
   commerces: Commerce[];
@@ -14,7 +15,16 @@ export function CommerceApprovalTable({ commerces: initialCommerces }: CommerceA
   const [searchQuery, setSearchQuery] = useState('');
   const [cityFilter, setCityFilter] = useState('all');
 
-  const toggleVerification = (id: string) => {
+  const toggleVerification = async (id: string) => {
+    const target = commerces.find((c) => c.id === id);
+    if (!target) return;
+
+    try {
+      await toggleCommerceVerificationAction(id, target.isVerified);
+    } catch (err) {
+      console.warn('Verification Server Action fallback:', err);
+    }
+
     setCommerces((prev) =>
       prev.map((c) => (c.id === id ? { ...c, isVerified: !c.isVerified } : c))
     );

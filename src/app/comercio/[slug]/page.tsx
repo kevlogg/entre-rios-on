@@ -1,3 +1,4 @@
+import { Metadata } from 'next';
 import React from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -5,11 +6,31 @@ import { notFound } from 'next/navigation';
 import { getCommerceBySlug, getProductsByCommerce } from '@/lib/dal/portal';
 import { MapPin, CheckCircle, MessageCircle, ArrowLeft, Store, ShieldCheck, Tag } from 'lucide-react';
 import { DynamicLayoutWrapper } from '@/components/layout/DynamicLayoutWrapper';
+import { JsonLd } from '@/components/common/JsonLd';
 
 export const revalidate = 60;
 
 interface PageProps {
   params: Promise<{ slug: string }>;
+}
+
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const { slug } = await params;
+  const commerce = await getCommerceBySlug(slug);
+
+  if (!commerce) {
+    return { title: 'Comercio no encontrado | Entre Ríos ON' };
+  }
+
+  return {
+    title: `${commerce.name} - ${commerce.category} en ${commerce.cityName} | Entre Ríos ON`,
+    description: commerce.description,
+    openGraph: {
+      title: `${commerce.name} - ${commerce.cityName}`,
+      description: commerce.description,
+      images: [{ url: commerce.logoUrl }],
+    },
+  };
 }
 
 export default async function CommerceDetailPage({ params }: PageProps) {
@@ -22,8 +43,30 @@ export default async function CommerceDetailPage({ params }: PageProps) {
 
   const products = await getProductsByCommerce(commerce.id);
 
+  const jsonLdData = {
+    '@context': 'https://schema.org',
+    '@type': 'LocalBusiness',
+    name: commerce.name,
+    description: commerce.description,
+    image: commerce.logoUrl,
+    telephone: commerce.phoneWhatsApp,
+    address: {
+      '@type': 'PostalAddress',
+      streetAddress: commerce.address,
+      addressLocality: commerce.cityName,
+      addressRegion: 'Entre Ríos',
+      addressCountry: 'AR',
+    },
+    aggregateRating: commerce.rating ? {
+      '@type': 'AggregateRating',
+      ratingValue: commerce.rating,
+      reviewCount: commerce.reviewCount || 1,
+    } : undefined,
+  };
+
   return (
     <DynamicLayoutWrapper>
+      <JsonLd data={jsonLdData} />
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 w-full">
         {/* Breadcrumb Navigation */}
         <div className="flex items-center gap-2 text-xs font-bold text-slate-500">

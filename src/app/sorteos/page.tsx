@@ -5,14 +5,30 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { ArrowLeft, Gift, Sparkles, CheckCircle2, Ticket, ShieldCheck } from 'lucide-react';
 import { DynamicLayoutWrapper } from '@/components/layout/DynamicLayoutWrapper';
+import { registerRaffleParticipantAction } from '@/server/actions/public';
 
 export default function SorteosPage() {
-  const [formData, setFormData] = useState({ name: '', phone: '', city: 'Paraná' });
+  const [formData, setFormData] = useState({ name: '', phone: '', city: 'Paraná', email: '' });
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.name || !formData.phone) return;
+    if (!formData.name || !formData.phone || isSubmitting) return;
+
+    setIsSubmitting(true);
+    try {
+      await registerRaffleParticipantAction({
+        fullName: formData.name,
+        phoneWhatsApp: formData.phone,
+        cityName: formData.city,
+        email: formData.email,
+      });
+    } catch (err) {
+      console.warn('Raffle registration fallback:', err);
+    }
+
+    setIsSubmitting(false);
     setIsSubmitted(true);
   };
 

@@ -1,3 +1,4 @@
+import { Metadata } from 'next';
 import React from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -5,11 +6,31 @@ import { notFound } from 'next/navigation';
 import { getProductBySlug, getCommerceBySlug } from '@/lib/dal/portal';
 import { MapPin, CheckCircle, MessageCircle, ArrowLeft, ShieldCheck, Tag, Share2, Store } from 'lucide-react';
 import { DynamicLayoutWrapper } from '@/components/layout/DynamicLayoutWrapper';
+import { JsonLd } from '@/components/common/JsonLd';
 
 export const revalidate = 60;
 
 interface PageProps {
   params: Promise<{ slug: string }>;
+}
+
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const { slug } = await params;
+  const product = await getProductBySlug(slug);
+
+  if (!product) {
+    return { title: 'Producto no encontrado | Entre Ríos ON' };
+  }
+
+  return {
+    title: `${product.title} - ${product.commerceName} (${product.cityName}) | Entre Ríos ON`,
+    description: product.description,
+    openGraph: {
+      title: product.title,
+      description: product.description,
+      images: [{ url: product.imageUrl }],
+    },
+  };
 }
 
 export default async function ProductDetailPage({ params }: PageProps) {
@@ -26,10 +47,30 @@ export default async function ProductDetailPage({ params }: PageProps) {
   const waMsg = product.whatsappMessageCustom 
     ? product.whatsappMessageCustom 
     : `Hola ${product.commerceName}, vi en el portal Entre Ríos ON su producto "${product.title}" y me gustaría comprarlo / realizar una consulta.`;
-  const waUrl = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(waMsg)}`;
+  
+  const trackingUrl = `/api/lead/whatsapp?phone=${encodeURIComponent(cleanPhone)}&message=${encodeURIComponent(waMsg)}&commerceId=${encodeURIComponent(product.commerceId)}&productId=${encodeURIComponent(product.id)}&cityId=${encodeURIComponent(product.cityId)}`;
+
+  const jsonLdData = {
+    '@context': 'https://schema.org',
+    '@type': 'Product',
+    name: product.title,
+    description: product.description,
+    image: product.imageUrl,
+    offers: {
+      '@type': 'Offer',
+      price: product.price || 0,
+      priceCurrency: product.currency || 'ARS',
+      availability: 'https://schema.org/InStock',
+      seller: {
+        '@type': 'Organization',
+        name: product.commerceName,
+      },
+    },
+  };
 
   return (
     <DynamicLayoutWrapper>
+      <JsonLd data={jsonLdData} />
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 w-full">
         {/* Breadcrumb Navigation */}
         <div className="flex items-center gap-2 text-xs font-bold text-slate-500">
@@ -114,7 +155,7 @@ export default async function ProductDetailPage({ params }: PageProps) {
               {/* Action Buttons */}
               <div className="space-y-3 pt-2">
                 <a
-                  href={waUrl}
+                  href={trackingUrl}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="w-full bg-[#25D366] hover:bg-[#20ba5a] text-white py-4 px-6 rounded-2xl font-extrabold text-base flex items-center justify-center gap-3 shadow-lg transition-transform active:scale-95 text-center"

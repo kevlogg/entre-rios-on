@@ -1,3 +1,4 @@
+import { Metadata } from 'next';
 import React from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -5,11 +6,31 @@ import { notFound } from 'next/navigation';
 import { getCityBySlug, getFeaturedProducts, getUpcomingEvents, getAllCommerces } from '@/lib/dal/portal';
 import { MapPin, Store, Calendar, ArrowLeft, Tag } from 'lucide-react';
 import { DynamicLayoutWrapper } from '@/components/layout/DynamicLayoutWrapper';
+import { JsonLd } from '@/components/common/JsonLd';
 
 export const revalidate = 60;
 
 interface PageProps {
   params: Promise<{ slug: string }>;
+}
+
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const { slug } = await params;
+  const city = await getCityBySlug(slug);
+
+  if (!city) {
+    return { title: 'Ciudad no encontrada | Entre Ríos ON' };
+  }
+
+  return {
+    title: `${city.name} - Comercios, Turismo y Guía Provincial | Entre Ríos ON`,
+    description: city.description,
+    openGraph: {
+      title: `${city.name} - Portal Entre Ríos ON`,
+      description: city.description,
+      images: [{ url: city.imageUrl }],
+    },
+  };
 }
 
 export default async function CityDetailPage({ params }: PageProps) {
@@ -28,8 +49,25 @@ export default async function CityDetailPage({ params }: PageProps) {
 
   const cityCommerces = commerces.filter((c) => c.cityId.toLowerCase() === city.id.toLowerCase());
 
+  const jsonLdData = {
+    '@context': 'https://schema.org',
+    '@type': 'AdministrativeArea',
+    name: city.name,
+    description: city.description,
+    containedInPlace: {
+      '@type': 'State',
+      name: 'Entre Ríos',
+      containedInPlace: {
+        '@type': 'Country',
+        name: 'Argentina',
+      },
+    },
+    image: city.imageUrl,
+  };
+
   return (
     <DynamicLayoutWrapper selectedCityId={city.id}>
+      <JsonLd data={jsonLdData} />
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-10 w-full">
         {/* Breadcrumb Navigation */}
         <div className="flex items-center gap-2 text-xs font-bold text-slate-500">

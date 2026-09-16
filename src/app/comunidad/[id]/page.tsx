@@ -1,3 +1,4 @@
+import { Metadata } from 'next';
 import React from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -5,11 +6,31 @@ import { notFound } from 'next/navigation';
 import { getEventById } from '@/lib/dal/portal';
 import { Calendar, MapPin, Clock, ArrowLeft, Share2, Newspaper } from 'lucide-react';
 import { DynamicLayoutWrapper } from '@/components/layout/DynamicLayoutWrapper';
+import { JsonLd } from '@/components/common/JsonLd';
 
 export const revalidate = 60;
 
 interface PageProps {
   params: Promise<{ id: string }>;
+}
+
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const { id } = await params;
+  const article = await getEventById(id);
+
+  if (!article) {
+    return { title: 'Noticia no encontrada | Entre Ríos ON' };
+  }
+
+  return {
+    title: `${article.title} | Entre Ríos ON Comunidad`,
+    description: article.excerpt,
+    openGraph: {
+      title: article.title,
+      description: article.excerpt,
+      images: [{ url: article.imageUrl }],
+    },
+  };
 }
 
 export default async function ArticleDetailPage({ params }: PageProps) {
@@ -20,8 +41,26 @@ export default async function ArticleDetailPage({ params }: PageProps) {
     notFound();
   }
 
+  const jsonLdData = {
+    '@context': 'https://schema.org',
+    '@type': 'NewsArticle',
+    headline: article.title,
+    description: article.excerpt,
+    image: [article.imageUrl],
+    datePublished: article.date,
+    author: {
+      '@type': 'Person',
+      name: article.author.name,
+    },
+    publisher: {
+      '@type': 'Organization',
+      name: 'Entre Ríos ON',
+    },
+  };
+
   return (
     <DynamicLayoutWrapper>
+      <JsonLd data={jsonLdData} />
       <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 w-full">
         {/* Breadcrumb Navigation */}
         <div className="flex items-center gap-2 text-xs font-bold text-slate-500">

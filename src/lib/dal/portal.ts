@@ -550,22 +550,129 @@ const simulateNetworkDelay = async (ms: number = 30): Promise<void> => {
   return new Promise((resolve) => setTimeout(resolve, ms));
 };
 
+function isSupabaseConfigured(): boolean {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  return Boolean(url && url.startsWith('http') && !url.includes('your-supabase-project'));
+}
+
 export async function getCities(): Promise<City[]> {
+  if (isSupabaseConfigured()) {
+    try {
+      const { createClient } = await import('@/lib/supabase/server');
+      const supabase = await createClient();
+      const { data, error } = await supabase.from('cities').select('*');
+      if (!error && data && data.length > 0) {
+        return data.map((c) => ({
+          id: c.id,
+          name: c.name,
+          slug: c.slug,
+          department: c.department,
+          description: c.description,
+          imageUrl: c.image_url,
+          isFeatured: c.is_featured,
+          commerceCount: c.commerce_count,
+        }));
+      }
+    } catch (e) {
+      console.warn('Fallback to mock cities data due to Supabase error:', e);
+    }
+  }
   await simulateNetworkDelay();
   return CITIES_MOCK;
 }
 
 export async function getCityBySlug(slug: string): Promise<City | undefined> {
+  if (isSupabaseConfigured()) {
+    try {
+      const { createClient } = await import('@/lib/supabase/server');
+      const supabase = await createClient();
+      const { data, error } = await supabase.from('cities').select('*').or(`slug.eq.${slug},id.eq.${slug}`).single();
+      if (!error && data) {
+        return {
+          id: data.id,
+          name: data.name,
+          slug: data.slug,
+          department: data.department,
+          description: data.description,
+          imageUrl: data.image_url,
+          isFeatured: data.is_featured,
+          commerceCount: data.commerce_count,
+        };
+      }
+    } catch (e) {
+      console.warn('Fallback to mock city detail:', e);
+    }
+  }
   await simulateNetworkDelay();
   return CITIES_MOCK.find((c) => c.slug === slug || c.id === slug);
 }
 
 export async function getHeroSlides(): Promise<BannerSlide[]> {
+  if (isSupabaseConfigured()) {
+    try {
+      const { createClient } = await import('@/lib/supabase/server');
+      const supabase = await createClient();
+      const { data, error } = await supabase.from('banner_slides').select('*').order('created_at', { ascending: false });
+      if (!error && data && data.length > 0) {
+        return data.map((slide) => ({
+          id: slide.id,
+          title: slide.title,
+          subtitle: slide.subtitle,
+          badgeText: slide.badge_text,
+          badgeType: slide.badge_type,
+          imageUrl: slide.image_url,
+          ctaText: slide.cta_text,
+          ctaUrl: slide.cta_url,
+          cityTag: slide.city_tag,
+          publishedAt: slide.published_at,
+        }));
+      }
+    } catch (e) {
+      console.warn('Fallback to mock hero slides:', e);
+    }
+  }
   await simulateNetworkDelay();
   return HERO_SLIDES_MOCK;
 }
 
 export async function getFeaturedProducts(cityId?: string, categoryId?: string): Promise<Product[]> {
+  if (isSupabaseConfigured()) {
+    try {
+      const { createClient } = await import('@/lib/supabase/server');
+      const supabase = await createClient();
+      let query = supabase.from('products').select('*');
+      if (cityId && cityId !== 'all') {
+        query = query.eq('city_id', cityId);
+      }
+      if (categoryId && categoryId !== 'all') {
+        query = query.eq('category_id', categoryId);
+      }
+      const { data, error } = await query;
+      if (!error && data && data.length > 0) {
+        return data.map((p) => ({
+          id: p.id,
+          title: p.title,
+          slug: p.slug,
+          price: p.price ? Number(p.price) : undefined,
+          currency: p.currency || 'ARS',
+          commerceId: p.commerce_id,
+          commerceName: p.commerce_name,
+          cityId: p.city_id,
+          cityName: p.city_name,
+          imageUrl: p.image_url,
+          category: p.category,
+          categoryId: p.category_id,
+          isFeatured: p.is_featured,
+          description: p.description,
+          phoneWhatsApp: p.phone_whatsapp,
+          whatsappMessageCustom: p.whatsapp_message_custom,
+        }));
+      }
+    } catch (e) {
+      console.warn('Fallback to mock products:', e);
+    }
+  }
+
   await simulateNetworkDelay();
   let list = PRODUCTS_MOCK;
   if (cityId && cityId !== 'all') {
@@ -582,26 +689,183 @@ export async function getFeaturedProducts(cityId?: string, categoryId?: string):
 }
 
 export async function getProductBySlug(slug: string): Promise<Product | undefined> {
+  if (isSupabaseConfigured()) {
+    try {
+      const { createClient } = await import('@/lib/supabase/server');
+      const supabase = await createClient();
+      const { data, error } = await supabase.from('products').select('*').or(`slug.eq.${slug},id.eq.${slug}`).single();
+      if (!error && data) {
+        return {
+          id: data.id,
+          title: data.title,
+          slug: data.slug,
+          price: data.price ? Number(data.price) : undefined,
+          currency: data.currency || 'ARS',
+          commerceId: data.commerce_id,
+          commerceName: data.commerce_name,
+          cityId: data.city_id,
+          cityName: data.city_name,
+          imageUrl: data.image_url,
+          category: data.category,
+          categoryId: data.category_id,
+          isFeatured: data.is_featured,
+          description: data.description,
+          phoneWhatsApp: data.phone_whatsapp,
+          whatsappMessageCustom: data.whatsapp_message_custom,
+        };
+      }
+    } catch (e) {
+      console.warn('Fallback to mock product detail:', e);
+    }
+  }
+
   await simulateNetworkDelay();
   return PRODUCTS_MOCK.find((p) => p.slug === slug || p.id === slug);
 }
 
 export async function getAllCommerces(): Promise<Commerce[]> {
+  if (isSupabaseConfigured()) {
+    try {
+      const { createClient } = await import('@/lib/supabase/server');
+      const supabase = await createClient();
+      const { data, error } = await supabase.from('commerces').select('*');
+      if (!error && data && data.length > 0) {
+        return data.map((c) => ({
+          id: c.id,
+          name: c.name,
+          slug: c.slug,
+          category: c.category,
+          cityId: c.city_id,
+          cityName: c.city_name,
+          description: c.description,
+          rating: Number(c.rating),
+          reviewCount: c.review_count,
+          isVerified: c.is_verified,
+          isSubscriptionActive: c.is_subscription_active,
+          logoUrl: c.logo_url,
+          coverUrl: c.cover_url,
+          phoneWhatsApp: c.phone_whatsapp,
+          address: c.address,
+          instagram: c.instagram,
+          website: c.website,
+        }));
+      }
+    } catch (e) {
+      console.warn('Fallback to mock commerces:', e);
+    }
+  }
+
   await simulateNetworkDelay();
   return Object.values(COMMERCES_MOCK);
 }
 
 export async function getCommerceBySlug(slug: string): Promise<Commerce | undefined> {
+  if (isSupabaseConfigured()) {
+    try {
+      const { createClient } = await import('@/lib/supabase/server');
+      const supabase = await createClient();
+      const { data, error } = await supabase.from('commerces').select('*').or(`slug.eq.${slug},id.eq.${slug}`).single();
+      if (!error && data) {
+        return {
+          id: data.id,
+          name: data.name,
+          slug: data.slug,
+          category: data.category,
+          cityId: data.city_id,
+          cityName: data.city_name,
+          description: data.description,
+          rating: Number(data.rating),
+          reviewCount: data.review_count,
+          isVerified: data.is_verified,
+          isSubscriptionActive: data.is_subscription_active,
+          logoUrl: data.logo_url,
+          coverUrl: data.cover_url,
+          phoneWhatsApp: data.phone_whatsapp,
+          address: data.address,
+          instagram: data.instagram,
+          website: data.website,
+        };
+      }
+    } catch (e) {
+      console.warn('Fallback to mock commerce detail:', e);
+    }
+  }
+
   await simulateNetworkDelay();
   return Object.values(COMMERCES_MOCK).find((c) => c.slug === slug || c.id === slug);
 }
 
 export async function getProductsByCommerce(commerceId: string): Promise<Product[]> {
+  if (isSupabaseConfigured()) {
+    try {
+      const { createClient } = await import('@/lib/supabase/server');
+      const supabase = await createClient();
+      const { data, error } = await supabase.from('products').select('*').eq('commerce_id', commerceId);
+      if (!error && data && data.length > 0) {
+        return data.map((p) => ({
+          id: p.id,
+          title: p.title,
+          slug: p.slug,
+          price: p.price ? Number(p.price) : undefined,
+          currency: p.currency || 'ARS',
+          commerceId: p.commerce_id,
+          commerceName: p.commerce_name,
+          cityId: p.city_id,
+          cityName: p.city_name,
+          imageUrl: p.image_url,
+          category: p.category,
+          categoryId: p.category_id,
+          isFeatured: p.is_featured,
+          description: p.description,
+          phoneWhatsApp: p.phone_whatsapp,
+          whatsappMessageCustom: p.whatsapp_message_custom,
+        }));
+      }
+    } catch (e) {
+      console.warn('Fallback to mock products by commerce:', e);
+    }
+  }
+
   await simulateNetworkDelay();
   return PRODUCTS_MOCK.filter((p) => p.commerceId === commerceId);
 }
 
 export async function getUpcomingEvents(cityId?: string): Promise<CommunityEvent[]> {
+  if (isSupabaseConfigured()) {
+    try {
+      const { createClient } = await import('@/lib/supabase/server');
+      const supabase = await createClient();
+      let query = supabase.from('community_events').select('*').order('date', { ascending: true });
+      if (cityId && cityId !== 'all') {
+        query = query.eq('city_id', cityId);
+      }
+      const { data, error } = await query;
+      if (!error && data && data.length > 0) {
+        return data.map((e) => ({
+          id: e.id,
+          title: e.title,
+          category: e.category,
+          date: e.date,
+          formattedDate: e.formatted_date,
+          location: e.location,
+          cityId: e.city_id,
+          cityName: e.city_name,
+          imageUrl: e.image_url,
+          readTimeMinutes: e.read_time_minutes,
+          excerpt: e.excerpt,
+          fullStory: e.full_story,
+          isFeatured: e.is_featured,
+          author: {
+            name: e.author_name,
+            avatarUrl: e.author_avatar_url,
+          },
+        }));
+      }
+    } catch (e) {
+      console.warn('Fallback to mock events:', e);
+    }
+  }
+
   await simulateNetworkDelay();
   if (!cityId || cityId === 'all') {
     return COMMUNITY_EVENTS_MOCK;
@@ -610,6 +874,37 @@ export async function getUpcomingEvents(cityId?: string): Promise<CommunityEvent
 }
 
 export async function getEventById(id: string): Promise<CommunityEvent | undefined> {
+  if (isSupabaseConfigured()) {
+    try {
+      const { createClient } = await import('@/lib/supabase/server');
+      const supabase = await createClient();
+      const { data, error } = await supabase.from('community_events').select('*').eq('id', id).single();
+      if (!error && data) {
+        return {
+          id: data.id,
+          title: data.title,
+          category: data.category,
+          date: data.date,
+          formattedDate: data.formatted_date,
+          location: data.location,
+          cityId: data.city_id,
+          cityName: data.city_name,
+          imageUrl: data.image_url,
+          readTimeMinutes: data.read_time_minutes,
+          excerpt: data.excerpt,
+          fullStory: data.full_story,
+          isFeatured: data.is_featured,
+          author: {
+            name: data.author_name,
+            avatarUrl: data.author_avatar_url,
+          },
+        };
+      }
+    } catch (e) {
+      console.warn('Fallback to mock event detail:', e);
+    }
+  }
+
   await simulateNetworkDelay();
   return COMMUNITY_EVENTS_MOCK.find((e) => e.id === id);
 }
@@ -618,9 +913,12 @@ export async function getBentoHighlights(): Promise<{
   featuredCommerce: Commerce;
   weekendEvent: CommunityEvent;
 }> {
-  await simulateNetworkDelay();
+  const commerces = await getAllCommerces();
+  const events = await getUpcomingEvents();
+
   return {
-    featuredCommerce: COMMERCES_MOCK['c1'],
-    weekendEvent: COMMUNITY_EVENTS_MOCK[0],
+    featuredCommerce: commerces[0] || COMMERCES_MOCK['c1'],
+    weekendEvent: events[0] || COMMUNITY_EVENTS_MOCK[0],
   };
 }
+

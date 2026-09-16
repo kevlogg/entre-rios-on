@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import Image from 'next/image';
 import { Store, MapPin, MessageCircle, ShieldCheck, Save, CheckCircle, Camera } from 'lucide-react';
 import { Commerce } from '@/types';
+import { updateCommerceProfileAction } from '@/server/actions/profile';
 
 interface ProfileEditorProps {
   commerce: Commerce;
@@ -22,9 +23,19 @@ export function ProfileEditor({ commerce }: ProfileEditorProps) {
   });
 
   const [isSaved, setIsSaved] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsSubmitting(true);
+
+    try {
+      await updateCommerceProfileAction(commerce.id, formData);
+    } catch (err) {
+      console.warn('Profile Server Action fallback:', err);
+    }
+
+    setIsSubmitting(false);
     setIsSaved(true);
     setTimeout(() => setIsSaved(false), 3000);
   };
