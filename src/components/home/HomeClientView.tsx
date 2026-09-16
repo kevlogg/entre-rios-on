@@ -27,6 +27,7 @@ export function HomeClientView({
   featuredCommerce,
   weekendEvent,
 }: HomeClientViewProps) {
+  const [selectedProvince, setSelectedProvince] = useState<string>('santa-fe');
   const [selectedCity, setSelectedCity] = useState<string>('all');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [filteredProducts, setFilteredProducts] = useState<Product[]>(initialProducts);
@@ -35,8 +36,10 @@ export function HomeClientView({
   useEffect(() => {
     const handleUrlChange = () => {
       const params = new URLSearchParams(window.location.search);
+      const provParam = params.get('province') || 'santa-fe';
       const cityParam = params.get('city') || 'all';
       const catParam = params.get('category') || 'all';
+      setSelectedProvince(provParam);
       setSelectedCity(cityParam);
       setSelectedCategory(catParam);
     };
@@ -48,6 +51,10 @@ export function HomeClientView({
 
   useEffect(() => {
     let prods = initialProducts;
+
+    if (selectedProvince !== 'all') {
+      prods = prods.filter((p) => !p.provinceId || p.provinceId === selectedProvince);
+    }
 
     if (selectedCity !== 'all') {
       prods = prods.filter((p) => p.cityId.toLowerCase() === selectedCity.toLowerCase());
@@ -63,14 +70,15 @@ export function HomeClientView({
 
     setFilteredProducts(prods);
 
-    if (selectedCity === 'all') {
-      setFilteredEvents(events);
-    } else {
-      setFilteredEvents(
-        events.filter((e) => e.cityId.toLowerCase() === selectedCity.toLowerCase())
-      );
+    let evs = events;
+    if (selectedProvince !== 'all') {
+      evs = evs.filter((e) => !e.provinceId || e.provinceId === selectedProvince);
     }
-  }, [selectedCity, selectedCategory, initialProducts, events]);
+    if (selectedCity !== 'all') {
+      evs = evs.filter((e) => e.cityId.toLowerCase() === selectedCity.toLowerCase());
+    }
+    setFilteredEvents(evs);
+  }, [selectedProvince, selectedCity, selectedCategory, initialProducts, events]);
 
   return (
     <div className="space-y-12 pt-8 sm:pt-12 pb-16">
@@ -90,6 +98,8 @@ export function HomeClientView({
             cities={cities}
             selectedCity={selectedCity}
             onSelectCity={(cityId) => setSelectedCity(cityId)}
+            selectedProvince={selectedProvince}
+            onSelectProvince={(provId) => setSelectedProvince(provId)}
           />
           <CategoryFilterBar
             selectedCategory={selectedCategory}

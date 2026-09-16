@@ -1,3 +1,9 @@
+export interface Province {
+  id: string;
+  name: string;
+  slug: string;
+}
+
 export interface City {
   id: string;
   name: string;
@@ -7,6 +13,8 @@ export interface City {
   imageUrl: string;
   isFeatured: boolean;
   commerceCount: number;
+  provinceId?: string;
+  provinceName?: string;
 }
 
 export interface Commerce {
@@ -16,6 +24,8 @@ export interface Commerce {
   category: string;
   cityId: string;
   cityName: string;
+  provinceId?: string;
+  provinceName?: string;
   description: string;
   rating: number;
   reviewCount: number;
@@ -25,6 +35,7 @@ export interface Commerce {
   coverUrl: string;
   phoneWhatsApp: string;
   address: string;
+  isDigitalOnly?: boolean;
   instagram?: string;
   website?: string;
 }
@@ -39,6 +50,8 @@ export interface Product {
   commerceName: string;
   cityId: string;
   cityName: string;
+  provinceId?: string;
+  provinceName?: string;
   imageUrl: string;
   category: string;
   categoryId?: string;
@@ -57,6 +70,8 @@ export interface CommunityEvent {
   location: string;
   cityId: string;
   cityName: string;
+  provinceId?: string;
+  provinceName?: string;
   imageUrl: string;
   readTimeMinutes: number;
   excerpt: string;
