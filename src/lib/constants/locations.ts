@@ -195,7 +195,7 @@ export const CITIES_ENTRE_RIOS: City[] = [
 export const ALL_CITIES: City[] = [...CITIES_SANTA_FE, ...CITIES_ENTRE_RIOS];
 
 export function getCitiesByProvince(provinceId: string): City[] {
-  if (!provinceId || provinceId === 'all') {
+  if (!provinceId || provinceId === 'all' || provinceId === 'todas') {
     return ALL_CITIES;
   }
   return ALL_CITIES.filter((city) => city.provinceId === provinceId);
@@ -204,3 +204,41 @@ export function getCitiesByProvince(provinceId: string): City[] {
 export function getProvinceById(provinceId: string): Province | undefined {
   return PROVINCES.find((p) => p.id === provinceId);
 }
+
+export function getProvinceBySlug(slug: string): Province | undefined {
+  if (!slug) return undefined;
+  return PROVINCES.find((p) => p.slug === slug || p.id === slug);
+}
+
+export function getCityBySlug(slug: string): City | undefined {
+  if (!slug) return undefined;
+  return ALL_CITIES.find((c) => c.slug === slug || c.id === slug);
+}
+
+export const VALID_SECTION_SLUGS: Record<string, { name: string; description: string }> = {
+  'comercios': {
+    name: 'Comercios Adheridos',
+    description: 'Directorio B2B y comercios verificados con contacto directo a WhatsApp.',
+  },
+  'catalogo': {
+    name: 'Catálogo & Ofertas',
+    description: 'Catálogo de productos y ofertas con pedido directo a WhatsApp.',
+  },
+  'sorteos': {
+    name: 'Sorteos ON MÁS',
+    description: 'Premios, sorteos vigentes e inscripciones gratuitas.',
+  },
+  'clasificados': {
+    name: 'Clasificados ON',
+    description: 'Compra y venta de inmuebles, maquinaria, servicios y oportunidades.',
+  },
+  'comunidad': {
+    name: 'Comunidad & Agenda Cultural',
+    description: 'Eventos, agenda cultural, festivales y noticias regionales.',
+  },
+  'turismo': {
+    name: 'Turismo & Posadas',
+    description: 'Guía de turismo, playas, termas, bodegas y alojamientos.',
+  },
+};
+

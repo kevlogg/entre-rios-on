@@ -1,8 +1,9 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { usePathname, useRouter } from 'next/navigation';
 import { 
   MapPin, 
   Search, 
@@ -15,13 +16,16 @@ import {
   Building2
 } from 'lucide-react';
 import { trackCitySelect, trackSearchQuery } from '@/lib/analytics/events';
-import { PROVINCES, getCitiesByProvince } from '@/lib/constants/locations';
+import { PROVINCES, getCitiesByProvince, getProvinceBySlug, getCityBySlug } from '@/lib/constants/locations';
 
 interface HeaderProps {
   selectedCityId?: string;
 }
 
 export function Header({ selectedCityId = 'all' }: HeaderProps) {
+  const pathname = usePathname();
+  const router = useRouter();
+
   const [selectedProvince, setSelectedProvince] = useState<string>('santa-fe');
   const [currentCity, setCurrentCity] = useState(selectedCityId);
   const [searchQuery, setSearchQuery] = useState('');
@@ -29,20 +33,69 @@ export function Header({ selectedCityId = 'all' }: HeaderProps) {
   const [isCityDropdownOpen, setIsCityDropdownOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
+  // Sync state from URL pathname
+  useEffect(() => {
+    if (!pathname) return;
+    const parts = pathname.split('/').filter(Boolean);
+    if (parts.length > 0) {
+      const provMatch = getProvinceBySlug(parts[0]);
+      if (provMatch) {
+        setSelectedProvince(provMatch.id);
+        if (parts.length > 1) {
+          const cityMatch = getCityBySlug(parts[1]);
+          if (cityMatch) {
+            setCurrentCity(cityMatch.id);
+          }
+        }
+      }
+    }
+  }, [pathname]);
+
   const availableCities = getCitiesByProvince(selectedProvince);
   const currentProvinceObj = PROVINCES.find((p) => p.id === selectedProvince) || PROVINCES[0];
-  const selectedCityObj = availableCities.find((c) => c.id === currentCity) || { id: 'all', name: 'Todas las ciudades' };
+  const selectedCityObj = availableCities.find((c) => c.id === currentCity) || { id: 'all', name: 'Todas las ciudades', slug: '' };
+
+  // Helper to build geo-targeted URL for a section
+  const getGeoUrl = (sectionSlug: string) => {
+    const provSlug = currentProvinceObj.slug || 'santa-fe';
+    const citySlug = selectedCityObj.id !== 'all' ? (selectedCityObj.slug || selectedCityObj.id) : null;
+
+    if (sectionSlug === '') {
+      if (citySlug) return `/${provSlug}/${citySlug}`;
+      if (provSlug !== 'todas') return `/${provSlug}`;
+      return '/';
+    }
+
+    if (citySlug) {
+      return `/${provSlug}/${citySlug}/${sectionSlug}`;
+    }
+    return `/${sectionSlug}`;
+  };
 
   const handleProvinceSelect = (provId: string) => {
     setSelectedProvince(provId);
     setCurrentCity('all');
     setIsProvinceDropdownOpen(false);
+
+    const targetProv = PROVINCES.find((p) => p.id === provId);
+    if (targetProv && targetProv.id !== 'all') {
+      router.push(`/${targetProv.slug}`);
+    } else {
+      router.push('/');
+    }
   };
 
   const handleCitySelect = (cityId: string, cityName: string) => {
     setCurrentCity(cityId);
     setIsCityDropdownOpen(false);
     trackCitySelect(cityId, cityName);
+
+    const targetCity = availableCities.find((c) => c.id === cityId);
+    if (targetCity && cityId !== 'all') {
+      router.push(`/${currentProvinceObj.slug}/${targetCity.slug}`);
+    } else {
+      router.push(`/${currentProvinceObj.slug}`);
+    }
   };
 
   const handleSearchSubmit = (e: React.FormEvent) => {
@@ -57,13 +110,13 @@ export function Header({ selectedCityId = 'all' }: HeaderProps) {
   };
 
   const navLinks = [
-    { name: 'Inicio', href: '/' },
-    { name: 'Comercios Adheridos', href: '/comercios' },
-    { name: 'Catálogo & Ofertas', href: '/catalogo' },
-    { name: 'Sorteos ON MÁS', href: '/sorteos' },
-    { name: 'Clasificados', href: '/clasificados' },
-    { name: 'Comunidad', href: '/comunidad' },
-    { name: 'Turismo', href: '/turismo' },
+    { name: 'Inicio', href: getGeoUrl('') },
+    { name: 'Comercios Adheridos', href: getGeoUrl('comercios') },
+    { name: 'Catálogo & Ofertas', href: getGeoUrl('catalogo') },
+    { name: 'Sorteos ON MÁS', href: getGeoUrl('sorteos') },
+    { name: 'Clasificados', href: getGeoUrl('clasificados') },
+    { name: 'Comunidad', href: getGeoUrl('comunidad') },
+    { name: 'Turismo', href: getGeoUrl('turismo') },
   ];
 
   return (
