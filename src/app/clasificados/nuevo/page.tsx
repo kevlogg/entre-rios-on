@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { ArrowLeft, Tag, PlusCircle, CheckCircle2, MessageCircle, MapPin, Sparkles, Car, ExternalLink } from 'lucide-react';

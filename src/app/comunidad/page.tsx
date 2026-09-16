@@ -106,7 +106,7 @@ export default async function ComunidadPage() {
                   <div className="space-y-2">
                     <span className="text-xs font-bold text-[#00ADB5] block">{evt.formattedDate || evt.date}</span>
                     <h3 className="text-base font-extrabold text-slate-900 leading-snug">{evt.title}</h3>
-                    <p className="text-xs text-slate-600 line-clamp-3 leading-relaxed">{evt.excerpt || evt.description}</p>
+                    <p className="text-xs text-slate-600 line-clamp-3 leading-relaxed">{evt.excerpt || evt.fullStory}</p>
                   </div>
 
                   <div className="pt-3 border-t border-slate-100 flex items-center justify-between">
