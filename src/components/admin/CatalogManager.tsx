@@ -181,16 +181,24 @@ export function CatalogManager({ products, onAddProduct, onDeleteProduct }: Cata
 
       {/* Modal: Publicar Nuevo Producto */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl max-w-lg w-full p-6 space-y-5 shadow-2xl animate-in fade-in zoom-in-95 duration-200">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-              <h3 className="text-lg font-extrabold text-[#0047BA] flex items-center gap-2">
-                <Sparkles className="w-5 h-5 text-[#00ADB5]" />
-                <span>Publicar Nuevo Producto en Entre Ríos ON MÁS</span>
+        <div
+          className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto"
+          onClick={() => setIsModalOpen(false)}
+        >
+          <div
+            className="bg-white rounded-3xl max-w-lg w-full p-6 space-y-5 shadow-2xl my-auto max-h-[90vh] overflow-y-auto animate-in fade-in zoom-in-95 duration-200 relative"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="sticky -top-6 -mt-6 bg-white z-20 pt-6 pb-3 flex items-center justify-between border-b border-slate-100">
+              <h3 className="text-base sm:text-lg font-extrabold text-[#0047BA] flex items-center gap-2">
+                <Sparkles className="w-5 h-5 text-[#00ADB5] shrink-0" />
+                <span>Publicar Nuevo Producto</span>
               </h3>
               <button
+                type="button"
                 onClick={() => setIsModalOpen(false)}
-                className="p-1.5 text-slate-400 hover:text-slate-600 rounded-lg"
+                className="p-1.5 text-slate-400 hover:text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-full transition-colors cursor-pointer"
+                title="Cerrar ventana"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -266,20 +274,21 @@ export function CatalogManager({ products, onAddProduct, onDeleteProduct }: Cata
                 <span>Los compradores podrán solicitar este producto directamente por WhatsApp sin comisión.</span>
               </div>
 
-              <div className="flex items-center justify-end gap-3 pt-2">
+              <div className="sticky -bottom-6 -mb-6 bg-white z-20 pt-3 pb-6 flex items-center justify-end gap-3 border-t border-slate-100">
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
-                  className="px-4 py-2.5 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-100"
+                  className="px-4 py-2.5 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-100 cursor-pointer"
                 >
                   Cancelar
                 </button>
 
                 <button
                   type="submit"
-                  className="bg-gradient-to-r from-[#00ADB5] to-[#007C8A] hover:from-[#00E5E8] hover:to-[#00ADB5] text-white px-6 py-2.5 rounded-xl font-extrabold text-xs shadow-md"
+                  disabled={isSubmitting}
+                  className="bg-gradient-to-r from-[#00ADB5] to-[#007C8A] hover:from-[#00E5E8] hover:to-[#00ADB5] text-white px-6 py-2.5 rounded-xl font-extrabold text-xs shadow-md cursor-pointer disabled:opacity-50"
                 >
-                  Publicar Producto Ahora
+                  {isSubmitting ? 'Guardando...' : 'Publicar Producto Ahora'}
                 </button>
               </div>
             </form>
