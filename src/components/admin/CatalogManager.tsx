@@ -7,7 +7,7 @@ import { Plus, Edit2, Trash2, Power, CheckCircle, Tag, ShoppingBag, X, Sparkles,
 import { CATEGORIES_LIST } from '@/lib/constants/categories';
 import { ALL_CITIES } from '@/lib/constants/locations';
 import { createProductAction, deleteProductAction } from '@/server/actions/catalog';
-import { ImageUploader } from '@/components/common/ImageUploader';
+import { MultiImageUploader } from '@/components/common/ImageUploader';
 
 interface CatalogManagerProps {
   products: Product[];
@@ -26,7 +26,7 @@ export function CatalogManager({ products, onAddProduct, onDeleteProduct }: Cata
   const [category, setCategory] = useState('gastronomia');
   const [cityId, setCityId] = useState('rosario');
   const [description, setDescription] = useState('');
-  const [imageUrl, setImageUrl] = useState('/images/prod-mate.jpg');
+  const [images, setImages] = useState<string[]>([]);
 
   const togglePause = (id: string) => {
     setPausedMap((prev) => ({ ...prev, [id]: !prev[id] }));
@@ -39,6 +39,7 @@ export function CatalogManager({ products, onAddProduct, onDeleteProduct }: Cata
     setIsSubmitting(true);
     const selectedCatObj = CATEGORIES_LIST.find((c) => c.id === category);
     const selectedCity = ALL_CITIES.find((c) => c.id === cityId) || ALL_CITIES[0];
+    const primaryImage = images[0] || '/images/city-rosario.jpg';
 
     const newProd: Product = {
       id: `p-new-${Date.now()}`,
@@ -51,7 +52,7 @@ export function CatalogManager({ products, onAddProduct, onDeleteProduct }: Cata
       cityId: selectedCity.id,
       cityName: selectedCity.name,
       provinceId: selectedCity.provinceId,
-      imageUrl: imageUrl || '/images/prod-mate.jpg',
+      imageUrl: primaryImage,
       category: selectedCatObj ? selectedCatObj.label : 'Productos',
       categoryId: category,
       isFeatured: true,
@@ -74,6 +75,7 @@ export function CatalogManager({ products, onAddProduct, onDeleteProduct }: Cata
     setTitle('');
     setPrice('');
     setDescription('');
+    setImages([]);
   };
 
   const handleDelete = async (id: string) => {
@@ -255,18 +257,11 @@ export function CatalogManager({ products, onAddProduct, onDeleteProduct }: Cata
                 />
               </div>
 
-              <ImageUploader
-                label="Imagen del Producto / Oferta"
-                value={imageUrl}
-                onChange={(url) => setImageUrl(url)}
-                presetOptions={[
-                  { label: 'Mates & Cerámica', url: '/images/prod-mate.jpg' },
-                  { label: 'Gastronomía Fluvial', url: '/images/prod-dorado.jpg' },
-                  { label: 'Vinos & Bodega', url: '/images/prod-vino-tannat.jpg' },
-                  { label: 'Citrus & Dulces', url: '/images/prod-dulces.jpg' },
-                  { label: 'Indumentaria', url: '/images/offer-1.jpg' },
-                  { label: 'Electro / Tecno', url: '/images/offer-2.jpg' },
-                ]}
+              <MultiImageUploader
+                images={images}
+                onChange={(newImgs) => setImages(newImgs)}
+                maxImages={3}
+                label="Fotos del Producto / Oferta"
               />
 
               <div className="bg-cyan-50 border border-cyan-200 rounded-2xl p-3 text-xs text-[#007C8A] font-semibold flex items-center gap-2">

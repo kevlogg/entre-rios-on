@@ -2,122 +2,131 @@
 
 import React, { useState } from 'react';
 import Image from 'next/image';
-import { Upload, Image as ImageIcon, Check, X, Sparkles } from 'lucide-react';
+import { Upload, Image as ImageIcon, Check, X, Sparkles, Plus } from 'lucide-react';
 
-interface ImageUploaderProps {
-  value: string;
-  onChange: (url: string) => void;
+interface MultiImageUploaderProps {
+  images: string[];
+  onChange: (images: string[]) => void;
+  maxImages?: number;
   label?: string;
-  presetOptions?: { label: string; url: string }[];
 }
 
-export function ImageUploader({ value, onChange, label = 'Imagen del Producto / Oferta', presetOptions }: ImageUploaderProps) {
+export function MultiImageUploader({
+  images,
+  onChange,
+  maxImages = 3,
+  label = 'Imágenes del Producto / Oferta *',
+}: MultiImageUploaderProps) {
   const [isUploading, setIsUploading] = useState(false);
-  const [dragActive, setDragActive] = useState(false);
 
-  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    if (!files.length) return;
+
+    const remainingSlots = maxImages - images.length;
+    const filesToProcess = files.slice(0, remainingSlots);
 
     setIsUploading(true);
 
-    try {
-      // Convert File to base64 DataURL preview
+    let loadedCount = 0;
+    const newImages: string[] = [];
+
+    filesToProcess.forEach((file) => {
       const reader = new FileReader();
       reader.onloadend = () => {
         if (typeof reader.result === 'string') {
-          onChange(reader.result);
+          newImages.push(reader.result);
         }
-        setIsUploading(false);
+        loadedCount++;
+        if (loadedCount === filesToProcess.length) {
+          onChange([...images, ...newImages].slice(0, maxImages));
+          setIsUploading(false);
+        }
       };
       reader.readAsDataURL(file);
-    } catch {
-      setIsUploading(false);
-    }
+    });
   };
 
-  const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault();
-    setDragActive(false);
-    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-      const file = e.dataTransfer.files[0];
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        if (typeof reader.result === 'string') {
-          onChange(reader.result);
-        }
-      };
-      reader.readAsDataURL(file);
-    }
+  const handleRemoveImage = (indexToRemove: number) => {
+    onChange(images.filter((_, idx) => idx !== indexToRemove));
   };
 
   return (
     <div className="space-y-3">
-      <label className="block text-xs font-bold text-slate-700">{label}</label>
-
-      {/* Upload Dropzone */}
-      <div
-        onDragOver={(e) => { e.preventDefault(); setDragActive(true); }}
-        onDragLeave={() => setDragActive(false)}
-        onDrop={handleDrop}
-        className={`relative border-2 border-dashed rounded-2xl p-4 transition-all flex flex-col items-center justify-center text-center space-y-2 cursor-pointer ${
-          dragActive
-            ? 'border-[#00ADB5] bg-cyan-50/50'
-            : 'border-slate-300 bg-slate-50 hover:bg-slate-100/80'
-        }`}
-      >
-        <input
-          type="file"
-          accept="image/*"
-          onChange={handleFileChange}
-          className="absolute inset-0 opacity-0 cursor-pointer w-full h-full z-10"
-        />
-
-        {value ? (
-          <div className="relative w-full h-36 rounded-xl overflow-hidden bg-slate-200 border border-slate-300">
-            <Image src={value} alt="Previsualización" fill className="object-cover" />
-            <div className="absolute top-2 right-2 bg-slate-900/70 text-white text-[10px] font-extrabold px-2 py-1 rounded-md backdrop-blur-xs flex items-center gap-1">
-              <Check className="w-3 h-3 text-[#00ADB5]" />
-              <span>Imagen Cargada</span>
-            </div>
-          </div>
-        ) : (
-          <>
-            <div className="p-3 rounded-full bg-white text-[#0047BA] shadow-sm">
-              <Upload className="w-5 h-5 text-[#00ADB5]" />
-            </div>
-            <div>
-              <p className="text-xs font-bold text-slate-800">
-                {isUploading ? 'Procesando imagen...' : 'Hacé clic o arrastrá una foto aquí'}
-              </p>
-              <p className="text-[11px] text-slate-400 font-medium">PNG, JPG, WEBP hasta 5MB</p>
-            </div>
-          </>
-        )}
+      <div className="flex items-center justify-between">
+        <label className="block text-xs font-bold text-slate-700">
+          {label} (Hasta {maxImages} fotos)
+        </label>
+        <span className="text-[11px] font-extrabold text-[#00ADB5] bg-cyan-50 px-2.5 py-0.5 rounded-full border border-cyan-200">
+          {images.length} de {maxImages} seleccionadas
+        </span>
       </div>
 
-      {/* Optional Preset Selector */}
-      {presetOptions && presetOptions.length > 0 && (
-        <div className="space-y-1.5 pt-1">
-          <span className="text-[11px] font-bold text-slate-500 block">O seleccionar un preset regional:</span>
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-            {presetOptions.map((opt, idx) => (
-              <button
-                key={idx}
-                type="button"
-                onClick={() => onChange(opt.url)}
-                className={`py-1.5 px-2 rounded-xl text-[11px] font-bold text-left truncate transition-colors border cursor-pointer ${
-                  value === opt.url
-                    ? 'bg-[#0047BA] text-white border-[#0047BA]'
-                    : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-100'
-                }`}
-              >
-                {opt.label}
-              </button>
-            ))}
+      {/* Grid de Imágenes de 3 Columnas */}
+      <div className="grid grid-cols-3 gap-3">
+        {images.map((img, idx) => (
+          <div key={idx} className="relative h-28 rounded-2xl overflow-hidden border border-slate-300 bg-slate-100 group shadow-xs">
+            <Image src={img} alt={`Imagen ${idx + 1}`} fill className="object-cover" />
+            <button
+              type="button"
+              onClick={() => handleRemoveImage(idx)}
+              className="absolute top-1.5 right-1.5 p-1.5 bg-slate-900/80 hover:bg-rose-600 text-white rounded-full transition-colors cursor-pointer z-20 shadow-md"
+              title="Eliminar foto"
+            >
+              <X className="w-3.5 h-3.5" />
+            </button>
+            <span className="absolute bottom-1.5 left-1.5 bg-slate-900/75 backdrop-blur-xs text-white text-[9px] font-extrabold px-2 py-0.5 rounded-md">
+              {idx === 0 ? 'Portada' : `Foto ${idx + 1}`}
+            </span>
           </div>
-        </div>
-      )}
+        ))}
+
+        {/* Botón para Cargar Foto si no alcanzó el límite */}
+        {images.length < maxImages && (
+          <label className={`relative h-28 border-2 border-dashed rounded-2xl transition-all flex flex-col items-center justify-center text-center p-2 cursor-pointer ${
+            isUploading
+              ? 'border-[#00ADB5] bg-cyan-50/50'
+              : 'border-slate-300 bg-slate-50 hover:bg-slate-100 hover:border-[#00ADB5]'
+          }`}>
+            <input
+              type="file"
+              accept="image/*"
+              multiple={maxImages > 1}
+              onChange={handleFileChange}
+              className="absolute inset-0 opacity-0 cursor-pointer w-full h-full z-10"
+            />
+            <div className="p-2 rounded-full bg-white text-[#0047BA] shadow-2xs mb-1">
+              <Upload className="w-4 h-4 text-[#00ADB5]" />
+            </div>
+            <span className="text-[11px] font-extrabold text-slate-700">
+              {isUploading ? 'Cargando...' : '+ Subir Foto'}
+            </span>
+            <span className="text-[9px] text-slate-400 font-medium">PNG, JPG o WEBP</span>
+          </label>
+        )}
+      </div>
     </div>
+  );
+}
+
+// Mantener compatibilidad previa
+export function ImageUploader({
+  value,
+  onChange,
+  label = 'Imagen del Producto / Oferta',
+  presetOptions,
+}: {
+  value: string;
+  onChange: (url: string) => void;
+  label?: string;
+  presetOptions?: { label: string; url: string }[];
+}) {
+  return (
+    <MultiImageUploader
+      images={value ? [value] : []}
+      onChange={(imgs) => onChange(imgs[0] || '')}
+      maxImages={1}
+      label={label}
+    />
   );
 }
