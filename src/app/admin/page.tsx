@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { Product } from '@/types';
+import { Product, Commerce } from '@/types';
 import { AdminHeader } from '@/components/admin/AdminHeader';
 import { AdminSidebar, AdminTab } from '@/components/admin/AdminSidebar';
 import { KpiCardsRow } from '@/components/admin/KpiCardsRow';
@@ -64,7 +64,7 @@ const INITIAL_MERCHANT_PRODUCTS: Product[] = [
   },
 ];
 
-const INITIAL_COMMERCE = {
+const INITIAL_COMMERCE: Commerce = {
   id: 'c1',
   name: 'Alfarería & Cerámica Delta',
   slug: 'alfareria-ceramica-delta',
@@ -81,14 +81,80 @@ const INITIAL_COMMERCE = {
   phoneWhatsApp: '5493447451234',
   address: '12 de Octubre 450, Colón',
   instagram: '@ceramica.delta.colon',
+  website: 'https://alfareriadelta.com',
 };
 
 export default function AdminPage() {
   const [activeTab, setActiveTab] = useState<AdminTab>('dashboard');
+  const [commerce, setCommerce] = useState(INITIAL_COMMERCE);
   const [products, setProducts] = useState<Product[]>(INITIAL_MERCHANT_PRODUCTS);
   const [waMessageTemplate, setWaMessageTemplate] = useState(
-    'Hola Alfarería Delta, vi su catálogo en el portal Entre Ríos ON y me gustaría realizar una consulta.'
+    'Hola, vi su negocio en el portal ON MÁS y me gustaría realizar una consulta.'
   );
+
+  React.useEffect(() => {
+    async function loadRealData() {
+      try {
+        const { createPublicClient } = await import('@/lib/supabase/public');
+        const supabase = createPublicClient();
+
+        // 1. Fetch real commerce
+        const { data: commsData } = await supabase.from('commerces').select('*').limit(1);
+        if (commsData && commsData.length > 0) {
+          const c = commsData[0];
+          setCommerce({
+            id: c.id,
+            name: c.name,
+            slug: c.slug,
+            category: c.category,
+            cityId: c.city_id,
+            cityName: c.city_name,
+            description: c.description,
+            rating: Number(c.rating),
+            reviewCount: c.review_count,
+            isVerified: c.is_verified,
+            isSubscriptionActive: c.is_subscription_active,
+            logoUrl: c.logo_url,
+            coverUrl: c.cover_url,
+            phoneWhatsApp: c.phone_whatsapp,
+            address: c.address,
+            instagram: c.instagram,
+            website: c.website,
+          });
+        }
+
+        // 2. Fetch real products
+        const { data: prodsData } = await supabase.from('products').select('*');
+        if (prodsData && prodsData.length > 0) {
+          setProducts(
+            prodsData.map((p) => ({
+              id: p.id,
+              title: p.title,
+              slug: p.slug,
+              price: p.price ? Number(p.price) : undefined,
+              currency: p.currency || 'ARS',
+              commerceId: p.commerce_id,
+              commerceName: p.commerce_name,
+              cityId: p.city_id,
+              cityName: p.city_name,
+              provinceId: p.province_id,
+              imageUrl: p.image_url,
+              category: p.category,
+              categoryId: p.category_id,
+              isFeatured: p.is_featured,
+              description: p.description,
+              phoneWhatsApp: p.phone_whatsapp,
+              whatsappMessageCustom: p.whatsapp_message_custom,
+            }))
+          );
+        }
+      } catch (err) {
+        console.warn('Fallback a datos de demostración en Admin:', err);
+      }
+    }
+
+    loadRealData();
+  }, []);
 
   const handleAddProduct = (newProd: Product) => {
     setProducts((prev) => [newProd, ...prev]);
@@ -102,9 +168,9 @@ export default function AdminPage() {
     <div className="min-h-screen flex flex-col bg-[#f8fafc]">
       {/* Top Navbar */}
       <AdminHeader
-        commerceName={INITIAL_COMMERCE.name}
-        commerceSlug={INITIAL_COMMERCE.slug}
-        cityName={INITIAL_COMMERCE.cityName}
+        commerceName={commerce.name}
+        commerceSlug={commerce.slug}
+        cityName={commerce.cityName}
       />
 
       <main className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
@@ -131,10 +197,10 @@ export default function AdminPage() {
                       <span>Panel B2B • Comercio Activo</span>
                     </div>
                     <h1 className="text-2xl sm:text-4xl font-extrabold leading-tight">
-                      ¡Hola, {INITIAL_COMMERCE.name}!
+                      ¡Hola, {commerce.name}!
                     </h1>
                     <p className="text-xs sm:text-sm text-slate-100 font-medium max-w-xl">
-                      Tu perfil en Colón se encuentra activo y recibiendo consultas directas en WhatsApp sin intermediarios ni comisiones.
+                      Tu perfil en {commerce.cityName} se encuentra activo y recibiendo consultas directas en WhatsApp sin intermediarios ni comisiones.
                     </p>
                   </div>
 
@@ -173,7 +239,7 @@ export default function AdminPage() {
             {/* TAB 3: PROFILE EDITOR */}
             {activeTab === 'profile' && (
               <div className="animate-in fade-in duration-200">
-                <ProfileEditor commerce={INITIAL_COMMERCE} />
+                <ProfileEditor commerce={commerce} />
               </div>
             )}
 
@@ -195,12 +261,12 @@ export default function AdminPage() {
                     <label className="block text-xs font-bold text-slate-700 mb-1">Teléfono WhatsApp Corporativo *</label>
                     <input
                       type="text"
-                      value={INITIAL_COMMERCE.phoneWhatsApp}
+                      value={commerce.phoneWhatsApp}
                       readOnly
                       className="w-full bg-slate-100 border border-slate-300 rounded-xl px-4 py-2.5 text-sm text-slate-800 font-mono"
                     />
                     <span className="text-[11px] text-slate-400 font-medium mt-1 block">
-                      Incluye código de país y área de Entre Ríos (ej. 5493447451234).
+                      Incluye código de país y área (ej. 5493415550199).
                     </span>
                   </div>
 
@@ -220,7 +286,7 @@ export default function AdminPage() {
                       Así recibirá tu equipo de atención el mensaje directo cuando un cliente presione &quot;Pedir por WhatsApp&quot;.
                     </p>
                     <a
-                      href={`https://wa.me/${INITIAL_COMMERCE.phoneWhatsApp}?text=${encodeURIComponent(waMessageTemplate)}`}
+                      href={`https://wa.me/${commerce.phoneWhatsApp}?text=${encodeURIComponent(waMessageTemplate)}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="bg-[#25D366] hover:bg-[#20ba5a] text-white px-4 py-2 rounded-xl text-xs font-extrabold inline-flex items-center gap-1.5 shadow-sm"
