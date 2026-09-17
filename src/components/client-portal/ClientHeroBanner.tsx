@@ -5,7 +5,71 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { ArrowRight, ChevronLeft, ChevronRight, MapPin } from 'lucide-react';
 
-const HERO_SLIDES = [
+interface HeroSlide {
+  id: string;
+  titleLine1: string;
+  titleLine2: string;
+  subtitle: string;
+  caption: string;
+  handwriting: string;
+  image: string;
+  location: string;
+  ctaText: string;
+  ctaHref: string;
+}
+
+const SANTA_FE_SLIDES: HeroSlide[] = [
+  {
+    id: 'rosario',
+    titleLine1: 'SANTA FE,',
+    titleLine2: 'SIEMPRE ON MÁS',
+    subtitle: 'Comprá. Vendé. Publicá. Conectá.',
+    caption: 'Toda la provincia en un solo lugar.',
+    handwriting: '“Monumento a la Bandera & Polo Comercial Litoraleño”',
+    image: '/images/hero-parana.jpg',
+    location: 'Rosario & Río Paraná, Santa Fe',
+    ctaText: 'Explorá Comercios de Rosario',
+    ctaHref: '/santa-fe/rosario',
+  },
+  {
+    id: 'santa-fe-capital',
+    titleLine1: 'SANTA FE CAPITAL',
+    titleLine2: 'COSTANERA SETÚBAL',
+    subtitle: 'Gastronomía, Historia & Polo Universitario',
+    caption: 'Conectando locales, servicios y emprendedores santafesinos por WhatsApp.',
+    handwriting: '“Tradición de alfajores y cerveza tirada al atardecer”',
+    image: '/images/city-concordia.jpg',
+    location: 'Santa Fe Capital',
+    ctaText: 'Ver Productos de Santa Fe',
+    ctaHref: '/santa-fe/santa-fe-capital',
+  },
+  {
+    id: 'rafaela',
+    titleLine1: 'RAFAELA &',
+    titleLine2: 'CUENCA LÁCTEA',
+    subtitle: 'Potencia Agroindustrial & Diseño Regional',
+    caption: 'Quesos de autor, fiambres artesanales y carpintería maciza de vanguardia.',
+    handwriting: '“Orgullo productivo del oeste santafesino”',
+    image: '/images/city-colon.jpg',
+    location: 'Rafaela, Santa Fe',
+    ctaText: 'Ver Productos de Rafaela',
+    ctaHref: '/santa-fe/rafaela',
+  },
+  {
+    id: 'reconquista',
+    titleLine1: 'SUR & NORTE',
+    titleLine2: 'SANTAFESINO',
+    subtitle: 'Venado Tuerto, Reconquista, Esperanza & Santo Tomé',
+    caption: 'Impulsando comercios y pymes de toda la provincia.',
+    handwriting: '“La provincia conectada en un solo click”',
+    image: '/images/city-gualeguaychu.jpg',
+    location: 'Provincia de Santa Fe',
+    ctaText: 'Explorar Ciudades de Santa Fe',
+    ctaHref: '/santa-fe',
+  },
+];
+
+const ENTRE_RIOS_SLIDES: HeroSlide[] = [
   {
     id: 'parana',
     titleLine1: 'ENTRE RÍOS,',
@@ -16,7 +80,7 @@ const HERO_SLIDES = [
     image: '/images/hero-parana.jpg',
     location: 'Costanera & Barrancas de Paraná',
     ctaText: 'Explorá Ofertas de Paraná',
-    ctaHref: '#ofertas-destacadas',
+    ctaHref: '/entre-rios/parana',
   },
   {
     id: 'colon',
@@ -28,7 +92,7 @@ const HERO_SLIDES = [
     image: '/images/hero-artesania.jpg',
     location: 'Colón, Entre Ríos',
     ctaText: 'Ver Productos de Colón',
-    ctaHref: '/ciudad/colon',
+    ctaHref: '/entre-rios/colon',
   },
   {
     id: 'concordia',
@@ -40,7 +104,7 @@ const HERO_SLIDES = [
     image: '/images/city-concordia.jpg',
     location: 'Concordia & Salto Grande',
     ctaText: 'Ver Productores de Concordia',
-    ctaHref: '/ciudad/concordia',
+    ctaHref: '/entre-rios/concordia',
   },
   {
     id: 'gualeguaychu',
@@ -52,35 +116,45 @@ const HERO_SLIDES = [
     image: '/images/city-gualeguaychu.jpg',
     location: 'Gualeguaychú, Entre Ríos',
     ctaText: 'Descubrir Gualeguaychú',
-    ctaHref: '/ciudad/gualeguaychu',
+    ctaHref: '/entre-rios/gualeguaychu',
   },
 ];
 
-export function ClientHeroBanner() {
+interface ClientHeroBannerProps {
+  provinceId?: string;
+}
+
+export function ClientHeroBanner({ provinceId = 'santa-fe' }: ClientHeroBannerProps) {
+  const slides = provinceId === 'entre-rios' ? ENTRE_RIOS_SLIDES : SANTA_FE_SLIDES;
   const [currentIndex, setCurrentIndex] = useState(0);
 
+  // Reset index when province changes
+  useEffect(() => {
+    setCurrentIndex(0);
+  }, [provinceId]);
+
   const nextSlide = useCallback(() => {
-    setCurrentIndex((prev) => (prev + 1) % HERO_SLIDES.length);
-  }, []);
+    setCurrentIndex((prev) => (prev + 1) % slides.length);
+  }, [slides.length]);
 
   const prevSlide = useCallback(() => {
-    setCurrentIndex((prev) => (prev - 1 + HERO_SLIDES.length) % HERO_SLIDES.length);
-  }, []);
+    setCurrentIndex((prev) => (prev - 1 + slides.length) % slides.length);
+  }, [slides.length]);
 
   useEffect(() => {
     const interval = setInterval(nextSlide, 5000);
     return () => clearInterval(interval);
   }, [nextSlide]);
 
-  const activeSlide = HERO_SLIDES[currentIndex];
+  const activeSlide = slides[currentIndex] || slides[0];
 
   return (
     <section 
-      aria-label="Carrusel Destacado de Entre Ríos"
+      aria-label="Carrusel Destacado Regional"
       className="relative w-full overflow-hidden bg-slate-950 min-h-[420px] sm:min-h-[480px] flex items-center shadow-lg group"
     >
       {/* Background Images with Fade Transition */}
-      {HERO_SLIDES.map((slide, idx) => (
+      {slides.map((slide, idx) => (
         <div
           key={slide.id}
           className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${
@@ -137,22 +211,22 @@ export function ClientHeroBanner() {
                 <ArrowRight className="w-5 h-5" />
               </Link>
 
-              {/* Clean Nav Controls (Without Play/Pause) */}
+              {/* Clean Nav Controls */}
               <div className="flex items-center gap-2 bg-black/40 backdrop-blur-md px-3 py-1.5 rounded-2xl border border-white/20">
                 <button
                   onClick={prevSlide}
-                  className="text-white/80 hover:text-white p-1.5 rounded-full hover:bg-white/20 transition-colors"
+                  className="text-white/80 hover:text-white p-1.5 rounded-full hover:bg-white/20 transition-colors cursor-pointer"
                   aria-label="Slide anterior"
                 >
                   <ChevronLeft className="w-5 h-5" />
                 </button>
 
                 <div className="flex items-center gap-1.5 px-2">
-                  {HERO_SLIDES.map((_, idx) => (
+                  {slides.map((_, idx) => (
                     <button
                       key={idx}
                       onClick={() => setCurrentIndex(idx)}
-                      className={`h-2.5 rounded-full transition-all duration-300 ${
+                      className={`h-2.5 rounded-full transition-all duration-300 cursor-pointer ${
                         idx === currentIndex ? 'w-7 bg-[#00E5E8]' : 'w-2.5 bg-white/50 hover:bg-white/80'
                       }`}
                       aria-label={`Ir a slide ${idx + 1}`}
@@ -162,7 +236,7 @@ export function ClientHeroBanner() {
 
                 <button
                   onClick={nextSlide}
-                  className="text-white/80 hover:text-white p-1.5 rounded-full hover:bg-white/20 transition-colors"
+                  className="text-white/80 hover:text-white p-1.5 rounded-full hover:bg-white/20 transition-colors cursor-pointer"
                   aria-label="Slide siguiente"
                 >
                   <ChevronRight className="w-5 h-5" />
