@@ -4,7 +4,7 @@ import React, { useState, Suspense } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
-import { Mail, Lock, ArrowRight, Sparkles, MapPin, KeyRound, CheckCircle2, User } from 'lucide-react';
+import { Mail, Lock, ArrowRight, Sparkles, MapPin, KeyRound, User } from 'lucide-react';
 import { getCitiesByProvince } from '@/lib/constants/locations';
 
 function LoginFormContent() {
@@ -44,6 +44,8 @@ function LoginFormContent() {
 
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (loading) return;
+    
     setLoading(true);
     setMessage(null);
 
@@ -62,11 +64,14 @@ function LoginFormContent() {
           return;
         }
 
-        // 1. SignUp en Supabase Auth
+        const redirectOrigin = typeof window !== 'undefined' ? window.location.origin : 'https://entre-rios-on.vercel.app';
+
+        // 1. SignUp en Supabase Auth con emailRedirectTo configurado hacia la URL del entorno
         const { data: authData, error: signUpErr } = await supabase.auth.signUp({
           email,
           password,
           options: {
+            emailRedirectTo: `${redirectOrigin}/auth/callback?next=/admin`,
             data: {
               first_name: firstName,
               last_name: lastName,
@@ -108,14 +113,28 @@ function LoginFormContent() {
           console.warn('Nota registro comercio:', commErr.message);
         }
 
-        setMessage({
-          type: 'success',
-          text: '¡Cuenta comercial registrada con éxito! Ingresando a tu panel...',
+        // 3. Intentar iniciar sesión automáticamente si Supabase tiene deshabilitada la confirmación por email
+        const { data: signInData } = await supabase.auth.signInWithPassword({
+          email,
+          password,
         });
 
-        setTimeout(() => {
-          router.push(redirectTo);
-        }, 1200);
+        if (signInData?.session) {
+          setMessage({
+            type: 'success',
+            text: '¡Cuenta comercial registrada e iniciada con éxito! Redirigiendo a tu panel...',
+          });
+          setTimeout(() => {
+            router.push(redirectTo);
+          }, 1200);
+        } else {
+          // Si requiere activación por correo
+          setMessage({
+            type: 'success',
+            text: `¡Registro exitoso! Enviamos un correo de confirmación a ${email}. Por favor, revisá tu casilla (y carpeta Spam) para activar tu cuenta e ingresar.`,
+          });
+          setLoading(false);
+        }
       } else if (mode === 'login') {
         // Sign In
         const { error } = await supabase.auth.signInWithPassword({
@@ -135,7 +154,8 @@ function LoginFormContent() {
             return;
           }
 
-          setMessage({ type: 'error', text: 'Credenciales incorrectas. Verificá tu email y contraseña.' });
+          setMessage({ type: 'error', text: 'Credenciales incorrectas o correo no confirmado. Verificá tu información.' });
+          setLoading(false);
         } else {
           setMessage({ type: 'success', text: '¡Sesión iniciada con éxito! Redirigiendo...' });
           setTimeout(() => {
@@ -144,8 +164,9 @@ function LoginFormContent() {
         }
       } else if (mode === 'forgot') {
         // Olvidé mi contraseña (Reset password)
+        const redirectOrigin = typeof window !== 'undefined' ? window.location.origin : 'https://entre-rios-on.vercel.app';
         const { error } = await supabase.auth.resetPasswordForEmail(email, {
-          redirectTo: `${window.location.origin}/login?mode=reset`,
+          redirectTo: `${redirectOrigin}/login?mode=reset`,
         });
 
         if (error) {
@@ -156,10 +177,10 @@ function LoginFormContent() {
             text: '¡Instrucciones enviadas! Revisá tu casilla de correo electrónico.',
           });
         }
+        setLoading(false);
       }
     } catch {
       router.push('/admin');
-    } finally {
       setLoading(false);
     }
   };
@@ -171,8 +192,9 @@ function LoginFormContent() {
       <div className="flex items-center justify-center gap-6 border-b border-slate-200 pb-3">
         <button
           type="button"
+          disabled={loading}
           onClick={() => { setMode('login'); setMessage(null); }}
-          className={`text-sm font-black transition-colors cursor-pointer ${
+          className={`text-sm font-black transition-colors cursor-pointer disabled:opacity-50 ${
             mode === 'login' ? 'text-[#0047BA] border-b-2 border-[#0047BA] pb-1' : 'text-slate-400 hover:text-slate-600'
           }`}
         >
@@ -180,8 +202,9 @@ function LoginFormContent() {
         </button>
         <button
           type="button"
+          disabled={loading}
           onClick={() => { setMode('signup'); setMessage(null); }}
-          className={`text-sm font-black transition-colors cursor-pointer ${
+          className={`text-sm font-black transition-colors cursor-pointer disabled:opacity-50 ${
             mode === 'signup' ? 'text-[#00ADB5] border-b-2 border-[#00ADB5] pb-1' : 'text-slate-400 hover:text-slate-600'
           }`}
         >
@@ -201,12 +224,181 @@ function LoginFormContent() {
         </span>
       </div>
 
-      {/* Feedback Message Alert */}
+      {/* Formulario Principal con Bloqueo Total mientras Carga */}
+      <form onSubmit={handleAuth} className="space-y-4">
+        <fieldset disabled={loading} className="space-y-4 group-disabled:opacity-60">
+          {mode === 'signup' && (
+            <>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Nombre *</label>
+                  <div className="relative">
+                    <User className="w-4 h-4 absolute left-3.5 top-3 text-slate-400" />
+                    <input
+                      type="text"
+                      required
+                      autoComplete="given-name"
+                      placeholder="Juan"
+                      value={firstName}
+                      onChange={(e) => setFirstName(e.target.value)}
+                      className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-xs text-slate-800 focus:ring-2 focus:ring-[#00ADB5] focus:bg-white disabled:bg-slate-100 disabled:cursor-not-allowed"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Apellido *</label>
+                  <div className="relative">
+                    <User className="w-4 h-4 absolute left-3.5 top-3 text-slate-400" />
+                    <input
+                      type="text"
+                      required
+                      autoComplete="family-name"
+                      placeholder="Pérez"
+                      value={lastName}
+                      onChange={(e) => setLastName(e.target.value)}
+                      className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-xs text-slate-800 focus:ring-2 focus:ring-[#00ADB5] focus:bg-white disabled:bg-slate-100 disabled:cursor-not-allowed"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1">Nombre Comercial de la Empresa / Pyme *</label>
+                <input
+                  type="text"
+                  required
+                  autoComplete="organization"
+                  placeholder="Ej. Parador & Bar Costanera"
+                  value={commerceName}
+                  onChange={(e) => setCommerceName(e.target.value)}
+                  className="w-full px-4 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-xs text-slate-800 focus:ring-2 focus:ring-[#00ADB5] focus:bg-white disabled:bg-slate-100 disabled:cursor-not-allowed"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Provincia *</label>
+                  <select
+                    value={provinceId}
+                    onChange={(e) => handleProvinceChange(e.target.value)}
+                    className="w-full px-3 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-xs font-bold text-slate-800 focus:ring-2 focus:ring-[#00ADB5] disabled:bg-slate-100 disabled:cursor-not-allowed"
+                  >
+                    <option value="santa-fe">Santa Fe</option>
+                    <option value="entre-rios">Entre Ríos</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Ciudad *</label>
+                  <select
+                    value={cityName}
+                    onChange={(e) => setCityName(e.target.value)}
+                    className="w-full px-3 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-xs font-bold text-slate-800 focus:ring-2 focus:ring-[#00ADB5] disabled:bg-slate-100 disabled:cursor-not-allowed"
+                  >
+                    {availableCities.map((city) => (
+                      <option key={city.id} value={city.name}>
+                        {city.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1">Teléfono WhatsApp Corporativo *</label>
+                <input
+                  type="text"
+                  required
+                  autoComplete="tel"
+                  placeholder="5493415550199"
+                  value={phoneWhatsApp}
+                  onChange={(e) => setPhoneWhatsApp(e.target.value)}
+                  className="w-full px-4 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-xs text-slate-800 font-mono focus:ring-2 focus:ring-[#00ADB5] focus:bg-white disabled:bg-slate-100 disabled:cursor-not-allowed"
+                />
+              </div>
+            </>
+          )}
+
+          <div>
+            <label className="block text-xs font-bold text-slate-700 mb-1">Correo Electrónico *</label>
+            <div className="relative">
+              <Mail className="w-4 h-4 absolute left-3.5 top-3 text-slate-400" />
+              <input
+                type="email"
+                required
+                autoComplete="email"
+                placeholder="contacto@miempresa.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-xs text-slate-800 focus:ring-2 focus:ring-[#00ADB5] focus:bg-white disabled:bg-slate-100 disabled:cursor-not-allowed"
+              />
+            </div>
+          </div>
+
+          {mode !== 'forgot' && (
+            <>
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1">Contraseña *</label>
+                <div className="relative">
+                  <Lock className="w-4 h-4 absolute left-3.5 top-3 text-slate-400" />
+                  <input
+                    type="password"
+                    required
+                    autoComplete={mode === 'signup' ? 'new-password' : 'current-password'}
+                    placeholder="••••••••"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-xs text-slate-800 focus:ring-2 focus:ring-[#00ADB5] focus:bg-white disabled:bg-slate-100 disabled:cursor-not-allowed"
+                  />
+                </div>
+              </div>
+
+              {mode === 'signup' && (
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Confirmar Contraseña *</label>
+                  <div className="relative">
+                    <Lock className="w-4 h-4 absolute left-3.5 top-3 text-slate-400" />
+                    <input
+                      type="password"
+                      required
+                      autoComplete="new-password"
+                      placeholder="••••••••"
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-xs text-slate-800 focus:ring-2 focus:ring-[#00ADB5] focus:bg-white disabled:bg-slate-100 disabled:cursor-not-allowed"
+                    />
+                  </div>
+                </div>
+              )}
+            </>
+          )}
+
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full bg-gradient-to-r from-[#0047BA] to-[#002878] hover:from-[#0B66FF] hover:to-[#0047BA] text-white py-3 rounded-2xl font-extrabold text-xs flex items-center justify-center gap-2 shadow-md transition-transform active:scale-95 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <span>
+              {loading
+                ? 'Procesando...'
+                : mode === 'signup'
+                ? 'Crear Cuenta Comercial'
+                : mode === 'forgot'
+                ? 'Enviar Enlace de Recuperación'
+                : 'Ingresar al Panel'}
+            </span>
+            <ArrowRight className="w-4 h-4" />
+          </button>
+        </fieldset>
+      </form>
+
+      {/* Feedback Message Alert (Ubicado AL FINAL del formulario para que sea siempre visible) */}
       {message && (
         <div
-          className={`p-3.5 rounded-2xl text-xs font-extrabold border ${
+          className={`p-4 rounded-2xl text-xs font-bold border leading-relaxed shadow-sm ${
             message.type === 'success'
-              ? 'bg-cyan-50 text-[#007C8A] border-cyan-200'
+              ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
               : 'bg-rose-50 text-rose-800 border-rose-200'
           }`}
         >
@@ -214,173 +406,14 @@ function LoginFormContent() {
         </div>
       )}
 
-      {/* Formulario Principal */}
-      <form onSubmit={handleAuth} className="space-y-4">
-        {mode === 'signup' && (
-          <>
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">Nombre *</label>
-                <div className="relative">
-                  <User className="w-4 h-4 absolute left-3.5 top-3 text-slate-400" />
-                  <input
-                    type="text"
-                    required
-                    placeholder="Juan"
-                    value={firstName}
-                    onChange={(e) => setFirstName(e.target.value)}
-                    className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-xs text-slate-800 focus:ring-2 focus:ring-[#00ADB5] focus:bg-white"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">Apellido *</label>
-                <div className="relative">
-                  <User className="w-4 h-4 absolute left-3.5 top-3 text-slate-400" />
-                  <input
-                    type="text"
-                    required
-                    placeholder="Pérez"
-                    value={lastName}
-                    onChange={(e) => setLastName(e.target.value)}
-                    className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-xs text-slate-800 focus:ring-2 focus:ring-[#00ADB5] focus:bg-white"
-                  />
-                </div>
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-xs font-bold text-slate-700 mb-1">Nombre Comercial de la Empresa / Pyme *</label>
-              <input
-                type="text"
-                required
-                placeholder="Ej. Parador & Bar Costanera"
-                value={commerceName}
-                onChange={(e) => setCommerceName(e.target.value)}
-                className="w-full px-4 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-xs text-slate-800 focus:ring-2 focus:ring-[#00ADB5] focus:bg-white"
-              />
-            </div>
-
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">Provincia *</label>
-                <select
-                  value={provinceId}
-                  onChange={(e) => handleProvinceChange(e.target.value)}
-                  className="w-full px-3 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-xs font-bold text-slate-800 focus:ring-2 focus:ring-[#00ADB5]"
-                >
-                  <option value="santa-fe">Santa Fe</option>
-                  <option value="entre-rios">Entre Ríos</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">Ciudad *</label>
-                <select
-                  value={cityName}
-                  onChange={(e) => setCityName(e.target.value)}
-                  className="w-full px-3 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-xs font-bold text-slate-800 focus:ring-2 focus:ring-[#00ADB5]"
-                >
-                  {availableCities.map((city) => (
-                    <option key={city.id} value={city.name}>
-                      {city.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-xs font-bold text-slate-700 mb-1">Teléfono WhatsApp Corporativo *</label>
-              <input
-                type="text"
-                required
-                placeholder="5493415550199"
-                value={phoneWhatsApp}
-                onChange={(e) => setPhoneWhatsApp(e.target.value)}
-                className="w-full px-4 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-xs text-slate-800 font-mono focus:ring-2 focus:ring-[#00ADB5] focus:bg-white"
-              />
-            </div>
-          </>
-        )}
-
-        <div>
-          <label className="block text-xs font-bold text-slate-700 mb-1">Correo Electrónico *</label>
-          <div className="relative">
-            <Mail className="w-4 h-4 absolute left-3.5 top-3 text-slate-400" />
-            <input
-              type="email"
-              required
-              placeholder="contacto@miempresa.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-xs text-slate-800 focus:ring-2 focus:ring-[#00ADB5] focus:bg-white"
-            />
-          </div>
-        </div>
-
-        {mode !== 'forgot' && (
-          <>
-            <div>
-              <label className="block text-xs font-bold text-slate-700 mb-1">Contraseña *</label>
-              <div className="relative">
-                <Lock className="w-4 h-4 absolute left-3.5 top-3 text-slate-400" />
-                <input
-                  type="password"
-                  required
-                  placeholder="••••••••"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-xs text-slate-800 focus:ring-2 focus:ring-[#00ADB5] focus:bg-white"
-                />
-              </div>
-            </div>
-
-            {mode === 'signup' && (
-              <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">Confirmar Contraseña *</label>
-                <div className="relative">
-                  <Lock className="w-4 h-4 absolute left-3.5 top-3 text-slate-400" />
-                  <input
-                    type="password"
-                    required
-                    placeholder="••••••••"
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-xs text-slate-800 focus:ring-2 focus:ring-[#00ADB5] focus:bg-white"
-                  />
-                </div>
-              </div>
-            )}
-          </>
-        )}
-
-        <button
-          type="submit"
-          disabled={loading}
-          className="w-full bg-gradient-to-r from-[#0047BA] to-[#002878] hover:from-[#0B66FF] hover:to-[#0047BA] text-white py-3 rounded-2xl font-extrabold text-xs flex items-center justify-center gap-2 shadow-md transition-transform active:scale-95 cursor-pointer disabled:opacity-50"
-        >
-          <span>
-            {loading
-              ? 'Procesando...'
-              : mode === 'signup'
-              ? 'Crear Cuenta Comercial'
-              : mode === 'forgot'
-              ? 'Enviar Enlace de Recuperación'
-              : 'Ingresar al Panel'}
-          </span>
-          <ArrowRight className="w-4 h-4" />
-        </button>
-      </form>
-
       {/* Olvidé mi contraseña / Volver al Login */}
       <div className="pt-2 border-t border-slate-100 text-center space-y-2">
         {mode === 'login' ? (
           <button
             type="button"
+            disabled={loading}
             onClick={() => { setMode('forgot'); setMessage(null); }}
-            className="text-xs font-extrabold text-[#0047BA] hover:underline cursor-pointer inline-flex items-center gap-1"
+            className="text-xs font-extrabold text-[#0047BA] hover:underline cursor-pointer inline-flex items-center gap-1 disabled:opacity-50"
           >
             <KeyRound className="w-3.5 h-3.5 text-[#00ADB5]" />
             <span>¿Olvidaste tu contraseña?</span>
@@ -388,8 +421,9 @@ function LoginFormContent() {
         ) : (
           <button
             type="button"
+            disabled={loading}
             onClick={() => { setMode('login'); setMessage(null); }}
-            className="text-xs font-extrabold text-slate-500 hover:text-slate-800 cursor-pointer"
+            className="text-xs font-extrabold text-slate-500 hover:text-slate-800 cursor-pointer disabled:opacity-50"
           >
             ← Volver a Ingresar
           </button>
