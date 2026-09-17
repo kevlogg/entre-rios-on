@@ -8,7 +8,7 @@ import { DynamicLayoutWrapper } from '@/components/layout/DynamicLayoutWrapper';
 import { registerRaffleParticipantAction } from '@/server/actions/public';
 
 export default function SorteosPage() {
-  const [formData, setFormData] = useState({ name: '', phone: '', city: 'Paraná', email: '' });
+  const [formData, setFormData] = useState({ name: '', phone: '', city: 'Rosario', email: '' });
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -123,14 +123,28 @@ export default function SorteosPage() {
                     onChange={(e) => setFormData({ ...formData, city: e.target.value })}
                     className="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-2.5 text-sm text-slate-800 focus:outline-hidden focus:ring-2 focus:ring-[#00ADB5]"
                   >
-                    <option value="Paraná">Paraná</option>
-                    <option value="Concordia">Concordia</option>
-                    <option value="Colón">Colón</option>
-                    <option value="Gualeguaychú">Gualeguaychú</option>
-                    <option value="Concepción del Uruguay">Concepción del Uruguay</option>
-                    <option value="Federación">Federación</option>
-                    <option value="Villa Elisa">Villa Elisa</option>
-                    <option value="Chajarí">Chajarí</option>
+                    <optgroup label="— Santa Fe —">
+                      <option value="Rosario">Rosario</option>
+                      <option value="Santa Fe Capital">Santa Fe Capital</option>
+                      <option value="Rafaela">Rafaela</option>
+                      <option value="Venado Tuerto">Venado Tuerto</option>
+                      <option value="Reconquista">Reconquista</option>
+                      <option value="Santo Tomé">Santo Tomé</option>
+                      <option value="Esperanza">Esperanza</option>
+                    </optgroup>
+                    <optgroup label="— Entre Ríos —">
+                      <option value="Paraná">Paraná</option>
+                      <option value="Concordia">Concordia</option>
+                      <option value="Colón">Colón</option>
+                      <option value="Gualeguaychú">Gualeguaychú</option>
+                      <option value="Concepción del Uruguay">Concepción del Uruguay</option>
+                      <option value="Federación">Federación</option>
+                      <option value="Villa Elisa">Villa Elisa</option>
+                      <option value="Chajarí">Chajarí</option>
+                    </optgroup>
+                    <optgroup label="— Otras —">
+                      <option value="Otra localidad">Otra localidad</option>
+                    </optgroup>
                   </select>
                 </div>
 

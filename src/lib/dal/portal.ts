@@ -4,10 +4,10 @@ import { ALL_CITIES } from '@/lib/constants/locations';
 // Mock Cities Data
 const CITIES_MOCK: City[] = ALL_CITIES;
 
-// Hero Editorial Slides
+// Hero Editorial Slides — Entre Ríos
 const HERO_SLIDES_MOCK: BannerSlide[] = [
   {
-    id: 'slide-1',
+    id: 'slide-er-1',
     title: 'XXXIX Fiesta Nacional de la Artesanía',
     subtitle: 'Vení a Colón a vivir 9 días de arte en vivo, música popular, orfebres del país y la mejor gastronomía costera.',
     badgeText: 'Fiesta Nacional • Colón',
@@ -19,7 +19,7 @@ const HERO_SLIDES_MOCK: BannerSlide[] = [
     publishedAt: '2026-09-05',
   },
   {
-    id: 'slide-2',
+    id: 'slide-er-2',
     title: 'Semana de los Sabores del Río Paraná',
     subtitle: 'Más de 25 restaurantes y comedores de barranca ofrecen platos exclusivos con dorado, surubí y surubí ahumado.',
     badgeText: 'Gastronomía • Paraná',
@@ -31,7 +31,7 @@ const HERO_SLIDES_MOCK: BannerSlide[] = [
     publishedAt: '2026-09-06',
   },
   {
-    id: 'slide-3',
+    id: 'slide-er-3',
     title: 'Ruta del Vino y Viñedos de Gualeguaychú',
     subtitle: 'Recorridos guiados por las bodegas boutique entrerrianas con catas al atardecer frente al río.',
     badgeText: 'Enoturismo • Gualeguaychú',
@@ -41,7 +41,47 @@ const HERO_SLIDES_MOCK: BannerSlide[] = [
     ctaUrl: '#catalogo',
     cityTag: 'Gualeguaychú',
     publishedAt: '2026-09-07',
-  }
+  },
+];
+
+// Hero Editorial Slides — Santa Fe
+const HERO_SLIDES_SANTA_FE_MOCK: BannerSlide[] = [
+  {
+    id: 'slide-sf-1',
+    title: 'Rosario: la Ciudad del Río más Vibrante del Litoral',
+    subtitle: 'Gastronomía de vanguardia, arte urbano, ferias de diseño y la costanera más activa del país te esperan en Rosario.',
+    badgeText: 'Destino ON MÁS • Rosario',
+    badgeType: 'tourism',
+    imageUrl: '/images/hero-rosario.jpg',
+    ctaText: 'Explorar Rosario',
+    ctaUrl: '#catalogo',
+    cityTag: 'Rosario',
+    publishedAt: '2026-09-05',
+  },
+  {
+    id: 'slide-sf-2',
+    title: 'Cuenca Láctea de Rafaela: Quesos y Sabores del Oeste Santafesino',
+    subtitle: 'Descubrí los productores artesanales de quesos, dulce de leche de campo y chacinados únicos de la región láctea más importante de Argentina.',
+    badgeText: 'Gastronomía Artesanal • Rafaela',
+    badgeType: 'commerce',
+    imageUrl: '/images/prod-dulces.jpg',
+    ctaText: 'Ver Productores',
+    ctaUrl: '#catalogo',
+    cityTag: 'Rafaela',
+    publishedAt: '2026-09-06',
+  },
+  {
+    id: 'slide-sf-3',
+    title: 'Santa Fe Capital: Historia, Río y Gastronomía Litoraleña',
+    subtitle: 'La capital provincial combina arquitectura colonial, Laguna Setúbal y una escena gastronómica rica en tradición litoraleña y cocina de fusión.',
+    badgeText: 'Capital Provincial • Santa Fe',
+    badgeType: 'event',
+    imageUrl: '/images/city-santa-fe-capital.jpg',
+    ctaText: 'Descubrir Santa Fe',
+    ctaUrl: '#catalogo',
+    cityTag: 'Santa Fe Capital',
+    publishedAt: '2026-09-07',
+  },
 ];
 
 // Mock Commerces
@@ -620,8 +660,8 @@ function isSupabaseConfigured(): boolean {
 export async function getCities(): Promise<City[]> {
   if (isSupabaseConfigured()) {
     try {
-      const { createClient } = await import('@/lib/supabase/server');
-      const supabase = await createClient();
+      const { createPublicClient } = await import('@/lib/supabase/public');
+      const supabase = createPublicClient();
       const { data, error } = await supabase.from('cities').select('*');
       if (!error && data && data.length > 0) {
         return data.map((c) => ({
@@ -646,8 +686,8 @@ export async function getCities(): Promise<City[]> {
 export async function getCityBySlug(slug: string): Promise<City | undefined> {
   if (isSupabaseConfigured()) {
     try {
-      const { createClient } = await import('@/lib/supabase/server');
-      const supabase = await createClient();
+      const { createPublicClient } = await import('@/lib/supabase/public');
+      const supabase = createPublicClient();
       const { data, error } = await supabase.from('cities').select('*').or(`slug.eq.${slug},id.eq.${slug}`).single();
       if (!error && data) {
         return {
@@ -669,12 +709,16 @@ export async function getCityBySlug(slug: string): Promise<City | undefined> {
   return CITIES_MOCK.find((c) => c.slug === slug || c.id === slug);
 }
 
-export async function getHeroSlides(): Promise<BannerSlide[]> {
+export async function getHeroSlides(provinceId?: string): Promise<BannerSlide[]> {
   if (isSupabaseConfigured()) {
     try {
-      const { createClient } = await import('@/lib/supabase/server');
-      const supabase = await createClient();
-      const { data, error } = await supabase.from('banner_slides').select('*').order('created_at', { ascending: false });
+      const { createPublicClient } = await import('@/lib/supabase/public');
+      const supabase = createPublicClient();
+      let query = supabase.from('banner_slides').select('*').order('created_at', { ascending: false });
+      if (provinceId && provinceId !== 'all') {
+        query = query.eq('province_id', provinceId);
+      }
+      const { data, error } = await query;
       if (!error && data && data.length > 0) {
         return data.map((slide) => ({
           id: slide.id,
@@ -694,14 +738,17 @@ export async function getHeroSlides(): Promise<BannerSlide[]> {
     }
   }
   await simulateNetworkDelay();
-  return HERO_SLIDES_MOCK;
+  // Return province-specific slides in mock mode
+  if (provinceId === 'santa-fe') return HERO_SLIDES_SANTA_FE_MOCK;
+  if (provinceId === 'entre-rios') return HERO_SLIDES_MOCK;
+  return [...HERO_SLIDES_SANTA_FE_MOCK, ...HERO_SLIDES_MOCK];
 }
 
 export async function getFeaturedProducts(cityId?: string, categoryId?: string): Promise<Product[]> {
   if (isSupabaseConfigured()) {
     try {
-      const { createClient } = await import('@/lib/supabase/server');
-      const supabase = await createClient();
+      const { createPublicClient } = await import('@/lib/supabase/public');
+      const supabase = createPublicClient();
       let query = supabase.from('products').select('*');
       if (cityId && cityId !== 'all') {
         query = query.eq('city_id', cityId);
@@ -753,8 +800,8 @@ export async function getFeaturedProducts(cityId?: string, categoryId?: string):
 export async function getProductBySlug(slug: string): Promise<Product | undefined> {
   if (isSupabaseConfigured()) {
     try {
-      const { createClient } = await import('@/lib/supabase/server');
-      const supabase = await createClient();
+      const { createPublicClient } = await import('@/lib/supabase/public');
+      const supabase = createPublicClient();
       const { data, error } = await supabase.from('products').select('*').or(`slug.eq.${slug},id.eq.${slug}`).single();
       if (!error && data) {
         return {
@@ -788,8 +835,8 @@ export async function getProductBySlug(slug: string): Promise<Product | undefine
 export async function getAllCommerces(): Promise<Commerce[]> {
   if (isSupabaseConfigured()) {
     try {
-      const { createClient } = await import('@/lib/supabase/server');
-      const supabase = await createClient();
+      const { createPublicClient } = await import('@/lib/supabase/public');
+      const supabase = createPublicClient();
       const { data, error } = await supabase.from('commerces').select('*');
       if (!error && data && data.length > 0) {
         return data.map((c) => ({
@@ -824,8 +871,8 @@ export async function getAllCommerces(): Promise<Commerce[]> {
 export async function getCommerceBySlug(slug: string): Promise<Commerce | undefined> {
   if (isSupabaseConfigured()) {
     try {
-      const { createClient } = await import('@/lib/supabase/server');
-      const supabase = await createClient();
+      const { createPublicClient } = await import('@/lib/supabase/public');
+      const supabase = createPublicClient();
       const { data, error } = await supabase.from('commerces').select('*').or(`slug.eq.${slug},id.eq.${slug}`).single();
       if (!error && data) {
         return {
@@ -860,8 +907,8 @@ export async function getCommerceBySlug(slug: string): Promise<Commerce | undefi
 export async function getProductsByCommerce(commerceId: string): Promise<Product[]> {
   if (isSupabaseConfigured()) {
     try {
-      const { createClient } = await import('@/lib/supabase/server');
-      const supabase = await createClient();
+      const { createPublicClient } = await import('@/lib/supabase/public');
+      const supabase = createPublicClient();
       const { data, error } = await supabase.from('products').select('*').eq('commerce_id', commerceId);
       if (!error && data && data.length > 0) {
         return data.map((p) => ({
@@ -895,8 +942,8 @@ export async function getProductsByCommerce(commerceId: string): Promise<Product
 export async function getUpcomingEvents(cityId?: string): Promise<CommunityEvent[]> {
   if (isSupabaseConfigured()) {
     try {
-      const { createClient } = await import('@/lib/supabase/server');
-      const supabase = await createClient();
+      const { createPublicClient } = await import('@/lib/supabase/public');
+      const supabase = createPublicClient();
       let query = supabase.from('community_events').select('*').order('date', { ascending: true });
       if (cityId && cityId !== 'all') {
         query = query.eq('city_id', cityId);
@@ -938,8 +985,8 @@ export async function getUpcomingEvents(cityId?: string): Promise<CommunityEvent
 export async function getEventById(id: string): Promise<CommunityEvent | undefined> {
   if (isSupabaseConfigured()) {
     try {
-      const { createClient } = await import('@/lib/supabase/server');
-      const supabase = await createClient();
+      const { createPublicClient } = await import('@/lib/supabase/public');
+      const supabase = createPublicClient();
       const { data, error } = await supabase.from('community_events').select('*').eq('id', id).single();
       if (!error && data) {
         return {

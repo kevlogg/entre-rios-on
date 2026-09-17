@@ -1,5 +1,5 @@
 -- ========================================================
--- ENTRE RÍOS ON: ESQUEMA DE BASE DE DATOS POSTGRESQL (SUPABASE)
+-- ON MÁS: ESQUEMA DE BASE DE DATOS POSTGRESQL (SUPABASE)
 -- ========================================================
 
 -- Habilitar extensión UUID
@@ -16,11 +16,13 @@ CREATE TABLE IF NOT EXISTS public.profiles (
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
--- 2. TABLA DE CIUDADES / DEPARTAMENTOS DE ENTRE RÍOS
+-- 2. TABLA DE CIUDADES / DEPARTAMENTOS DE SANTA FE Y ENTRE RÍOS
 CREATE TABLE IF NOT EXISTS public.cities (
   id TEXT PRIMARY KEY,
   name TEXT NOT NULL,
   slug TEXT UNIQUE NOT NULL,
+  province_id TEXT NOT NULL DEFAULT 'santa-fe',
+  province_name TEXT NOT NULL DEFAULT 'Santa Fe',
   department TEXT NOT NULL,
   description TEXT NOT NULL,
   image_url TEXT NOT NULL,
@@ -35,6 +37,7 @@ CREATE TABLE IF NOT EXISTS public.commerces (
   name TEXT NOT NULL,
   slug TEXT UNIQUE NOT NULL,
   category TEXT NOT NULL,
+  province_id TEXT NOT NULL DEFAULT 'santa-fe',
   city_id TEXT NOT NULL REFERENCES public.cities(id) ON DELETE CASCADE,
   city_name TEXT NOT NULL,
   description TEXT NOT NULL,
@@ -56,6 +59,8 @@ CREATE TABLE IF NOT EXISTS public.commerces (
 
 -- Agregar Clave Foránea de perfil a comercio
 ALTER TABLE public.profiles 
+  DROP CONSTRAINT IF EXISTS fk_profile_commerce;
+ALTER TABLE public.profiles 
   ADD CONSTRAINT fk_profile_commerce 
   FOREIGN KEY (commerce_id) REFERENCES public.commerces(id) ON DELETE SET NULL;
 
@@ -68,6 +73,7 @@ CREATE TABLE IF NOT EXISTS public.products (
   currency TEXT DEFAULT 'ARS',
   commerce_id UUID NOT NULL REFERENCES public.commerces(id) ON DELETE CASCADE,
   commerce_name TEXT NOT NULL,
+  province_id TEXT NOT NULL DEFAULT 'santa-fe',
   city_id TEXT NOT NULL REFERENCES public.cities(id) ON DELETE CASCADE,
   city_name TEXT NOT NULL,
   image_url TEXT NOT NULL,
@@ -89,6 +95,7 @@ CREATE TABLE IF NOT EXISTS public.community_events (
   date DATE NOT NULL,
   formatted_date TEXT NOT NULL,
   location TEXT NOT NULL,
+  province_id TEXT NOT NULL DEFAULT 'santa-fe',
   city_id TEXT NOT NULL REFERENCES public.cities(id) ON DELETE CASCADE,
   city_name TEXT NOT NULL,
   image_url TEXT NOT NULL,
@@ -111,6 +118,7 @@ CREATE TABLE IF NOT EXISTS public.banner_slides (
   image_url TEXT NOT NULL,
   cta_text TEXT NOT NULL,
   cta_url TEXT NOT NULL,
+  province_id TEXT NOT NULL DEFAULT 'santa-fe',
   city_tag TEXT NOT NULL,
   published_at DATE NOT NULL DEFAULT CURRENT_DATE,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
@@ -121,6 +129,7 @@ CREATE TABLE IF NOT EXISTS public.classifieds (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   title TEXT NOT NULL,
   category TEXT NOT NULL CHECK (category IN ('Vehículos', 'Inmuebles', 'Maquinaria', 'Servicios', 'Otros')),
+  province_id TEXT NOT NULL DEFAULT 'santa-fe',
   city_name TEXT NOT NULL,
   price TEXT NOT NULL,
   image_url TEXT NOT NULL,
@@ -149,6 +158,7 @@ CREATE TABLE IF NOT EXISTS public.raffle_participants (
   raffle_id UUID NOT NULL REFERENCES public.raffles(id) ON DELETE CASCADE,
   full_name TEXT NOT NULL,
   phone_whatsapp TEXT NOT NULL,
+  province_id TEXT NOT NULL DEFAULT 'santa-fe',
   city_name TEXT NOT NULL,
   email TEXT,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
@@ -167,7 +177,9 @@ CREATE TABLE IF NOT EXISTS public.whatsapp_clicks (
 -- ========================================================
 -- ÍNDICES DE RENDIMIENTO DE CONSULTAS SQL
 -- ========================================================
+CREATE INDEX IF NOT EXISTS idx_cities_province ON public.cities(province_id);
 CREATE INDEX IF NOT EXISTS idx_commerces_city ON public.commerces(city_id);
+CREATE INDEX IF NOT EXISTS idx_commerces_province ON public.commerces(province_id);
 CREATE INDEX IF NOT EXISTS idx_commerces_slug ON public.commerces(slug);
 CREATE INDEX IF NOT EXISTS idx_products_commerce ON public.products(commerce_id);
 CREATE INDEX IF NOT EXISTS idx_products_city ON public.products(city_id);
@@ -189,27 +201,62 @@ ALTER TABLE public.raffle_participants ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.whatsapp_clicks ENABLE ROW LEVEL SECURITY;
 
 -- Lectura pública para elementos del portal
+DROP POLICY IF EXISTS "Public Read Cities" ON public.cities;
 CREATE POLICY "Public Read Cities" ON public.cities FOR SELECT USING (true);
+
+DROP POLICY IF EXISTS "Public Read Commerces" ON public.commerces;
 CREATE POLICY "Public Read Commerces" ON public.commerces FOR SELECT USING (true);
+
+DROP POLICY IF EXISTS "Public Read Products" ON public.products;
 CREATE POLICY "Public Read Products" ON public.products FOR SELECT USING (true);
+
+DROP POLICY IF EXISTS "Public Read Events" ON public.community_events;
 CREATE POLICY "Public Read Events" ON public.community_events FOR SELECT USING (true);
+
+DROP POLICY IF EXISTS "Public Read Banners" ON public.banner_slides;
 CREATE POLICY "Public Read Banners" ON public.banner_slides FOR SELECT USING (true);
+
+DROP POLICY IF EXISTS "Public Read Approved Classifieds" ON public.classifieds;
 CREATE POLICY "Public Read Approved Classifieds" ON public.classifieds FOR SELECT USING (status = 'APPROVED');
+
+DROP POLICY IF EXISTS "Public Read Active Raffles" ON public.raffles;
 CREATE POLICY "Public Read Active Raffles" ON public.raffles FOR SELECT USING (true);
 
 -- Permisos de Inserción Pública para Participantes de Sorteos y Clics de WhatsApp
+DROP POLICY IF EXISTS "Public Insert Raffle Participants" ON public.raffle_participants;
 CREATE POLICY "Public Insert Raffle Participants" ON public.raffle_participants FOR INSERT WITH CHECK (true);
+
+DROP POLICY IF EXISTS "Public Insert WhatsApp Clicks" ON public.whatsapp_clicks;
 CREATE POLICY "Public Insert WhatsApp Clicks" ON public.whatsapp_clicks FOR INSERT WITH CHECK (true);
 
 -- ========================================================
 -- DATOS SEMILLA (SEED DATA)
 -- ========================================================
-INSERT INTO public.cities (id, name, slug, department, description, image_url, is_featured, commerce_count)
+INSERT INTO public.cities (id, name, slug, province_id, province_name, department, description, image_url, is_featured, commerce_count)
 VALUES 
-  ('parana', 'Paraná', 'parana', 'Paraná', 'Capital provincial a orillas del majestuoso Río Paraná, destacada por sus barrancas, gastronomía fluvial y centro comercial.', '/images/city-parana.jpg', true, 342),
-  ('concordia', 'Concordia', 'concordia', 'Concordia', 'Corazón citrícola y termal sobre el Uruguay, epicentro de la producción de arándanos, citrus y turismo de pesca.', '/images/city-concordia.jpg', true, 215),
-  ('colon', 'Colón', 'colon', 'Colón', 'Capital Nacional de la Artesanía, playas de arenas blancas, complejas termas y portal de entrada al Parque Nacional El Palmar.', '/images/city-colon.jpg', true, 189),
-  ('gualeguaychu', 'Gualeguaychú', 'gualeguaychu', 'Gualeguaychú', 'Capital del Carnaval del País, con intensos viñedos locales, balnearios sobre el río Gualeguaychú y rica industria textil y gráfica.', '/images/city-gualeguaychu.jpg', true, 278),
-  ('concepcion-del-uruguay', 'Concepción del Uruguay', 'concepcion-del-uruguay', 'Uruguay', 'La Histórica de Entre Ríos, hogar del Palacio San José, polo universitario del litoral y activo puerto comercial.', '/images/city-concepcion.jpg', true, 164),
-  ('federacion', 'Federación', 'federacion', 'Federación', 'Pionera termal a orillas del Embalse Salto Grande, caracterizada por sus parques acuáticos y serenidad turística.', '/images/city-federacion.jpg', true, 120)
-ON CONFLICT (id) DO NOTHING;
+  -- Santa Fe
+  ('rosario', 'Rosario', 'rosario', 'santa-fe', 'Santa Fe', 'Rosario', 'Polo comercial, industrial y gastronómico a orillas del río Paraná.', '/images/city-rosario.jpg', true, 450),
+  ('santa-fe-capital', 'Santa Fe Capital', 'santa-fe-capital', 'santa-fe', 'Santa Fe', 'La Capital', 'Capital provincial, centro administrativo, universitario y cultural.', '/images/city-santa-fe-capital.jpg', true, 380),
+  ('rafaela', 'Rafaela', 'rafaela', 'santa-fe', 'Santa Fe', 'Castellanos', 'Corazón productivo e industrial del oeste santafesino.', '/images/city-rafaela.jpg', true, 190),
+  ('venado-tuerto', 'Venado Tuerto', 'venado-tuerto', 'santa-fe', 'Santa Fe', 'General López', 'Centro agroindustrial y comercial del sur de Santa Fe.', '/images/city-rafaela.jpg', false, 140),
+  ('reconquista', 'Reconquista', 'reconquista', 'santa-fe', 'Santa Fe', 'General Obligado', 'Polo comercial y agroganadero del norte santafesino.', '/images/city-rosario.jpg', false, 110),
+  ('santo-tome', 'Santo Tomé', 'santo-tome', 'santa-fe', 'Santa Fe', 'La Capital', 'Ciudad vecina conectada al área metropolitana santafesina.', '/images/city-santa-fe-capital.jpg', false, 85),
+  ('esperanza', 'Esperanza', 'esperanza', 'santa-fe', 'Santa Fe', 'Las Colonias', 'Primera colonia agrícola organizada de la República Argentina.', '/images/city-rafaela.jpg', false, 95),
+  -- Entre Ríos
+  ('parana', 'Paraná', 'parana', 'entre-rios', 'Entre Ríos', 'Paraná', 'Capital provincial de Entre Ríos con barrancas al río Paraná.', '/images/city-parana.jpg', true, 310),
+  ('concordia', 'Concordia', 'concordia', 'entre-rios', 'Entre Ríos', 'Concordia', 'Capital nacional del citrus y termas a orillas del río Uruguay.', '/images/city-concordia.jpg', true, 240),
+  ('colon', 'Colón', 'colon', 'entre-rios', 'Entre Ríos', 'Colón', 'Destino turístico con playas de arena blanca y termas.', '/images/city-colon.jpg', true, 180),
+  ('gualeguaychu', 'Gualeguaychú', 'gualeguaychu', 'entre-rios', 'Entre Ríos', 'Gualeguaychú', 'Bodegas boutique, enoturismo y eventos culturales.', '/images/city-gualeguaychu.jpg', true, 210),
+  ('concepcion-del-uruguay', 'Concepción del Uruguay', 'concepcion-del-uruguay', 'entre-rios', 'Entre Ríos', 'Uruguay', 'Ciudad histórica con puerto y polo universitario.', '/images/city-concepcion.jpg', false, 160),
+  ('federacion', 'Federación', 'federacion', 'entre-rios', 'Entre Ríos', 'Federación', 'Ciudad termal pionera a orillas del lago Salto Grande.', '/images/city-federacion.jpg', false, 120),
+  ('villa-elisa', 'Villa Elisa', 'villa-elisa', 'entre-rios', 'Entre Ríos', 'Colón', 'Jardín de Entre Ríos con complejo termal.', '/images/city-villaelisa.jpg', false, 90),
+  ('chajari', 'Chajarí', 'chajari', 'entre-rios', 'Entre Ríos', 'Federación', 'Polo citrícola y termal del noreste entrerriano.', '/images/city-chajari.jpg', false, 105)
+ON CONFLICT (id) DO UPDATE SET
+  name = EXCLUDED.name,
+  province_id = EXCLUDED.province_id,
+  province_name = EXCLUDED.province_name,
+  department = EXCLUDED.department,
+  description = EXCLUDED.description,
+  image_url = EXCLUDED.image_url,
+  is_featured = EXCLUDED.is_featured,
+  commerce_count = EXCLUDED.commerce_count;
