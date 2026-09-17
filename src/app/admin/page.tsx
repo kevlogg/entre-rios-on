@@ -12,85 +12,12 @@ import { ProfileEditor } from '@/components/admin/ProfileEditor';
 import { SubscriptionPlans } from '@/components/admin/SubscriptionPlans';
 import { MessageCircle, ShieldCheck, Zap, Sparkles, ExternalLink, ArrowRight, Store, Gift } from 'lucide-react';
 
-const INITIAL_MERCHANT_PRODUCTS: Product[] = [
-  {
-    id: 'p1',
-    title: 'Juego de Mates de Cerámica Cincelada y Alpaca',
-    slug: 'juego-mate-ceramica-alpaca',
-    price: 34500,
-    currency: 'ARS',
-    commerceId: 'c1',
-    commerceName: 'Alfarería & Cerámica Delta',
-    cityId: 'colon',
-    cityName: 'Colón',
-    imageUrl: '/images/prod-mate.jpg',
-    category: 'Hogar y Deco',
-    categoryId: 'hogar',
-    isFeatured: true,
-    description: 'Mate de cerámica artesanal horneada a 1200°C con virola grabada en alpaca con motivos de flora autóctona. Incluye bombilla de plata alemana.',
-    phoneWhatsApp: '5493447451234',
-  },
-  {
-    id: 'p6',
-    title: 'Cuchillo Criollo de Acero de Disco con Cabo de Guampa',
-    slug: 'cuchillo-criollo-disco-guampa',
-    price: 39000,
-    currency: 'ARS',
-    commerceId: 'c1',
-    commerceName: 'Alfarería & Cerámica Delta',
-    cityId: 'colon',
-    cityName: 'Colón',
-    imageUrl: '/images/prod-cuchillo.jpg',
-    category: 'Hogar y Deco',
-    categoryId: 'hogar',
-    isFeatured: false,
-    description: 'Forjado a mano por el maestro platero de Colón. Hoja de 18cm en acero de arado tratada térmicamente con vaina de cuero vacuno curtido.',
-    phoneWhatsApp: '5493447451234',
-  },
-  {
-    id: 'p13',
-    title: 'Juego de Grifería Monocomando para Baño Cromo',
-    slug: 'griferia-monocomando-bano-cromo',
-    price: 78500,
-    currency: 'ARS',
-    commerceId: 'c1',
-    commerceName: 'Alfarería & Cerámica Delta',
-    cityId: 'colon',
-    cityName: 'Colón',
-    imageUrl: '/images/prod-mate.jpg',
-    category: 'Construcción',
-    categoryId: 'construccion',
-    isFeatured: false,
-    description: 'Set completo lavatorio y bidet monocomando con aireador ecológico ahorrador de agua.',
-    phoneWhatsApp: '5493447451234',
-  },
-];
-
-const INITIAL_COMMERCE: Commerce = {
-  id: 'c1',
-  name: 'Alfarería & Cerámica Delta',
-  slug: 'alfareria-ceramica-delta',
-  category: 'Artesanías & Decoración',
-  cityId: 'colon',
-  cityName: 'Colón',
-  description: 'Taller galardonado de cerámica modelada a mano utilizando arcillas nativas de Colón y diseños inspirados en la fauna del litoral.',
-  rating: 4.9,
-  reviewCount: 84,
-  isVerified: true,
-  isSubscriptionActive: true,
-  logoUrl: '/images/commerce-alfareria.jpg',
-  coverUrl: '/images/commerce-alfareria.jpg',
-  phoneWhatsApp: '5493447451234',
-  address: '12 de Octubre 450, Colón',
-  instagram: '@ceramica.delta.colon',
-  website: 'https://alfareriadelta.com',
-};
-
 export default function AdminPage() {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<AdminTab>('dashboard');
-  const [commerce, setCommerce] = useState(INITIAL_COMMERCE);
-  const [products, setProducts] = useState<Product[]>(INITIAL_MERCHANT_PRODUCTS);
+  const [commerce, setCommerce] = useState<Commerce | null>(null);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
   const [waMessageTemplate, setWaMessageTemplate] = useState(
     'Hola, vi su negocio en el portal ON MÁS y me gustaría realizar una consulta.'
   );
@@ -109,9 +36,9 @@ export default function AdminPage() {
           return;
         }
 
-        let targetCommerce = null;
+        let targetCommerce: any = null;
 
-        // Buscar el comercio propiedad del usuario autenticado
+        // 2. Buscar el comercio propiedad del usuario autenticado por owner_id
         const { data: userCommerces } = await supabase
           .from('commerces')
           .select('*')
@@ -122,9 +49,13 @@ export default function AdminPage() {
           targetCommerce = userCommerces[0];
         }
 
-        // Si el usuario registrado no tiene comercio creado aún, lo creamos dinámicamente
+        // 3. Si el usuario no tiene registro aún en commerces, intentar crearlo en Supabase
         if (!targetCommerce) {
-          const merchantName = user.user_metadata?.commerce_name || user.user_metadata?.full_name || user.email?.split('@')[0] || 'Mi Comercio Comercial';
+          const merchantName =
+            user.user_metadata?.commerce_name ||
+            user.user_metadata?.full_name ||
+            user.email?.split('@')[0] ||
+            'Mi Empresa Comercial';
           const slug = merchantName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || `comm-${Date.now()}`;
 
           const { data: createdCommerce } = await supabase
@@ -153,33 +84,44 @@ export default function AdminPage() {
           }
         }
 
-        if (targetCommerce) {
-          const c = targetCommerce;
-          setCommerce({
-            id: c.id,
-            name: c.name,
-            slug: c.slug,
-            category: c.category || 'Comercio General',
-            cityId: c.city_id || 'rosario',
-            cityName: c.city_name || 'Rosario',
-            description: c.description || `Comercio adherido al portal ON MÁS en ${c.city_name}.`,
-            rating: Number(c.rating || 5.0),
-            reviewCount: c.review_count || 1,
-            isVerified: c.is_verified ?? true,
-            isSubscriptionActive: c.is_subscription_active ?? true,
-            logoUrl: c.logo_url || '/images/city-rosario.jpg',
-            coverUrl: c.cover_url || '/images/city-rosario.jpg',
-            phoneWhatsApp: c.phone_whatsapp || '',
-            address: c.address || `${c.city_name}, Argentina`,
-            instagram: c.instagram || '',
-            website: c.website || '',
-          });
+        // 4. Resolver objeto Commerce utilizando datos reales del usuario
+        const merchantName =
+          targetCommerce?.name ||
+          user.user_metadata?.commerce_name ||
+          user.user_metadata?.full_name ||
+          user.email?.split('@')[0] ||
+          'Mi Empresa Comercial';
 
-          // 2. Cargar productos vinculados a este comercio específico
+        const cityName = targetCommerce?.city_name || user.user_metadata?.city_name || 'Rosario';
+
+        const resolvedCommerce: Commerce = {
+          id: targetCommerce?.id || `comm-${user.id}`,
+          name: merchantName,
+          slug: targetCommerce?.slug || merchantName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || `comm-${Date.now()}`,
+          category: targetCommerce?.category || 'Comercio General',
+          cityId: targetCommerce?.city_id || 'rosario',
+          cityName: cityName,
+          description: targetCommerce?.description || `Comercio adherido al portal ON MÁS en ${cityName}.`,
+          rating: Number(targetCommerce?.rating || 5.0),
+          reviewCount: targetCommerce?.review_count || 1,
+          isVerified: targetCommerce?.is_verified ?? true,
+          isSubscriptionActive: targetCommerce?.is_subscription_active ?? true,
+          logoUrl: targetCommerce?.logo_url || '/images/city-rosario.jpg',
+          coverUrl: targetCommerce?.cover_url || '/images/city-rosario.jpg',
+          phoneWhatsApp: targetCommerce?.phone_whatsapp || '5493415550199',
+          address: targetCommerce?.address || `${cityName}, Argentina`,
+          instagram: targetCommerce?.instagram || '',
+          website: targetCommerce?.website || '',
+        };
+
+        setCommerce(resolvedCommerce);
+
+        // 5. Cargar productos vinculados a este comercio específico
+        if (targetCommerce?.id) {
           const { data: prodsData } = await supabase
             .from('products')
             .select('*')
-            .eq('commerce_id', c.id);
+            .eq('commerce_id', targetCommerce.id);
 
           if (prodsData && prodsData.length > 0) {
             setProducts(
@@ -206,14 +148,18 @@ export default function AdminPage() {
           } else {
             setProducts([]);
           }
+        } else {
+          setProducts([]);
         }
       } catch (err) {
-        console.warn('Fallback a datos de demostración en Admin:', err);
+        console.warn('Error al cargar datos en Admin:', err);
+      } finally {
+        setLoading(false);
       }
     }
 
     loadRealData();
-  }, []);
+  }, [router]);
 
   const handleAddProduct = (newProd: Product) => {
     setProducts((prev) => [newProd, ...prev]);
@@ -222,6 +168,15 @@ export default function AdminPage() {
   const handleDeleteProduct = (id: string) => {
     setProducts((prev) => prev.filter((p) => p.id !== id));
   };
+
+  if (loading || !commerce) {
+    return (
+      <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center text-white space-y-4">
+        <div className="w-10 h-10 border-4 border-[#00ADB5] border-t-transparent rounded-full animate-spin" />
+        <p className="text-xs font-bold text-slate-300">Cargando tu panel comercial...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex flex-col bg-[#f8fafc]">
