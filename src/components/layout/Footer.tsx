@@ -25,7 +25,7 @@ export function Footer() {
             </div>
 
             <p className="text-xs text-slate-200 leading-relaxed max-w-sm font-medium">
-              Plataforma regional híbrida que integra el Directorio Comercial B2B, el Catálogo de Productos directo a WhatsApp y el Portal de Medios y Turismo de la Provincia de Entre Ríos.
+              Plataforma regional híbrida que integra el Directorio Comercial B2B, el Catálogo de Productos directo a WhatsApp y el Portal de Medios y Turismo de la Región (Santa Fe & Entre Ríos).
             </p>
 
             <div className="flex items-center gap-3 pt-2">
@@ -43,12 +43,12 @@ export function Footer() {
           <div className="space-y-3">
             <h4 className="text-xs font-extrabold text-white uppercase tracking-wider">Nodos Regionales</h4>
             <ul className="space-y-2 text-xs text-slate-200 font-medium">
-              <li><Link href="/ciudad/parana" className="hover:text-[#00E5E8] transition-colors">Paraná (Capital)</Link></li>
-              <li><Link href="/ciudad/concordia" className="hover:text-[#00E5E8] transition-colors">Concordia</Link></li>
-              <li><Link href="/ciudad/colon" className="hover:text-[#00E5E8] transition-colors">Colón</Link></li>
-              <li><Link href="/ciudad/gualeguaychu" className="hover:text-[#00E5E8] transition-colors">Gualeguaychú</Link></li>
-              <li><Link href="/ciudad/concepcion-del-uruguay" className="hover:text-[#00E5E8] transition-colors">Concepción del Uruguay</Link></li>
-              <li><Link href="/ciudad/federacion" className="hover:text-[#00E5E8] transition-colors">Federación</Link></li>
+              <li><Link href="/santa-fe/rosario" className="hover:text-[#00E5E8] transition-colors">Rosario (Santa Fe)</Link></li>
+              <li><Link href="/santa-fe/santa-fe-capital" className="hover:text-[#00E5E8] transition-colors">Santa Fe Capital</Link></li>
+              <li><Link href="/santa-fe/rafaela" className="hover:text-[#00E5E8] transition-colors">Rafaela</Link></li>
+              <li><Link href="/entre-rios/parana" className="hover:text-[#00E5E8] transition-colors">Paraná (Entre Ríos)</Link></li>
+              <li><Link href="/entre-rios/concordia" className="hover:text-[#00E5E8] transition-colors">Concordia</Link></li>
+              <li><Link href="/entre-rios/colon" className="hover:text-[#00E5E8] transition-colors">Colón</Link></li>
             </ul>
           </div>
 

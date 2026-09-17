@@ -19,6 +19,7 @@ export async function createProductAction(productData: Partial<Product>): Promis
         currency: productData.currency || 'ARS',
         commerce_id: productData.commerceId || 'c1',
         commerce_name: productData.commerceName || 'Comercio Registrado',
+        province_id: productData.provinceId || 'santa-fe',
         city_id: productData.cityId || 'colon',
         city_name: productData.cityName || 'Colón',
         image_url: productData.imageUrl || '/images/prod-mate.jpg',

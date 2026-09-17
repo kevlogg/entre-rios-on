@@ -5,6 +5,7 @@ import Image from 'next/image';
 import { Product } from '@/types';
 import { Plus, Edit2, Trash2, Power, CheckCircle, Tag, ShoppingBag, X, Sparkles, MessageCircle } from 'lucide-react';
 import { CATEGORIES_LIST } from '@/lib/constants/categories';
+import { ALL_CITIES } from '@/lib/constants/locations';
 import { createProductAction, deleteProductAction } from '@/server/actions/catalog';
 import { ImageUploader } from '@/components/common/ImageUploader';
 
@@ -23,7 +24,7 @@ export function CatalogManager({ products, onAddProduct, onDeleteProduct }: Cata
   const [title, setTitle] = useState('');
   const [price, setPrice] = useState('');
   const [category, setCategory] = useState('gastronomia');
-  const [cityId, setCityId] = useState('colon');
+  const [cityId, setCityId] = useState('rosario');
   const [description, setDescription] = useState('');
   const [imageUrl, setImageUrl] = useState('/images/prod-mate.jpg');
 
@@ -37,6 +38,7 @@ export function CatalogManager({ products, onAddProduct, onDeleteProduct }: Cata
 
     setIsSubmitting(true);
     const selectedCatObj = CATEGORIES_LIST.find((c) => c.id === category);
+    const selectedCity = ALL_CITIES.find((c) => c.id === cityId) || ALL_CITIES[0];
 
     const newProd: Product = {
       id: `p-new-${Date.now()}`,
@@ -45,16 +47,17 @@ export function CatalogManager({ products, onAddProduct, onDeleteProduct }: Cata
       price: parseFloat(price) || 0,
       currency: 'ARS',
       commerceId: 'c1',
-      commerceName: 'Alfarería & Cerámica Delta',
-      cityId,
-      cityName: cityId === 'colon' ? 'Colón' : cityId === 'parana' ? 'Paraná' : 'Concordia',
+      commerceName: 'Comercio ON MÁS',
+      cityId: selectedCity.id,
+      cityName: selectedCity.name,
+      provinceId: selectedCity.provinceId,
       imageUrl: imageUrl || '/images/prod-mate.jpg',
       category: selectedCatObj ? selectedCatObj.label : 'Productos',
       categoryId: category,
       isFeatured: true,
       description: description || 'Producto destacado publicado por el comercio socio.',
-      phoneWhatsApp: '5493447451234',
-      whatsappMessageCustom: `Hola Alfarería Delta, vi en Entre Ríos ON el producto "${title}" y quisiera consultar disponibilidad.`,
+      phoneWhatsApp: '5493415550199',
+      whatsappMessageCustom: `Hola, vi en el portal ON MÁS el producto "${title}" y quisiera consultar disponibilidad.`,
     };
 
     try {
