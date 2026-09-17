@@ -3,7 +3,9 @@
 import React from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { Store, ShieldCheck, ExternalLink, Bell, User, CheckCircle } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { Store, ShieldCheck, ExternalLink, Bell, LogOut, Sparkles } from 'lucide-react';
+import { createClient } from '@/lib/supabase/client';
 
 interface AdminHeaderProps {
   commerceName: string;
@@ -12,61 +14,88 @@ interface AdminHeaderProps {
 }
 
 export function AdminHeader({ commerceName, commerceSlug, cityName }: AdminHeaderProps) {
+  const router = useRouter();
+  const supabase = createClient();
+
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+    router.push('/login');
+  };
+
   return (
-    <header className="bg-slate-900 text-white border-b border-slate-800 sticky top-11 z-40">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
-        <div className="flex items-center justify-between gap-4">
+    <header className="sticky top-0 z-40 bg-white border-b border-slate-200 transition-all shadow-xs">
+      {/* Top Banner Ribbon - Matches Main Site Header */}
+      <div className="bg-gradient-to-r from-[#002878] via-[#0047BA] to-[#00ADB5] text-white text-xs py-1.5 px-4 text-center font-semibold flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2 max-w-7xl mx-auto w-full justify-between">
+          <div className="flex items-center gap-2">
+            <Sparkles className="w-3.5 h-3.5 text-cyan-300 animate-pulse" />
+            <span> Panel B2B Corporativo • ON MÁS (Santa Fe & Entre Ríos) </span>
+          </div>
+
+          <div className="hidden sm:flex items-center gap-3 text-[11px]">
+            <span className="bg-white/20 text-white font-extrabold px-2.5 py-0.5 rounded-full uppercase">
+              Socio Comercial Verificado
+            </span>
+          </div>
+        </div>
+      </div>
+
+      {/* Main Navbar */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between h-20 gap-4">
           
-          {/* Brand Logo & Merchant Badge */}
+          {/* Brand Logo & Active Commerce Badge */}
           <div className="flex items-center gap-4">
-            <Link href="/" className="flex items-center gap-2">
-              <div className="relative w-32 h-10">
+            <Link href="/" className="flex items-center gap-3 shrink-0">
+              <div className="relative w-44 h-12">
                 <Image
                   src="/logo.png"
-                  alt="Entre Ríos ON MÁS"
+                  alt="ON MÁS Portal"
                   fill
-                  className="object-contain object-left brightness-200"
+                  priority
+                  className="object-contain object-left"
                 />
               </div>
             </Link>
 
-            <span className="hidden md:inline-block h-6 w-px bg-slate-700" />
+            <span className="hidden md:inline-block h-7 w-px bg-slate-200" />
 
-            <div className="hidden sm:flex items-center gap-2 bg-slate-800 border border-slate-700 px-3 py-1 rounded-xl text-xs">
-              <Store className="w-3.5 h-3.5 text-[#00ADB5]" />
-              <span className="font-extrabold text-slate-100">{commerceName}</span>
-              <span className="text-slate-400">({cityName})</span>
-              <ShieldCheck className="w-3.5 h-3.5 text-[#00ADB5]" />
+            <div className="hidden sm:flex items-center gap-2 bg-slate-50 border border-slate-200 px-3.5 py-1.5 rounded-2xl text-xs font-bold text-slate-800 shadow-2xs">
+              <Store className="w-4 h-4 text-[#00ADB5]" />
+              <span className="font-black text-[#0047BA]">{commerceName}</span>
+              <span className="text-slate-500 font-medium">({cityName})</span>
+              <ShieldCheck className="w-4 h-4 text-[#00ADB5]" />
             </div>
           </div>
 
-          {/* Action CTAs: Ver Perfil Público, Notificaciones, Usuario */}
+          {/* Action CTAs: Ver Perfil Público, Notificaciones, User Profile & Logout */}
           <div className="flex items-center gap-3">
             <Link
               href={`/comercio/${commerceSlug}`}
               target="_blank"
-              className="bg-gradient-to-r from-[#00ADB5] to-[#007C8A] hover:from-[#00E5E8] hover:to-[#00ADB5] text-white px-3.5 py-1.5 rounded-xl text-xs font-extrabold flex items-center gap-1.5 transition-all shadow-xs"
+              className="bg-gradient-to-r from-[#00ADB5] to-[#007C8A] hover:from-[#00E5E8] hover:to-[#00ADB5] text-white px-4 py-2.5 rounded-2xl text-xs font-extrabold flex items-center gap-1.5 transition-transform active:scale-95 shadow-sm"
             >
               <span>Ver Perfil Público</span>
               <ExternalLink className="w-3.5 h-3.5" />
             </Link>
 
             <button
-              className="p-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded-xl transition-colors relative"
+              className="p-2.5 text-slate-500 hover:text-slate-900 hover:bg-slate-100 rounded-2xl transition-colors relative cursor-pointer"
               title="Notificaciones de Consultas"
             >
-              <Bell className="w-4 h-4" />
-              <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-[#00E5E8] animate-pulse" />
+              <Bell className="w-4.5 h-4.5" />
+              <span className="absolute top-2 right-2 w-2 h-2 rounded-full bg-[#00E5E8] animate-pulse" />
             </button>
 
-            <div className="flex items-center gap-2 pl-2 border-l border-slate-800">
-              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#0047BA] to-[#002878] text-white flex items-center justify-center font-bold text-xs shadow-xs">
-                ED
-              </div>
-              <div className="hidden lg:block text-left text-xs">
-                <p className="font-extrabold leading-none text-slate-200">Admin Delta</p>
-                <p className="text-[10px] text-cyan-400 font-semibold mt-0.5">Socio Verificado</p>
-              </div>
+            <div className="flex items-center gap-2 pl-2 border-l border-slate-200">
+              <button
+                onClick={handleSignOut}
+                className="bg-rose-50 hover:bg-rose-100 text-rose-700 px-3 py-2 rounded-2xl text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer"
+                title="Cerrar Sesión"
+              >
+                <LogOut className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">Salir</span>
+              </button>
             </div>
           </div>
 

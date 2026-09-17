@@ -121,14 +121,14 @@ export function CatalogManager({ products, onAddProduct, onDeleteProduct }: Cata
           return (
             <div
               key={prod.id}
-              className={`rounded-2xl border transition-all flex flex-col justify-between overflow-hidden p-4 space-y-3 ${
+              className={`rounded-2xl border transition-all flex flex-col justify-between p-4 space-y-4 min-h-[340px] h-full ${
                 isPaused
                   ? 'bg-slate-50 border-slate-300 opacity-60'
                   : 'bg-white border-slate-200 shadow-2xs hover:shadow-md'
               }`}
             >
-              <div className="space-y-3">
-                <div className="relative h-36 w-full bg-slate-100 rounded-xl overflow-hidden">
+              <div className="space-y-3 flex-1 flex flex-col">
+                <div className="relative h-44 w-full bg-slate-100 rounded-xl overflow-hidden shrink-0">
                   <Image src={prod.imageUrl} alt={prod.title} fill className="object-cover" />
                   <span className="absolute top-2 left-2 bg-slate-900/80 text-white text-[9px] font-bold px-2 py-0.5 rounded-md">
                     {prod.category}
@@ -140,16 +140,16 @@ export function CatalogManager({ products, onAddProduct, onDeleteProduct }: Cata
                   )}
                 </div>
 
-                <div className="space-y-1">
-                  <h4 className="font-bold text-slate-900 text-sm line-clamp-1">{prod.title}</h4>
-                  <p className="text-xs text-slate-500 line-clamp-2">{prod.description}</p>
+                <div className="space-y-1.5 flex-1 flex flex-col justify-start">
+                  <h4 className="font-extrabold text-slate-900 text-sm leading-snug line-clamp-2">{prod.title}</h4>
+                  <p className="text-xs text-slate-500 font-medium line-clamp-2 leading-relaxed">{prod.description}</p>
                 </div>
               </div>
 
-              <div className="pt-3 border-t border-slate-100 flex items-center justify-between">
+              <div className="pt-3 border-t border-slate-100 flex items-center justify-between mt-auto">
                 <div>
                   <span className="text-[10px] text-slate-400 block font-semibold">Precio</span>
-                  <span className="text-sm font-extrabold text-[#0047BA]">
+                  <span className="text-sm font-black text-[#0047BA]">
                     {formatPrice(prod.price)}
                   </span>
                 </div>

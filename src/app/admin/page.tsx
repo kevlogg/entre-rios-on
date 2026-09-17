@@ -8,6 +8,7 @@ import { AdminSidebar, AdminTab } from '@/components/admin/AdminSidebar';
 import { KpiCardsRow } from '@/components/admin/KpiCardsRow';
 import { CatalogManager } from '@/components/admin/CatalogManager';
 import { ProfileEditor } from '@/components/admin/ProfileEditor';
+import { SubscriptionPlans } from '@/components/admin/SubscriptionPlans';
 import { MessageCircle, ShieldCheck, Zap, Sparkles, ExternalLink, ArrowRight, Store, Gift } from 'lucide-react';
 
 const INITIAL_MERCHANT_PRODUCTS: Product[] = [
@@ -299,61 +300,9 @@ export default function AdminPage() {
               </div>
             )}
 
-            {/* TAB 5: B2B SUBSCRIPTION & PLAN */}
+            {/* TAB 5: SUBSCRIPTION */}
             {activeTab === 'subscription' && (
-              <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-xs space-y-6 animate-in fade-in duration-200">
-                <div className="border-b border-slate-100 pb-4 flex items-center justify-between">
-                  <div>
-                    <h3 className="text-xl font-extrabold text-[#004b87] flex items-center gap-2">
-                      <ShieldCheck className="w-5 h-5 text-[#00a859]" />
-                      <span>Estado de la Suscripción B2B</span>
-                    </h3>
-                    <p className="text-xs text-slate-500 font-medium mt-1">
-                      Membresía comercial activa en el Portal Entre Ríos ON.
-                    </p>
-                  </div>
-
-                  <span className="bg-emerald-100 text-[#00a859] font-black text-xs px-3.5 py-1.5 rounded-full uppercase">
-                    Plan Socio Pionero
-                  </span>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-                  <div className="p-5 rounded-2xl bg-slate-50 border border-slate-200 space-y-2">
-                    <span className="text-xs font-bold text-slate-400 uppercase">Comisiones por Ventas</span>
-                    <p className="text-2xl font-black text-emerald-600">0% Libres</p>
-                    <p className="text-xs text-slate-500 font-medium">El 100% del cobro va directo a tu cuenta comercial.</p>
-                  </div>
-
-                  <div className="p-5 rounded-2xl bg-slate-50 border border-slate-200 space-y-2">
-                    <span className="text-xs font-bold text-slate-400 uppercase">Publicación de Ofertas</span>
-                    <p className="text-2xl font-black text-[#004b87]">Ilimitada</p>
-                    <p className="text-xs text-slate-500 font-medium">Podés renovar o actualizar tu catálogo cuando quieras.</p>
-                  </div>
-
-                  <div className="p-5 rounded-2xl bg-slate-50 border border-slate-200 space-y-2">
-                    <span className="text-xs font-bold text-slate-400 uppercase">Verificación Provincial</span>
-                    <p className="text-2xl font-black text-amber-500">Insignia Gold</p>
-                    <p className="text-xs text-slate-500 font-medium">Comercio auditado y respaldado en la región.</p>
-                  </div>
-                </div>
-
-                <div className="bg-gradient-to-r from-[#004b87] to-[#00a859] rounded-2xl p-6 text-white space-y-3">
-                  <h4 className="text-lg font-extrabold">¿Querés destacar tus ofertas en la Portada Principal?</h4>
-                  <p className="text-xs text-slate-100 font-medium max-w-xl">
-                    Solicitá la posición destacada en el Bento Row o proponé una experiencia para la agenda cultural de Entre Ríos.
-                  </p>
-                  <a
-                    href="https://wa.me/5493434567890?text=Hola%20equipo%20Entre%20R%C3%ADos%20ON,%20quiero%20consultar%20por%20espacios%20destacados."
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="bg-white text-[#004b87] px-5 py-2.5 rounded-xl font-extrabold text-xs inline-flex items-center gap-1.5 shadow-md"
-                  >
-                    <span>Contactar Asesor B2B</span>
-                    <ArrowRight className="w-4 h-4" />
-                  </a>
-                </div>
-              </div>
+              <SubscriptionPlans commerceId={commerce.id} />
             )}
 
           </div>
