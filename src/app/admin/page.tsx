@@ -18,6 +18,8 @@ export default function AdminPage() {
   const [commerce, setCommerce] = useState<Commerce | null>(null);
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
+  const [waClicksCount, setWaClicksCount] = useState<number>(0);
+  const [viewsCount, setViewsCount] = useState<number>(0);
   const [waMessageTemplate, setWaMessageTemplate] = useState(
     'Hola, vi su negocio en el portal ON MÁS y me gustaría realizar una consulta.'
   );
@@ -116,8 +118,17 @@ export default function AdminPage() {
 
         setCommerce(resolvedCommerce);
 
-        // 5. Cargar productos vinculados a este comercio específico
+        // 5. Cargar métricas reales (Clicks de WhatsApp y Vistas de Perfil)
         if (targetCommerce?.id) {
+          const { count: waCount } = await supabase
+            .from('whatsapp_clicks')
+            .select('*', { count: 'exact', head: true })
+            .eq('commerce_id', targetCommerce.id);
+
+          setWaClicksCount(waCount || 0);
+          setViewsCount(targetCommerce.review_count || 0);
+
+          // Cargar productos pertenecientes al comercio
           const { data: prodsData } = await supabase
             .from('products')
             .select('*')
@@ -149,6 +160,8 @@ export default function AdminPage() {
             setProducts([]);
           }
         } else {
+          setWaClicksCount(0);
+          setViewsCount(0);
           setProducts([]);
         }
       } catch (err) {
@@ -227,8 +240,12 @@ export default function AdminPage() {
                   </button>
                 </div>
 
-                {/* KPI Cards Row */}
-                <KpiCardsRow productCount={products.length} />
+                {/* KPI Cards Row con métricas reales */}
+                <KpiCardsRow
+                  productCount={products.length}
+                  whatsappClicksCount={waClicksCount}
+                  profileViewsCount={viewsCount}
+                />
 
                 {/* Quick Catalog Preview */}
                 <CatalogManager
