@@ -18,6 +18,7 @@ const caveat = Caveat({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://entreriosonmas.gob.ar'),
   title: 'Entre Ríos ON MÁS Portal | Comercio. Comunidad. Oportunidades.',
   description: 'Portal regional híbrido de Entre Ríos: Directorio Comercial B2B, Catálogo directo a WhatsApp, Turismo, Gastronomía y Agenda de la Comunidad de Paraná, Concordia, Colón, Gualeguaychú y la provincia.',
   keywords: [
@@ -36,16 +37,14 @@ export const metadata: Metadata = {
   authors: [{ name: 'Entre Ríos ON MÁS Portal' }],
   icons: {
     icon: [
-      { url: '/logo.png', type: 'image/png' },
-      { url: '/icon.png', type: 'image/png' },
+      { url: '/favicon.ico', sizes: 'any' },
+      { url: '/favicon-32x32.png', type: 'image/png', sizes: '32x32' },
+      { url: '/favicon-16x16.png', type: 'image/png', sizes: '16x16' },
+      { url: '/icon.png', type: 'image/png', sizes: '512x512' },
     ],
-    shortcut: '/logo.png',
-    apple: '/logo.png',
-    other: [
-      {
-        rel: 'apple-touch-icon-precomposed',
-        url: '/logo.png',
-      },
+    shortcut: '/favicon.ico',
+    apple: [
+      { url: '/apple-touch-icon.png', sizes: '180x180', type: 'image/png' },
     ],
   },
   openGraph: {
@@ -91,9 +90,10 @@ export default function RootLayout({
   return (
     <html lang="es" className={`${inter.variable} ${caveat.variable}`}>
       <head>
-        <link rel="icon" type="image/png" href="/logo.png" />
-        <link rel="shortcut icon" href="/logo.png" />
-        <link rel="apple-touch-icon" href="/logo.png" />
+        <link rel="icon" href="/favicon.ico" sizes="any" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+        <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
