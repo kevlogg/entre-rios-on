@@ -83,7 +83,13 @@ function LoginFormContent() {
         });
 
         if (signUpErr) {
-          setMessage({ type: 'error', text: `Error al registrarse: ${signUpErr.message}` });
+          let errText = signUpErr.message;
+          if (signUpErr.message.includes('email rate limit exceeded') || signUpErr.message.includes('rate limit') || signUpErr.message.includes('over_email_send_rate_limit')) {
+            errText = 'Superaste el límite temporal de correos enviados por hora (seguridad de Supabase). Por favor, aguardá 10 a 15 minutos o probá con otra casilla de correo.';
+          } else if (signUpErr.message.includes('User already registered') || signUpErr.message.includes('already exists')) {
+            errText = 'Este correo electrónico ya está registrado. Podés ingresar directamente desde la pestaña "Ingresar".';
+          }
+          setMessage({ type: 'error', text: errText });
           setLoading(false);
           return;
         }
