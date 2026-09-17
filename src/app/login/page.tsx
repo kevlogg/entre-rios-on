@@ -163,31 +163,25 @@ function LoginFormContent() {
     <div className="bg-white/95 backdrop-blur-xl py-8 px-6 sm:px-10 shadow-2xl rounded-3xl border border-white/40 space-y-6">
       
       {/* Selector de Modo: Ingresar vs Registrar Comercio */}
-      <div className="flex items-center justify-between border-b border-slate-200 pb-3">
-        <div className="flex gap-4">
-          <button
-            type="button"
-            onClick={() => { setMode('login'); setMessage(null); }}
-            className={`text-sm font-black transition-colors cursor-pointer ${
-              mode === 'login' ? 'text-[#0047BA] border-b-2 border-[#0047BA] pb-1' : 'text-slate-400 hover:text-slate-600'
-            }`}
-          >
-            Ingresar
-          </button>
-          <button
-            type="button"
-            onClick={() => { setMode('signup'); setMessage(null); }}
-            className={`text-sm font-black transition-colors cursor-pointer ${
-              mode === 'signup' ? 'text-[#00ADB5] border-b-2 border-[#00ADB5] pb-1' : 'text-slate-400 hover:text-slate-600'
-            }`}
-          >
-            Registrar Comercio
-          </button>
-        </div>
-
-        <span className="text-[10px] font-extrabold bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full uppercase">
-          {mode === 'login' ? 'Acceso Comercio' : mode === 'signup' ? 'Alta Nuevo Socio' : 'Recuperar Clave'}
-        </span>
+      <div className="flex items-center justify-center gap-6 border-b border-slate-200 pb-3">
+        <button
+          type="button"
+          onClick={() => { setMode('login'); setMessage(null); }}
+          className={`text-sm font-black transition-colors cursor-pointer ${
+            mode === 'login' ? 'text-[#0047BA] border-b-2 border-[#0047BA] pb-1' : 'text-slate-400 hover:text-slate-600'
+          }`}
+        >
+          Ingresar
+        </button>
+        <button
+          type="button"
+          onClick={() => { setMode('signup'); setMessage(null); }}
+          className={`text-sm font-black transition-colors cursor-pointer ${
+            mode === 'signup' ? 'text-[#00ADB5] border-b-2 border-[#00ADB5] pb-1' : 'text-slate-400 hover:text-slate-600'
+          }`}
+        >
+          Registrar Comercio
+        </button>
       </div>
 
       {/* Dynamic Banner Note */}
