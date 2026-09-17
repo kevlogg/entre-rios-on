@@ -1,18 +1,18 @@
 import { createServerClient } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
 
+const FALLBACK_URL = 'https://oetagnusdhbqrznugwuo.supabase.co';
+const FALLBACK_KEY = 'sb_publishable_5M-Ivho089HyL1LF-5V3oA_hpv6d54V';
+
 export async function updateSession(request: NextRequest) {
   let supabaseResponse = NextResponse.next({
     request,
   });
 
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
-  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
-
-  // If Supabase is not configured yet, skip middleware session checks gracefully
-  if (!supabaseUrl || supabaseUrl.includes('your-supabase-project')) {
-    return supabaseResponse;
-  }
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_URL.startsWith('http')
+    ? process.env.NEXT_PUBLIC_SUPABASE_URL
+    : FALLBACK_URL;
+  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || FALLBACK_KEY;
 
   const supabase = createServerClient(supabaseUrl, supabaseAnonKey, {
     cookies: {
