@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { Product, Commerce } from '@/types';
 import { AdminHeader } from '@/components/admin/AdminHeader';
 import { AdminSidebar, AdminTab } from '@/components/admin/AdminSidebar';
@@ -86,6 +87,7 @@ const INITIAL_COMMERCE: Commerce = {
 };
 
 export default function AdminPage() {
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState<AdminTab>('dashboard');
   const [commerce, setCommerce] = useState(INITIAL_COMMERCE);
   const [products, setProducts] = useState<Product[]>(INITIAL_MERCHANT_PRODUCTS);
@@ -102,31 +104,52 @@ export default function AdminPage() {
         // 1. Obtener sesión del usuario autenticado
         const { data: { user } } = await supabase.auth.getUser();
 
-        let targetCommerce = null;
-
-        if (user) {
-          // Buscar el comercio propiedad del usuario autenticado
-          const { data: userCommerces } = await supabase
-            .from('commerces')
-            .select('*')
-            .eq('owner_id', user.id)
-            .order('created_at', { ascending: false });
-
-          if (userCommerces && userCommerces.length > 0) {
-            targetCommerce = userCommerces[0];
-          }
+        if (!user) {
+          router.push('/login');
+          return;
         }
 
-        // Si no se encuentra comercio asociado por owner_id, tomar el último comercio registrado
-        if (!targetCommerce) {
-          const { data: latestComms } = await supabase
-            .from('commerces')
-            .select('*')
-            .order('created_at', { ascending: false })
-            .limit(1);
+        let targetCommerce = null;
 
-          if (latestComms && latestComms.length > 0) {
-            targetCommerce = latestComms[0];
+        // Buscar el comercio propiedad del usuario autenticado
+        const { data: userCommerces } = await supabase
+          .from('commerces')
+          .select('*')
+          .eq('owner_id', user.id)
+          .order('created_at', { ascending: false });
+
+        if (userCommerces && userCommerces.length > 0) {
+          targetCommerce = userCommerces[0];
+        }
+
+        // Si el usuario registrado no tiene comercio creado aún, lo creamos dinámicamente
+        if (!targetCommerce) {
+          const merchantName = user.user_metadata?.commerce_name || user.user_metadata?.full_name || user.email?.split('@')[0] || 'Mi Comercio Comercial';
+          const slug = merchantName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || `comm-${Date.now()}`;
+
+          const { data: createdCommerce } = await supabase
+            .from('commerces')
+            .insert({
+              name: merchantName,
+              slug,
+              category: 'Comercio General',
+              province_id: 'santa-fe',
+              city_id: 'rosario',
+              city_name: 'Rosario',
+              description: `Comercio adherido al portal ON MÁS.`,
+              phone_whatsapp: '5493415550199',
+              address: 'Rosario, Argentina',
+              logo_url: '/images/city-rosario.jpg',
+              cover_url: '/images/city-rosario.jpg',
+              is_verified: true,
+              is_subscription_active: true,
+              owner_id: user.id,
+            })
+            .select()
+            .single();
+
+          if (createdCommerce) {
+            targetCommerce = createdCommerce;
           }
         }
 
