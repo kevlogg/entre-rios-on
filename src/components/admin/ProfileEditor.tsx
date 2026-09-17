@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import Image from 'next/image';
-import { Store, MapPin, MessageCircle, ShieldCheck, Save, CheckCircle, Camera, Globe, Building2, Laptop } from 'lucide-react';
+import { Store, MapPin, MessageCircle, ShieldCheck, Save, CheckCircle, Camera, Globe, Building2, Laptop, Upload } from 'lucide-react';
 import { Commerce } from '@/types';
 import { updateCommerceProfileAction } from '@/server/actions/profile';
 import { PROVINCES, getCitiesByProvince } from '@/lib/constants/locations';
@@ -12,16 +12,19 @@ interface ProfileEditorProps {
 }
 
 export function ProfileEditor({ commerce }: ProfileEditorProps) {
+  const [logoUrl, setLogoUrl] = useState(commerce.logoUrl || '/images/city-rosario.jpg');
+  const [coverUrl, setCoverUrl] = useState(commerce.coverUrl || '/images/city-rosario.jpg');
+
   const [formData, setFormData] = useState({
     name: commerce.name,
-    category: commerce.category,
+    category: commerce.category || 'Comercio General',
     provinceId: commerce.provinceId || 'santa-fe',
-    cityName: commerce.cityName,
+    cityName: commerce.cityName || 'Rosario',
     address: commerce.address || '',
-    phoneWhatsApp: commerce.phoneWhatsApp,
-    instagram: commerce.instagram || '@ceramica.delta.colon',
-    description: commerce.description,
-    cuit: '30-71892345-9',
+    phoneWhatsApp: commerce.phoneWhatsApp || '',
+    instagram: commerce.instagram || '',
+    description: commerce.description || '',
+    cuit: '',
     isDigitalOnly: commerce.isDigitalOnly || false,
   });
 
@@ -39,12 +42,32 @@ export function ProfileEditor({ commerce }: ProfileEditorProps) {
     });
   };
 
+  const handleImageUpload = (
+    e: React.ChangeEvent<HTMLInputElement>,
+    setter: (url: string) => void
+  ) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      if (typeof reader.result === 'string') {
+        setter(reader.result);
+      }
+    };
+    reader.readAsDataURL(file);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
 
     try {
-      await updateCommerceProfileAction(commerce.id, formData);
+      await updateCommerceProfileAction(commerce.id, {
+        ...formData,
+        logoUrl,
+        coverUrl,
+      });
     } catch (err) {
       console.warn('Profile Server Action fallback:', err);
     }
@@ -69,30 +92,66 @@ export function ProfileEditor({ commerce }: ProfileEditorProps) {
           </p>
         </div>
 
-        <div className="bg-cyan-50 border border-cyan-200 text-[#00ADB5] px-3.5 py-1.5 rounded-2xl text-xs font-extrabold flex items-center gap-1.5">
+        <div className="bg-cyan-50 border border-cyan-200 text-[#00ADB5] px-3.5 py-1.5 rounded-2xl text-xs font-extrabold flex items-center gap-1.5 shrink-0">
           <ShieldCheck className="w-4 h-4" />
           <span>Comercio Verificado</span>
         </div>
       </div>
 
-      {/* Visual Brand Assets Row (Logo & Cover Preview) */}
-      <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-center bg-slate-50 p-6 rounded-2xl border border-slate-200">
-        <div className="md:col-span-4 flex items-center gap-4">
-          <div className="relative w-20 h-20 rounded-2xl overflow-hidden bg-white border-2 border-slate-300 shadow-sm shrink-0">
-            <Image src={commerce.logoUrl} alt={commerce.name} fill className="object-cover" />
-          </div>
-          <div>
-            <span className="text-xs font-bold text-slate-800 block">Logo Oficial</span>
-            <span className="text-[11px] text-slate-400 block">Recomendado 400x400 px</span>
-            <button type="button" className="text-xs font-bold text-[#00ADB5] hover:underline mt-1">Cambiar Logo</button>
-          </div>
-        </div>
+      {/* Visual Brand Assets Row (Logo & Cover Uploaders with Recommended Sizes) */}
+      <div className="space-y-4 bg-slate-50 p-6 rounded-2xl border border-slate-200">
+        <h4 className="text-xs font-extrabold text-[#0047BA] uppercase tracking-wider">Imágenes de Marca del Comercio</h4>
 
-        <div className="md:col-span-8 flex items-center gap-4">
-          <div className="relative h-20 w-full rounded-2xl overflow-hidden bg-slate-300 border border-slate-300 shadow-sm">
-            <Image src={commerce.coverUrl} alt="Portada" fill className="object-cover" />
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-start">
+          {/* Logo Upload */}
+          <div className="md:col-span-5 space-y-2">
+            <label className="block text-xs font-bold text-slate-700">Logo Oficial del Negocio</label>
+            <div className="flex items-center gap-4">
+              <div className="relative w-20 h-20 rounded-2xl overflow-hidden bg-white border-2 border-slate-300 shadow-sm shrink-0">
+                <Image src={logoUrl} alt={formData.name} fill className="object-cover" />
+              </div>
+              <div className="space-y-1.5 flex-1">
+                <span className="text-[11px] font-bold text-slate-500 block leading-tight">
+                  Tamaño recomendado: <strong className="text-slate-700 block">400 x 400 px</strong> (Cuadrado 1:1)
+                </span>
+                <label className="inline-flex items-center gap-1.5 bg-white hover:bg-slate-100 text-[#00ADB5] border border-slate-300 px-3 py-1.5 rounded-xl text-xs font-bold cursor-pointer transition-colors shadow-2xs">
+                  <Camera className="w-3.5 h-3.5" />
+                  <span>Subir Logo</span>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => handleImageUpload(e, setLogoUrl)}
+                  />
+                </label>
+              </div>
+            </div>
           </div>
-          <button type="button" className="text-xs font-bold text-[#00ADB5] hover:underline shrink-0">Cambiar Portada</button>
+
+          {/* Portada Upload */}
+          <div className="md:col-span-7 space-y-2">
+            <label className="block text-xs font-bold text-slate-700">Imagen de Portada (Banner Principal)</label>
+            <div className="space-y-2">
+              <div className="relative h-20 w-full rounded-2xl overflow-hidden bg-slate-200 border border-slate-300 shadow-sm">
+                <Image src={coverUrl} alt="Portada" fill className="object-cover" />
+              </div>
+              <div className="flex items-center justify-between gap-2">
+                <span className="text-[11px] font-bold text-slate-500">
+                  Tamaño recomendado: <strong className="text-slate-700">1200 x 400 px</strong> (Relación 3:1)
+                </span>
+                <label className="inline-flex items-center gap-1.5 bg-white hover:bg-slate-100 text-[#00ADB5] border border-slate-300 px-3 py-1.5 rounded-xl text-xs font-bold cursor-pointer transition-colors shadow-2xs shrink-0">
+                  <Camera className="w-3.5 h-3.5" />
+                  <span>Subir Portada</span>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => handleImageUpload(e, setCoverUrl)}
+                  />
+                </label>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -114,6 +173,7 @@ export function ProfileEditor({ commerce }: ProfileEditorProps) {
             <label className="block text-xs font-bold text-slate-700 mb-1">CUIT / Identificación Comercial</label>
             <input
               type="text"
+              placeholder="30-XXXXXXXX-X (Opcional)"
               value={formData.cuit}
               onChange={(e) => setFormData({ ...formData, cuit: e.target.value })}
               className="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-2.5 text-sm text-slate-800 focus:ring-2 focus:ring-[#00ADB5]"
@@ -151,9 +211,10 @@ export function ProfileEditor({ commerce }: ProfileEditorProps) {
         {/* Location selectors: Provincia & Ciudad */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div>
-            <label className="block text-xs font-bold text-slate-700 mb-1">Rubro / Categoría Principal</label>
+            <label className="block text-xs font-bold text-slate-700 mb-1">Rubro / Categoría Principal *</label>
             <input
               type="text"
+              required
               value={formData.category}
               onChange={(e) => setFormData({ ...formData, category: e.target.value })}
               className="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-2.5 text-sm text-slate-800 focus:ring-2 focus:ring-[#00ADB5]"
@@ -204,7 +265,7 @@ export function ProfileEditor({ commerce }: ProfileEditorProps) {
           <input
             type="text"
             disabled={formData.isDigitalOnly}
-            placeholder={formData.isDigitalOnly ? 'Negocio 100% Online / Venta Digital sin local de atención presencial' : 'Ej: Av. Córdoba 1450'}
+            placeholder={formData.isDigitalOnly ? 'Negocio 100% Online / Venta Digital sin local de atención presencial' : 'Ej: Av. Córdoba 1450 (Opcional)'}
             value={formData.isDigitalOnly ? '' : formData.address}
             onChange={(e) => setFormData({ ...formData, address: e.target.value })}
             className={`w-full border rounded-xl px-4 py-2.5 text-sm ${
@@ -235,6 +296,7 @@ export function ProfileEditor({ commerce }: ProfileEditorProps) {
             <div className="relative">
               <input
                 type="text"
+                placeholder="@micomercio (Opcional)"
                 value={formData.instagram}
                 onChange={(e) => setFormData({ ...formData, instagram: e.target.value })}
                 className="w-full bg-slate-50 border border-slate-300 rounded-xl pl-10 pr-4 py-2.5 text-sm text-slate-800 focus:ring-2 focus:ring-[#00ADB5]"
@@ -245,9 +307,11 @@ export function ProfileEditor({ commerce }: ProfileEditorProps) {
         </div>
 
         <div>
-          <label className="block text-xs font-bold text-slate-700 mb-1">Descripción / Historia del Negocio</label>
+          <label className="block text-xs font-bold text-slate-700 mb-1">Descripción / Historia del Negocio *</label>
           <textarea
             rows={4}
+            required
+            placeholder="Describí los servicios, productos y la propuesta de valor de tu empresa..."
             value={formData.description}
             onChange={(e) => setFormData({ ...formData, description: e.target.value })}
             className="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-2.5 text-sm text-slate-800 focus:ring-2 focus:ring-[#00ADB5]"
@@ -276,4 +340,3 @@ export function ProfileEditor({ commerce }: ProfileEditorProps) {
     </div>
   );
 }
-
