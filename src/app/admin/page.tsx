@@ -274,63 +274,7 @@ export default function AdminPage() {
               </div>
             )}
 
-            {/* TAB 4: WHATSAPP INTEGRATION & SETUP */}
-            {activeTab === 'whatsapp' && (
-              <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-xs space-y-6 animate-in fade-in duration-200">
-                <div className="border-b border-slate-100 pb-4 space-y-1">
-                  <h3 className="text-xl font-extrabold text-[#004b87] flex items-center gap-2">
-                    <MessageCircle className="w-5 h-5 text-[#25D366]" />
-                    <span>Canal de Ventas WhatsApp Directo</span>
-                  </h3>
-                  <p className="text-xs text-slate-500 font-medium">
-                    Configurá el número corporativo y los mensajes automáticos que recibirás cuando los clientes hagan clic en tus productos.
-                  </p>
-                </div>
-
-                <div className="space-y-4 max-w-2xl">
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1">Teléfono WhatsApp Corporativo *</label>
-                    <input
-                      type="text"
-                      value={commerce.phoneWhatsApp}
-                      readOnly
-                      className="w-full bg-slate-100 border border-slate-300 rounded-xl px-4 py-2.5 text-sm text-slate-800 font-mono"
-                    />
-                    <span className="text-[11px] text-slate-400 font-medium mt-1 block">
-                      Incluye código de país y área (ej. 5493415550199).
-                    </span>
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1">Plantilla de Mensaje de Entrada Predeterminada</label>
-                    <textarea
-                      rows={3}
-                      value={waMessageTemplate}
-                      onChange={(e) => setWaMessageTemplate(e.target.value)}
-                      className="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-2.5 text-sm text-slate-800 focus:ring-2 focus:ring-[#00a859]"
-                    />
-                  </div>
-
-                  <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-4 space-y-2">
-                    <span className="text-xs font-extrabold text-emerald-800 block">Vista Previa de Prueba</span>
-                    <p className="text-xs text-slate-600 font-medium">
-                      Así recibirá tu equipo de atención el mensaje directo cuando un cliente presione &quot;Pedir por WhatsApp&quot;.
-                    </p>
-                    <a
-                      href={`https://wa.me/${commerce.phoneWhatsApp}?text=${encodeURIComponent(waMessageTemplate)}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="bg-[#25D366] hover:bg-[#20ba5a] text-white px-4 py-2 rounded-xl text-xs font-extrabold inline-flex items-center gap-1.5 shadow-sm"
-                    >
-                      <MessageCircle className="w-4 h-4 fill-current" />
-                      <span>Probar Mensaje en WhatsApp</span>
-                    </a>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* TAB 5: SUBSCRIPTION */}
+            {/* TAB 4: SUBSCRIPTION */}
             {activeTab === 'subscription' && (
               <SubscriptionPlans commerceId={commerce.id} />
             )}
