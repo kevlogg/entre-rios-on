@@ -96,58 +96,93 @@ export default function AdminPage() {
   React.useEffect(() => {
     async function loadRealData() {
       try {
-        const { createPublicClient } = await import('@/lib/supabase/public');
-        const supabase = createPublicClient();
+        const { createClient } = await import('@/lib/supabase/client');
+        const supabase = createClient();
 
-        // 1. Fetch real commerce
-        const { data: commsData } = await supabase.from('commerces').select('*').limit(1);
-        if (commsData && commsData.length > 0) {
-          const c = commsData[0];
+        // 1. Obtener sesión del usuario autenticado
+        const { data: { user } } = await supabase.auth.getUser();
+
+        let targetCommerce = null;
+
+        if (user) {
+          // Buscar el comercio propiedad del usuario autenticado
+          const { data: userCommerces } = await supabase
+            .from('commerces')
+            .select('*')
+            .eq('owner_id', user.id)
+            .order('created_at', { ascending: false });
+
+          if (userCommerces && userCommerces.length > 0) {
+            targetCommerce = userCommerces[0];
+          }
+        }
+
+        // Si no se encuentra comercio asociado por owner_id, tomar el último comercio registrado
+        if (!targetCommerce) {
+          const { data: latestComms } = await supabase
+            .from('commerces')
+            .select('*')
+            .order('created_at', { ascending: false })
+            .limit(1);
+
+          if (latestComms && latestComms.length > 0) {
+            targetCommerce = latestComms[0];
+          }
+        }
+
+        if (targetCommerce) {
+          const c = targetCommerce;
           setCommerce({
             id: c.id,
             name: c.name,
             slug: c.slug,
-            category: c.category,
-            cityId: c.city_id,
-            cityName: c.city_name,
-            description: c.description,
-            rating: Number(c.rating),
-            reviewCount: c.review_count,
-            isVerified: c.is_verified,
-            isSubscriptionActive: c.is_subscription_active,
-            logoUrl: c.logo_url,
-            coverUrl: c.cover_url,
-            phoneWhatsApp: c.phone_whatsapp,
-            address: c.address,
-            instagram: c.instagram,
-            website: c.website,
+            category: c.category || 'Comercio General',
+            cityId: c.city_id || 'rosario',
+            cityName: c.city_name || 'Rosario',
+            description: c.description || `Comercio adherido al portal ON MÁS en ${c.city_name}.`,
+            rating: Number(c.rating || 5.0),
+            reviewCount: c.review_count || 1,
+            isVerified: c.is_verified ?? true,
+            isSubscriptionActive: c.is_subscription_active ?? true,
+            logoUrl: c.logo_url || '/images/city-rosario.jpg',
+            coverUrl: c.cover_url || '/images/city-rosario.jpg',
+            phoneWhatsApp: c.phone_whatsapp || '',
+            address: c.address || `${c.city_name}, Argentina`,
+            instagram: c.instagram || '',
+            website: c.website || '',
           });
-        }
 
-        // 2. Fetch real products
-        const { data: prodsData } = await supabase.from('products').select('*');
-        if (prodsData && prodsData.length > 0) {
-          setProducts(
-            prodsData.map((p) => ({
-              id: p.id,
-              title: p.title,
-              slug: p.slug,
-              price: p.price ? Number(p.price) : undefined,
-              currency: p.currency || 'ARS',
-              commerceId: p.commerce_id,
-              commerceName: p.commerce_name,
-              cityId: p.city_id,
-              cityName: p.city_name,
-              provinceId: p.province_id,
-              imageUrl: p.image_url,
-              category: p.category,
-              categoryId: p.category_id,
-              isFeatured: p.is_featured,
-              description: p.description,
-              phoneWhatsApp: p.phone_whatsapp,
-              whatsappMessageCustom: p.whatsapp_message_custom,
-            }))
-          );
+          // 2. Cargar productos vinculados a este comercio específico
+          const { data: prodsData } = await supabase
+            .from('products')
+            .select('*')
+            .eq('commerce_id', c.id);
+
+          if (prodsData && prodsData.length > 0) {
+            setProducts(
+              prodsData.map((p) => ({
+                id: p.id,
+                title: p.title,
+                slug: p.slug,
+                price: p.price ? Number(p.price) : undefined,
+                currency: p.currency || 'ARS',
+                commerceId: p.commerce_id,
+                commerceName: p.commerce_name,
+                cityId: p.city_id,
+                cityName: p.city_name,
+                provinceId: p.province_id,
+                imageUrl: p.image_url,
+                category: p.category,
+                categoryId: p.category_id,
+                isFeatured: p.is_featured,
+                description: p.description,
+                phoneWhatsApp: p.phone_whatsapp,
+                whatsappMessageCustom: p.whatsapp_message_custom,
+              }))
+            );
+          } else {
+            setProducts([]);
+          }
         }
       } catch (err) {
         console.warn('Fallback a datos de demostración en Admin:', err);
