@@ -51,7 +51,7 @@ export default function AdminPage() {
           targetCommerce = userCommerces[0];
         }
 
-        // 3. Si el usuario no tiene registro aún en commerces, intentar crearlo en Supabase
+        // 3. Si el usuario no tiene registro aún en commerces por owner_id, intentar buscar si existe uno sin owner_id o crearlo
         if (!targetCommerce) {
           const merchantName =
             user.user_metadata?.commerce_name ||
@@ -60,38 +60,36 @@ export default function AdminPage() {
             'Mi Empresa Comercial';
           const cleanSlug = merchantName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || 'comercio';
 
-          // Intentar primero con el slug limpio
-          const { data: createdCommerce, error: insertErr } = await supabase
+          // Intentar vincular por slug si fue creado durante el registro sin owner_id asignado
+          const { data: existingUnlinked } = await supabase
             .from('commerces')
-            .insert({
-              name: merchantName,
-              slug: cleanSlug,
-              category: 'Comercio General',
-              province_id: user.user_metadata?.province_id || 'santa-fe',
-              city_id: user.user_metadata?.city_id || 'rosario',
-              city_name: user.user_metadata?.city_name || 'Rosario',
-              description: `Comercio adherido al portal ON MÁS.`,
-              phone_whatsapp: user.user_metadata?.phone_whatsapp || '',
-              address: '',
-              logo_url: '/images/city-rosario.jpg',
-              cover_url: '/images/city-rosario.jpg',
-              is_verified: true,
-              is_subscription_active: true,
-              owner_id: user.id,
-            })
-            .select()
-            .single();
+            .select('*')
+            .or(`slug.eq.${cleanSlug},slug.ilike.${cleanSlug}-%`)
+            .is('owner_id', null)
+            .order('created_at', { ascending: false })
+            .limit(1)
+            .maybeSingle();
 
-          if (createdCommerce) {
-            targetCommerce = createdCommerce;
-          } else if (insertErr) {
-            // Si hubo conflicto de clave única por slug, reintentar con sufijo de ID de usuario
-            const fallbackSlugWithId = `${cleanSlug}-${user.id.slice(0, 6)}`;
-            const { data: retryCommerce } = await supabase
+          if (existingUnlinked) {
+            const { data: updatedUnlinked } = await supabase
+              .from('commerces')
+              .update({ owner_id: user.id })
+              .eq('id', existingUnlinked.id)
+              .select()
+              .single();
+
+            if (updatedUnlinked) {
+              targetCommerce = updatedUnlinked;
+            }
+          }
+
+          if (!targetCommerce) {
+            // Intentar crear registro nuevo en Supabase
+            const { data: createdCommerce, error: insertErr } = await supabase
               .from('commerces')
               .insert({
                 name: merchantName,
-                slug: fallbackSlugWithId,
+                slug: cleanSlug,
                 category: 'Comercio General',
                 province_id: user.user_metadata?.province_id || 'santa-fe',
                 city_id: user.user_metadata?.city_id || 'rosario',
@@ -108,8 +106,35 @@ export default function AdminPage() {
               .select()
               .single();
 
-            if (retryCommerce) {
-              targetCommerce = retryCommerce;
+            if (createdCommerce) {
+              targetCommerce = createdCommerce;
+            } else if (insertErr) {
+              // Si hubo conflicto de clave única por slug, reintentar con sufijo de ID de usuario
+              const fallbackSlugWithId = `${cleanSlug}-${user.id.slice(0, 6)}`;
+              const { data: retryCommerce } = await supabase
+                .from('commerces')
+                .insert({
+                  name: merchantName,
+                  slug: fallbackSlugWithId,
+                  category: 'Comercio General',
+                  province_id: user.user_metadata?.province_id || 'santa-fe',
+                  city_id: user.user_metadata?.city_id || 'rosario',
+                  city_name: user.user_metadata?.city_name || 'Rosario',
+                  description: `Comercio adherido al portal ON MÁS.`,
+                  phone_whatsapp: user.user_metadata?.phone_whatsapp || '',
+                  address: '',
+                  logo_url: '/images/city-rosario.jpg',
+                  cover_url: '/images/city-rosario.jpg',
+                  is_verified: true,
+                  is_subscription_active: true,
+                  owner_id: user.id,
+                })
+                .select()
+                .single();
+
+              if (retryCommerce) {
+                targetCommerce = retryCommerce;
+              }
             }
           }
         }
@@ -132,6 +157,8 @@ export default function AdminPage() {
           category: targetCommerce?.category || 'Comercio General',
           cityId: targetCommerce?.city_id || 'rosario',
           cityName: cityName,
+          provinceId: targetCommerce?.province_id || user.user_metadata?.province_id || 'santa-fe',
+          provinceName: targetCommerce?.province_name || (targetCommerce?.province_id === 'entre-rios' ? 'Entre Ríos' : 'Santa Fe'),
           description: targetCommerce?.description || `Comercio adherido al portal ON MÁS en ${cityName}.`,
           rating: Number(targetCommerce?.rating || 5.0),
           reviewCount: targetCommerce?.review_count || 1,
@@ -142,6 +169,7 @@ export default function AdminPage() {
           phoneWhatsApp: targetCommerce?.phone_whatsapp || user.user_metadata?.phone_whatsapp || '',
           address: targetCommerce?.address ?? '',
           email: user.email || targetCommerce?.email || '',
+          isDigitalOnly: targetCommerce?.is_digital_only ?? false,
           website: targetCommerce?.website || '',
         };
 

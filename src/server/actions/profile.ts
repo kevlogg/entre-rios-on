@@ -28,10 +28,12 @@ export async function updateCommerceProfileAction(
       if (profileData.logoUrl) updatePayload.logo_url = profileData.logoUrl;
       if (profileData.coverUrl) updatePayload.cover_url = profileData.coverUrl;
       if (profileData.provinceId) updatePayload.province_id = profileData.provinceId;
+      if (profileData.cityId) updatePayload.city_id = profileData.cityId;
       if (profileData.cityName) updatePayload.city_name = profileData.cityName;
       if (profileData.isDigitalOnly !== undefined) updatePayload.is_digital_only = profileData.isDigitalOnly;
       if (profileData.website) updatePayload.website = profileData.website;
       if (profileData.slug) updatePayload.slug = profileData.slug;
+      if (user) updatePayload.owner_id = user.id;
 
       let targetId: string | null = null;
 
@@ -69,6 +71,11 @@ export async function updateCommerceProfileAction(
 
         const { error: updateErr, data: updatedData } = await updateQuery.select();
 
+        if (updateErr) {
+          console.warn('Error al actualizar por ID/slug en Supabase:', updateErr);
+          return { success: false, message: `Error al actualizar: ${updateErr.message}` };
+        }
+
         if (user && (!updatedData || updatedData.length === 0)) {
           const cleanName = profileData.name || user.user_metadata?.commerce_name || 'Comercio Adherido';
           const generatedSlug =
@@ -81,7 +88,7 @@ export async function updateCommerceProfileAction(
             slug: generatedSlug,
             category: profileData.category || 'Comercio General',
             province_id: profileData.provinceId || 'santa-fe',
-            city_id: 'rosario',
+            city_id: profileData.cityId || 'rosario',
             city_name: profileData.cityName || 'Rosario',
             description: profileData.description || 'Comercio adherido al portal ON MÁS.',
             phone_whatsapp: profileData.phoneWhatsApp || '',
@@ -102,9 +109,6 @@ export async function updateCommerceProfileAction(
             console.warn('Error al insertar perfil en Supabase:', insertErr);
             return { success: false, message: `Error al crear registro de comercio: ${insertErr.message}` };
           }
-        } else if (updateErr) {
-          console.warn('Error al actualizar por ID/slug en Supabase:', updateErr);
-          return { success: false, message: `Error al actualizar: ${updateErr.message}` };
         }
       }
 
@@ -123,3 +127,4 @@ export async function updateCommerceProfileAction(
     return { success: false, message: `Error inesperado: ${(err as Error).message}` };
   }
 }
+

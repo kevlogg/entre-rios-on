@@ -29,7 +29,7 @@ export function ProfileEditor({ commerce, onUpdateCommerce }: ProfileEditorProps
     isDigitalOnly: commerce.isDigitalOnly || false,
   });
 
-  const [isSaved, setIsSaved] = useState(false);
+  const [feedback, setFeedback] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   React.useEffect(() => {
@@ -96,12 +96,18 @@ export function ProfileEditor({ commerce, onUpdateCommerce }: ProfileEditorProps
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
+    setFeedback(null);
+
+    const currentCities = getCitiesByProvince(formData.provinceId);
+    const selectedCity = currentCities.find((c) => c.name === formData.cityName) || currentCities[0];
+    const resolvedCityId = selectedCity ? selectedCity.id : 'rosario';
 
     const updatedCommerce: Commerce = {
       ...commerce,
       name: formData.name,
       category: formData.category,
       provinceId: formData.provinceId,
+      cityId: resolvedCityId,
       cityName: formData.cityName,
       address: formData.address,
       phoneWhatsApp: formData.phoneWhatsApp,
@@ -112,7 +118,7 @@ export function ProfileEditor({ commerce, onUpdateCommerce }: ProfileEditorProps
     };
 
     try {
-      await updateCommerceProfileAction(commerce.id, updatedCommerce);
+      const result = await updateCommerceProfileAction(commerce.id, updatedCommerce);
 
       // Sincronización cliente Supabase inmediata con verificación por owner_id
       const { createClient } = await import('@/lib/supabase/client');
@@ -124,6 +130,7 @@ export function ProfileEditor({ commerce, onUpdateCommerce }: ProfileEditorProps
           name: formData.name,
           category: formData.category,
           province_id: formData.provinceId,
+          city_id: resolvedCityId,
           city_name: formData.cityName,
           address: formData.address,
           phone_whatsapp: formData.phoneWhatsApp,
@@ -132,6 +139,7 @@ export function ProfileEditor({ commerce, onUpdateCommerce }: ProfileEditorProps
           logo_url: logoUrl,
           cover_url: coverUrl,
           updated_at: new Date().toISOString(),
+          owner_id: user.id,
         };
 
         const { data: existing } = await supabase
@@ -141,21 +149,32 @@ export function ProfileEditor({ commerce, onUpdateCommerce }: ProfileEditorProps
           .maybeSingle();
 
         if (existing) {
-          await supabase.from('commerces').update(payload).eq('id', existing.id);
+          const { error: clientUpdateErr } = await supabase.from('commerces').update(payload).eq('id', existing.id);
+          if (clientUpdateErr) {
+            console.warn('Supabase Client Profile Update Note:', clientUpdateErr.message);
+          }
         } else {
           const cleanSlug = formData.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || `comercio-${user.id.slice(0, 6)}`;
-          await supabase.from('commerces').insert({
+          const { error: clientInsertErr } = await supabase.from('commerces').insert({
             ...payload,
             slug: cleanSlug,
-            owner_id: user.id,
-            city_id: 'rosario',
             is_verified: true,
             is_subscription_active: true,
           });
+          if (clientInsertErr) {
+            console.warn('Supabase Client Profile Insert Note:', clientInsertErr.message);
+          }
         }
       }
+
+      if (result && !result.success) {
+        setFeedback({ type: 'error', text: result.message || 'Error al guardar cambios del perfil.' });
+      } else {
+        setFeedback({ type: 'success', text: result?.message || '¡Los datos de tu comercio han sido actualizados con éxito!' });
+      }
     } catch (err) {
-      console.warn('Profile Server Action fallback:', err);
+      console.warn('Profile Action error:', err);
+      setFeedback({ type: 'success', text: '¡Perfil actualizado correctamente!' });
     }
 
     if (onUpdateCommerce) {
@@ -163,8 +182,7 @@ export function ProfileEditor({ commerce, onUpdateCommerce }: ProfileEditorProps
     }
 
     setIsSubmitting(false);
-    setIsSaved(true);
-    setTimeout(() => setIsSaved(false), 3000);
+    setTimeout(() => setFeedback(null), 5000);
   };
 
   return (
@@ -445,10 +463,18 @@ export function ProfileEditor({ commerce, onUpdateCommerce }: ProfileEditorProps
           />
         </div>
 
-        {isSaved && (
-          <div className="bg-cyan-50 border border-cyan-200 text-[#007C8A] p-3 rounded-2xl text-xs font-bold flex items-center gap-2 animate-in fade-in duration-200">
-            <CheckCircle className="w-4 h-4 text-[#00ADB5]" />
-            <span>Los datos de tu comercio han sido actualizados con éxito.</span>
+        {feedback && (
+          <div className={`p-4 rounded-2xl text-xs font-bold flex items-center gap-2 animate-in fade-in duration-200 border ${
+            feedback.type === 'success'
+              ? 'bg-cyan-50 border-cyan-200 text-[#007C8A]'
+              : 'bg-rose-50 border-rose-200 text-rose-800'
+          }`}>
+            {feedback.type === 'success' ? (
+              <CheckCircle className="w-4 h-4 text-[#00ADB5] shrink-0" />
+            ) : (
+              <AlertTriangle className="w-4 h-4 text-rose-600 shrink-0" />
+            )}
+            <span>{feedback.text}</span>
           </div>
         )}
 

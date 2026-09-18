@@ -66,6 +66,8 @@ function LoginFormContent() {
 
         const redirectOrigin = typeof window !== 'undefined' ? window.location.origin : 'https://entre-rios-on.vercel.app';
 
+        const cityObj = availableCities.find((c) => c.name === cityName) || availableCities[0];
+
         // 1. SignUp en Supabase Auth con emailRedirectTo configurado hacia la URL del entorno
         const { data: authData, error: signUpErr } = await supabase.auth.signUp({
           email,
@@ -79,6 +81,7 @@ function LoginFormContent() {
               commerce_name: commerceName,
               phone_whatsapp: phoneWhatsApp,
               province_id: provinceId,
+              city_id: cityObj.id,
               city_name: cityName,
               role: 'MERCHANT_ADMIN',
             }
@@ -98,12 +101,20 @@ function LoginFormContent() {
         }
 
         // 2. Insertar Comercio en la tabla commerces de Supabase
-        const slug = commerceName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || `comm-${Date.now()}`;
-        const cityObj = availableCities.find((c) => c.name === cityName) || availableCities[0];
+        const cleanSlug = commerceName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || `comm-${Date.now()}`;
+
+        // Evitar choques de clave única por slug
+        const { data: existingSlug } = await supabase
+          .from('commerces')
+          .select('id')
+          .eq('slug', cleanSlug)
+          .maybeSingle();
+
+        const finalSlug = existingSlug ? `${cleanSlug}-${Date.now().toString().slice(-4)}` : cleanSlug;
 
         const { error: commErr } = await supabase.from('commerces').insert({
           name: commerceName,
-          slug,
+          slug: finalSlug,
           category: 'Comercio General',
           province_id: provinceId,
           city_id: cityObj.id,
