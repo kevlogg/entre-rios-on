@@ -9,6 +9,14 @@ export async function updateSession(request: NextRequest) {
     request,
   });
 
+  // Guard against bloated/oversized cookies stored in browser
+  const allCookies = request.cookies.getAll();
+  allCookies.forEach((cookie) => {
+    if (cookie.value.length > 3000 || cookie.value.includes('data:image/')) {
+      supabaseResponse.cookies.delete(cookie.name);
+    }
+  });
+
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_URL.startsWith('http')
     ? process.env.NEXT_PUBLIC_SUPABASE_URL
     : FALLBACK_URL;
