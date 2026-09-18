@@ -58,14 +58,14 @@ export default function AdminPage() {
             user.user_metadata?.full_name ||
             user.email?.split('@')[0] ||
             'Mi Empresa Comercial';
-          const baseSlug = merchantName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || 'comercio';
-          const slug = `${baseSlug}-${user.id.slice(0, 6)}`;
+          const cleanSlug = merchantName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || 'comercio';
 
-          const { data: createdCommerce } = await supabase
+          // Intentar primero con el slug limpio
+          const { data: createdCommerce, error: insertErr } = await supabase
             .from('commerces')
             .insert({
               name: merchantName,
-              slug,
+              slug: cleanSlug,
               category: 'Comercio General',
               province_id: user.user_metadata?.province_id || 'santa-fe',
               city_id: user.user_metadata?.city_id || 'rosario',
@@ -84,6 +84,33 @@ export default function AdminPage() {
 
           if (createdCommerce) {
             targetCommerce = createdCommerce;
+          } else if (insertErr) {
+            // Si hubo conflicto de clave única por slug, reintentar con sufijo de ID de usuario
+            const fallbackSlugWithId = `${cleanSlug}-${user.id.slice(0, 6)}`;
+            const { data: retryCommerce } = await supabase
+              .from('commerces')
+              .insert({
+                name: merchantName,
+                slug: fallbackSlugWithId,
+                category: 'Comercio General',
+                province_id: user.user_metadata?.province_id || 'santa-fe',
+                city_id: user.user_metadata?.city_id || 'rosario',
+                city_name: user.user_metadata?.city_name || 'Rosario',
+                description: `Comercio adherido al portal ON MÁS.`,
+                phone_whatsapp: user.user_metadata?.phone_whatsapp || '',
+                address: '',
+                logo_url: '/images/city-rosario.jpg',
+                cover_url: '/images/city-rosario.jpg',
+                is_verified: true,
+                is_subscription_active: true,
+                owner_id: user.id,
+              })
+              .select()
+              .single();
+
+            if (retryCommerce) {
+              targetCommerce = retryCommerce;
+            }
           }
         }
 
@@ -96,12 +123,12 @@ export default function AdminPage() {
           'Mi Empresa Comercial';
 
         const cityName = targetCommerce?.city_name || user.user_metadata?.city_name || 'Rosario';
-        const fallbackSlug = `${merchantName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || 'comercio'}-${user.id.slice(0, 6)}`;
+        const cleanSlug = merchantName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || 'comercio';
 
         const resolvedCommerce: Commerce = {
           id: targetCommerce?.id || `comm-${user.id}`,
           name: merchantName,
-          slug: targetCommerce?.slug || fallbackSlug,
+          slug: targetCommerce?.slug || cleanSlug,
           category: targetCommerce?.category || 'Comercio General',
           cityId: targetCommerce?.city_id || 'rosario',
           cityName: cityName,

@@ -874,26 +874,15 @@ export async function getCommerceBySlug(slug: string): Promise<Commerce | undefi
       const { createPublicClient } = await import('@/lib/supabase/public');
       const supabase = createPublicClient();
 
-      // 1. Try querying by slug directly
+      const cleanSlugWithoutSuffix = slug.replace(/-[a-z0-9]{6,8}$/i, '');
+      const cleanId = slug.replace('comm-', '');
+
+      // 1. Try querying Supabase matching slug, clean slug, id, or owner_id
       let { data, error } = await supabase
         .from('commerces')
         .select('*')
-        .eq('slug', slug)
+        .or(`slug.eq.${slug},slug.eq.${cleanSlugWithoutSuffix},id.eq.${slug},owner_id.eq.${cleanId}`)
         .limit(1);
-
-      // 2. If not found by slug, try querying by id or owner_id if slug matches UUID / comm- format
-      if ((!data || data.length === 0) && slug) {
-        const cleanId = slug.replace('comm-', '');
-        const { data: idData } = await supabase
-          .from('commerces')
-          .select('*')
-          .or(`id.eq.${slug},owner_id.eq.${cleanId}`)
-          .limit(1);
-
-        if (idData && idData.length > 0) {
-          data = idData;
-        }
-      }
 
       if (data && data.length > 0) {
         const item = data[0];
@@ -926,18 +915,21 @@ export async function getCommerceBySlug(slug: string): Promise<Commerce | undefi
   }
 
   await simulateNetworkDelay();
-  const found = Object.values(COMMERCES_MOCK).find((c) => c.slug === slug || c.id === slug);
+  const cleanSlugWithoutSuffix = slug.replace(/-[a-z0-9]{6,8}$/i, '');
+  const found = Object.values(COMMERCES_MOCK).find((c) => c.slug === slug || c.slug === cleanSlugWithoutSuffix || c.id === slug);
   if (found) return found;
 
   // Partial slug match fallback in COMMERCES_MOCK
   const partial = Object.values(COMMERCES_MOCK).find((c) => slug.includes(c.slug) || c.slug.includes(slug));
   if (partial) return partial;
 
-  // Dynamic fallback object to avoid 404 for admin merchants
-  const cleanName = slug
+  // Dynamic fallback object to avoid 404 for admin merchants (strips random user/hash suffix)
+  const rawName = slug
     .replace(/^comm-/, '')
-    .replace(/-/g, ' ')
-    .replace(/\b\w/g, (l) => l.toUpperCase());
+    .replace(/-[a-z0-9]{6,8}$/i, '')
+    .replace(/-/g, ' ');
+
+  const cleanName = rawName.replace(/\b\w/g, (l) => l.toUpperCase());
 
   return {
     id: `comm-${slug}`,
