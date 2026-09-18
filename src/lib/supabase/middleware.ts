@@ -9,17 +9,6 @@ export async function updateSession(request: NextRequest) {
     request,
   });
 
-  // Guard against bloated/oversized cookies stored in browser
-  const allCookies = request.cookies.getAll();
-  const authCookies = allCookies.filter((c) => c.name.includes('-auth-token'));
-  const totalAuthLength = authCookies.reduce((sum, c) => sum + c.value.length, 0);
-  const hasBase64 = allCookies.some((c) => c.value.includes('data:image/') || c.value.includes('base64'));
-
-  if (authCookies.length > 2 || totalAuthLength > 3500 || hasBase64) {
-    authCookies.forEach((cookie) => {
-      supabaseResponse.cookies.delete(cookie.name);
-    });
-  }
 
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_URL.startsWith('http')
     ? process.env.NEXT_PUBLIC_SUPABASE_URL

@@ -28,20 +28,6 @@ function LoginFormContent() {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
-  React.useEffect(() => {
-    if (typeof document !== 'undefined') {
-      const cookies = document.cookie.split('; ');
-      const authChunks = cookies.filter((c) => c.includes('-auth-token'));
-      if (authChunks.length > 2 || document.cookie.includes('data:image/')) {
-        authChunks.forEach((c) => {
-          const eqPos = c.indexOf('=');
-          const name = eqPos > -1 ? c.substring(0, eqPos) : c;
-          document.cookie = `${name.trim()}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/`;
-        });
-      }
-    }
-  }, []);
-
   const supabase = createClient();
 
   // Obtenemos la lista dinámica de ciudades según la provincia seleccionada
@@ -144,9 +130,7 @@ function LoginFormContent() {
             type: 'success',
             text: '¡Cuenta comercial registrada e iniciada con éxito! Redirigiendo a tu panel...',
           });
-          setTimeout(() => {
-            router.push(redirectTo);
-          }, 1200);
+          window.location.href = redirectTo;
         } else {
           // Si requiere activación por correo
           setMessage({
@@ -157,7 +141,7 @@ function LoginFormContent() {
         }
       } else if (mode === 'login') {
         // Sign In
-        const { data: signInData, error } = await supabase.auth.signInWithPassword({
+        const { error } = await supabase.auth.signInWithPassword({
           email,
           password,
         });
@@ -168,17 +152,15 @@ function LoginFormContent() {
               type: 'success',
               text: '¡Sesión iniciada! Redirigiendo al panel...',
             });
-            setTimeout(() => {
-              router.push('/admin');
-            }, 800);
+            window.location.href = '/admin';
             return;
           }
 
-          setMessage({ type: 'error', text: 'Credenciales incorrectas o correo no confirmado. Verificá tu información.' });
+          setMessage({ type: 'error', text: error.message || 'Credenciales incorrectas o correo no confirmado.' });
           setLoading(false);
         } else {
           setMessage({ type: 'success', text: '¡Sesión iniciada con éxito! Redirigiendo...' });
-          router.push(redirectTo);
+          window.location.href = redirectTo;
         }
       } else if (mode === 'forgot') {
         // Olvidé mi contraseña (Reset password)
