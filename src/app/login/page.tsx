@@ -77,6 +77,9 @@ function LoginFormContent() {
               last_name: lastName,
               full_name: `${firstName} ${lastName}`.trim(),
               commerce_name: commerceName,
+              phone_whatsapp: phoneWhatsApp,
+              province_id: provinceId,
+              city_name: cityName,
               role: 'MERCHANT_ADMIN',
             }
           }

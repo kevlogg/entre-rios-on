@@ -31,6 +31,23 @@ export function ProfileEditor({ commerce }: ProfileEditorProps) {
   const [isSaved, setIsSaved] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  React.useEffect(() => {
+    setFormData({
+      name: commerce.name,
+      category: commerce.category || 'Comercio General',
+      provinceId: commerce.provinceId || 'santa-fe',
+      cityName: commerce.cityName || 'Rosario',
+      address: commerce.address || '',
+      phoneWhatsApp: commerce.phoneWhatsApp || '',
+      instagram: commerce.instagram || '',
+      description: commerce.description || '',
+      cuit: '',
+      isDigitalOnly: commerce.isDigitalOnly || false,
+    });
+    if (commerce.logoUrl) setLogoUrl(commerce.logoUrl);
+    if (commerce.coverUrl) setCoverUrl(commerce.coverUrl);
+  }, [commerce]);
+
   const availableCities = getCitiesByProvince(formData.provinceId);
 
   const handleProvinceChange = (newProvinceId: string) => {

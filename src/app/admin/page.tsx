@@ -110,7 +110,7 @@ export default function AdminPage() {
           isSubscriptionActive: targetCommerce?.is_subscription_active ?? true,
           logoUrl: targetCommerce?.logo_url || '/images/city-rosario.jpg',
           coverUrl: targetCommerce?.cover_url || '/images/city-rosario.jpg',
-          phoneWhatsApp: targetCommerce?.phone_whatsapp || '5493415550199',
+          phoneWhatsApp: targetCommerce?.phone_whatsapp || user.user_metadata?.phone_whatsapp || '',
           address: targetCommerce?.address || `${cityName}, Argentina`,
           instagram: targetCommerce?.instagram || '',
           website: targetCommerce?.website || '',
