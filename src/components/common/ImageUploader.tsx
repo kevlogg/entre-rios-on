@@ -19,7 +19,7 @@ export function MultiImageUploader({
 }: MultiImageUploaderProps) {
   const [isUploading, setIsUploading] = useState(false);
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
     if (!files.length) return;
 
@@ -28,23 +28,18 @@ export function MultiImageUploader({
 
     setIsUploading(true);
 
-    let loadedCount = 0;
-    const newImages: string[] = [];
-
-    filesToProcess.forEach((file) => {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        if (typeof reader.result === 'string') {
-          newImages.push(reader.result);
-        }
-        loadedCount++;
-        if (loadedCount === filesToProcess.length) {
-          onChange([...images, ...newImages].slice(0, maxImages));
-          setIsUploading(false);
-        }
-      };
-      reader.readAsDataURL(file);
-    });
+    try {
+      const { uploadImageToSupabase } = await import('@/lib/supabase/storage');
+      const uploadPromises = filesToProcess.map((file) =>
+        uploadImageToSupabase(file, 'products')
+      );
+      const newUploadedUrls = await Promise.all(uploadPromises);
+      onChange([...images, ...newUploadedUrls].slice(0, maxImages));
+    } catch (err) {
+      console.warn('Error subiendo imágenes a Supabase Storage:', err);
+    } finally {
+      setIsUploading(false);
+    }
   };
 
   const handleRemoveImage = (indexToRemove: number) => {

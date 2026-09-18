@@ -106,7 +106,6 @@ export async function updateCommerceProfileAction(
             address: profileData.address || '',
             logo_url: profileData.logoUrl || '/images/city-rosario.jpg',
             cover_url: profileData.coverUrl || '/images/city-rosario.jpg',
-            is_digital_only: profileData.isDigitalOnly || false,
             website: profileData.website || '',
             is_verified: true,
             is_subscription_active: true,

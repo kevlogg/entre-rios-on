@@ -77,20 +77,27 @@ export function ProfileEditor({ commerce, onUpdateCommerce }: ProfileEditorProps
     });
   };
 
-  const handleImageUpload = (
+  const handleImageUpload = async (
     e: React.ChangeEvent<HTMLInputElement>,
     setter: (url: string) => void
   ) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      if (typeof reader.result === 'string') {
-        setter(reader.result);
-      }
-    };
-    reader.readAsDataURL(file);
+    try {
+      const { uploadImageToSupabase } = await import('@/lib/supabase/storage');
+      const url = await uploadImageToSupabase(file, 'commerces');
+      setter(url);
+    } catch (err) {
+      console.warn('Fallback to FileReader image upload:', err);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        if (typeof reader.result === 'string') {
+          setter(reader.result);
+        }
+      };
+      reader.readAsDataURL(file);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
