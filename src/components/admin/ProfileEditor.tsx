@@ -133,6 +133,9 @@ export function ProfileEditor({ commerce, onUpdateCommerce }: ProfileEditorProps
       const { data: { user } } = await supabase.auth.getUser();
 
       if (user) {
+        const safeLogo = logoUrl && !logoUrl.startsWith('data:') ? logoUrl : null;
+        const safeCover = coverUrl && !coverUrl.startsWith('data:') ? coverUrl : null;
+
         await supabase.auth.updateUser({
           data: {
             commerce_name: formData.name,
@@ -141,8 +144,8 @@ export function ProfileEditor({ commerce, onUpdateCommerce }: ProfileEditorProps
             city_id: resolvedCityId,
             city_name: formData.cityName,
             is_digital_only: formData.isDigitalOnly,
-            logo_url: logoUrl,
-            cover_url: coverUrl,
+            logo_url: safeLogo,
+            cover_url: safeCover,
           }
         });
 

@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import Image from 'next/image';
-import { Product } from '@/types';
+import { Commerce, Product } from '@/types';
 import { Plus, Edit2, Trash2, Power, CheckCircle, Tag, ShoppingBag, X, Sparkles, MessageCircle } from 'lucide-react';
 import { CATEGORIES_LIST } from '@/lib/constants/categories';
 import { ALL_CITIES } from '@/lib/constants/locations';
@@ -10,12 +10,13 @@ import { createProductAction, deleteProductAction } from '@/server/actions/catal
 import { MultiImageUploader } from '@/components/common/ImageUploader';
 
 interface CatalogManagerProps {
+  commerce?: Commerce | null;
   products: Product[];
   onAddProduct: (newProd: Product) => void;
   onDeleteProduct: (id: string) => void;
 }
 
-export function CatalogManager({ products, onAddProduct, onDeleteProduct }: CatalogManagerProps) {
+export function CatalogManager({ commerce, products, onAddProduct, onDeleteProduct }: CatalogManagerProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [pausedMap, setPausedMap] = useState<Record<string, boolean>>({});
@@ -47,27 +48,32 @@ export function CatalogManager({ products, onAddProduct, onDeleteProduct }: Cata
       slug: title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, ''),
       price: parseFloat(price) || 0,
       currency: 'ARS',
-      commerceId: 'c1',
-      commerceName: 'Comercio ON MÁS',
-      cityId: selectedCity.id,
-      cityName: selectedCity.name,
-      provinceId: selectedCity.provinceId,
+      commerceId: commerce?.id || 'c1',
+      commerceName: commerce?.name || 'Comercio ON MÁS',
+      cityId: commerce?.cityId || selectedCity.id,
+      cityName: commerce?.cityName || selectedCity.name,
+      provinceId: commerce?.provinceId || selectedCity.provinceId,
       imageUrl: primaryImage,
       category: selectedCatObj ? selectedCatObj.label : 'Productos',
       categoryId: category,
       isFeatured: true,
       description: description || 'Producto destacado publicado por el comercio socio.',
-      phoneWhatsApp: '5493415550199',
+      phoneWhatsApp: commerce?.phoneWhatsApp || '5493415550199',
       whatsappMessageCustom: `Hola, vi en el portal ON MÁS el producto "${title}" y quisiera consultar disponibilidad.`,
     };
 
     try {
-      await createProductAction(newProd);
+      const res = await createProductAction(newProd);
+      if (res && res.data) {
+        onAddProduct(res.data);
+      } else {
+        onAddProduct(newProd);
+      }
     } catch (err) {
       console.warn('Server Action response fallback:', err);
+      onAddProduct(newProd);
     }
 
-    onAddProduct(newProd);
     setIsModalOpen(false);
     setIsSubmitting(false);
 

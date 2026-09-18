@@ -8,30 +8,64 @@ export async function createProductAction(productData: Partial<Product>): Promis
   try {
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 
-    // Si Supabase está configurado, insertar en base de datos real
     if (supabaseUrl && !supabaseUrl.includes('your-supabase-project')) {
       const supabase = await createClient();
+      const { data: { user } } = await supabase.auth.getUser();
 
-      const { data, error } = await supabase.from('products').insert({
+      let targetCommerceId = productData.commerceId;
+      let targetCommerceName = productData.commerceName;
+      let targetCityId = productData.cityId;
+      let targetCityName = productData.cityName;
+      let targetProvinceId = productData.provinceId;
+      let targetPhone = productData.phoneWhatsApp;
+
+      if (user) {
+        const { data: userComm } = await supabase
+          .from('commerces')
+          .select('id, name, city_id, city_name, province_id, phone_whatsapp')
+          .eq('owner_id', user.id)
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .maybeSingle();
+
+        if (userComm) {
+          targetCommerceId = userComm.id;
+          if (!targetCommerceName) targetCommerceName = userComm.name;
+          if (!targetCityId) targetCityId = userComm.city_id;
+          if (!targetCityName) targetCityName = userComm.city_name;
+          if (!targetProvinceId) targetProvinceId = userComm.province_id;
+          if (!targetPhone) targetPhone = userComm.phone_whatsapp;
+        }
+      }
+
+      const isUuid = targetCommerceId && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(targetCommerceId);
+
+      const insertPayload: any = {
         title: productData.title,
-        slug: productData.slug || productData.title?.toLowerCase().replace(/\s+/g, '-') || `prod-${Date.now()}`,
+        slug: productData.slug || productData.title?.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || `prod-${Date.now()}`,
         price: productData.price,
         currency: productData.currency || 'ARS',
-        commerce_id: productData.commerceId || 'c1',
-        commerce_name: productData.commerceName || 'Comercio Registrado',
-        province_id: productData.provinceId || 'santa-fe',
-        city_id: productData.cityId || 'colon',
-        city_name: productData.cityName || 'Colón',
-        image_url: productData.imageUrl || '/images/prod-mate.jpg',
+        commerce_name: targetCommerceName || 'Comercio Registrado',
+        province_id: targetProvinceId || 'santa-fe',
+        city_id: targetCityId || 'rosario',
+        city_name: targetCityName || 'Rosario',
+        image_url: productData.imageUrl || '/images/city-rosario.jpg',
         category: productData.category || 'Generales',
         category_id: productData.categoryId || 'hogar',
-        is_featured: productData.isFeatured || false,
+        is_featured: productData.isFeatured ?? true,
         description: productData.description || '',
-        phone_whatsapp: productData.phoneWhatsApp || '5493447451234',
+        phone_whatsapp: targetPhone || '5493415550199',
         whatsapp_message_custom: productData.whatsappMessageCustom,
-      }).select().single();
+      };
+
+      if (isUuid) {
+        insertPayload.commerce_id = targetCommerceId;
+      }
+
+      const { data, error } = await supabase.from('products').insert(insertPayload).select().single();
 
       if (error) {
+        console.error('Error al insertar producto en Supabase:', error.message);
         return { success: false, message: `Error al guardar producto: ${error.message}` };
       }
 
@@ -52,6 +86,7 @@ export async function createProductAction(productData: Partial<Product>): Promis
           commerceName: data.commerce_name,
           cityId: data.city_id,
           cityName: data.city_name,
+          provinceId: data.province_id,
           imageUrl: data.image_url,
           category: data.category,
           categoryId: data.category_id,

@@ -38,6 +38,19 @@ export default function AdminPage() {
           return;
         }
 
+        // Clean bloated base64 metadata from user session token if present
+        if (
+          user.user_metadata?.logo_url?.startsWith('data:') ||
+          user.user_metadata?.cover_url?.startsWith('data:')
+        ) {
+          await supabase.auth.updateUser({
+            data: {
+              logo_url: null,
+              cover_url: null,
+            },
+          });
+        }
+
         let targetCommerce: any = null;
 
         // 2. Buscar el comercio propiedad del usuario autenticado por owner_id
@@ -316,6 +329,7 @@ export default function AdminPage() {
 
                 {/* Quick Catalog Preview */}
                 <CatalogManager
+                  commerce={commerce}
                   products={products}
                   onAddProduct={handleAddProduct}
                   onDeleteProduct={handleDeleteProduct}
@@ -327,6 +341,7 @@ export default function AdminPage() {
             {activeTab === 'catalog' && (
               <div className="animate-in fade-in duration-200">
                 <CatalogManager
+                  commerce={commerce}
                   products={products}
                   onAddProduct={handleAddProduct}
                   onDeleteProduct={handleDeleteProduct}
