@@ -162,3 +162,78 @@ export async function deleteProductAction(productId: string): Promise<{ success:
     return { success: false, message: `Error inesperado: ${(err as Error).message}` };
   }
 }
+
+export async function updateProductAction(
+  productId: string,
+  productData: Partial<Product>
+): Promise<{ success: boolean; message: string; data?: Product }> {
+  try {
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+
+    if (supabaseUrl && !supabaseUrl.includes('your-supabase-project')) {
+      const supabase = createAdminClient();
+
+      const updatePayload: any = {
+        updated_at: new Date().toISOString(),
+      };
+
+      if (productData.title) updatePayload.title = productData.title;
+      if (productData.price !== undefined) updatePayload.price = productData.price;
+      if (productData.category) updatePayload.category = productData.category;
+      if (productData.categoryId) updatePayload.category_id = productData.categoryId;
+      if (productData.cityId) updatePayload.city_id = productData.cityId;
+      if (productData.cityName) updatePayload.city_name = productData.cityName;
+      if (productData.imageUrl) updatePayload.image_url = productData.imageUrl;
+      if (productData.description !== undefined) updatePayload.description = productData.description;
+      if (productData.phoneWhatsApp) updatePayload.phone_whatsapp = productData.phoneWhatsApp;
+
+      const { data, error } = await supabase
+        .from('products')
+        .update(updatePayload)
+        .eq('id', productId)
+        .select()
+        .single();
+
+      if (error) {
+        return { success: false, message: `Error editando producto: ${error.message}` };
+      }
+
+      try {
+        revalidatePath('/admin');
+        revalidatePath('/');
+      } catch {}
+
+      return {
+        success: true,
+        message: '¡Producto actualizado exitosamente!',
+        data: {
+          id: data.id,
+          title: data.title,
+          slug: data.slug,
+          price: Number(data.price),
+          currency: data.currency,
+          commerceId: data.commerce_id,
+          commerceName: data.commerce_name,
+          cityId: data.city_id,
+          cityName: data.city_name,
+          provinceId: data.province_id,
+          imageUrl: data.image_url,
+          category: data.category,
+          categoryId: data.category_id,
+          isFeatured: data.is_featured,
+          description: data.description,
+          phoneWhatsApp: data.phone_whatsapp,
+          whatsappMessageCustom: data.whatsapp_message_custom,
+        }
+      };
+    }
+
+    try {
+      revalidatePath('/admin');
+    } catch {}
+
+    return { success: true, message: '¡Producto actualizado en modo demostración!' };
+  } catch (err) {
+    return { success: false, message: `Error inesperado: ${(err as Error).message}` };
+  }
+}

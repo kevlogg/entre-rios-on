@@ -6,7 +6,7 @@ import { Commerce, Product } from '@/types';
 import { Plus, Edit2, Trash2, Power, CheckCircle, Tag, ShoppingBag, X, Sparkles, MessageCircle } from 'lucide-react';
 import { CATEGORIES_LIST } from '@/lib/constants/categories';
 import { ALL_CITIES } from '@/lib/constants/locations';
-import { createProductAction, deleteProductAction } from '@/server/actions/catalog';
+import { createProductAction, updateProductAction, deleteProductAction } from '@/server/actions/catalog';
 import { MultiImageUploader } from '@/components/common/ImageUploader';
 
 interface CatalogManagerProps {
@@ -18,6 +18,7 @@ interface CatalogManagerProps {
 
 export function CatalogManager({ commerce, products, onAddProduct, onDeleteProduct }: CatalogManagerProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [pausedMap, setPausedMap] = useState<Record<string, boolean>>({});
 
@@ -33,7 +34,29 @@ export function CatalogManager({ commerce, products, onAddProduct, onDeleteProdu
     setPausedMap((prev) => ({ ...prev, [id]: !prev[id] }));
   };
 
-  const handleCreateProduct = async (e: React.FormEvent) => {
+  const handleOpenNewModal = () => {
+    setEditingProduct(null);
+    setTitle('');
+    setPrice('');
+    setCategory('gastronomia');
+    setCityId('rosario');
+    setDescription('');
+    setImages([]);
+    setIsModalOpen(true);
+  };
+
+  const handleOpenEditModal = (prod: Product) => {
+    setEditingProduct(prod);
+    setTitle(prod.title);
+    setPrice(prod.price ? prod.price.toString() : '');
+    setCategory(prod.categoryId || 'gastronomia');
+    setCityId(prod.cityId || 'rosario');
+    setDescription(prod.description || '');
+    setImages(prod.imageUrl ? [prod.imageUrl] : []);
+    setIsModalOpen(true);
+  };
+
+  const handleSaveProduct = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!title || !price || isSubmitting) return;
 
@@ -42,39 +65,65 @@ export function CatalogManager({ commerce, products, onAddProduct, onDeleteProdu
     const selectedCity = ALL_CITIES.find((c) => c.id === cityId) || ALL_CITIES[0];
     const primaryImage = images[0] || '/images/city-rosario.jpg';
 
-    const newProd: Product = {
-      id: `p-new-${Date.now()}`,
-      title,
-      slug: title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, ''),
-      price: parseFloat(price) || 0,
-      currency: 'ARS',
-      commerceId: commerce?.id || 'c1',
-      commerceName: commerce?.name || 'Comercio ON MÁS',
-      cityId: commerce?.cityId || selectedCity.id,
-      cityName: commerce?.cityName || selectedCity.name,
-      provinceId: commerce?.provinceId || selectedCity.provinceId,
-      imageUrl: primaryImage,
-      category: selectedCatObj ? selectedCatObj.label : 'Productos',
-      categoryId: category,
-      isFeatured: true,
-      description: description || 'Producto destacado publicado por el comercio socio.',
-      phoneWhatsApp: commerce?.phoneWhatsApp || '5493415550199',
-      whatsappMessageCustom: `Hola, vi en el portal ON MÁS el producto "${title}" y quisiera consultar disponibilidad.`,
-    };
+    if (editingProduct) {
+      const updatedFields: Partial<Product> = {
+        title,
+        price: parseFloat(price) || 0,
+        category: selectedCatObj ? selectedCatObj.label : 'Productos',
+        categoryId: category,
+        cityId: selectedCity.id,
+        cityName: selectedCity.name,
+        description,
+        imageUrl: primaryImage,
+      };
 
-    try {
-      const res = await createProductAction(newProd);
-      if (res && res.data) {
-        onAddProduct(res.data);
-      } else {
+      try {
+        const res = await updateProductAction(editingProduct.id, updatedFields);
+        if (res && res.data) {
+          onAddProduct(res.data);
+        } else {
+          onAddProduct({ ...editingProduct, ...updatedFields });
+        }
+      } catch (err) {
+        console.warn('Update product fallback:', err);
+        onAddProduct({ ...editingProduct, ...updatedFields });
+      }
+    } else {
+      const newProd: Product = {
+        id: `p-new-${Date.now()}`,
+        title,
+        slug: title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, ''),
+        price: parseFloat(price) || 0,
+        currency: 'ARS',
+        commerceId: commerce?.id || 'c1',
+        commerceName: commerce?.name || 'Comercio ON MÁS',
+        cityId: commerce?.cityId || selectedCity.id,
+        cityName: commerce?.cityName || selectedCity.name,
+        provinceId: commerce?.provinceId || selectedCity.provinceId,
+        imageUrl: primaryImage,
+        category: selectedCatObj ? selectedCatObj.label : 'Productos',
+        categoryId: category,
+        isFeatured: true,
+        description: description || 'Producto destacado publicado por el comercio socio.',
+        phoneWhatsApp: commerce?.phoneWhatsApp || '5493415550199',
+        whatsappMessageCustom: `Hola, vi en el portal ON MÁS el producto "${title}" y quisiera consultar disponibilidad.`,
+      };
+
+      try {
+        const res = await createProductAction(newProd);
+        if (res && res.data) {
+          onAddProduct(res.data);
+        } else {
+          onAddProduct(newProd);
+        }
+      } catch (err) {
+        console.warn('Server Action response fallback:', err);
         onAddProduct(newProd);
       }
-    } catch (err) {
-      console.warn('Server Action response fallback:', err);
-      onAddProduct(newProd);
     }
 
     setIsModalOpen(false);
+    setEditingProduct(null);
     setIsSubmitting(false);
 
     // Reset Form
@@ -114,7 +163,7 @@ export function CatalogManager({ commerce, products, onAddProduct, onDeleteProdu
         </div>
 
         <button
-          onClick={() => setIsModalOpen(true)}
+          onClick={handleOpenNewModal}
           className="bg-gradient-to-r from-[#00ADB5] to-[#007C8A] hover:from-[#00E5E8] hover:to-[#00ADB5] text-white px-5 py-2.5 rounded-2xl font-extrabold text-xs shadow-md flex items-center justify-center gap-2 transition-transform active:scale-95 cursor-pointer"
         >
           <Plus className="w-4 h-4" />
@@ -164,6 +213,14 @@ export function CatalogManager({ commerce, products, onAddProduct, onDeleteProdu
 
                 <div className="flex items-center gap-1.5">
                   <button
+                    onClick={() => handleOpenEditModal(prod)}
+                    className="p-2 rounded-xl bg-cyan-50 text-[#00ADB5] hover:bg-cyan-100 transition-colors cursor-pointer"
+                    title="Editar Publicación"
+                  >
+                    <Edit2 className="w-3.5 h-3.5" />
+                  </button>
+
+                  <button
                     onClick={() => togglePause(prod.id)}
                     className={`p-2 rounded-xl text-xs font-bold transition-colors cursor-pointer ${
                       isPaused ? 'bg-amber-100 text-amber-700' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
@@ -187,11 +244,11 @@ export function CatalogManager({ commerce, products, onAddProduct, onDeleteProdu
         })}
       </div>
 
-      {/* Modal: Publicar Nuevo Producto */}
+      {/* Modal: Publicar / Editar Producto */}
       {isModalOpen && (
         <div
           className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto"
-          onClick={() => setIsModalOpen(false)}
+          onClick={() => { setIsModalOpen(false); setEditingProduct(null); }}
         >
           <div
             className="bg-white rounded-3xl max-w-lg w-full p-6 space-y-5 shadow-2xl my-auto max-h-[90vh] overflow-y-auto animate-in fade-in zoom-in-95 duration-200 relative"
@@ -200,11 +257,11 @@ export function CatalogManager({ commerce, products, onAddProduct, onDeleteProdu
             <div className="sticky -top-6 -mt-6 bg-white z-20 pt-6 pb-3 flex items-center justify-between border-b border-slate-100">
               <h3 className="text-base sm:text-lg font-extrabold text-[#0047BA] flex items-center gap-2">
                 <Sparkles className="w-5 h-5 text-[#00ADB5] shrink-0" />
-                <span>Publicar Nuevo Producto</span>
+                <span>{editingProduct ? 'Editar Producto / Publicación' : 'Publicar Nuevo Producto'}</span>
               </h3>
               <button
                 type="button"
-                onClick={() => setIsModalOpen(false)}
+                onClick={() => { setIsModalOpen(false); setEditingProduct(null); }}
                 className="p-1.5 text-slate-400 hover:text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-full transition-colors cursor-pointer"
                 title="Cerrar ventana"
               >
@@ -212,7 +269,7 @@ export function CatalogManager({ commerce, products, onAddProduct, onDeleteProdu
               </button>
             </div>
 
-            <form onSubmit={handleCreateProduct} className="space-y-4">
+            <form onSubmit={handleSaveProduct} className="space-y-4">
               <div>
                 <label className="block text-xs font-bold text-slate-700 mb-1">Título de la Oferta / Producto *</label>
                 <input
@@ -289,7 +346,7 @@ export function CatalogManager({ commerce, products, onAddProduct, onDeleteProdu
                   disabled={isSubmitting}
                   className="bg-gradient-to-r from-[#00ADB5] to-[#007C8A] hover:from-[#00E5E8] hover:to-[#00ADB5] text-white px-6 py-2.5 rounded-xl font-extrabold text-xs shadow-md cursor-pointer disabled:opacity-50"
                 >
-                  {isSubmitting ? 'Guardando...' : 'Publicar Producto Ahora'}
+                  {isSubmitting ? 'Guardando...' : editingProduct ? 'Guardar Cambios' : 'Publicar Producto Ahora'}
                 </button>
               </div>
             </form>
