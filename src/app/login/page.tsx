@@ -100,37 +100,23 @@ function LoginFormContent() {
           return;
         }
 
-        // 2. Insertar Comercio en la tabla commerces de Supabase
-        const cleanSlug = commerceName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || `comm-${Date.now()}`;
-
-        // Evitar choques de clave única por slug
-        const { data: existingSlug } = await supabase
-          .from('commerces')
-          .select('id')
-          .eq('slug', cleanSlug)
-          .maybeSingle();
-
-        const finalSlug = existingSlug ? `${cleanSlug}-${Date.now().toString().slice(-4)}` : cleanSlug;
-
-        const { error: commErr } = await supabase.from('commerces').insert({
-          name: commerceName,
-          slug: finalSlug,
-          category: 'Comercio General',
-          province_id: provinceId,
-          city_id: cityObj.id,
-          city_name: cityObj.name,
-          description: `Comercio adherido al portal ON MÁS en ${cityObj.name}.`,
-          phone_whatsapp: phoneWhatsApp || '5493415550199',
-          address: `${cityObj.name}, Argentina`,
-          logo_url: '/images/city-rosario.jpg',
-          cover_url: '/images/city-rosario.jpg',
-          is_verified: true,
-          is_subscription_active: true,
-          owner_id: authData.user?.id || null,
-        });
-
-        if (commErr) {
-          console.warn('Nota registro comercio:', commErr.message);
+        // 2. Insertar Comercio en la tabla commerces de Supabase de forma segura vía Server Action
+        if (authData.user?.id) {
+          try {
+            const { registerCommerceOnSignUpAction } = await import('@/server/actions/profile');
+            await registerCommerceOnSignUpAction({
+              userId: authData.user.id,
+              email: email,
+              commerceName: commerceName,
+              phoneWhatsApp: phoneWhatsApp,
+              provinceId: provinceId,
+              cityId: cityObj.id,
+              cityName: cityObj.name,
+              fullName: `${firstName} ${lastName}`.trim(),
+            });
+          } catch (regErr) {
+            console.warn('Nota registro comercio Server Action:', regErr);
+          }
         }
 
         // 3. Intentar iniciar sesión automáticamente si Supabase tiene deshabilitada la confirmación por email

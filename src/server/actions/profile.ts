@@ -138,3 +138,78 @@ export async function updateCommerceProfileAction(
   }
 }
 
+export async function registerCommerceOnSignUpAction(data: {
+  userId: string;
+  email: string;
+  commerceName: string;
+  phoneWhatsApp: string;
+  provinceId: string;
+  cityId: string;
+  cityName: string;
+  fullName?: string;
+}): Promise<{ success: boolean; message: string; slug?: string }> {
+  try {
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+
+    if (supabaseUrl && !supabaseUrl.includes('your-supabase-project')) {
+      const supabase = await createClient();
+
+      // 1. Asegurar la presencia del perfil en public.profiles para la FK commerces_owner_id_fkey
+      try {
+        await supabase.from('profiles').upsert({
+          id: data.userId,
+          email: data.email,
+          full_name: data.fullName || data.commerceName,
+          updated_at: new Date().toISOString(),
+        }, { onConflict: 'id' });
+      } catch (profErr) {
+        console.warn('Profile upsert note:', profErr);
+      }
+
+      // 2. Resolver slug único
+      const cleanSlug = data.commerceName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || `comercio-${Date.now()}`;
+      
+      const { data: existingSlug } = await supabase
+        .from('commerces')
+        .select('id')
+        .eq('slug', cleanSlug)
+        .maybeSingle();
+
+      const finalSlug = existingSlug ? `${cleanSlug}-${Date.now().toString().slice(-4)}` : cleanSlug;
+
+      // 3. Insertar el comercio en Supabase
+      const { error: insertErr } = await supabase.from('commerces').insert({
+        name: data.commerceName,
+        slug: finalSlug,
+        category: 'Comercio General',
+        province_id: data.provinceId,
+        city_id: data.cityId,
+        city_name: data.cityName,
+        description: `Comercio adherido al portal ON MÁS en ${data.cityName}.`,
+        phone_whatsapp: data.phoneWhatsApp || '',
+        address: `${data.cityName}, Argentina`,
+        logo_url: '/images/city-rosario.jpg',
+        cover_url: '/images/city-rosario.jpg',
+        is_verified: true,
+        is_subscription_active: true,
+        owner_id: data.userId,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      });
+
+      if (insertErr) {
+        console.warn('Error registrando comercio en Supabase:', insertErr);
+        return { success: false, message: insertErr.message };
+      }
+
+      revalidatePath('/admin');
+      revalidatePath('/comercios');
+      return { success: true, message: 'Comercio registrado con éxito', slug: finalSlug };
+    }
+
+    return { success: true, message: 'Comercio registrado en modo demostración' };
+  } catch (err) {
+    return { success: false, message: (err as Error).message };
+  }
+}
+
