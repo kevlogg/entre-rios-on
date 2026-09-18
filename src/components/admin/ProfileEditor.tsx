@@ -135,7 +135,6 @@ export function ProfileEditor({ commerce, onUpdateCommerce }: ProfileEditorProps
           address: formData.address,
           phone_whatsapp: formData.phoneWhatsApp,
           description: formData.description,
-          is_digital_only: formData.isDigitalOnly,
           logo_url: logoUrl,
           cover_url: coverUrl,
           updated_at: new Date().toISOString(),

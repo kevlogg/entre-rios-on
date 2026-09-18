@@ -30,14 +30,25 @@ export async function updateCommerceProfileAction(
       if (profileData.provinceId) updatePayload.province_id = profileData.provinceId;
       if (profileData.cityId) updatePayload.city_id = profileData.cityId;
       if (profileData.cityName) updatePayload.city_name = profileData.cityName;
-      if (profileData.isDigitalOnly !== undefined) updatePayload.is_digital_only = profileData.isDigitalOnly;
       if (profileData.website) updatePayload.website = profileData.website;
       if (profileData.slug) updatePayload.slug = profileData.slug;
-      if (user) updatePayload.owner_id = user.id;
 
       let targetId: string | null = null;
 
       if (user) {
+        // Asegurar la presencia del perfil en public.profiles para cumplir con commerces_owner_id_fkey
+        try {
+          await supabase.from('profiles').upsert({
+            id: user.id,
+            email: user.email,
+            full_name: user.user_metadata?.full_name || profileData.name || 'Comerciante',
+            updated_at: new Date().toISOString(),
+          }, { onConflict: 'id' });
+          updatePayload.owner_id = user.id;
+        } catch (profErr) {
+          console.warn('Note profile upsert:', profErr);
+        }
+
         const { data: existingCommerce } = await supabase
           .from('commerces')
           .select('id')
