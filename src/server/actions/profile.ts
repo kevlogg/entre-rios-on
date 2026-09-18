@@ -22,7 +22,6 @@ export async function updateCommerceProfileAction(
           description: profileData.description,
           phone_whatsapp: profileData.phoneWhatsApp,
           address: profileData.address,
-          instagram: profileData.instagram,
           website: profileData.website,
           updated_at: new Date().toISOString(),
         })

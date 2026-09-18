@@ -102,7 +102,6 @@ const COMMERCES_MOCK: Record<string, Commerce> = {
     coverUrl: '/images/commerce-alfareria.jpg',
     phoneWhatsApp: '5493447451234',
     address: '12 de Octubre 450, Colón',
-    instagram: '@ceramica.delta.colon',
   },
   'c2': {
     id: 'c2',
@@ -120,7 +119,6 @@ const COMMERCES_MOCK: Record<string, Commerce> = {
     coverUrl: '/images/commerce-costanera.jpg',
     phoneWhatsApp: '5493434229876',
     address: 'Av. Laurencena 1280, Puerto de Paraná',
-    instagram: '@eldoradaparanacostanera',
   },
   'c3': {
     id: 'c3',
@@ -176,7 +174,6 @@ const COMMERCES_MOCK: Record<string, Commerce> = {
     coverUrl: '/images/commerce-costanera.jpg',
     phoneWhatsApp: '5493414567890',
     address: 'Jujuy 2800, Rosario',
-    instagram: '@pichincha.cerveza.rosario',
   },
   'c6': {
     id: 'c6',
@@ -855,7 +852,6 @@ export async function getAllCommerces(): Promise<Commerce[]> {
           coverUrl: c.cover_url,
           phoneWhatsApp: c.phone_whatsapp,
           address: c.address,
-          instagram: c.instagram,
           website: c.website,
         }));
       }
@@ -904,7 +900,6 @@ export async function getCommerceBySlug(slug: string): Promise<Commerce | undefi
           coverUrl: item.cover_url || '/images/city-rosario.jpg',
           phoneWhatsApp: item.phone_whatsapp || '',
           address: item.address || '',
-          instagram: item.instagram || '',
           website: item.website || '',
           email: item.email || '',
         };

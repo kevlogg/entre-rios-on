@@ -142,7 +142,6 @@ export default function AdminPage() {
           phoneWhatsApp: targetCommerce?.phone_whatsapp || user.user_metadata?.phone_whatsapp || '',
           address: targetCommerce?.address ?? '',
           email: user.email || targetCommerce?.email || '',
-          instagram: targetCommerce?.instagram || '',
           website: targetCommerce?.website || '',
         };
 

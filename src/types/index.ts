@@ -37,7 +37,6 @@ export interface Commerce {
   address: string;
   email?: string;
   isDigitalOnly?: boolean;
-  instagram?: string;
   website?: string;
 }
 
