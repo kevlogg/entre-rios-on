@@ -177,31 +177,8 @@ function LoginFormContent() {
           setMessage({ type: 'error', text: 'Credenciales incorrectas o correo no confirmado. Verificá tu información.' });
           setLoading(false);
         } else {
-          // Purgar metadata pesada inmediatamente tras iniciar sesión para que el JWT de cookie sea compacto (<1KB)
-          if (signInData?.user) {
-            const meta = signInData.user.user_metadata || {};
-            if (
-              meta.logo_url ||
-              meta.cover_url ||
-              Object.values(meta).some((v) => typeof v === 'string' && (v.startsWith('data:') || (v as string).length > 300))
-            ) {
-              try {
-                await supabase.auth.updateUser({
-                  data: {
-                    logo_url: null,
-                    cover_url: null,
-                  },
-                });
-              } catch (cleanErr) {
-                console.warn('Limpieza metadata warning:', cleanErr);
-              }
-            }
-          }
-
           setMessage({ type: 'success', text: '¡Sesión iniciada con éxito! Redirigiendo...' });
-          setTimeout(() => {
-            router.push(redirectTo);
-          }, 600);
+          router.push(redirectTo);
         }
       } else if (mode === 'forgot') {
         // Olvidé mi contraseña (Reset password)

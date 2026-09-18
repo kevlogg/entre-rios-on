@@ -38,19 +38,6 @@ export default function AdminPage() {
           return;
         }
 
-        // Clean bloated base64 metadata from user session token if present
-        if (
-          user.user_metadata?.logo_url?.startsWith('data:') ||
-          user.user_metadata?.cover_url?.startsWith('data:')
-        ) {
-          await supabase.auth.updateUser({
-            data: {
-              logo_url: null,
-              cover_url: null,
-            },
-          });
-        }
-
         let targetCommerce: any = null;
 
         // 2. Buscar el comercio propiedad del usuario autenticado por owner_id
