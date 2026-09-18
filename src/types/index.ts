@@ -35,6 +35,7 @@ export interface Commerce {
   coverUrl: string;
   phoneWhatsApp: string;
   address: string;
+  email?: string;
   isDigitalOnly?: boolean;
   instagram?: string;
   website?: string;

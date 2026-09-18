@@ -58,7 +58,8 @@ export default function AdminPage() {
             user.user_metadata?.full_name ||
             user.email?.split('@')[0] ||
             'Mi Empresa Comercial';
-          const slug = merchantName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || `comm-${Date.now()}`;
+          const baseSlug = merchantName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || 'comercio';
+          const slug = `${baseSlug}-${user.id.slice(0, 6)}`;
 
           const { data: createdCommerce } = await supabase
             .from('commerces')
@@ -66,12 +67,12 @@ export default function AdminPage() {
               name: merchantName,
               slug,
               category: 'Comercio General',
-              province_id: 'santa-fe',
-              city_id: 'rosario',
-              city_name: 'Rosario',
+              province_id: user.user_metadata?.province_id || 'santa-fe',
+              city_id: user.user_metadata?.city_id || 'rosario',
+              city_name: user.user_metadata?.city_name || 'Rosario',
               description: `Comercio adherido al portal ON MÁS.`,
-              phone_whatsapp: '5493415550199',
-              address: 'Rosario, Argentina',
+              phone_whatsapp: user.user_metadata?.phone_whatsapp || '',
+              address: '',
               logo_url: '/images/city-rosario.jpg',
               cover_url: '/images/city-rosario.jpg',
               is_verified: true,
@@ -95,11 +96,12 @@ export default function AdminPage() {
           'Mi Empresa Comercial';
 
         const cityName = targetCommerce?.city_name || user.user_metadata?.city_name || 'Rosario';
+        const fallbackSlug = `${merchantName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || 'comercio'}-${user.id.slice(0, 6)}`;
 
         const resolvedCommerce: Commerce = {
           id: targetCommerce?.id || `comm-${user.id}`,
           name: merchantName,
-          slug: targetCommerce?.slug || merchantName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || `comm-${Date.now()}`,
+          slug: targetCommerce?.slug || fallbackSlug,
           category: targetCommerce?.category || 'Comercio General',
           cityId: targetCommerce?.city_id || 'rosario',
           cityName: cityName,
@@ -111,7 +113,8 @@ export default function AdminPage() {
           logoUrl: targetCommerce?.logo_url || '/images/city-rosario.jpg',
           coverUrl: targetCommerce?.cover_url || '/images/city-rosario.jpg',
           phoneWhatsApp: targetCommerce?.phone_whatsapp || user.user_metadata?.phone_whatsapp || '',
-          address: targetCommerce?.address || `${cityName}, Argentina`,
+          address: targetCommerce?.address ?? '',
+          email: user.email || targetCommerce?.email || '',
           instagram: targetCommerce?.instagram || '',
           website: targetCommerce?.website || '',
         };

@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import Image from 'next/image';
-import { Store, MapPin, MessageCircle, ShieldCheck, Save, CheckCircle, Camera, Globe, Building2, Laptop, Upload } from 'lucide-react';
+import { Store, MapPin, MessageCircle, ShieldCheck, Save, CheckCircle, Camera, Globe, Building2, Laptop, Upload, Mail, AlertTriangle } from 'lucide-react';
 import { Commerce } from '@/types';
 import { updateCommerceProfileAction } from '@/server/actions/profile';
 import { PROVINCES, getCitiesByProvince } from '@/lib/constants/locations';
@@ -14,6 +14,7 @@ interface ProfileEditorProps {
 export function ProfileEditor({ commerce }: ProfileEditorProps) {
   const [logoUrl, setLogoUrl] = useState(commerce.logoUrl || '/images/city-rosario.jpg');
   const [coverUrl, setCoverUrl] = useState(commerce.coverUrl || '/images/city-rosario.jpg');
+  const [userEmail, setUserEmail] = useState(commerce.email || '');
 
   const [formData, setFormData] = useState({
     name: commerce.name,
@@ -46,6 +47,24 @@ export function ProfileEditor({ commerce }: ProfileEditorProps) {
     });
     if (commerce.logoUrl) setLogoUrl(commerce.logoUrl);
     if (commerce.coverUrl) setCoverUrl(commerce.coverUrl);
+    if (commerce.email) setUserEmail(commerce.email);
+
+    async function loadUserEmail() {
+      try {
+        const { createClient } = await import('@/lib/supabase/client');
+        const supabase = createClient();
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user?.email) {
+          setUserEmail(user.email);
+        }
+      } catch (err) {
+        console.warn('Could not fetch user email for ProfileEditor:', err);
+      }
+    }
+
+    if (!commerce.email) {
+      loadUserEmail();
+    }
   }, [commerce]);
 
   const availableCities = getCitiesByProvince(formData.provinceId);
@@ -198,6 +217,29 @@ export function ProfileEditor({ commerce }: ProfileEditorProps) {
           </div>
         </div>
 
+        {/* Read-Only Account Email */}
+        <div>
+          <label className="block text-xs font-bold text-slate-700 mb-1 flex items-center justify-between">
+            <span>Correo Electrónico de la Cuenta (No modificable) *</span>
+            <span className="text-[10px] text-slate-500 bg-slate-100 px-2 py-0.5 rounded-md font-bold border border-slate-200">
+              Campo Bloqueado
+            </span>
+          </label>
+          <div className="relative">
+            <input
+              type="email"
+              readOnly
+              disabled
+              value={userEmail || commerce.email || ''}
+              className="w-full bg-slate-100 border border-slate-300 rounded-xl pl-10 pr-4 py-2.5 text-sm text-slate-600 font-bold cursor-not-allowed select-none opacity-90 shadow-2xs"
+            />
+            <Mail className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
+          </div>
+          <p className="text-[11px] text-slate-400 font-medium mt-1">
+            El email de la cuenta está vinculado a tu acceso de usuario y no puede ser modificado desde este panel.
+          </p>
+        </div>
+
         {/* Digital Only Business Toggle Card */}
         <div className="bg-gradient-to-r from-cyan-50/70 to-blue-50/70 border border-cyan-200 rounded-2xl p-4 flex items-center justify-between gap-4">
           <div className="flex items-start gap-3">
@@ -275,22 +317,40 @@ export function ProfileEditor({ commerce }: ProfileEditorProps) {
           </div>
         </div>
 
-        <div>
+        {/* Physical Address input & mandatory alert */}
+        <div className="space-y-2">
           <label className="block text-xs font-bold text-slate-700 mb-1">
-            Dirección Física de Atención {formData.isDigitalOnly ? '(Opcional para Negocio Digital)' : '*'}
+            Dirección Física del Local / Atención Presencial {!formData.isDigitalOnly ? '*' : '(Opcional para Negocio Digital)'}
           </label>
           <input
             type="text"
+            required={!formData.isDigitalOnly}
             disabled={formData.isDigitalOnly}
-            placeholder={formData.isDigitalOnly ? 'Negocio 100% Online / Venta Digital sin local de atención presencial' : 'Ej: Av. Córdoba 1450 (Opcional)'}
+            placeholder={formData.isDigitalOnly ? 'Negocio 100% Online / Venta Digital sin local de atención presencial' : 'Ej: Av. Córdoba 1450, San Martín 230, etc.'}
             value={formData.isDigitalOnly ? '' : formData.address}
             onChange={(e) => setFormData({ ...formData, address: e.target.value })}
             className={`w-full border rounded-xl px-4 py-2.5 text-sm ${
               formData.isDigitalOnly 
                 ? 'bg-slate-100 text-slate-400 border-slate-200 cursor-not-allowed italic' 
+                : formData.address.trim() === ''
+                ? 'bg-amber-50/50 border-amber-300 text-slate-800 focus:ring-2 focus:ring-amber-500'
                 : 'bg-slate-50 text-slate-800 border-slate-300 focus:ring-2 focus:ring-[#00ADB5]'
             }`}
           />
+
+          {!formData.isDigitalOnly && formData.address.trim() === '' && (
+            <div className="bg-amber-50 border border-amber-300 rounded-2xl p-4 flex items-start gap-3 text-amber-900 animate-in fade-in duration-200 shadow-2xs">
+              <AlertTriangle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
+              <div className="space-y-1">
+                <h5 className="text-xs font-extrabold text-amber-950 uppercase tracking-wider">
+                  ¡Alerta: Dirección física obligatoria!
+                </h5>
+                <p className="text-xs font-medium text-amber-800 leading-relaxed">
+                  Tu comercio no está marcado como 100% Digital. Por favor ingresá la dirección física de tu local o punto de atención para que tus clientes puedan ubicarte y para figurar en las búsquedas locales.
+                </p>
+              </div>
+            </div>
+          )}
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
