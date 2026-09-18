@@ -9,9 +9,10 @@ import { PROVINCES, getCitiesByProvince } from '@/lib/constants/locations';
 
 interface ProfileEditorProps {
   commerce: Commerce;
+  onUpdateCommerce?: (updated: Commerce) => void;
 }
 
-export function ProfileEditor({ commerce }: ProfileEditorProps) {
+export function ProfileEditor({ commerce, onUpdateCommerce }: ProfileEditorProps) {
   const [logoUrl, setLogoUrl] = useState(commerce.logoUrl || '/images/city-rosario.jpg');
   const [coverUrl, setCoverUrl] = useState(commerce.coverUrl || '/images/city-rosario.jpg');
   const [userEmail, setUserEmail] = useState(commerce.email || '');
@@ -96,14 +97,48 @@ export function ProfileEditor({ commerce }: ProfileEditorProps) {
     e.preventDefault();
     setIsSubmitting(true);
 
+    const updatedCommerce: Commerce = {
+      ...commerce,
+      name: formData.name,
+      category: formData.category,
+      provinceId: formData.provinceId,
+      cityName: formData.cityName,
+      address: formData.address,
+      phoneWhatsApp: formData.phoneWhatsApp,
+      description: formData.description,
+      isDigitalOnly: formData.isDigitalOnly,
+      logoUrl,
+      coverUrl,
+    };
+
     try {
-      await updateCommerceProfileAction(commerce.id, {
-        ...formData,
-        logoUrl,
-        coverUrl,
-      });
+      await updateCommerceProfileAction(commerce.id, updatedCommerce);
+
+      // Sincronización cliente Supabase inmediata
+      const { createClient } = await import('@/lib/supabase/client');
+      const supabase = createClient();
+      await supabase
+        .from('commerces')
+        .update({
+          name: formData.name,
+          category: formData.category,
+          province_id: formData.provinceId,
+          city_name: formData.cityName,
+          address: formData.address,
+          phone_whatsapp: formData.phoneWhatsApp,
+          description: formData.description,
+          is_digital_only: formData.isDigitalOnly,
+          logo_url: logoUrl,
+          cover_url: coverUrl,
+          updated_at: new Date().toISOString(),
+        })
+        .or(`id.eq.${commerce.id},slug.eq.${commerce.slug}`);
     } catch (err) {
       console.warn('Profile Server Action fallback:', err);
+    }
+
+    if (onUpdateCommerce) {
+      onUpdateCommerce(updatedCommerce);
     }
 
     setIsSubmitting(false);

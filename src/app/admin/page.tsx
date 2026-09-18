@@ -309,7 +309,10 @@ export default function AdminPage() {
             {/* TAB 3: PROFILE EDITOR */}
             {activeTab === 'profile' && (
               <div className="animate-in fade-in duration-200">
-                <ProfileEditor commerce={commerce} />
+                <ProfileEditor
+                  commerce={commerce}
+                  onUpdateCommerce={(updated) => setCommerce(updated)}
+                />
               </div>
             )}
 
