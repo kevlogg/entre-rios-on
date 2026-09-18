@@ -14,6 +14,8 @@ export async function updateCommerceProfileAction(
     if (supabaseUrl && !supabaseUrl.includes('your-supabase-project')) {
       const supabase = await createClient();
 
+      const { data: { user } } = await supabase.auth.getUser();
+
       const updatePayload: Record<string, any> = {
         name: profileData.name,
         category: profileData.category,
@@ -29,26 +31,85 @@ export async function updateCommerceProfileAction(
       if (profileData.cityName) updatePayload.city_name = profileData.cityName;
       if (profileData.isDigitalOnly !== undefined) updatePayload.is_digital_only = profileData.isDigitalOnly;
       if (profileData.website) updatePayload.website = profileData.website;
+      if (profileData.slug) updatePayload.slug = profileData.slug;
 
-      const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(commerceId);
-      const cleanUserId = commerceId.replace(/^comm-/, '');
+      let targetId: string | null = null;
 
-      let query = supabase.from('commerces').update(updatePayload);
+      if (user) {
+        const { data: existingCommerce } = await supabase
+          .from('commerces')
+          .select('id')
+          .eq('owner_id', user.id)
+          .maybeSingle();
 
-      if (isUuid) {
-        query = query.or(`id.eq.${commerceId},slug.eq.${commerceId},owner_id.eq.${commerceId}`);
-      } else {
-        query = query.or(`slug.eq.${commerceId},owner_id.eq.${cleanUserId}`);
+        if (existingCommerce) {
+          targetId = existingCommerce.id;
+        }
       }
 
-      const { error } = await query;
+      if (targetId) {
+        const { error } = await supabase
+          .from('commerces')
+          .update(updatePayload)
+          .eq('id', targetId);
 
-      if (error) {
-        console.warn('Error al actualizar perfil en Supabase:', error);
-        return { success: false, message: `Error al actualizar perfil: ${error.message}` };
+        if (error) {
+          console.warn('Error al actualizar perfil en Supabase:', error);
+          return { success: false, message: `Error al actualizar perfil: ${error.message}` };
+        }
+      } else {
+        const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(commerceId);
+
+        let updateQuery = supabase.from('commerces').update(updatePayload);
+        if (isUuid) {
+          updateQuery = updateQuery.eq('id', commerceId);
+        } else {
+          updateQuery = updateQuery.eq('slug', commerceId);
+        }
+
+        const { error: updateErr, data: updatedData } = await updateQuery.select();
+
+        if (user && (!updatedData || updatedData.length === 0)) {
+          const cleanName = profileData.name || user.user_metadata?.commerce_name || 'Comercio Adherido';
+          const generatedSlug =
+            profileData.slug ||
+            cleanName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') ||
+            `comercio-${user.id.slice(0, 6)}`;
+
+          const insertPayload = {
+            name: cleanName,
+            slug: generatedSlug,
+            category: profileData.category || 'Comercio General',
+            province_id: profileData.provinceId || 'santa-fe',
+            city_id: 'rosario',
+            city_name: profileData.cityName || 'Rosario',
+            description: profileData.description || 'Comercio adherido al portal ON MÁS.',
+            phone_whatsapp: profileData.phoneWhatsApp || '',
+            address: profileData.address || '',
+            logo_url: profileData.logoUrl || '/images/city-rosario.jpg',
+            cover_url: profileData.coverUrl || '/images/city-rosario.jpg',
+            is_digital_only: profileData.isDigitalOnly || false,
+            website: profileData.website || '',
+            is_verified: true,
+            is_subscription_active: true,
+            owner_id: user.id,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+          };
+
+          const { error: insertErr } = await supabase.from('commerces').insert(insertPayload);
+          if (insertErr) {
+            console.warn('Error al insertar perfil en Supabase:', insertErr);
+            return { success: false, message: `Error al crear registro de comercio: ${insertErr.message}` };
+          }
+        } else if (updateErr) {
+          console.warn('Error al actualizar por ID/slug en Supabase:', updateErr);
+          return { success: false, message: `Error al actualizar: ${updateErr.message}` };
+        }
       }
 
       revalidatePath('/admin');
+      revalidatePath('/comercios');
       if (profileData.slug) {
         revalidatePath(`/comercio/${profileData.slug}`);
       }

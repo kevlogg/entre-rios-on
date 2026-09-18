@@ -5,7 +5,8 @@ import { getAllCommerces } from '@/lib/dal/portal';
 import { MapPin, Store, CheckCircle, ArrowLeft, MessageCircle } from 'lucide-react';
 import { DynamicLayoutWrapper } from '@/components/layout/DynamicLayoutWrapper';
 
-export const revalidate = 60;
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 export default async function ComerciosPage() {
   const commerces = await getAllCommerces();
@@ -44,7 +45,13 @@ export default async function ComerciosPage() {
               <div className="space-y-3">
                 <div className="flex items-center gap-4">
                   <div className="relative w-16 h-16 rounded-2xl overflow-hidden bg-slate-100 shrink-0 border border-slate-200">
-                    <Image src={comm.logoUrl} alt={comm.name} fill className="object-cover" />
+                    <Image
+                      src={comm.logoUrl}
+                      alt={comm.name}
+                      fill
+                      unoptimized={comm.logoUrl.startsWith('data:')}
+                      className="object-cover"
+                    />
                   </div>
                   <div>
                     <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-md uppercase">

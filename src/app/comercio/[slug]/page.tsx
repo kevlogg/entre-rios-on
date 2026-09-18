@@ -95,6 +95,7 @@ export default async function CommerceDetailPage({ params }: PageProps) {
               src={commerce.coverUrl}
               alt={commerce.name}
               fill
+              unoptimized={commerce.coverUrl.startsWith('data:')}
               className="object-cover object-center"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-black/20" />
@@ -113,6 +114,7 @@ export default async function CommerceDetailPage({ params }: PageProps) {
                     src={commerce.logoUrl}
                     alt={commerce.name}
                     fill
+                    unoptimized={commerce.logoUrl.startsWith('data:')}
                     className="object-cover"
                   />
                 </div>
@@ -159,7 +161,11 @@ export default async function CommerceDetailPage({ params }: PageProps) {
                 <div className="text-xs space-y-2 text-slate-600">
                   <p className="flex items-center gap-2 font-medium">
                     <MapPin className="w-4 h-4 text-[#00a859]" />
-                    <span>{commerce.address || 'Atención presencial / online en la región'}</span>
+                    <span>
+                      {commerce.isDigitalOnly
+                        ? 'Negocio 100% Digital / Venta Online'
+                        : (commerce.address || 'Atención presencial en la región')}
+                    </span>
                   </p>
                   <p className="flex items-center gap-2 font-bold text-[#004b87]">
                     <Store className="w-4 h-4 text-[#00a859]" />

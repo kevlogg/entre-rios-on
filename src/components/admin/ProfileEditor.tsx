@@ -114,12 +114,13 @@ export function ProfileEditor({ commerce, onUpdateCommerce }: ProfileEditorProps
     try {
       await updateCommerceProfileAction(commerce.id, updatedCommerce);
 
-      // Sincronización cliente Supabase inmediata
+      // Sincronización cliente Supabase inmediata con verificación por owner_id
       const { createClient } = await import('@/lib/supabase/client');
       const supabase = createClient();
-      await supabase
-        .from('commerces')
-        .update({
+      const { data: { user } } = await supabase.auth.getUser();
+
+      if (user) {
+        const payload = {
           name: formData.name,
           category: formData.category,
           province_id: formData.provinceId,
@@ -131,8 +132,28 @@ export function ProfileEditor({ commerce, onUpdateCommerce }: ProfileEditorProps
           logo_url: logoUrl,
           cover_url: coverUrl,
           updated_at: new Date().toISOString(),
-        })
-        .or(`id.eq.${commerce.id},slug.eq.${commerce.slug}`);
+        };
+
+        const { data: existing } = await supabase
+          .from('commerces')
+          .select('id')
+          .eq('owner_id', user.id)
+          .maybeSingle();
+
+        if (existing) {
+          await supabase.from('commerces').update(payload).eq('id', existing.id);
+        } else {
+          const cleanSlug = formData.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || `comercio-${user.id.slice(0, 6)}`;
+          await supabase.from('commerces').insert({
+            ...payload,
+            slug: cleanSlug,
+            owner_id: user.id,
+            city_id: 'rosario',
+            is_verified: true,
+            is_subscription_active: true,
+          });
+        }
+      }
     } catch (err) {
       console.warn('Profile Server Action fallback:', err);
     }
@@ -177,7 +198,13 @@ export function ProfileEditor({ commerce, onUpdateCommerce }: ProfileEditorProps
             <label className="block text-xs font-bold text-slate-700">Logo Oficial del Negocio</label>
             <div className="flex items-center gap-4">
               <div className="relative w-20 h-20 rounded-2xl overflow-hidden bg-white border-2 border-slate-300 shadow-sm shrink-0">
-                <Image src={logoUrl} alt={formData.name} fill className="object-cover" />
+                <Image
+                  src={logoUrl}
+                  alt={formData.name}
+                  fill
+                  unoptimized={logoUrl.startsWith('data:')}
+                  className="object-cover"
+                />
               </div>
               <div className="space-y-1.5 flex-1">
                 <span className="text-[11px] font-bold text-slate-500 block leading-tight">
@@ -202,7 +229,13 @@ export function ProfileEditor({ commerce, onUpdateCommerce }: ProfileEditorProps
             <label className="block text-xs font-bold text-slate-700">Imagen de Portada (Banner Principal)</label>
             <div className="space-y-2">
               <div className="relative h-20 w-full rounded-2xl overflow-hidden bg-slate-200 border border-slate-300 shadow-sm">
-                <Image src={coverUrl} alt="Portada" fill className="object-cover" />
+                <Image
+                  src={coverUrl}
+                  alt="Portada"
+                  fill
+                  unoptimized={coverUrl.startsWith('data:')}
+                  className="object-cover"
+                />
               </div>
               <div className="flex items-center justify-between gap-2">
                 <span className="text-[11px] font-bold text-slate-500">

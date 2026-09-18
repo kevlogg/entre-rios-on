@@ -872,19 +872,22 @@ export async function getCommerceBySlug(slug: string): Promise<Commerce | undefi
 
       const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(slug);
       const cleanSlugWithoutSuffix = slug.replace(/-[a-z0-9]{6,8}$/i, '');
-      const cleanId = slug.replace('comm-', '');
+      const cleanId = slug.replace(/^comm-/, '');
+      const isCleanIdUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(cleanId);
 
       let query = supabase.from('commerces').select('*');
 
       if (isUuid) {
         query = query.or(`id.eq.${slug},slug.eq.${slug},owner_id.eq.${slug}`);
-      } else {
+      } else if (isCleanIdUuid) {
         query = query.or(`slug.eq.${slug},slug.eq.${cleanSlugWithoutSuffix},owner_id.eq.${cleanId}`);
+      } else {
+        query = query.or(`slug.eq.${slug},slug.eq.${cleanSlugWithoutSuffix}`);
       }
 
       const { data, error } = await query.limit(1);
 
-      if (data && data.length > 0) {
+      if (!error && data && data.length > 0) {
         const item = data[0];
         return {
           id: item.id,
@@ -906,6 +909,7 @@ export async function getCommerceBySlug(slug: string): Promise<Commerce | undefi
           address: item.address || '',
           website: item.website || '',
           email: item.email || '',
+          isDigitalOnly: item.is_digital_only ?? false,
         };
       }
     } catch (e) {
