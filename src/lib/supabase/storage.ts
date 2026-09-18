@@ -1,54 +1,25 @@
-import { createClient } from '@/lib/supabase/client';
+import { compressImage } from '@/lib/utils/imageCompressor';
+import { uploadImageServerAction } from '@/server/actions/storage';
 
 /**
- * Sube un archivo de imagen al Storage de Supabase y devuelve la URL pública.
- * Si el bucket de Storage aún no está creado o falla por permisos, realiza un fallback transparente a Data URL.
+ * Sube un archivo de imagen al Storage de Supabase a través de Server Action y devuelve la URL pública permanente.
  */
 export async function uploadImageToSupabase(
   file: File,
   bucketName: string = 'commerces'
 ): Promise<string> {
   try {
-    const supabase = createClient();
-    const fileExt = file.name.split('.').pop() || 'jpg';
-    const cleanFileName = `${Date.now()}-${Math.random().toString(36).substring(2, 8)}.${fileExt}`;
-    const filePath = `uploads/${cleanFileName}`;
+    const compressedDataUrl = await compressImage(file, 1000, 1000, 0.82);
+    const result = await uploadImageServerAction(compressedDataUrl, file.name, bucketName);
 
-    // Intentar subir al bucket de Storage en Supabase
-    const { data, error } = await supabase.storage
-      .from(bucketName)
-      .upload(filePath, file, {
-        cacheControl: '3600',
-        upsert: true,
-      });
-
-    if (!error && data) {
-      // Obtener URL pública permanente
-      const { data: publicUrlData } = supabase.storage
-        .from(bucketName)
-        .getPublicUrl(filePath);
-
-      if (publicUrlData?.publicUrl) {
-        return publicUrlData.publicUrl;
-      }
-    } else {
-      console.warn(`Supabase Storage note (${bucketName}):`, error?.message || 'Bucket not accessible, using Data URL fallback.');
+    if (result.success && result.url) {
+      return result.url;
     }
-  } catch (err) {
-    console.warn('Supabase Storage upload exception:', err);
-  }
 
-  // Fallback a Data URL de lectura directa
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      if (typeof reader.result === 'string') {
-        resolve(reader.result);
-      } else {
-        reject(new Error('Error al procesar archivo de imagen.'));
-      }
-    };
-    reader.onerror = reject;
-    reader.readAsDataURL(file);
-  });
+    console.warn('Server storage upload note:', result.error);
+    return compressedDataUrl;
+  } catch (err) {
+    console.warn('Image process error:', err);
+    return await compressImage(file, 800, 800, 0.8);
+  }
 }

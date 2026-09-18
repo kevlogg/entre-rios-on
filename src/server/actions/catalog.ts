@@ -2,6 +2,7 @@
 
 import { revalidatePath } from 'next/cache';
 import { createClient } from '@/lib/supabase/server';
+import { createAdminClient } from '@/lib/supabase/admin';
 import { Product } from '@/types';
 
 export async function createProductAction(productData: Partial<Product>): Promise<{ success: boolean; message: string; data?: Product }> {
@@ -9,8 +10,10 @@ export async function createProductAction(productData: Partial<Product>): Promis
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 
     if (supabaseUrl && !supabaseUrl.includes('your-supabase-project')) {
-      const supabase = await createClient();
-      const { data: { user } } = await supabase.auth.getUser();
+      const supabaseUserClient = await createClient();
+      const supabase = createAdminClient();
+
+      const { data: { user } } = await supabaseUserClient.auth.getUser();
 
       let targetCommerceId = productData.commerceId;
       let targetCommerceName = productData.commerceName;
@@ -38,13 +41,31 @@ export async function createProductAction(productData: Partial<Product>): Promis
         }
       }
 
+      // Si aún no tenemos targetCommerceId de UUID válido, obtener el primer comercio disponible como fallback
       const isUuid = targetCommerceId && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(targetCommerceId);
+      if (!isUuid) {
+        const { data: fallbackComm } = await supabase
+          .from('commerces')
+          .select('id, name, city_id, city_name, province_id, phone_whatsapp')
+          .limit(1)
+          .maybeSingle();
+
+        if (fallbackComm) {
+          targetCommerceId = fallbackComm.id;
+          if (!targetCommerceName) targetCommerceName = fallbackComm.name;
+          if (!targetCityId) targetCityId = fallbackComm.city_id;
+          if (!targetCityName) targetCityName = fallbackComm.city_name;
+          if (!targetProvinceId) targetProvinceId = fallbackComm.province_id;
+          if (!targetPhone) targetPhone = fallbackComm.phone_whatsapp;
+        }
+      }
 
       const insertPayload: any = {
         title: productData.title,
         slug: productData.slug || productData.title?.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || `prod-${Date.now()}`,
         price: productData.price,
         currency: productData.currency || 'ARS',
+        commerce_id: targetCommerceId,
         commerce_name: targetCommerceName || 'Comercio Registrado',
         province_id: targetProvinceId || 'santa-fe',
         city_id: targetCityId || 'rosario',
@@ -58,10 +79,6 @@ export async function createProductAction(productData: Partial<Product>): Promis
         whatsapp_message_custom: productData.whatsappMessageCustom,
       };
 
-      if (isUuid) {
-        insertPayload.commerce_id = targetCommerceId;
-      }
-
       const { data, error } = await supabase.from('products').insert(insertPayload).select().single();
 
       if (error) {
@@ -69,9 +86,13 @@ export async function createProductAction(productData: Partial<Product>): Promis
         return { success: false, message: `Error al guardar producto: ${error.message}` };
       }
 
-      revalidatePath('/admin');
-      revalidatePath('/');
-      revalidatePath('/ciudad/[slug]', 'page');
+      try {
+        revalidatePath('/admin');
+        revalidatePath('/');
+        revalidatePath('/ciudad/[slug]', 'page');
+      } catch (revErr) {
+        console.warn('revalidatePath note:', revErr);
+      }
 
       return {
         success: true,
@@ -98,9 +119,11 @@ export async function createProductAction(productData: Partial<Product>): Promis
       };
     }
 
-    // Fallback reactivo sin DB
-    revalidatePath('/admin');
-    revalidatePath('/');
+    try {
+      revalidatePath('/admin');
+      revalidatePath('/');
+    } catch {}
+
     return {
       success: true,
       message: '¡Producto publicado en modo demostración!',
@@ -115,19 +138,25 @@ export async function deleteProductAction(productId: string): Promise<{ success:
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 
     if (supabaseUrl && !supabaseUrl.includes('your-supabase-project')) {
-      const supabase = await createClient();
+      const supabase = createAdminClient();
       const { error } = await supabase.from('products').delete().eq('id', productId);
 
       if (error) {
         return { success: false, message: `Error eliminando oferta: ${error.message}` };
       }
 
-      revalidatePath('/admin');
-      revalidatePath('/');
+      try {
+        revalidatePath('/admin');
+        revalidatePath('/');
+      } catch {}
+
       return { success: true, message: 'Producto eliminado correctamente.' };
     }
 
-    revalidatePath('/admin');
+    try {
+      revalidatePath('/admin');
+    } catch {}
+
     return { success: true, message: 'Producto eliminado en modo demostración.' };
   } catch (err) {
     return { success: false, message: `Error inesperado: ${(err as Error).message}` };

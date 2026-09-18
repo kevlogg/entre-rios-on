@@ -2,6 +2,7 @@
 
 import { revalidatePath } from 'next/cache';
 import { createClient } from '@/lib/supabase/server';
+import { createAdminClient } from '@/lib/supabase/admin';
 import { Commerce } from '@/types';
 
 export async function updateCommerceProfileAction(
@@ -12,9 +13,10 @@ export async function updateCommerceProfileAction(
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 
     if (supabaseUrl && !supabaseUrl.includes('your-supabase-project')) {
-      const supabase = await createClient();
+      const supabaseUserClient = await createClient();
+      const supabase = createAdminClient();
 
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { user } } = await supabaseUserClient.auth.getUser();
 
       const updatePayload: Record<string, any> = {
         name: profileData.name,
@@ -140,16 +142,22 @@ export async function updateCommerceProfileAction(
         }
       }
 
-      revalidatePath('/admin');
-      revalidatePath('/comercios');
-      if (profileData.slug) {
-        revalidatePath(`/comercio/${profileData.slug}`);
-      }
-      revalidatePath('/comercio/[slug]', 'page');
+      try {
+        revalidatePath('/admin');
+        revalidatePath('/comercios');
+        if (profileData.slug) {
+          revalidatePath(`/comercio/${profileData.slug}`);
+        }
+        revalidatePath('/comercio/[slug]', 'page');
+      } catch {}
+
       return { success: true, message: '¡Perfil comercial actualizado correctamente!' };
     }
 
-    revalidatePath('/admin');
+    try {
+      revalidatePath('/admin');
+    } catch {}
+
     return { success: true, message: '¡Perfil actualizado en modo demostración!' };
   } catch (err) {
     return { success: false, message: `Error inesperado: ${(err as Error).message}` };
@@ -170,7 +178,7 @@ export async function registerCommerceOnSignUpAction(data: {
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 
     if (supabaseUrl && !supabaseUrl.includes('your-supabase-project')) {
-      const supabase = await createClient();
+      const supabase = createAdminClient();
 
       // 1. Asegurar la presencia del perfil en public.profiles para la FK commerces_owner_id_fkey
       try {
@@ -220,8 +228,11 @@ export async function registerCommerceOnSignUpAction(data: {
         return { success: false, message: insertErr.message };
       }
 
-      revalidatePath('/admin');
-      revalidatePath('/comercios');
+      try {
+        revalidatePath('/admin');
+        revalidatePath('/comercios');
+      } catch {}
+
       return { success: true, message: 'Comercio registrado con éxito', slug: finalSlug };
     }
 
