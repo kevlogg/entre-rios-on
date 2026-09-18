@@ -28,6 +28,20 @@ function LoginFormContent() {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
+  React.useEffect(() => {
+    if (typeof document !== 'undefined') {
+      const cookies = document.cookie.split('; ');
+      const authChunks = cookies.filter((c) => c.includes('-auth-token'));
+      if (authChunks.length > 2 || document.cookie.includes('data:image/')) {
+        authChunks.forEach((c) => {
+          const eqPos = c.indexOf('=');
+          const name = eqPos > -1 ? c.substring(0, eqPos) : c;
+          document.cookie = `${name.trim()}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/`;
+        });
+      }
+    }
+  }, []);
+
   const supabase = createClient();
 
   // Obtenemos la lista dinámica de ciudades según la provincia seleccionada
@@ -143,7 +157,7 @@ function LoginFormContent() {
         }
       } else if (mode === 'login') {
         // Sign In
-        const { error } = await supabase.auth.signInWithPassword({
+        const { data: signInData, error } = await supabase.auth.signInWithPassword({
           email,
           password,
         });
@@ -163,10 +177,31 @@ function LoginFormContent() {
           setMessage({ type: 'error', text: 'Credenciales incorrectas o correo no confirmado. Verificá tu información.' });
           setLoading(false);
         } else {
+          // Purgar metadata pesada inmediatamente tras iniciar sesión para que el JWT de cookie sea compacto (<1KB)
+          if (signInData?.user) {
+            const meta = signInData.user.user_metadata || {};
+            if (
+              meta.logo_url ||
+              meta.cover_url ||
+              Object.values(meta).some((v) => typeof v === 'string' && (v.startsWith('data:') || (v as string).length > 300))
+            ) {
+              try {
+                await supabase.auth.updateUser({
+                  data: {
+                    logo_url: null,
+                    cover_url: null,
+                  },
+                });
+              } catch (cleanErr) {
+                console.warn('Limpieza metadata warning:', cleanErr);
+              }
+            }
+          }
+
           setMessage({ type: 'success', text: '¡Sesión iniciada con éxito! Redirigiendo...' });
           setTimeout(() => {
             router.push(redirectTo);
-          }, 800);
+          }, 600);
         }
       } else if (mode === 'forgot') {
         // Olvidé mi contraseña (Reset password)
