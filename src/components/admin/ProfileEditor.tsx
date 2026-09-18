@@ -85,18 +85,17 @@ export function ProfileEditor({ commerce, onUpdateCommerce }: ProfileEditorProps
     if (!file) return;
 
     try {
+      const { compressImage } = await import('@/lib/utils/imageCompressor');
+      const compressed = await compressImage(file, 800, 800, 0.8);
+
       const { uploadImageToSupabase } = await import('@/lib/supabase/storage');
       const url = await uploadImageToSupabase(file, 'commerces');
-      setter(url);
+      setter(url && !url.startsWith('data:') ? url : compressed);
     } catch (err) {
-      console.warn('Fallback to FileReader image upload:', err);
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        if (typeof reader.result === 'string') {
-          setter(reader.result);
-        }
-      };
-      reader.readAsDataURL(file);
+      console.warn('Image process fallback:', err);
+      const { compressImage } = await import('@/lib/utils/imageCompressor');
+      const compressed = await compressImage(file, 800, 800, 0.8);
+      setter(compressed);
     }
   };
 
@@ -125,14 +124,28 @@ export function ProfileEditor({ commerce, onUpdateCommerce }: ProfileEditorProps
     };
 
     try {
+      // 1. Ejecutar Server Action para actualizar la base de datos
       const result = await updateCommerceProfileAction(commerce.id, updatedCommerce);
 
-      // Sincronización cliente Supabase inmediata con verificación por owner_id
+      // 2. Sincronizar metadata de Auth en el cliente para persistencia ante F5
       const { createClient } = await import('@/lib/supabase/client');
       const supabase = createClient();
       const { data: { user } } = await supabase.auth.getUser();
 
       if (user) {
+        await supabase.auth.updateUser({
+          data: {
+            commerce_name: formData.name,
+            phone_whatsapp: formData.phoneWhatsApp,
+            province_id: formData.provinceId,
+            city_id: resolvedCityId,
+            city_name: formData.cityName,
+            is_digital_only: formData.isDigitalOnly,
+            logo_url: logoUrl,
+            cover_url: coverUrl,
+          }
+        });
+
         const payload = {
           name: formData.name,
           category: formData.category,
@@ -180,7 +193,7 @@ export function ProfileEditor({ commerce, onUpdateCommerce }: ProfileEditorProps
       }
     } catch (err) {
       console.warn('Profile Action error:', err);
-      setFeedback({ type: 'success', text: '¡Perfil actualizado correctamente!' });
+      setFeedback({ type: 'error', text: `Error al actualizar perfil: ${(err as Error).message}` });
     }
 
     if (onUpdateCommerce) {

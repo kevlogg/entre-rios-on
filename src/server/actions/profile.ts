@@ -49,14 +49,32 @@ export async function updateCommerceProfileAction(
           console.warn('Note profile upsert:', profErr);
         }
 
-        const { data: existingCommerce } = await supabase
+        // 1. Buscar primero por owner_id
+        const { data: existingByOwner } = await supabase
           .from('commerces')
           .select('id')
           .eq('owner_id', user.id)
           .maybeSingle();
 
-        if (existingCommerce) {
-          targetId = existingCommerce.id;
+        if (existingByOwner) {
+          targetId = existingByOwner.id;
+        } else {
+          // 2. Si no se encontró por owner_id, buscar por slug o ID para vincularlo
+          const cleanSlug = (profileData.slug || profileData.name || commerceId)
+            .toLowerCase()
+            .replace(/^comm-/, '')
+            .replace(/[^a-z0-9]+/g, '-')
+            .replace(/(^-|-$)/g, '');
+
+          const { data: existingBySlug } = await supabase
+            .from('commerces')
+            .select('id')
+            .or(`id.eq.${commerceId},slug.eq.${cleanSlug},slug.eq.${commerceId}`)
+            .maybeSingle();
+
+          if (existingBySlug) {
+            targetId = existingBySlug.id;
+          }
         }
       }
 
