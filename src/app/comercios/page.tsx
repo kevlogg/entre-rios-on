@@ -75,7 +75,7 @@ export default async function ComerciosPage() {
                   Ver Perfil
                 </Link>
                 <a
-                  href={`https://wa.me/${comm.phoneWhatsApp}?text=${encodeURIComponent(`Hola ${comm.name}, vi su comercio en el directorio Entre Ríos ON.`)}`}
+                  href={`/api/lead/whatsapp?phone=${encodeURIComponent((comm.phoneWhatsApp || '').replace(/\D/g, ''))}&message=${encodeURIComponent(`Hola ${comm.name}, vi su comercio en el directorio Entre Ríos ON.`)}&commerceId=${encodeURIComponent(comm.id)}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="bg-[#25D366] hover:bg-[#20ba5a] text-white p-2.5 rounded-xl"

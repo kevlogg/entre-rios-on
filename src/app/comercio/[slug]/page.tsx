@@ -7,6 +7,7 @@ import { getCommerceBySlug, getProductsByCommerce } from '@/lib/dal/portal';
 import { MapPin, CheckCircle, MessageCircle, ArrowLeft, Store, ShieldCheck, Tag } from 'lucide-react';
 import { DynamicLayoutWrapper } from '@/components/layout/DynamicLayoutWrapper';
 import { JsonLd } from '@/components/common/JsonLd';
+import { ProfileViewTracker } from '@/components/common/ProfileViewTracker';
 
 export const revalidate = 60;
 
@@ -43,6 +44,10 @@ export default async function CommerceDetailPage({ params }: PageProps) {
 
   const products = await getProductsByCommerce(commerce.id);
 
+  const cleanPhone = (commerce.phoneWhatsApp || '').replace(/\D/g, '');
+  const waMsg = `Hola ${commerce.name}, los encontré en el portal Entre Ríos ON y me gustaría consultar su catálogo.`;
+  const trackingUrl = `/api/lead/whatsapp?phone=${encodeURIComponent(cleanPhone)}&message=${encodeURIComponent(waMsg)}&commerceId=${encodeURIComponent(commerce.id)}&cityId=${encodeURIComponent(commerce.cityId)}`;
+
   const jsonLdData = {
     '@context': 'https://schema.org',
     '@type': 'LocalBusiness',
@@ -67,6 +72,7 @@ export default async function CommerceDetailPage({ params }: PageProps) {
   return (
     <DynamicLayoutWrapper>
       <JsonLd data={jsonLdData} />
+      <ProfileViewTracker commerceId={commerce.id} />
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 w-full">
         {/* Breadcrumb Navigation */}
         <div className="flex items-center gap-2 text-xs font-bold text-slate-500">
@@ -128,7 +134,7 @@ export default async function CommerceDetailPage({ params }: PageProps) {
 
               {/* Direct WhatsApp CTA */}
               <a
-                href={`https://wa.me/${commerce.phoneWhatsApp}?text=${encodeURIComponent(`Hola ${commerce.name}, los encontré en el portal Entre Ríos ON y me gustaría consultar su catálogo.`)}`}
+                href={trackingUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="bg-[#25D366] hover:bg-[#20ba5a] text-white px-6 py-3 rounded-2xl font-extrabold text-sm shadow-md flex items-center justify-center gap-2 transition-transform active:scale-95"

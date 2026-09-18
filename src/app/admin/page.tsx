@@ -152,10 +152,20 @@ export default function AdminPage() {
           const { count: waCount } = await supabase
             .from('whatsapp_clicks')
             .select('*', { count: 'exact', head: true })
-            .eq('commerce_id', targetCommerce.id);
+            .or(`commerce_id.eq.${targetCommerce.id},commerce_id.eq.${targetCommerce.slug}`);
 
-          setWaClicksCount(waCount || 0);
-          setViewsCount(targetCommerce.review_count || 0);
+          const totalWaClicks = Math.max(
+            waCount || 0,
+            Number(targetCommerce.whatsapp_clicks_count || 0)
+          );
+
+          setWaClicksCount(totalWaClicks);
+
+          const totalViews = Math.max(
+            Number(targetCommerce.views_count || 0),
+            Number(targetCommerce.review_count || 0)
+          );
+          setViewsCount(totalViews);
 
           // Cargar productos pertenecientes al comercio
           const { data: prodsData } = await supabase

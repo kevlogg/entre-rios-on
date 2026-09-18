@@ -199,7 +199,7 @@ export function FeaturedOffersGrid({ selectedCategory = 'all' }: FeaturedOffersG
     trackWhatsAppClick(item.id, 'commerce-client', item.title, item.location);
     const cleanPhone = item.phoneWhatsApp.replace(/[^\d]/g, '');
     const msg = encodeURIComponent(`Hola, vi en el Portal Entre Ríos ON MÁS el producto "${item.title}" por ${formatPrice(item.price)} y me gustaría comprarlo.`);
-    window.open(`https://wa.me/${cleanPhone}?text=${msg}`, '_blank', 'noopener,noreferrer');
+    window.open(`/api/lead/whatsapp?phone=${cleanPhone}&message=${msg}&productId=${item.id}`, '_blank', 'noopener,noreferrer');
   };
 
   const activeCategoryObj = CATEGORIES_LIST.find((c) => c.id === selectedCategory);

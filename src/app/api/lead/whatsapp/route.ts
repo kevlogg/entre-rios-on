@@ -1,5 +1,5 @@
 import { NextResponse, type NextRequest } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
+import { createPublicClient } from '@/lib/supabase/public';
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
@@ -10,22 +10,39 @@ export async function GET(request: NextRequest) {
   const productId = searchParams.get('productId');
   const cityId = searchParams.get('cityId');
 
-  // Normalizar número telefónico (remover espacios, guiones y signos)
+  // Normalizar número telefónico
   const cleanPhone = rawPhone.replace(/\D/g, '');
 
-  // Intentar registrar la métrica del lead en Supabase si está activo
   try {
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
     if (supabaseUrl && !supabaseUrl.includes('your-supabase-project')) {
-      const supabase = await createClient();
+      const supabase = createPublicClient();
       const userAgent = request.headers.get('user-agent') || 'Unknown';
 
+      // 1. Insertar el evento de lead en whatsapp_clicks
       await supabase.from('whatsapp_clicks').insert({
         commerce_id: commerceId || null,
         product_id: productId || null,
         city_id: cityId || null,
         user_agent: userAgent,
       });
+
+      // 2. Si hay commerceId, incrementar whatsapp_clicks_count acumulativo en commerces
+      if (commerceId) {
+        const { data: comm } = await supabase
+          .from('commerces')
+          .select('id, whatsapp_clicks_count')
+          .or(`id.eq.${commerceId},slug.eq.${commerceId}`)
+          .maybeSingle();
+
+        if (comm) {
+          const nextClicks = Number(comm.whatsapp_clicks_count || 0) + 1;
+          await supabase
+            .from('commerces')
+            .update({ whatsapp_clicks_count: nextClicks })
+            .eq('id', comm.id);
+        }
+      }
     }
   } catch (err) {
     console.warn('Error registrando lead de WhatsApp en Supabase:', err);
