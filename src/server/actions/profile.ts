@@ -30,10 +30,18 @@ export async function updateCommerceProfileAction(
       if (profileData.isDigitalOnly !== undefined) updatePayload.is_digital_only = profileData.isDigitalOnly;
       if (profileData.website) updatePayload.website = profileData.website;
 
-      const { error } = await supabase
-        .from('commerces')
-        .update(updatePayload)
-        .or(`id.eq.${commerceId},slug.eq.${commerceId}`);
+      const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(commerceId);
+      const cleanUserId = commerceId.replace(/^comm-/, '');
+
+      let query = supabase.from('commerces').update(updatePayload);
+
+      if (isUuid) {
+        query = query.or(`id.eq.${commerceId},slug.eq.${commerceId},owner_id.eq.${commerceId}`);
+      } else {
+        query = query.or(`slug.eq.${commerceId},owner_id.eq.${cleanUserId}`);
+      }
+
+      const { error } = await query;
 
       if (error) {
         console.warn('Error al actualizar perfil en Supabase:', error);
@@ -41,6 +49,9 @@ export async function updateCommerceProfileAction(
       }
 
       revalidatePath('/admin');
+      if (profileData.slug) {
+        revalidatePath(`/comercio/${profileData.slug}`);
+      }
       revalidatePath('/comercio/[slug]', 'page');
       return { success: true, message: '¡Perfil comercial actualizado correctamente!' };
     }

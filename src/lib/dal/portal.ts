@@ -870,15 +870,19 @@ export async function getCommerceBySlug(slug: string): Promise<Commerce | undefi
       const { createPublicClient } = await import('@/lib/supabase/public');
       const supabase = createPublicClient();
 
+      const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(slug);
       const cleanSlugWithoutSuffix = slug.replace(/-[a-z0-9]{6,8}$/i, '');
       const cleanId = slug.replace('comm-', '');
 
-      // 1. Try querying Supabase matching slug, clean slug, id, or owner_id
-      let { data, error } = await supabase
-        .from('commerces')
-        .select('*')
-        .or(`slug.eq.${slug},slug.eq.${cleanSlugWithoutSuffix},id.eq.${slug},owner_id.eq.${cleanId}`)
-        .limit(1);
+      let query = supabase.from('commerces').select('*');
+
+      if (isUuid) {
+        query = query.or(`id.eq.${slug},slug.eq.${slug},owner_id.eq.${slug}`);
+      } else {
+        query = query.or(`slug.eq.${slug},slug.eq.${cleanSlugWithoutSuffix},owner_id.eq.${cleanId}`);
+      }
+
+      const { data, error } = await query.limit(1);
 
       if (data && data.length > 0) {
         const item = data[0];

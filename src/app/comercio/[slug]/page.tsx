@@ -9,7 +9,8 @@ import { DynamicLayoutWrapper } from '@/components/layout/DynamicLayoutWrapper';
 import { JsonLd } from '@/components/common/JsonLd';
 import { ProfileViewTracker } from '@/components/common/ProfileViewTracker';
 
-export const revalidate = 60;
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 interface PageProps {
   params: Promise<{ slug: string }>;
