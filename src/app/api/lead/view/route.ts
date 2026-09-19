@@ -1,13 +1,31 @@
 import { NextResponse, type NextRequest } from 'next/server';
 import { createPublicClient } from '@/lib/supabase/public';
+import { checkRateLimit, getClientIp } from '@/lib/security/rateLimit';
+import { ViewLeadSchema } from '@/lib/security/validation';
 
 export async function GET(request: NextRequest) {
-  const { searchParams } = new URL(request.url);
-  const commerceId = searchParams.get('commerceId');
+  // 1. Verificación de Rate Limit (Máximo 30 vistas por minuto por IP)
+  const clientIp = getClientIp(request.headers);
+  const rateCheck = checkRateLimit(`view_lead:${clientIp}`, { limit: 30, windowMs: 60 * 1000 });
 
-  if (!commerceId) {
-    return NextResponse.json({ success: false, message: 'Falta commerceId' }, { status: 400 });
+  if (!rateCheck.success) {
+    return NextResponse.json(
+      { success: false, message: 'Demasiadas peticiones. Por favor intente más tarde.' },
+      { status: 429, headers: { 'Retry-After': String(Math.ceil(rateCheck.resetInMs / 1000)) } }
+    );
   }
+
+  // 2. Validación de parámetros con Zod
+  const { searchParams } = new URL(request.url);
+  const parseResult = ViewLeadSchema.safeParse({
+    commerceId: searchParams.get('commerceId') || '',
+  });
+
+  if (!parseResult.success) {
+    return NextResponse.json({ success: false, message: 'Falta commerceId o formato inválido' }, { status: 400 });
+  }
+
+  const { commerceId } = parseResult.data;
 
   try {
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;

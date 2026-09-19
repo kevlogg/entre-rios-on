@@ -64,9 +64,9 @@ export function ClientFooter() {
               <span>|</span>
               <Link href="#ayuda" className="hover:text-[#00ADB5]">Ayuda</Link>
               <span>|</span>
-              <Link href="#terminos" className="hover:text-[#00ADB5]">Términos y condiciones</Link>
+              <Link href="/terminos" className="hover:text-[#00ADB5]">Términos y condiciones</Link>
               <span>|</span>
-              <Link href="#privacidad" className="hover:text-[#00ADB5]">Privacidad</Link>
+              <Link href="/privacidad" className="hover:text-[#00ADB5]">Privacidad</Link>
               <span>|</span>
               <Link href="#contacto" className="hover:text-[#00ADB5]">Contacto</Link>
               <span>|</span>

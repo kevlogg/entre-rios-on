@@ -2,6 +2,9 @@
 
 import { createAdminClient } from '@/lib/supabase/admin';
 
+const ALLOWED_MIME_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/avif'];
+const MAX_FILE_SIZE_BYTES = 5 * 1024 * 1024; // 5 MB
+
 export async function uploadImageServerAction(
   base64DataUrl: string,
   fileName: string,
@@ -21,9 +24,20 @@ export async function uploadImageServerAction(
       return { success: false, error: 'Formato de imagen inválido.' };
     }
 
-    const mimeType = matches[1];
+    const mimeType = matches[1].toLowerCase();
     const base64Data = matches[2];
+
+    // Validar tipo de archivo (MIME Type)
+    if (!ALLOWED_MIME_TYPES.includes(mimeType)) {
+      return { success: false, error: 'Tipo de archivo no permitido. Solo se aceptan imágenes (JPG, PNG, WEBP, GIF, AVIF).' };
+    }
+
     const buffer = Buffer.from(base64Data, 'base64');
+
+    // Validar tamaño máximo (5MB)
+    if (buffer.length > MAX_FILE_SIZE_BYTES) {
+      return { success: false, error: 'La imagen supera el tamaño máximo permitido de 5MB.' };
+    }
 
     const fileExt = fileName.split('.').pop() || mimeType.split('/')[1] || 'jpg';
     const cleanFileName = `uploads/${Date.now()}-${Math.random().toString(36).substring(2, 8)}.${fileExt}`;

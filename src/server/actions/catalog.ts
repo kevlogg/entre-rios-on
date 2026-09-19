@@ -138,6 +138,13 @@ export async function deleteProductAction(productId: string): Promise<{ success:
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 
     if (supabaseUrl && !supabaseUrl.includes('your-supabase-project')) {
+      // Verificar sesión activa antes de eliminar
+      const supabaseUserClient = await createClient();
+      const { data: { user } } = await supabaseUserClient.auth.getUser();
+      if (!user) {
+        return { success: false, message: 'No autorizado. Sesión requerida.' };
+      }
+
       const supabase = createAdminClient();
       const { error } = await supabase.from('products').delete().eq('id', productId);
 
@@ -171,6 +178,13 @@ export async function updateProductAction(
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 
     if (supabaseUrl && !supabaseUrl.includes('your-supabase-project')) {
+      // Verificar sesión activa antes de actualizar
+      const supabaseUserClient = await createClient();
+      const { data: { user } } = await supabaseUserClient.auth.getUser();
+      if (!user) {
+        return { success: false, message: 'No autorizado. Sesión requerida.' };
+      }
+
       const supabase = createAdminClient();
 
       const updatePayload: any = {

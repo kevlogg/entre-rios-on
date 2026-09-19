@@ -11,10 +11,22 @@ CREATE TABLE IF NOT EXISTS public.profiles (
   email TEXT UNIQUE NOT NULL,
   full_name TEXT,
   role TEXT NOT NULL DEFAULT 'MERCHANT_ADMIN' CHECK (role IN ('SUPER_ADMIN', 'MERCHANT_ADMIN', 'PUBLIC_USER')),
+  -- Tipo de usuario automotor: particular (vende/compra autos), agencia (concesionaria),
+  -- negocio_automotor (talleres, repuestos, seguros, etc.)
+  user_type TEXT DEFAULT 'particular' CHECK (user_type IN ('particular', 'agencia', 'negocio_automotor')),
+  phone_whatsapp TEXT,
+  province_id TEXT DEFAULT 'santa-fe',
+  city_name TEXT,
   commerce_id UUID,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+
+-- Migración para bases de datos existentes (ejecutar si la tabla ya existe)
+-- ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS user_type TEXT DEFAULT 'particular' CHECK (user_type IN ('particular', 'agencia', 'negocio_automotor'));
+-- ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS phone_whatsapp TEXT;
+-- ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS province_id TEXT DEFAULT 'santa-fe';
+-- ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS city_name TEXT;
 
 -- 2. TABLA DE CIUDADES / DEPARTAMENTOS DE SANTA FE Y ENTRE RÍOS
 CREATE TABLE IF NOT EXISTS public.cities (

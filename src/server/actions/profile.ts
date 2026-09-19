@@ -242,3 +242,104 @@ export async function registerCommerceOnSignUpAction(data: {
   }
 }
 
+// ================================================================
+// NUEVO: Registro de usuario con tipo (particular / agencia / negocio_automotor)
+// ================================================================
+export async function registerUserOnSignUpAction(data: {
+  userId: string;
+  email: string;
+  userType: 'particular' | 'agencia' | 'negocio_automotor';
+  fullName?: string;
+  phoneWhatsApp?: string;
+  provinceId: string;
+  cityId: string;
+  cityName: string;
+  businessName?: string;
+  businessCategory?: string;
+}): Promise<{ success: boolean; message: string; slug?: string }> {
+  try {
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+
+    if (supabaseUrl && !supabaseUrl.includes('your-supabase-project')) {
+      const supabase = createAdminClient();
+
+      // Determinar el rol según el tipo de usuario
+      const role = data.userType === 'particular' ? 'PUBLIC_USER' : 'MERCHANT_ADMIN';
+
+      // 1. Upsert del perfil con user_type
+      try {
+        await supabase.from('profiles').upsert({
+          id: data.userId,
+          email: data.email,
+          full_name: data.fullName || '',
+          role,
+          user_type: data.userType,
+          phone_whatsapp: data.phoneWhatsApp || null,
+          province_id: data.provinceId,
+          city_name: data.cityName,
+          updated_at: new Date().toISOString(),
+        }, { onConflict: 'id' });
+      } catch (profErr) {
+        console.warn('Profile upsert note:', profErr);
+      }
+
+      // 2. Para agencias y negocios automotores: crear también un commerce
+      if ((data.userType === 'agencia' || data.userType === 'negocio_automotor') && data.businessName) {
+        const categoryMap: Record<string, string> = {
+          agencia: 'Agencia Automotriz',
+        };
+        const commerceCategory = data.userType === 'negocio_automotor'
+          ? (data.businessCategory || 'Negocio Automotor')
+          : categoryMap[data.userType];
+
+        const rawSlug = data.businessName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+        const { data: existingSlug } = await supabase
+          .from('commerces')
+          .select('id')
+          .eq('slug', rawSlug)
+          .maybeSingle();
+        const finalSlug = existingSlug ? `${rawSlug}-${Date.now().toString().slice(-4)}` : rawSlug;
+
+        const { error: insertErr } = await supabase.from('commerces').insert({
+          name: data.businessName,
+          slug: finalSlug,
+          category: commerceCategory,
+          province_id: data.provinceId,
+          city_id: data.cityId,
+          city_name: data.cityName,
+          description: data.userType === 'agencia'
+            ? `Agencia automotriz adherida al portal automotor en ${data.cityName}.`
+            : `${data.businessCategory || 'Negocio automotor'} en ${data.cityName}.`,
+          phone_whatsapp: data.phoneWhatsApp || '',
+          address: `${data.cityName}, Argentina`,
+          logo_url: '/images/city-rosario.jpg',
+          cover_url: '/images/city-rosario.jpg',
+          is_verified: true,
+          is_subscription_active: true,
+          owner_id: data.userId,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        });
+
+        if (insertErr) {
+          console.warn('Error registrando commerce automotor:', insertErr);
+          return { success: false, message: insertErr.message };
+        }
+
+        try {
+          revalidatePath('/admin');
+          revalidatePath('/comercios');
+          revalidatePath('/sectores-automotores');
+        } catch {}
+
+        return { success: true, message: 'Registro completado con éxito', slug: finalSlug };
+      }
+
+      return { success: true, message: 'Perfil de usuario registrado con éxito' };
+    }
+
+    return { success: true, message: 'Registro en modo demostración' };
+  } catch (err) {
+    return { success: false, message: (err as Error).message };
+  }
+}

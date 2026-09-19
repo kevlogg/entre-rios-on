@@ -13,6 +13,12 @@ export async function toggleCommerceVerificationAction(
     if (supabaseUrl && !supabaseUrl.includes('your-supabase-project')) {
       const supabase = await createClient();
 
+      // Verificar sesión activa
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        return { success: false, message: 'No autorizado.' };
+      }
+
       const { error } = await supabase
         .from('commerces')
         .update({ is_verified: !currentStatus })
@@ -41,6 +47,12 @@ export async function drawRaffleWinnerAction(
 
     if (supabaseUrl && !supabaseUrl.includes('your-supabase-project')) {
       const supabase = await createClient();
+
+      // Verificar sesión activa
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        return { success: false, message: 'No autorizado.' };
+      }
 
       // Obtener todos los participantes del sorteo
       const { data: participants, error } = await supabase

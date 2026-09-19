@@ -1,17 +1,38 @@
 import { NextResponse, type NextRequest } from 'next/server';
 import { createPublicClient } from '@/lib/supabase/public';
+import { checkRateLimit, getClientIp } from '@/lib/security/rateLimit';
+import { WhatsAppLeadSchema } from '@/lib/security/validation';
 
 export async function GET(request: NextRequest) {
-  const { searchParams } = new URL(request.url);
+  // 1. Verificación de Rate Limit (Máximo 20 clics por minuto por IP)
+  const clientIp = getClientIp(request.headers);
+  const rateCheck = checkRateLimit(`wa_lead:${clientIp}`, { limit: 20, windowMs: 60 * 1000 });
 
-  const rawPhone = searchParams.get('phone') || '5493447451234';
-  const customMessage = searchParams.get('message') || 'Hola, vi su oferta en el portal Entre Ríos ON y me gustaría realizar una consulta.';
-  const commerceId = searchParams.get('commerceId');
-  const productId = searchParams.get('productId');
-  const cityId = searchParams.get('cityId');
+  if (!rateCheck.success) {
+    return NextResponse.json(
+      { error: 'Demasiadas peticiones. Por favor intente más tarde.' },
+      { status: 429, headers: { 'Retry-After': String(Math.ceil(rateCheck.resetInMs / 1000)) } }
+    );
+  }
+
+  // 2. Validación de parámetros con Zod
+  const { searchParams } = new URL(request.url);
+  const parseResult = WhatsAppLeadSchema.safeParse({
+    phone: searchParams.get('phone') || undefined,
+    message: searchParams.get('message') || undefined,
+    commerceId: searchParams.get('commerceId') || undefined,
+    productId: searchParams.get('productId') || undefined,
+    cityId: searchParams.get('cityId') || undefined,
+  });
+
+  if (!parseResult.success) {
+    return NextResponse.json({ error: 'Parámetros inválidos' }, { status: 400 });
+  }
+
+  const { phone, message, commerceId, productId, cityId } = parseResult.data;
 
   // Normalizar número telefónico
-  const cleanPhone = rawPhone.replace(/\D/g, '');
+  const cleanPhone = (phone || '5493447451234').replace(/\D/g, '');
 
   try {
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -49,7 +70,7 @@ export async function GET(request: NextRequest) {
   }
 
   // Generar enlace seguro de WhatsApp Web / App
-  const encodedText = encodeURIComponent(customMessage);
+  const encodedText = encodeURIComponent(message || '');
   const waUrl = `https://wa.me/${cleanPhone}?text=${encodedText}`;
 
   return NextResponse.redirect(waUrl, 302);
