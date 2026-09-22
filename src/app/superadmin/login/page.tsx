@@ -25,15 +25,18 @@ export default function SuperAdminLoginPage() {
     setError(null);
     setLoading(true);
 
-    setTimeout(() => {
+    try {
       const res = loginSuperAdmin(email, password);
       if (res.success) {
-        router.push('/superadmin');
+        window.location.href = '/superadmin';
       } else {
         setError(res.message);
         setLoading(false);
       }
-    }, 400);
+    } catch (err) {
+      setError('Ocurrió un error inesperado al validar el acceso.');
+      setLoading(false);
+    }
   };
 
   const handleQuickFill = (selectedEmail: string) => {
