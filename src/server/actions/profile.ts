@@ -243,12 +243,12 @@ export async function registerCommerceOnSignUpAction(data: {
 }
 
 // ================================================================
-// NUEVO: Registro de usuario con tipo (particular / agencia / negocio_automotor)
+// NUEVO: Registro de usuario con tipo para ON MÁS Portal
 // ================================================================
 export async function registerUserOnSignUpAction(data: {
   userId: string;
   email: string;
-  userType: 'particular' | 'agencia' | 'negocio_automotor';
+  userType: 'particular' | 'comercio' | 'empresa_turismo' | 'agencia' | 'negocio_automotor';
   fullName?: string;
   phoneWhatsApp?: string;
   provinceId: string;
@@ -283,14 +283,16 @@ export async function registerUserOnSignUpAction(data: {
         console.warn('Profile upsert note:', profErr);
       }
 
-      // 2. Para agencias y negocios automotores: crear también un commerce
-      if ((data.userType === 'agencia' || data.userType === 'negocio_automotor') && data.businessName) {
+      // 2. Para comercios, empresas o agencias: crear también un registro en commerces
+      const needsBusiness = data.userType !== 'particular';
+      if (needsBusiness && data.businessName) {
         const categoryMap: Record<string, string> = {
+          comercio: 'Comercio General',
+          empresa_turismo: 'Empresa & Turismo',
           agencia: 'Agencia Automotriz',
+          negocio_automotor: 'Negocio Automotor',
         };
-        const commerceCategory = data.userType === 'negocio_automotor'
-          ? (data.businessCategory || 'Negocio Automotor')
-          : categoryMap[data.userType];
+        const commerceCategory = data.businessCategory || categoryMap[data.userType] || 'Comercio General';
 
         const rawSlug = data.businessName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
         const { data: existingSlug } = await supabase
@@ -307,9 +309,7 @@ export async function registerUserOnSignUpAction(data: {
           province_id: data.provinceId,
           city_id: data.cityId,
           city_name: data.cityName,
-          description: data.userType === 'agencia'
-            ? `Agencia automotriz adherida al portal automotor en ${data.cityName}.`
-            : `${data.businessCategory || 'Negocio automotor'} en ${data.cityName}.`,
+          description: `${data.businessName} - Perfil verificado en ${data.cityName} (${data.provinceId === 'santa-fe' ? 'Santa Fe' : 'Entre Ríos'}).`,
           phone_whatsapp: data.phoneWhatsApp || '',
           address: `${data.cityName}, Argentina`,
           logo_url: '/images/city-rosario.jpg',
@@ -322,14 +322,13 @@ export async function registerUserOnSignUpAction(data: {
         });
 
         if (insertErr) {
-          console.warn('Error registrando commerce automotor:', insertErr);
+          console.warn('Error registrando commerce en Supabase:', insertErr);
           return { success: false, message: insertErr.message };
         }
 
         try {
           revalidatePath('/admin');
           revalidatePath('/comercios');
-          revalidatePath('/sectores-automotores');
         } catch {}
 
         return { success: true, message: 'Registro completado con éxito', slug: finalSlug };

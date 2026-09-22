@@ -4,55 +4,59 @@ import React, { useState, Suspense } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
-import { Mail, Lock, ArrowRight, Sparkles, MapPin, KeyRound, User, Car, Building2, Wrench, CheckCircle2 } from 'lucide-react';
+import { Mail, Lock, ArrowRight, Sparkles, MapPin, KeyRound, User, Store, Building2, CheckCircle2 } from 'lucide-react';
 import { getCitiesByProvince } from '@/lib/constants/locations';
 
-type UserType = 'particular' | 'agencia' | 'negocio_automotor';
+type UserType = 'particular' | 'comercio' | 'empresa_turismo';
 
 const USER_TYPES: { id: UserType; icon: React.ReactNode; title: string; subtitle: string; planBadge: string; color: string; borderColor: string; bgColor: string }[] = [
   {
     id: 'particular',
-    icon: <Car className="w-7 h-7" />,
-    title: 'Particular',
-    subtitle: 'Publicá tu vehículo particular',
-    planBadge: '1 auto x 30 días ($15.000)',
-    color: 'text-blue-600',
-    borderColor: 'border-blue-500',
-    bgColor: 'bg-blue-50/80',
+    icon: <User className="w-7 h-7" />,
+    title: 'Vecino / Usuario Particular',
+    subtitle: 'Explorá productos, participá en sorteos y contactá comercios',
+    planBadge: 'Acceso Gratuito',
+    color: 'text-[#00ADB5]',
+    borderColor: 'border-[#00ADB5]',
+    bgColor: 'bg-cyan-50/80',
   },
   {
-    id: 'agencia',
+    id: 'comercio',
+    icon: <Store className="w-7 h-7" />,
+    title: 'Comercio / Emprendimiento',
+    subtitle: 'Publicá tu catálogo, vendé por WhatsApp y posicioná tu local',
+    planBadge: 'Plan Plata • Bronce',
+    color: 'text-white',
+    borderColor: 'border-[#0047BA]',
+    bgColor: 'bg-[#002878]',
+  },
+  {
+    id: 'empresa_turismo',
     icon: <Building2 className="w-7 h-7" />,
-    title: 'Agencia / Concesionaria',
-    subtitle: 'Venta profesional de autos y flota',
-    planBadge: 'Base $99.000 (30 autos) • Pro $199.000 (Ilimitado)',
-    color: 'text-purple-200',
-    borderColor: 'border-purple-600',
-    bgColor: 'bg-[#2A1B4E]',
-  },
-  {
-    id: 'negocio_automotor',
-    icon: <Wrench className="w-7 h-7" />,
-    title: 'Negocio del Mundo Automotor',
-    subtitle: 'Taller, repuestos, seguros, lavadero…',
-    planBadge: 'Base $49.000 • Pro $99.000',
-    color: 'text-emerald-400',
-    borderColor: 'border-emerald-600',
-    bgColor: 'bg-[#0F2A28]',
+    title: 'Empresa, Servicios o Turismo',
+    subtitle: 'Gestioná posadas, parques, avisos B2B, empleos y presencia VIP',
+    planBadge: 'Plan Oro • Empresa',
+    color: 'text-amber-400',
+    borderColor: 'border-amber-500',
+    bgColor: 'bg-[#1A2332]',
   },
 ];
 
-const NEGOCIO_AUTO_CATEGORIES = [
-  'Taller Mecánico',
-  'Repuestos y Accesorios',
-  'Seguros Automotor',
-  'Financiación de Vehículos',
-  'Lavado & Detailing',
-  'Electricidad del Automotor',
-  'Chapa y Pintura',
-  'Neumáticos',
-  'Gestoría del Automotor',
-  'Otro',
+const COMMERCE_CATEGORIES = [
+  'Gastronomía & Sabores',
+  'Comercios & Locales',
+  'Indumentaria, Calzado & Moda',
+  'Hogar, Muebles & Decoración',
+  'Artesanías & Productos Regionales',
+  'Tecnología & Electrodomésticos',
+  'Turismo, Termas & Posadas',
+  'Construcción & Ferretería',
+  'Automotor, Motos & Repuestos',
+  'Salud, Belleza & Bienestar',
+  'Agro, Campo & Alimentos',
+  'Herramientas e Industria',
+  'Servicios Profesionales B2B',
+  'Otro Rubro',
 ];
 
 function LoginFormContent() {
@@ -73,7 +77,7 @@ function LoginFormContent() {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [businessName, setBusinessName] = useState('');
-  const [businessCategory, setBusinessCategory] = useState(NEGOCIO_AUTO_CATEGORIES[0]);
+  const [businessCategory, setBusinessCategory] = useState(COMMERCE_CATEGORIES[0]);
   const [provinceId, setProvinceId] = useState('santa-fe');
   const [cityName, setCityName] = useState('Rosario');
   const [phoneWhatsApp, setPhoneWhatsApp] = useState('');
@@ -118,7 +122,7 @@ function LoginFormContent() {
         const cityObj = availableCities.find((c) => c.name === cityName) || availableCities[0];
         const fullName = `${firstName} ${lastName}`.trim();
 
-        const needsBusiness = userType === 'agencia' || userType === 'negocio_automotor';
+        const needsBusiness = userType === 'comercio' || userType === 'empresa_turismo';
         const computedRole = needsBusiness ? 'MERCHANT_ADMIN' : 'PUBLIC_USER';
         const computedRedirect = needsBusiness ? '/admin' : (redirectTo === '/admin' ? '/' : redirectTo);
 
@@ -133,7 +137,7 @@ function LoginFormContent() {
               full_name: fullName,
               user_type: userType,
               commerce_name: needsBusiness ? businessName : undefined,
-              business_category: userType === 'negocio_automotor' ? businessCategory : undefined,
+              business_category: needsBusiness ? businessCategory : undefined,
               phone_whatsapp: phoneWhatsApp,
               province_id: provinceId,
               city_id: cityObj?.id,
@@ -169,7 +173,7 @@ function LoginFormContent() {
               cityId: cityObj?.id || '',
               cityName: cityObj?.name || cityName,
               businessName: needsBusiness ? businessName : undefined,
-              businessCategory: userType === 'negocio_automotor' ? businessCategory : undefined,
+              businessCategory: needsBusiness ? businessCategory : undefined,
             });
           } catch (regErr) {
             console.warn('Nota registro Server Action:', regErr);
@@ -216,7 +220,7 @@ function LoginFormContent() {
   };
 
   const selectedTypeConfig = USER_TYPES.find((t) => t.id === userType);
-  const needsBusiness = userType === 'agencia' || userType === 'negocio_automotor';
+  const needsBusiness = userType === 'comercio' || userType === 'empresa_turismo';
 
   return (
     <div className="bg-white/95 backdrop-blur-xl py-8 px-6 sm:px-10 shadow-2xl rounded-3xl border border-white/40 space-y-6">
@@ -292,7 +296,7 @@ function LoginFormContent() {
             <div className={selectedTypeConfig?.color}>{selectedTypeConfig?.icon}</div>
             <div className="flex-1 text-left">
               <p className={`text-xs font-black ${selectedTypeConfig?.color}`}>{selectedTypeConfig?.title}</p>
-              <p className="text-[11px] text-slate-500">Tocá para cambiar el tipo de cuenta</p>
+              <p className="text-[11px] text-slate-300">Tocá para cambiar el tipo de cuenta</p>
             </div>
             <CheckCircle2 className={`w-4 h-4 ${selectedTypeConfig?.color}`} />
           </button>
@@ -333,38 +337,36 @@ function LoginFormContent() {
                 </div>
               </div>
 
-              {/* Nombre comercial (solo agencias y negocios automotores) */}
+              {/* Nombre comercial (solo comercios y empresas) */}
               {needsBusiness && (
                 <>
                   <div>
                     <label className="block text-xs font-bold text-slate-700 mb-1">
-                      {userType === 'agencia' ? 'Nombre de la Agencia / Concesionaria *' : 'Nombre del Negocio *'}
+                      {userType === 'comercio' ? 'Nombre del Comercio / Emprendimiento *' : 'Nombre de la Empresa / Complejo *'}
                     </label>
                     <input
                       type="text"
                       required
                       autoComplete="organization"
-                      placeholder={userType === 'agencia' ? 'Ej. Automotores El Paraná' : 'Ej. Taller García'}
+                      placeholder={userType === 'comercio' ? 'Ej. Alfarería Delta' : 'Ej. Posada & Termas del Sol'}
                       value={businessName}
                       onChange={(e) => setBusinessName(e.target.value)}
                       className="w-full px-4 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-xs text-slate-800 focus:ring-2 focus:ring-[#00ADB5] focus:bg-white disabled:bg-slate-100"
                     />
                   </div>
 
-                  {userType === 'negocio_automotor' && (
-                    <div>
-                      <label className="block text-xs font-bold text-slate-700 mb-1">Rubro del Negocio *</label>
-                      <select
-                        value={businessCategory}
-                        onChange={(e) => setBusinessCategory(e.target.value)}
-                        className="w-full px-3 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-xs font-bold text-slate-800 focus:ring-2 focus:ring-[#00ADB5] disabled:bg-slate-100"
-                      >
-                        {NEGOCIO_AUTO_CATEGORIES.map((cat) => (
-                          <option key={cat} value={cat}>{cat}</option>
-                        ))}
-                      </select>
-                    </div>
-                  )}
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1">Rubro Comercial / Sector *</label>
+                    <select
+                      value={businessCategory}
+                      onChange={(e) => setBusinessCategory(e.target.value)}
+                      className="w-full px-3 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-xs font-bold text-slate-800 focus:ring-2 focus:ring-[#00ADB5] disabled:bg-slate-100"
+                    >
+                      {COMMERCE_CATEGORIES.map((cat) => (
+                        <option key={cat} value={cat}>{cat}</option>
+                      ))}
+                    </select>
+                  </div>
                 </>
               )}
 
@@ -398,7 +400,7 @@ function LoginFormContent() {
               {/* WhatsApp (todos) */}
               <div>
                 <label className="block text-xs font-bold text-slate-700 mb-1">
-                  {needsBusiness ? 'WhatsApp del Negocio *' : 'WhatsApp Personal (opcional)'}
+                  {needsBusiness ? 'WhatsApp de Contacto Directo *' : 'WhatsApp Personal (opcional)'}
                 </label>
                 <input
                   type="text"
@@ -478,7 +480,7 @@ function LoginFormContent() {
         <>
           <div className="bg-slate-50 border border-slate-200 rounded-2xl p-3.5 text-xs text-slate-600 font-medium flex items-center gap-2">
             <Sparkles className="w-4 h-4 text-[#00ADB5] shrink-0" />
-            <span>Accedé a tu panel de control para gestionar tus publicaciones o negocio.</span>
+            <span>Accedé a tu panel de control para gestionar tus publicaciones, catálogo o comercio.</span>
           </div>
 
           <form onSubmit={handleAuth} className="space-y-4">
@@ -617,14 +619,14 @@ export default function LoginPage() {
         <div className="text-center space-y-3">
           <Link href="/" className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-md px-4 py-2 rounded-2xl border border-white/20 text-white font-extrabold text-sm">
             <MapPin className="w-4 h-4 text-[#00E5E8]" />
-            <span>ON MÁS • Portal Automotor Regional</span>
+            <span>ON MÁS • Portal Regional Multisectorial</span>
           </Link>
 
           <h1 className="text-3xl sm:text-4xl font-black text-white tracking-tight">
             Acceso a tu Cuenta
           </h1>
           <p className="text-xs sm:text-sm text-slate-300 font-medium max-w-xs mx-auto">
-            Ingresá o registrate para publicar vehículos y gestionar tu presencia automotriz.
+            Ingresá o registrate para gestionar tu perfil, catálogo comercial o publicaciones en ON MÁS.
           </p>
         </div>
 

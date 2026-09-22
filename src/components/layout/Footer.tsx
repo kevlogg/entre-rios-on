@@ -3,7 +3,7 @@
 import React from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { Store, MessageCircle, MapPin, Mail, Heart } from 'lucide-react';
+import { Store, MessageCircle, MapPin, Mail, Heart, Lock } from 'lucide-react';
 
 export function Footer() {
   return (
@@ -85,17 +85,24 @@ export function Footer() {
 
         </div>
 
-        {/* Bottom Bar */}
+        {/* Bottom Bar con acceso escondido a SuperAdmin */}
         <div className="pt-8 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-300 gap-4">
-          <p>© {new Date().getFullYear()} ON MÁS Portal. Todos los derechos reservados.</p>
+          <div className="flex items-center gap-2">
+            <p>© {new Date().getFullYear()} ON MÁS Portal. Todos los derechos reservados.</p>
+            <Link 
+              href="/superadmin/login" 
+              className="text-slate-600/30 hover:text-slate-400 transition-colors p-1" 
+              aria-label="Acceso Administración" 
+              title="Panel de Control"
+            >
+              <Lock className="w-3 h-3" />
+            </Link>
+          </div>
           <div className="flex items-center gap-4">
-            <p className="flex items-center gap-1 font-medium">
+            <p className="flex items-center gap-1 font-medium text-slate-400">
               <span>Desarrollado para potenciar la región con</span>
               <Heart className="w-3.5 h-3.5 text-cyan-400 fill-current" />
             </p>
-            <Link href="/superadmin" className="text-slate-500 hover:text-amber-400 transition-colors text-[11px] font-semibold" title="Acceso Panel SuperAdmin">
-              SuperAdmin
-            </Link>
           </div>
         </div>
 

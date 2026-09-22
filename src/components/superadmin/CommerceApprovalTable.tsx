@@ -36,10 +36,22 @@ export function CommerceApprovalTable({ commerces: initialCommerces }: CommerceA
     );
   };
 
+  const [typeFilter, setTypeFilter] = useState<'all' | 'particular' | 'agencia' | 'negocio_automotor'>('all');
+
   const filteredCommerces = commerces.filter((c) => {
     const matchesSearch = c.name.toLowerCase().includes(searchQuery.toLowerCase()) || c.cityName.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesCity = cityFilter === 'all' || c.cityId.toLowerCase() === cityFilter.toLowerCase();
-    return matchesSearch && matchesCity;
+    
+    let matchesType = true;
+    if (typeFilter === 'particular') {
+      matchesType = c.category.toLowerCase().includes('particular');
+    } else if (typeFilter === 'agencia') {
+      matchesType = c.category.toLowerCase().includes('agencia') || c.category.toLowerCase().includes('concesionaria');
+    } else if (typeFilter === 'negocio_automotor') {
+      matchesType = !c.category.toLowerCase().includes('particular') && !c.category.toLowerCase().includes('agencia');
+    }
+    
+    return matchesSearch && matchesCity && matchesType;
   });
 
   return (
@@ -50,18 +62,18 @@ export function CommerceApprovalTable({ commerces: initialCommerces }: CommerceA
         <div>
           <h3 className="text-xl font-black text-[#0047BA] flex items-center gap-2">
             <Store className="w-5 h-5 text-[#00ADB5]" />
-            <span>Gestión Provincial de Comercios & Socios B2B</span>
+            <span>Gestión General de Usuarios & Planes (SuperAdmin)</span>
           </h3>
           <p className="text-xs text-slate-500 font-medium mt-1">
-            Control de altas, insignias de verificación Gold y estados de cuenta en los 17 departamentos.
+            Administración de los 3 tipos de perfil: Particulares ($15k), Agencias (Base $99k/Pro $199k) y Negocios Automotores (Base $49k/Pro $99k).
           </p>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-3">
           <div className="relative">
             <input
               type="text"
-              placeholder="Buscar comercio..."
+              placeholder="Buscar por nombre o ciudad..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="bg-slate-50 border border-slate-300 rounded-xl pl-9 pr-4 py-2 text-xs font-medium text-slate-800"
@@ -75,6 +87,8 @@ export function CommerceApprovalTable({ commerces: initialCommerces }: CommerceA
             className="bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs font-bold text-slate-700"
           >
             <option value="all">Todas las Ciudades</option>
+            <option value="rosario">Rosario</option>
+            <option value="santa-fe-capital">Santa Fe Capital</option>
             <option value="parana">Paraná</option>
             <option value="colon">Colón</option>
             <option value="concordia">Concordia</option>
@@ -83,16 +97,53 @@ export function CommerceApprovalTable({ commerces: initialCommerces }: CommerceA
         </div>
       </div>
 
+      {/* User Type Filters */}
+      <div className="flex items-center gap-2 text-xs font-bold overflow-x-auto pb-1">
+        <span className="text-slate-400 font-black text-[11px] uppercase mr-1">Perfil:</span>
+        <button
+          onClick={() => setTypeFilter('all')}
+          className={`px-3 py-1.5 rounded-xl transition-all cursor-pointer ${
+            typeFilter === 'all' ? 'bg-[#0047BA] text-white shadow-xs' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+          }`}
+        >
+          Todos los perfiles ({commerces.length})
+        </button>
+        <button
+          onClick={() => setTypeFilter('particular')}
+          className={`px-3 py-1.5 rounded-xl transition-all cursor-pointer ${
+            typeFilter === 'particular' ? 'bg-blue-600 text-white shadow-xs' : 'bg-blue-50 text-blue-700 hover:bg-blue-100'
+          }`}
+        >
+          Particulares ($15.000)
+        </button>
+        <button
+          onClick={() => setTypeFilter('agencia')}
+          className={`px-3 py-1.5 rounded-xl transition-all cursor-pointer ${
+            typeFilter === 'agencia' ? 'bg-[#2A1B4E] text-white shadow-xs' : 'bg-purple-50 text-purple-800 hover:bg-purple-100'
+          }`}
+        >
+          Agencias (Base $99k / Pro $199k)
+        </button>
+        <button
+          onClick={() => setTypeFilter('negocio_automotor')}
+          className={`px-3 py-1.5 rounded-xl transition-all cursor-pointer ${
+            typeFilter === 'negocio_automotor' ? 'bg-[#0F2A28] text-white shadow-xs' : 'bg-emerald-50 text-emerald-800 hover:bg-emerald-100'
+          }`}
+        >
+          Mundo Automotor (Base $49k / Pro $99k)
+        </button>
+      </div>
+
       {/* Commerces Table */}
       <div className="overflow-x-auto">
         <table className="w-full text-left text-xs">
           <thead>
             <tr className="border-b border-slate-200 text-slate-400 font-extrabold uppercase tracking-wider">
-              <th className="pb-3 px-3">Comercio / Negocio</th>
+              <th className="pb-3 px-3">Cuenta / Usuario</th>
               <th className="pb-3 px-3">Localidad</th>
-              <th className="pb-3 px-3">Rubro</th>
+              <th className="pb-3 px-3">Tipo de Perfil</th>
               <th className="pb-3 px-3 text-center">Insignia Verificado</th>
-              <th className="pb-3 px-3 text-center">Suscripción B2B</th>
+              <th className="pb-3 px-3 text-center">Estado del Plan</th>
               <th className="pb-3 px-3 text-right">Acciones SuperAdmin</th>
             </tr>
           </thead>
@@ -106,7 +157,7 @@ export function CommerceApprovalTable({ commerces: initialCommerces }: CommerceA
                     </div>
                     <div>
                       <p className="font-extrabold text-slate-900 text-sm">{comm.name}</p>
-                      <p className="text-[11px] text-slate-400 font-medium">{comm.address}</p>
+                      <p className="text-[11px] text-slate-400 font-medium">{comm.address || comm.email || 'Sin dirección'}</p>
                     </div>
                   </div>
                 </td>
@@ -119,7 +170,7 @@ export function CommerceApprovalTable({ commerces: initialCommerces }: CommerceA
                 </td>
 
                 <td className="py-3.5 px-3">
-                  <span className="bg-slate-100 text-slate-700 px-2.5 py-1 rounded-md text-[10px] font-extrabold uppercase">
+                  <span className="bg-slate-100 text-slate-800 px-2.5 py-1 rounded-md text-[10px] font-extrabold uppercase">
                     {comm.category}
                   </span>
                 </td>
@@ -141,19 +192,19 @@ export function CommerceApprovalTable({ commerces: initialCommerces }: CommerceA
                 <td className="py-3.5 px-3 text-center">
                   <button
                     onClick={() => toggleSubscription(comm.id)}
-                    className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-[11px] font-extrabold cursor-pointer transition-colors ${
+                    className={`inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-[11px] font-black cursor-pointer transition-transform active:scale-95 ${
                       comm.isSubscriptionActive
-                        ? 'bg-blue-100 text-[#0047BA]'
-                        : 'bg-amber-100 text-amber-700'
+                        ? 'bg-emerald-100 text-emerald-800 border border-emerald-300'
+                        : 'bg-rose-100 text-rose-800 border border-rose-300'
                     }`}
                   >
-                    <span>{comm.isSubscriptionActive ? 'Plan Activo 0%' : 'Pausado'}</span>
+                    <span>{comm.isSubscriptionActive ? '✓ Plan Activo' : '⚠ Inactivo (Sin Plan)'}</span>
                   </button>
                 </td>
 
                 <td className="py-3.5 px-3 text-right">
                   <a
-                    href={`https://wa.me/${comm.phoneWhatsApp}?text=${encodeURIComponent(`Hola ${comm.name}, me comunico del equipo SuperAdmin de Entre Ríos ON MÁS.`)}`}
+                    href={`https://wa.me/${comm.phoneWhatsApp}?text=${encodeURIComponent(`Hola ${comm.name}, me comunico del equipo SuperAdmin de Entre Ríos ON MÁS sobre el estado de tu cuenta.`)}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="inline-flex items-center gap-1 bg-[#25D366] hover:bg-[#20ba5a] text-white px-3 py-1.5 rounded-xl font-extrabold text-[11px]"
