@@ -93,85 +93,101 @@ export function SuperAdminDashboardClient({
           </h1>
 
           <p className="text-sm sm:text-base text-slate-100 font-medium leading-relaxed">
-            Gestioná comercios, pagos en efectivo, colores por provincia, medidas de banners, sorteos, ofertas laborales, noticias y sitios web solicitados.
+            Gestioná comercios reales, pagos en efectivo, imágenes por provincia, banners publicitarios, sorteos, ofertas laborales, noticias y sitios web solicitados.
           </p>
         </div>
 
-        <div className="bg-white/10 backdrop-blur-md rounded-2xl p-5 border border-white/20 space-y-2 text-center shrink-0">
+        <div className="bg-white/10 backdrop-blur-md rounded-2xl p-5 border border-white/20 space-y-2 text-center shrink-0 min-w-[200px]">
           <span className="text-[10px] font-black uppercase tracking-wider text-amber-300 block">
-            Red Comercial Provincial
+            Red Comercial Real
           </span>
-          <p className="text-3xl font-black text-white">1.128</p>
-          <p className="text-xs text-slate-200 font-bold">Comercios ON MÁS</p>
+          <p className="text-3xl font-black text-white">{initialCommerces.length}</p>
+          <p className="text-xs text-slate-200 font-bold">Comercios Registrados</p>
         </div>
       </div>
 
-      {/* Categorized Tab Navigation Bar */}
-      <div className="bg-white rounded-3xl p-2 border border-slate-200 shadow-sm overflow-x-auto scrollbar-none">
-        <div className="flex items-center gap-1.5 min-w-max">
-          {tabs.map((tab) => {
-            const IconComp = tab.icon;
-            const isActive = activeTab === tab.id;
-            return (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={`flex items-center gap-2 px-4 py-3 rounded-2xl text-xs font-extrabold transition-all cursor-pointer ${
-                  isActive
-                    ? 'bg-gradient-to-r from-[#0047BA] to-[#00ADB5] text-white shadow-md scale-102'
-                    : 'text-slate-600 hover:bg-slate-100 hover:text-[#0047BA]'
-                }`}
-              >
-                <IconComp className={`w-4 h-4 ${isActive ? 'text-amber-300' : 'text-[#00ADB5]'}`} />
-                <span>{tab.label}</span>
-                {tab.badge && (
-                  <span
-                    className={`text-[10px] px-2 py-0.5 rounded-full font-black ${
-                      isActive ? 'bg-white/20 text-white' : 'bg-slate-200 text-slate-700'
-                    }`}
-                  >
-                    {tab.badge}
-                  </span>
-                )}
-              </button>
-            );
-          })}
-        </div>
-      </div>
+      {/* Main Layout Grid: Sidebar Panel + Tab Content */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        
+        {/* Sticky Vertical Sidebar Access Panel */}
+        <aside className="lg:col-span-3 bg-white rounded-3xl p-4 border border-slate-200 shadow-sm space-y-3 sticky top-24">
+          <div className="px-3 py-2 border-b border-slate-100 flex items-center justify-between">
+            <span className="text-xs font-black uppercase tracking-wider text-slate-400">
+              Menú Principal
+            </span>
+            <span className="text-[10px] bg-cyan-100 text-[#0047BA] font-extrabold px-2 py-0.5 rounded-full">
+              8 Módulos
+            </span>
+          </div>
 
-      {/* Tab Contents */}
-      <div className="space-y-6">
-        {activeTab === 'commerces' && (
-          <CommerceApprovalTable commerces={initialCommerces} />
-        )}
+          <nav className="space-y-1.5">
+            {tabs.map((tab) => {
+              const IconComp = tab.icon;
+              const isActive = activeTab === tab.id;
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  className={`w-full flex items-center justify-between px-4 py-3.5 rounded-2xl text-xs font-extrabold transition-all cursor-pointer text-left ${
+                    isActive
+                      ? 'bg-gradient-to-r from-[#0047BA] to-[#00ADB5] text-white shadow-md'
+                      : 'text-slate-700 hover:bg-slate-100 hover:text-[#0047BA]'
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    <IconComp className={`w-4 h-4 shrink-0 ${isActive ? 'text-amber-300' : 'text-[#00ADB5]'}`} />
+                    <span className="truncate">{tab.label}</span>
+                  </div>
+                  {tab.badge && (
+                    <span
+                      className={`text-[10px] px-2 py-0.5 rounded-full font-black shrink-0 ${
+                        isActive ? 'bg-white/20 text-white' : 'bg-slate-200 text-slate-700'
+                      }`}
+                    >
+                      {tab.badge}
+                    </span>
+                  )}
+                </button>
+              );
+            })}
+          </nav>
+        </aside>
 
-        {activeTab === 'cash-payments' && (
-          <CashPaymentsManager />
-        )}
+        {/* Tab Content Panel */}
+        <main className="lg:col-span-9 space-y-6">
+          {activeTab === 'commerces' && (
+            <CommerceApprovalTable commerces={initialCommerces} />
+          )}
 
-        {activeTab === 'geo-customizer' && (
-          <GeoCustomizerManager initialCities={initialCities} />
-        )}
+          {activeTab === 'cash-payments' && (
+            <CashPaymentsManager />
+          )}
 
-        {activeTab === 'raffles' && (
-          <RafflesManager />
-        )}
+          {activeTab === 'geo-customizer' && (
+            <GeoCustomizerManager initialCities={initialCities} />
+          )}
 
-        {activeTab === 'jobs' && (
-          <JobsManager />
-        )}
+          {activeTab === 'raffles' && (
+            <RafflesManager />
+          )}
 
-        {activeTab === 'news' && (
-          <NewsManager events={initialEvents} />
-        )}
+          {activeTab === 'jobs' && (
+            <JobsManager />
+          )}
 
-        {activeTab === 'tourism' && (
-          <TourismManager />
-        )}
+          {activeTab === 'news' && (
+            <NewsManager events={initialEvents} />
+          )}
 
-        {activeTab === 'web-requests' && (
-          <WebRequestsManager />
-        )}
+          {activeTab === 'tourism' && (
+            <TourismManager />
+          )}
+
+          {activeTab === 'web-requests' && (
+            <WebRequestsManager />
+          )}
+        </main>
+
       </div>
     </div>
   );

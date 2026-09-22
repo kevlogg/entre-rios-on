@@ -224,6 +224,51 @@ export function JobsManager() {
           ))}
         </div>
       </div>
+
+      {/* Listado de Perfiles de Candidatos Registrados */}
+      <div className="bg-white rounded-3xl p-6 border border-slate-200 shadow-sm space-y-4">
+        <div className="flex items-center justify-between">
+          <h3 className="text-base font-black text-slate-900 flex items-center gap-2">
+            <UserCheck className="w-5 h-5 text-purple-600" />
+            Candidatos Postulados desde la Web (2 Registrados)
+          </h3>
+          <span className="text-xs font-bold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200">
+            Base de Talentos Activa
+          </span>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4 space-y-2">
+            <div className="flex items-center justify-between">
+              <span className="font-extrabold text-slate-900 text-xs">Mariana Gomez</span>
+              <span className="text-[10px] bg-purple-100 text-purple-800 font-black px-2 py-0.5 rounded-full">
+                Paraná
+              </span>
+            </div>
+            <p className="text-xs font-bold text-[#0047BA]">Administrativa & Contable</p>
+            <p className="text-[11px] text-slate-600">5 años en gestión comercial y software de facturación.</p>
+            <div className="pt-2 border-t border-slate-200 flex items-center justify-between text-[11px]">
+              <span className="text-slate-500">Contactar: 5493434556677</span>
+              <span className="text-emerald-700 font-bold">Verificado</span>
+            </div>
+          </div>
+
+          <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4 space-y-2">
+            <div className="flex items-center justify-between">
+              <span className="font-extrabold text-slate-900 text-xs">Lucas Peralta</span>
+              <span className="text-[10px] bg-purple-100 text-purple-800 font-black px-2 py-0.5 rounded-full">
+                Concordia
+              </span>
+            </div>
+            <p className="text-xs font-bold text-[#0047BA]">Chofer Repartidor (Licencia B2)</p>
+            <p className="text-[11px] text-slate-600">Experiencia en logística de alimentos y distribución en ruta.</p>
+            <div className="pt-2 border-t border-slate-200 flex items-center justify-between text-[11px]">
+              <span className="text-slate-500">Contactar: 5493454112244</span>
+              <span className="text-emerald-700 font-bold">Verificado</span>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
