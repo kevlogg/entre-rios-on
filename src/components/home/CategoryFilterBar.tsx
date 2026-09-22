@@ -1,8 +1,9 @@
 'use client';
 
 import React from 'react';
+import Image from 'next/image';
 import { CATEGORIES_LIST } from '@/lib/constants/categories';
-import { LayoutGrid, Sparkles } from 'lucide-react';
+import { Sparkles, ArrowRight, LayoutGrid } from 'lucide-react';
 
 interface CategoryFilterBarProps {
   selectedCategory: string;
@@ -14,70 +15,102 @@ export function CategoryFilterBar({
   onSelectCategory,
 }: CategoryFilterBarProps) {
   return (
-    <div className="bg-white rounded-3xl p-5 border border-slate-200 shadow-sm space-y-4">
-      <div className="flex items-center justify-between">
-        <h3 className="text-xs font-black uppercase tracking-widest text-[#0047BA] flex items-center gap-1.5">
-          <Sparkles className="w-4 h-4 text-amber-500 fill-current animate-pulse" />
-          <span>Explorar por Rubros & Categorías Vibrantes</span>
-        </h3>
+    <section className="bg-white rounded-3xl p-5 sm:p-6 border border-slate-200 shadow-sm space-y-5">
+      {/* Top Header Row */}
+      <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+        <div className="flex items-center gap-2">
+          <h2 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
+            Categorías
+          </h2>
+          <span className="text-xs font-bold text-slate-400 hidden sm:inline">
+            • Explorá por rubro comercial
+          </span>
+        </div>
 
-        {selectedCategory !== 'all' && (
+        {selectedCategory !== 'all' ? (
           <button
             onClick={() => onSelectCategory('all')}
-            className="text-xs font-bold text-[#00ADB5] hover:underline"
+            className="text-xs font-extrabold text-[#00ADB5] hover:text-[#0047BA] transition-colors flex items-center gap-1"
           >
-            Limpiar filtro de categoría
+            <span>Mostrar todas las categorías</span>
+            <ArrowRight className="w-3.5 h-3.5" />
+          </button>
+        ) : (
+          <button
+            onClick={() => onSelectCategory('all')}
+            className="text-xs font-extrabold text-[#0047BA] hover:text-[#00ADB5] transition-colors flex items-center gap-1"
+          >
+            <span>Ver todas</span>
+            <ArrowRight className="w-3.5 h-3.5" />
           </button>
         )}
       </div>
 
-      <div className="flex items-center gap-2.5 overflow-x-auto pb-2 scrollbar-none">
-        {/* All Categories Button */}
+      {/* Grid of Marketplace Category Cards (Imagen a la izquierda, Texto a la derecha) */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
+        {/* All Categories Option */}
         <button
           onClick={() => onSelectCategory('all')}
-          className={`flex items-center gap-2.5 px-4 py-2.5 rounded-2xl text-xs font-extrabold transition-all whitespace-nowrap border shrink-0 cursor-pointer ${
+          className={`group flex items-center rounded-2xl border transition-all text-left overflow-hidden h-20 sm:h-24 cursor-pointer ${
             selectedCategory === 'all'
-              ? 'bg-gradient-to-r from-[#0047BA] to-[#00ADB5] text-white border-[#0047BA] shadow-md scale-102'
-              : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100 hover:border-slate-300'
+              ? 'bg-[#0047BA] text-white border-[#0047BA] shadow-md ring-2 ring-[#00ADB5]'
+              : 'bg-white text-slate-800 border-slate-200 hover:border-[#00ADB5] hover:shadow-md'
           }`}
         >
-          <div className="w-7 h-7 rounded-xl bg-white/20 flex items-center justify-center font-black">
-            <LayoutGrid className="w-4 h-4" />
+          <div className={`w-1/3 h-full flex items-center justify-center border-r shrink-0 ${
+            selectedCategory === 'all' ? 'bg-white/10 border-white/20 text-white' : 'bg-slate-100 border-slate-200/80 text-[#0047BA]'
+          }`}>
+            <LayoutGrid className="w-7 h-7 stroke-[2.2]" />
           </div>
-          <span>Todos los Rubros</span>
+          <div className="w-2/3 p-3.5">
+            <span className={`font-black text-xs sm:text-sm leading-snug block ${
+              selectedCategory === 'all' ? 'text-white' : 'text-slate-900 group-hover:text-[#0047BA]'
+            }`}>
+              Todas las categorías
+            </span>
+            <span className={`text-[10px] block mt-0.5 font-medium ${
+              selectedCategory === 'all' ? 'text-slate-200' : 'text-slate-500'
+            }`}>
+              Ver catálogo completo
+            </span>
+          </div>
         </button>
 
         {/* Dynamic Category Cards */}
         {CATEGORIES_LIST.map((cat) => {
-          const IconComponent = cat.icon;
           const isSelected = selectedCategory === cat.id;
 
           return (
             <button
               key={cat.id}
               onClick={() => onSelectCategory(cat.id)}
-              className={`flex items-center gap-2.5 px-3.5 py-2 rounded-2xl text-xs font-extrabold transition-all whitespace-nowrap border shrink-0 cursor-pointer ${
+              className={`group flex items-center rounded-2xl border transition-all text-left overflow-hidden h-20 sm:h-24 cursor-pointer ${
                 isSelected
-                  ? `bg-gradient-to-r ${cat.activeBg} text-white border-transparent shadow-md scale-102`
-                  : 'bg-slate-50 text-slate-800 border-slate-200/80 hover:bg-white hover:border-slate-300 hover:shadow-xs'
+                  ? 'bg-gradient-to-r from-[#00ADB5] to-[#007C8A] text-white border-[#00ADB5] shadow-md ring-2 ring-[#00ADB5]'
+                  : 'bg-white text-slate-800 border-slate-200/90 hover:border-[#00ADB5] hover:shadow-md'
               }`}
             >
-              {/* Vibrant Icon Box with Solid Body & Color */}
-              <div
-                className={`w-8 h-8 rounded-xl flex items-center justify-center border transition-transform ${
-                  isSelected
-                    ? 'bg-white/20 border-white/30 text-white'
-                    : `${cat.iconBg} ${cat.iconColor}`
-                }`}
-              >
-                <IconComponent className="w-4 h-4 stroke-[2.5]" />
+              {/* Left Box: Product Image Asset */}
+              <div className="w-1/3 h-full bg-[#f4f4f5] border-r border-slate-200/60 shrink-0 relative overflow-hidden flex items-center justify-center p-1.5">
+                <img
+                  src={cat.imageUrl}
+                  alt={cat.label}
+                  className="w-full h-full object-cover rounded-xl group-hover:scale-105 transition-transform duration-300"
+                />
               </div>
 
-              <span>{cat.label}</span>
+              {/* Right Box: Bold Category Label */}
+              <div className="w-2/3 p-3.5">
+                <span className={`font-extrabold text-xs sm:text-sm leading-snug line-clamp-2 block ${
+                  isSelected ? 'text-white' : 'text-slate-800 group-hover:text-[#0047BA]'
+                }`}>
+                  {cat.label}
+                </span>
+              </div>
             </button>
           );
         })}
       </div>
-    </div>
+    </section>
   );
 }
