@@ -11,6 +11,10 @@ import {
   HeartPulse, 
   Umbrella, 
   LayoutGrid,
+  Trophy,
+  Wheat,
+  Wine,
+  Tv,
   LucideIcon
 } from 'lucide-react';
 
@@ -27,6 +31,7 @@ export interface CategoryDef {
 }
 
 export const CATEGORIES_LIST: CategoryDef[] = [
+  // Page 1: First 8 items (2 rows x 4 cols)
   { 
     id: 'autos', 
     label: 'Autos, Motos y Vehículos', 
@@ -39,7 +44,7 @@ export const CATEGORIES_LIST: CategoryDef[] = [
   },
   { 
     id: 'tecnologia', 
-    label: 'Celulares y Tecnología', 
+    label: 'Celulares y Teléfonos', 
     icon: Laptop,
     description: 'Dispositivos, computación, electrodomésticos y equipamiento digital.',
     imageUrl: 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&w=400&q=80',
@@ -48,14 +53,54 @@ export const CATEGORIES_LIST: CategoryDef[] = [
     activeBg: 'from-indigo-600 to-indigo-800'
   },
   { 
-    id: 'gastronomia', 
-    label: 'Gastronomía y Sabores', 
-    icon: Utensils,
-    description: 'Pescados de río, viñedos, comedores de barranca y repostería.',
-    imageUrl: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=400&q=80',
-    iconBg: 'bg-amber-500/15 border-amber-200',
-    iconColor: 'text-amber-600',
-    activeBg: 'from-amber-500 to-amber-700'
+    id: 'electro', 
+    label: 'Electrodomésticos y Aires', 
+    icon: Tv,
+    description: 'Lavadoras, heladeras, aire acondicionado y tecnología del hogar.',
+    imageUrl: 'https://images.unsplash.com/photo-1584622650111-993a426fbf0a?auto=format&fit=crop&w=400&q=80',
+    iconBg: 'bg-blue-500/15 border-blue-200',
+    iconColor: 'text-blue-600',
+    activeBg: 'from-blue-600 to-blue-800'
+  },
+  { 
+    id: 'industria', 
+    label: 'Herramientas e Industria', 
+    icon: Factory,
+    description: 'Insumos industriales, metalúrgica, parques industriales y maquinaria agro.',
+    imageUrl: 'https://images.unsplash.com/photo-1581092160607-ee22621dd758?auto=format&fit=crop&w=400&q=80',
+    iconBg: 'bg-slate-500/15 border-slate-300',
+    iconColor: 'text-slate-700',
+    activeBg: 'from-slate-700 to-slate-900'
+  },
+  { 
+    id: 'indumentaria', 
+    label: 'Ropa, Calzado y Accesorios', 
+    icon: Shirt,
+    description: 'Calzado urbano, prendas de lana autóctona, accesorios y moda.',
+    imageUrl: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=400&q=80',
+    iconBg: 'bg-pink-500/15 border-pink-200',
+    iconColor: 'text-pink-600',
+    activeBg: 'from-pink-600 to-rose-700'
+  },
+  { 
+    id: 'deportes', 
+    label: 'Deportes y Fitness', 
+    icon: Trophy,
+    description: 'Equipamiento deportivo, suplementos, bicicletas y gimnasio.',
+    imageUrl: 'https://images.unsplash.com/photo-1584735935682-2f2b69dff9d2?auto=format&fit=crop&w=400&q=80',
+    iconBg: 'bg-cyan-500/15 border-cyan-200',
+    iconColor: 'text-cyan-600',
+    activeBg: 'from-cyan-600 to-teal-800'
+  },
+  { 
+    id: 'salud', 
+    label: 'Belleza y Cuidado Personal', 
+    icon: HeartPulse,
+    description: 'Spas termales, cosmética natural, nutrición y cuidado personal.',
+    imageUrl: 'https://images.unsplash.com/photo-1540555700478-4be289fbecef?auto=format&fit=crop&w=400&q=80',
+    iconBg: 'bg-red-500/15 border-red-200',
+    iconColor: 'text-red-500',
+    activeBg: 'from-red-500 to-rose-700'
   },
   { 
     id: 'hogar', 
@@ -67,15 +112,57 @@ export const CATEGORIES_LIST: CategoryDef[] = [
     iconColor: 'text-emerald-600',
     activeBg: 'from-emerald-600 to-emerald-800'
   },
+
+  // Page 2: Second 8 items (2 rows x 4 cols)
   { 
-    id: 'indumentaria', 
-    label: 'Ropa, Calzado y Accesorios', 
-    icon: Shirt,
-    description: 'Calzado urbano, prendas de lana autóctona, accesorios y moda.',
-    imageUrl: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=400&q=80',
-    iconBg: 'bg-pink-500/15 border-pink-200',
-    iconColor: 'text-pink-600',
-    activeBg: 'from-pink-600 to-rose-700'
+    id: 'gastronomia', 
+    label: 'Gastronomía y Sabores', 
+    icon: Utensils,
+    description: 'Pescados de río, viñedos, comedores de barranca y repostería.',
+    imageUrl: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=400&q=80',
+    iconBg: 'bg-amber-500/15 border-amber-200',
+    iconColor: 'text-amber-600',
+    activeBg: 'from-amber-500 to-amber-700'
+  },
+  { 
+    id: 'bebidas', 
+    label: 'Vinos, Cervezas y Bodegas', 
+    icon: Wine,
+    description: 'Viñedos de Entre Ríos, cerveza artesanal y bebidas regionales.',
+    imageUrl: 'https://images.unsplash.com/photo-1510812431401-41d2bd2722f3?auto=format&fit=crop&w=400&q=80',
+    iconBg: 'bg-purple-500/15 border-purple-200',
+    iconColor: 'text-purple-600',
+    activeBg: 'from-purple-600 to-indigo-800'
+  },
+  { 
+    id: 'construccion', 
+    label: 'Construcción e Inmuebles', 
+    icon: HardHat,
+    description: 'Corralones, grifería, cerámicos, revestimientos y servicios de obra.',
+    imageUrl: 'https://images.unsplash.com/photo-1570129477492-45c003edd2be?auto=format&fit=crop&w=400&q=80',
+    iconBg: 'bg-orange-500/15 border-orange-200',
+    iconColor: 'text-orange-600',
+    activeBg: 'from-orange-600 to-amber-700'
+  },
+  { 
+    id: 'turismo', 
+    label: 'Turismo, Termas y Posadas', 
+    icon: Umbrella,
+    description: 'Paseos náuticos, complejos termales, playas, alojamientos y excursiones.',
+    imageUrl: 'https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&w=400&q=80',
+    iconBg: 'bg-teal-500/15 border-teal-200',
+    iconColor: 'text-teal-600',
+    activeBg: 'from-teal-600 to-cyan-700'
+  },
+  { 
+    id: 'agro', 
+    label: 'Agro, Campo y Alimentos', 
+    icon: Wheat,
+    description: 'Citrus, miel, agronomía, insumos agrícolas y alimentos de campo.',
+    imageUrl: 'https://images.unsplash.com/photo-1587049352847-4a222e784d38?auto=format&fit=crop&w=400&q=80',
+    iconBg: 'bg-yellow-500/15 border-yellow-200',
+    iconColor: 'text-yellow-600',
+    activeBg: 'from-yellow-600 to-amber-800'
   },
   { 
     id: 'comercios', 
@@ -92,50 +179,10 @@ export const CATEGORIES_LIST: CategoryDef[] = [
     label: 'Productos y Artesanías', 
     icon: ShoppingCart,
     description: 'Catálogo de productos regionales, artesanías y manufactura.',
-    imageUrl: 'https://images.unsplash.com/photo-1510812431401-41d2bd2722f3?auto=format&fit=crop&w=400&q=80',
+    imageUrl: 'https://images.unsplash.com/photo-1513885535751-8b9238bd345a?auto=format&fit=crop&w=400&q=80',
     iconBg: 'bg-cyan-500/15 border-cyan-200',
     iconColor: 'text-[#00ADB5]',
     activeBg: 'from-[#00ADB5] to-[#007C8A]'
-  },
-  { 
-    id: 'industria', 
-    label: 'Herramientas e Industria', 
-    icon: Factory,
-    description: 'Insumos industriales, metalúrgica, parques industriales y maquinaria agro.',
-    imageUrl: 'https://images.unsplash.com/photo-1581092160607-ee22621dd758?auto=format&fit=crop&w=400&q=80',
-    iconBg: 'bg-slate-500/15 border-slate-300',
-    iconColor: 'text-slate-700',
-    activeBg: 'from-slate-700 to-slate-900'
-  },
-  { 
-    id: 'construccion', 
-    label: 'Construcción e Inmuebles', 
-    icon: HardHat,
-    description: 'Corralones, grifería, cerámicos, revestimientos y servicios de obra.',
-    imageUrl: 'https://images.unsplash.com/photo-1570129477492-45c003edd2be?auto=format&fit=crop&w=400&q=80',
-    iconBg: 'bg-orange-500/15 border-orange-200',
-    iconColor: 'text-orange-600',
-    activeBg: 'from-orange-600 to-amber-700'
-  },
-  { 
-    id: 'salud', 
-    label: 'Belleza, Salud y Fitness', 
-    icon: HeartPulse,
-    description: 'Spas termales, cosmética natural, nutrición y centros de salud.',
-    imageUrl: 'https://images.unsplash.com/photo-1540555700478-4be289fbecef?auto=format&fit=crop&w=400&q=80',
-    iconBg: 'bg-red-500/15 border-red-200',
-    iconColor: 'text-red-500',
-    activeBg: 'from-red-500 to-rose-700'
-  },
-  { 
-    id: 'turismo', 
-    label: 'Turismo, Termas y Posadas', 
-    icon: Umbrella,
-    description: 'Paseos náuticos, complejos termales, playas, alojamientos y excursiones.',
-    imageUrl: 'https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&w=400&q=80',
-    iconBg: 'bg-teal-500/15 border-teal-200',
-    iconColor: 'text-teal-600',
-    activeBg: 'from-teal-600 to-cyan-700'
   },
   { 
     id: 'mas', 
