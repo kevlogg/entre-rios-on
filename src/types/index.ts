@@ -15,6 +15,7 @@ export interface City {
   commerceCount: number;
   provinceId?: string;
   provinceName?: string;
+  bannerUrl?: string;
 }
 
 export interface Commerce {
@@ -38,6 +39,7 @@ export interface Commerce {
   email?: string;
   isDigitalOnly?: boolean;
   website?: string;
+  plan?: 'Bronce' | 'Plata' | 'Oro';
 }
 
 export interface Product {
@@ -59,6 +61,7 @@ export interface Product {
   description: string;
   phoneWhatsApp: string;
   whatsappMessageCustom?: string;
+  commercePlan?: 'Bronce' | 'Plata' | 'Oro';
 }
 
 export interface CommunityEvent {

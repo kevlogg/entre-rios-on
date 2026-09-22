@@ -18,23 +18,24 @@ const caveat = Caveat({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://entreriosonmas.gob.ar'),
-  title: 'Entre Ríos ON MÁS Portal | Comercio. Comunidad. Oportunidades.',
-  description: 'Portal regional híbrido de Entre Ríos: Directorio Comercial B2B, Catálogo directo a WhatsApp, Turismo, Gastronomía y Agenda de la Comunidad de Paraná, Concordia, Colón, Gualeguaychú y la provincia.',
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://onmas.gob.ar'),
+  title: 'ON MÁS Portal | Comercio. Comunidad. Oportunidades.',
+  description: 'Portal regional híbrido ON MÁS: Directorio Comercial B2B, Catálogo directo a WhatsApp, Turismo, Gastronomía y Agenda de la Comunidad de Entre Ríos, Santa Fe y la región.',
   keywords: [
+    'ON MÁS',
+    'ONMAS',
     'Entre Ríos',
     'Santa Fe',
     'Paraná',
     'Concordia',
     'Colón',
     'Gualeguaychú',
-    'Directorio Comercial Entre Ríos',
-    'Compras por WhatsApp Entre Ríos',
-    'Turismo Entre Ríos',
-    'Gastronomía de Río',
-    'Fiesta de la Artesanía',
+    'Directorio Comercial',
+    'Compras por WhatsApp',
+    'Turismo',
+    'Gastronomía',
   ],
-  authors: [{ name: 'Entre Ríos ON MÁS Portal' }],
+  authors: [{ name: 'ON MÁS Portal' }],
   icons: {
     icon: [
       { url: '/favicon.ico', sizes: 'any' },
@@ -48,23 +49,23 @@ export const metadata: Metadata = {
     ],
   },
   openGraph: {
-    title: 'Entre Ríos ON MÁS Portal | Toda la provincia en un solo lugar',
-    description: 'Comprá. Vendé. Publicá. Conectá. Toda la provincia en un solo lugar.',
+    title: 'ON MÁS Portal | Toda la región en un solo lugar',
+    description: 'Comprá. Vendé. Publicá. Conectá. Toda la región en un solo lugar.',
     type: 'website',
     locale: 'es_AR',
-    siteName: 'Entre Ríos ON MÁS Portal',
+    siteName: 'ON MÁS Portal',
     images: [
       {
         url: '/logo.png',
         width: 1200,
         height: 630,
-        alt: 'Entre Ríos ON MÁS Logo Oficial',
+        alt: 'ON MÁS Logo Oficial',
       },
     ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Entre Ríos ON MÁS Portal | Comercio, Turismo y Medios',
+    title: 'ON MÁS Portal | Comercio, Turismo y Medios',
     description: 'Directorio Comercial B2B, Catálogo directo a WhatsApp y Portal de Medios y Turismo.',
     images: ['/logo.png'],
   },
@@ -78,8 +79,8 @@ export default function RootLayout({
   const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'Organization',
-    name: 'Entre Ríos ON MÁS Portal',
-    url: 'https://entreriosonmas.gob.ar',
+    name: 'ON MÁS Portal',
+    url: 'https://onmas.gob.ar',
     logo: 'https://entreriosonmas.gob.ar/logo.png',
     sameAs: [
       'https://facebook.com',

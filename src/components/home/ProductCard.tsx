@@ -81,7 +81,11 @@ export function ProductCard({ product }: ProductCardProps) {
           <Link href={`/comercio/${commerceSlug}`} className="flex items-center gap-1 text-[11px] font-bold text-[#0047BA] hover:underline">
             <Store className="w-3 h-3 text-[#00ADB5] shrink-0" />
             <span className="truncate">{product.commerceName}</span>
-            <CheckCircle className="w-3 h-3 text-[#00ADB5] shrink-0" />
+            {product.commercePlan && product.commercePlan !== 'Bronce' && (
+              <span title="Comercio Verificado (Plan Plata/Oro)">
+                <CheckCircle className="w-3 h-3 text-[#00ADB5] shrink-0" />
+              </span>
+            )}
           </Link>
 
           {/* Title Link */}

@@ -7,7 +7,7 @@ import { getProvinceBySlug, getCityBySlug, VALID_SECTION_SLUGS, ALL_CITIES } fro
 import ComerciosPage from '@/app/comercios/page';
 import CatalogoPage from '@/app/catalogo/page';
 import SorteosPage from '@/app/sorteos/page';
-import ClasificadosPage from '@/app/clasificados/page';
+import EmpleosPage from '@/app/empleos/page';
 import ComunidadPage from '@/app/comunidad/page';
 import TurismoPage from '@/app/turismo/page';
 
@@ -101,8 +101,9 @@ export default async function GeoSectionPage({ params }: GeoSectionPageProps) {
       return <CatalogoPage />;
     case 'sorteos':
       return <SorteosPage />;
+    case 'empleos':
     case 'clasificados':
-      return <ClasificadosPage />;
+      return <EmpleosPage />;
     case 'comunidad':
       return <ComunidadPage />;
     case 'turismo':

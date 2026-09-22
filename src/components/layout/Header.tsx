@@ -113,8 +113,9 @@ export function Header({ selectedCityId = 'all' }: HeaderProps) {
     { name: 'Inicio', href: getGeoUrl('') },
     { name: 'Comercios Adheridos', href: getGeoUrl('comercios') },
     { name: 'Catálogo & Ofertas', href: getGeoUrl('catalogo') },
+    { name: 'Mi Sitio Web', href: '/mi-sitio-web' },
     { name: 'Sorteos ON MÁS', href: getGeoUrl('sorteos') },
-    { name: 'Clasificados', href: getGeoUrl('clasificados') },
+    { name: 'Empleos', href: '/empleos' },
     { name: 'Comunidad', href: getGeoUrl('comunidad') },
     { name: 'Turismo', href: getGeoUrl('turismo') },
   ];
@@ -124,7 +125,7 @@ export function Header({ selectedCityId = 'all' }: HeaderProps) {
       {/* Top Banner Ribbon */}
       <div className="bg-gradient-to-r from-[#002878] via-[#0047BA] to-[#00ADB5] text-white text-xs py-1.5 px-4 text-center font-semibold flex items-center justify-center gap-2">
         <Sparkles className="w-3.5 h-3.5 text-cyan-300 animate-pulse" />
-        <span> Portal Oficial del Comercio, Turismo y Medios: Entre Ríos ON MÁS </span>
+        <span> Portal Oficial del Comercio, Turismo y Medios: ON MÁS </span>
         <span className="hidden sm:inline-block opacity-85">• Impulsando la economía del Litoral</span>
       </div>
 
@@ -136,7 +137,7 @@ export function Header({ selectedCityId = 'all' }: HeaderProps) {
             <div className="relative w-40 h-12 sm:w-48 sm:h-14">
               <Image
                 src="/logo.png"
-                alt="Entre Ríos ON MÁS Portal"
+                alt="ON MÁS Portal"
                 fill
                 priority
                 className="object-contain object-left"

@@ -15,7 +15,7 @@ export function ClientFooter() {
             <div className="relative w-48 h-14">
               <Image
                 src="/logo.png"
-                alt="Entre Ríos ON MÁS Portal"
+                alt="ON MÁS Portal"
                 fill
                 className="object-contain object-left"
               />

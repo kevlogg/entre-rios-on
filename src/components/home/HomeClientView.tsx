@@ -7,6 +7,7 @@ import { HeroSlider } from '@/components/home/HeroSlider';
 import { CityFilterBar } from '@/components/home/CityFilterBar';
 import { CategoryFilterBar } from '@/components/home/CategoryFilterBar';
 import { ProductCard } from '@/components/home/ProductCard';
+import { GoldPlanAdsBanner } from '@/components/home/GoldPlanAdsBanner';
 import { CommunityEvents } from '@/components/home/CommunityEvents';
 import { Store, MessageCircle, ShieldCheck, Zap, ArrowRight, Sparkles } from 'lucide-react';
 
@@ -106,6 +107,9 @@ export function HomeClientView({
             onSelectCategory={(catId) => setSelectedCategory(catId)}
           />
         </div>
+
+        {/* 2b. Publicidad Exclusiva Comercios Plan Oro */}
+        <GoldPlanAdsBanner />
 
         {/* 3. Comercios & Catálogo Destacado Section (Formato Tienda Compacta) */}
         <section id="catalogo" className="space-y-6">

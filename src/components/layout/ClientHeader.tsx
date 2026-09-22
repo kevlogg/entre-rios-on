@@ -112,8 +112,9 @@ export function ClientHeader() {
     { name: 'Inicio', href: getGeoUrl(''), slug: '' },
     { name: 'Comercios Adheridos', href: getGeoUrl('comercios'), slug: 'comercios' },
     { name: 'Catálogo & Ofertas', href: getGeoUrl('catalogo'), slug: 'catalogo' },
+    { name: 'Mi Sitio Web', href: '/mi-sitio-web', slug: 'mi-sitio-web' },
     { name: 'Sorteos ON MÁS', href: getGeoUrl('sorteos'), slug: 'sorteos' },
-    { name: 'Clasificados', href: getGeoUrl('clasificados'), slug: 'clasificados' },
+    { name: 'Empleos', href: '/empleos', slug: 'empleos' },
     { name: 'Comunidad', href: getGeoUrl('comunidad'), slug: 'comunidad' },
     { name: 'Turismo', href: getGeoUrl('turismo'), slug: 'turismo' },
   ];
@@ -129,7 +130,7 @@ export function ClientHeader() {
             <div className="relative w-40 h-12 sm:w-48 sm:h-14">
               <Image
                 src="/logo.png"
-                alt="Entre Ríos ON MÁS Portal"
+                alt="ON MÁS Portal"
                 fill
                 priority
                 className="object-contain object-left"

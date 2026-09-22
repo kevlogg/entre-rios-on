@@ -228,9 +228,17 @@ export const VALID_SECTION_SLUGS: Record<string, { name: string; description: st
     name: 'Sorteos ON MÁS',
     description: 'Premios, sorteos vigentes e inscripciones gratuitas.',
   },
+  'empleos': {
+    name: 'Empleos & Oportunidades',
+    description: 'Búsquedas laborales, ofertas de trabajo y postulaciones directas.',
+  },
   'clasificados': {
-    name: 'Clasificados ON',
-    description: 'Compra y venta de inmuebles, maquinaria, servicios y oportunidades.',
+    name: 'Empleos & Oportunidades',
+    description: 'Búsquedas laborales, ofertas de trabajo y postulaciones directas.',
+  },
+  'mi-sitio-web': {
+    name: 'Mi Sitio Web Propio',
+    description: 'Servicio de desarrollo de sitios web corporativos y tiendas online.',
   },
   'comunidad': {
     name: 'Comunidad & Agenda Cultural',

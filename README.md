@@ -1,4 +1,6 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# ON MÁS (onmas)
+
+Portal regional híbrido de Comercio B2B, Catálogo directo a WhatsApp, Turismo y Medios.
 
 ## Getting Started
 

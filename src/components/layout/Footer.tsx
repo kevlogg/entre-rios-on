@@ -18,7 +18,7 @@ export function Footer() {
             <div className="relative w-48 h-14 bg-white/95 rounded-2xl p-2 inline-block shadow-md">
               <Image
                 src="/logo.png"
-                alt="Entre Ríos ON MÁS Portal"
+                alt="ON MÁS Portal"
                 fill
                 className="object-contain p-1"
               />
@@ -74,7 +74,7 @@ export function Footer() {
               </p>
               <p className="flex items-center gap-2">
                 <Mail className="w-4 h-4 text-[#00E5E8]" />
-                <span>contacto@entreriosonmas.gob.ar</span>
+                <span>contacto@onmas.gob.ar</span>
               </p>
               <p className="flex items-center gap-2">
                 <MessageCircle className="w-4 h-4 text-[#25D366]" />
@@ -87,7 +87,7 @@ export function Footer() {
 
         {/* Bottom Bar */}
         <div className="pt-8 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-300 gap-4">
-          <p>© {new Date().getFullYear()} Entre Ríos ON MÁS Portal. Todos los derechos reservados.</p>
+          <p>© {new Date().getFullYear()} ON MÁS Portal. Todos los derechos reservados.</p>
           <div className="flex items-center gap-4">
             <p className="flex items-center gap-1 font-medium">
               <span>Desarrollado para potenciar la región con</span>
