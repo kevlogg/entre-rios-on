@@ -243,12 +243,12 @@ export async function registerCommerceOnSignUpAction(data: {
 }
 
 // ================================================================
-// NUEVO: Registro de usuario con tipo para ON MÁS Portal
+// NUEVO: Registro de usuario con tipo para ON MÁS Portal (Particular / Comercio / Turismo)
 // ================================================================
 export async function registerUserOnSignUpAction(data: {
   userId: string;
   email: string;
-  userType: 'particular' | 'comercio' | 'empresa_turismo' | 'agencia' | 'negocio_automotor';
+  userType: 'particular' | 'comercio' | 'turismo' | 'empresa_turismo' | 'agencia' | 'negocio_automotor';
   fullName?: string;
   phoneWhatsApp?: string;
   provinceId: string;
@@ -283,12 +283,13 @@ export async function registerUserOnSignUpAction(data: {
         console.warn('Profile upsert note:', profErr);
       }
 
-      // 2. Para comercios, empresas o agencias: crear también un registro en commerces
+      // 2. Para comercios, turismo, empresas o agencias: crear también un registro en commerces
       const needsBusiness = data.userType !== 'particular';
       if (needsBusiness && data.businessName) {
         const categoryMap: Record<string, string> = {
           comercio: 'Comercio General',
-          empresa_turismo: 'Empresa & Turismo',
+          turismo: 'Turismo & Alojamientos',
+          empresa_turismo: 'Turismo & Alojamientos',
           agencia: 'Agencia Automotriz',
           negocio_automotor: 'Negocio Automotor',
         };
@@ -309,7 +310,7 @@ export async function registerUserOnSignUpAction(data: {
           province_id: data.provinceId,
           city_id: data.cityId,
           city_name: data.cityName,
-          description: `${data.businessName} - Perfil verificado en ${data.cityName} (${data.provinceId === 'santa-fe' ? 'Santa Fe' : 'Entre Ríos'}).`,
+          description: `${data.businessName} - ${commerceCategory} en ${data.cityName} (${data.provinceId === 'santa-fe' ? 'Santa Fe' : 'Entre Ríos'}).`,
           phone_whatsapp: data.phoneWhatsApp || '',
           address: `${data.cityName}, Argentina`,
           logo_url: '/images/city-rosario.jpg',
@@ -329,6 +330,7 @@ export async function registerUserOnSignUpAction(data: {
         try {
           revalidatePath('/admin');
           revalidatePath('/comercios');
+          revalidatePath('/turismo');
         } catch {}
 
         return { success: true, message: 'Registro completado con éxito', slug: finalSlug };

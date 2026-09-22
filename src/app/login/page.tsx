@@ -4,17 +4,17 @@ import React, { useState, Suspense } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
-import { Mail, Lock, ArrowRight, Sparkles, MapPin, KeyRound, User, Store, Building2, CheckCircle2 } from 'lucide-react';
+import { Mail, Lock, ArrowRight, Sparkles, MapPin, KeyRound, User, Store, Palmtree, CheckCircle2 } from 'lucide-react';
 import { getCitiesByProvince } from '@/lib/constants/locations';
 
-type UserType = 'particular' | 'comercio' | 'empresa_turismo';
+type UserType = 'particular' | 'comercio' | 'turismo';
 
 const USER_TYPES: { id: UserType; icon: React.ReactNode; title: string; subtitle: string; planBadge: string; color: string; borderColor: string; bgColor: string }[] = [
   {
     id: 'particular',
     icon: <User className="w-7 h-7" />,
     title: 'Vecino / Usuario Particular',
-    subtitle: 'Explorá productos, participá en sorteos y contactá comercios',
+    subtitle: 'Explorá productos, participá en sorteos y contactá por WhatsApp',
     planBadge: 'Acceso Gratuito',
     color: 'text-[#00ADB5]',
     borderColor: 'border-[#00ADB5]',
@@ -24,21 +24,21 @@ const USER_TYPES: { id: UserType; icon: React.ReactNode; title: string; subtitle
     id: 'comercio',
     icon: <Store className="w-7 h-7" />,
     title: 'Comercio / Emprendimiento',
-    subtitle: 'Publicá tu catálogo, vendé por WhatsApp y posicioná tu local',
-    planBadge: 'Plan Plata • Bronce',
+    subtitle: 'Publicá tu catálogo, vendé por WhatsApp y posicioná tu negocio',
+    planBadge: 'Bronce • Plata • Oro',
     color: 'text-white',
     borderColor: 'border-[#0047BA]',
     bgColor: 'bg-[#002878]',
   },
   {
-    id: 'empresa_turismo',
-    icon: <Building2 className="w-7 h-7" />,
-    title: 'Empresa, Servicios o Turismo',
-    subtitle: 'Gestioná posadas, parques, avisos B2B, empleos y presencia VIP',
-    planBadge: 'Plan Oro • Empresa',
-    color: 'text-amber-400',
-    borderColor: 'border-amber-500',
-    bgColor: 'bg-[#1A2332]',
+    id: 'turismo',
+    icon: <Palmtree className="w-7 h-7" />,
+    title: 'Turismo / Alojamientos & Complejos',
+    subtitle: 'Publicá posadas, complejos termales, paseos y servicios turísticos',
+    planBadge: 'Bronce • Plata • Oro',
+    color: 'text-emerald-300',
+    borderColor: 'border-emerald-600',
+    bgColor: 'bg-[#064e3b]',
   },
 ];
 
@@ -49,14 +49,24 @@ const COMMERCE_CATEGORIES = [
   'Hogar, Muebles & Decoración',
   'Artesanías & Productos Regionales',
   'Tecnología & Electrodomésticos',
-  'Turismo, Termas & Posadas',
   'Construcción & Ferretería',
   'Automotor, Motos & Repuestos',
   'Salud, Belleza & Bienestar',
   'Agro, Campo & Alimentos',
   'Herramientas e Industria',
   'Servicios Profesionales B2B',
-  'Otro Rubro',
+  'Otro Rubro Comercial',
+];
+
+const TURISMO_CATEGORIES = [
+  'Posadas, Cabañas & Hosterías',
+  'Hoteles & Spas Termales',
+  'Paseos Náuticos & Excursiones',
+  'Gastronomía Turística & Barranca',
+  'Turismo Rural & Estancias',
+  'Recreación, Playas & Parques',
+  'Guías de Turismo & Experiencias',
+  'Otro Servicio Turístico',
 ];
 
 function LoginFormContent() {
@@ -96,6 +106,11 @@ function LoginFormContent() {
 
   const handleSelectUserType = (type: UserType) => {
     setUserType(type);
+    if (type === 'turismo') {
+      setBusinessCategory(TURISMO_CATEGORIES[0]);
+    } else {
+      setBusinessCategory(COMMERCE_CATEGORIES[0]);
+    }
     setSignupStep('form');
   };
 
@@ -122,7 +137,7 @@ function LoginFormContent() {
         const cityObj = availableCities.find((c) => c.name === cityName) || availableCities[0];
         const fullName = `${firstName} ${lastName}`.trim();
 
-        const needsBusiness = userType === 'comercio' || userType === 'empresa_turismo';
+        const needsBusiness = userType === 'comercio' || userType === 'turismo';
         const computedRole = needsBusiness ? 'MERCHANT_ADMIN' : 'PUBLIC_USER';
         const computedRedirect = needsBusiness ? '/admin' : (redirectTo === '/admin' ? '/' : redirectTo);
 
@@ -220,7 +235,7 @@ function LoginFormContent() {
   };
 
   const selectedTypeConfig = USER_TYPES.find((t) => t.id === userType);
-  const needsBusiness = userType === 'comercio' || userType === 'empresa_turismo';
+  const needsBusiness = userType === 'comercio' || userType === 'turismo';
 
   return (
     <div className="bg-white/95 backdrop-blur-xl py-8 px-6 sm:px-10 shadow-2xl rounded-3xl border border-white/40 space-y-6">
@@ -337,18 +352,18 @@ function LoginFormContent() {
                 </div>
               </div>
 
-              {/* Nombre comercial (solo comercios y empresas) */}
+              {/* Nombre comercial (comercios o turismo) */}
               {needsBusiness && (
                 <>
                   <div>
                     <label className="block text-xs font-bold text-slate-700 mb-1">
-                      {userType === 'comercio' ? 'Nombre del Comercio / Emprendimiento *' : 'Nombre de la Empresa / Complejo *'}
+                      {userType === 'comercio' ? 'Nombre del Comercio / Emprendimiento *' : 'Nombre de la Posada / Complejo Turístico *'}
                     </label>
                     <input
                       type="text"
                       required
                       autoComplete="organization"
-                      placeholder={userType === 'comercio' ? 'Ej. Alfarería Delta' : 'Ej. Posada & Termas del Sol'}
+                      placeholder={userType === 'comercio' ? 'Ej. Alfarería Delta' : 'Ej. Posada & Cabañas del Sol'}
                       value={businessName}
                       onChange={(e) => setBusinessName(e.target.value)}
                       className="w-full px-4 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-xs text-slate-800 focus:ring-2 focus:ring-[#00ADB5] focus:bg-white disabled:bg-slate-100"
@@ -356,13 +371,15 @@ function LoginFormContent() {
                   </div>
 
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1">Rubro Comercial / Sector *</label>
+                    <label className="block text-xs font-bold text-slate-700 mb-1">
+                      {userType === 'comercio' ? 'Rubro Comercial *' : 'Rubro / Servicio Turístico *'}
+                    </label>
                     <select
                       value={businessCategory}
                       onChange={(e) => setBusinessCategory(e.target.value)}
                       className="w-full px-3 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-xs font-bold text-slate-800 focus:ring-2 focus:ring-[#00ADB5] disabled:bg-slate-100"
                     >
-                      {COMMERCE_CATEGORIES.map((cat) => (
+                      {(userType === 'turismo' ? TURISMO_CATEGORIES : COMMERCE_CATEGORIES).map((cat) => (
                         <option key={cat} value={cat}>{cat}</option>
                       ))}
                     </select>
@@ -637,3 +654,4 @@ export default function LoginPage() {
     </div>
   );
 }
+
