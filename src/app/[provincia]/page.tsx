@@ -5,6 +5,7 @@ import { ClientHeader } from '@/components/layout/ClientHeader';
 import { ClientHomeContainer } from '@/components/client-portal/ClientHomeContainer';
 import { ClientFooter } from '@/components/layout/ClientFooter';
 import { getProvinceBySlug, PROVINCES } from '@/lib/constants/locations';
+import { getFeaturedProducts } from '@/lib/dal/portal';
 
 export const revalidate = 60;
 
@@ -73,10 +74,12 @@ export default async function ProvincePage({ params }: ProvincePageProps) {
     notFound();
   }
 
+  const products = await getFeaturedProducts(undefined, undefined, prov.id);
+
   return (
     <div className="min-h-screen flex flex-col bg-[#f8fafc]">
       <ClientHeader />
-      <ClientHomeContainer />
+      <ClientHomeContainer provinceId={prov.id} initialProducts={products} />
       <ClientFooter />
     </div>
   );

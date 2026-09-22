@@ -258,7 +258,7 @@ export function Header({ selectedCityId = 'all' }: HeaderProps) {
             </Link>
 
             <Link
-              href="#sumar-comercio"
+              href="/login?mode=signup&type=negocio_automotor"
               className="flex items-center gap-1.5 bg-gradient-to-r from-[#00ADB5] to-[#0047BA] hover:from-[#007C8A] hover:to-[#002878] text-white px-3.5 py-2 rounded-xl text-xs font-extrabold shadow-md transition-all active:scale-95 cursor-pointer"
             >
               <Store className="w-3.5 h-3.5 text-white" />

@@ -8,6 +8,7 @@ import { MapPin, CheckCircle, MessageCircle, ArrowLeft, Store, ShieldCheck, Tag 
 import { DynamicLayoutWrapper } from '@/components/layout/DynamicLayoutWrapper';
 import { JsonLd } from '@/components/common/JsonLd';
 import { ProfileViewTracker } from '@/components/common/ProfileViewTracker';
+import { FavoriteButton } from '@/components/common/FavoriteButton';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -135,16 +136,19 @@ export default async function CommerceDetailPage({ params }: PageProps) {
                 </div>
               </div>
 
-              {/* Direct WhatsApp CTA */}
-              <a
-                href={trackingUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="bg-[#25D366] hover:bg-[#20ba5a] text-white px-6 py-3 rounded-2xl font-extrabold text-sm shadow-md flex items-center justify-center gap-2 transition-transform active:scale-95"
-              >
-                <MessageCircle className="w-5 h-5 fill-current" />
-                <span>Contactar por WhatsApp</span>
-              </a>
+              {/* Direct WhatsApp CTA & Favorite */}
+              <div className="flex items-center gap-3">
+                <FavoriteButton itemId={commerce.id} itemType="agencia" itemTitle={commerce.name} />
+                <a
+                  href={trackingUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="bg-[#25D366] hover:bg-[#20ba5a] text-white px-6 py-3 rounded-2xl font-extrabold text-sm shadow-md flex items-center justify-center gap-2 transition-transform active:scale-95"
+                >
+                  <MessageCircle className="w-5 h-5 fill-current" />
+                  <span>Contactar por WhatsApp</span>
+                </a>
+              </div>
             </div>
 
             {/* Description & Metadata */}

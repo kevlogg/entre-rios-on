@@ -9,12 +9,14 @@ import { FeaturedOffersGrid } from '@/components/client-portal/FeaturedOffersGri
 import { CityExploreBar } from '@/components/client-portal/CityExploreBar';
 import { BentoRowTwo } from '@/components/client-portal/BentoRowTwo';
 import { getProvinceBySlug } from '@/lib/constants/locations';
+import { Product } from '@/types';
 
 interface ClientHomeContainerProps {
   provinceId?: string;
+  initialProducts?: Product[];
 }
 
-export function ClientHomeContainer({ provinceId }: ClientHomeContainerProps) {
+export function ClientHomeContainer({ provinceId, initialProducts = [] }: ClientHomeContainerProps) {
   const pathname = usePathname();
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [activeProvince, setActiveProvince] = useState<string>(provinceId || 'santa-fe');
@@ -45,7 +47,7 @@ export function ClientHomeContainer({ provinceId }: ClientHomeContainerProps) {
       {/* Hero panorámico según provincia activa (Santa Fe por defecto) */}
       <ClientHeroBanner provinceId={activeProvince} />
 
-      {/* Barra de 12 categorías por íconos */}
+      {/* Barra de categorías en grid 2x4 */}
       <CategoryIconBar
         selectedCategory={selectedCategory}
         onSelectCategory={(catId) => setSelectedCategory(catId)}
@@ -54,8 +56,11 @@ export function ClientHomeContainer({ provinceId }: ClientHomeContainerProps) {
       {/* Primer Bento: Comercio Digital, Comunidad ON, Sorteos ON */}
       <BentoRowOne />
 
-      {/* Ofertas e ítems filtrados por categoría */}
-      <FeaturedOffersGrid selectedCategory={selectedCategory} />
+      {/* Ofertas e ítems reales de la base de datos Supabase / DAL */}
+      <FeaturedOffersGrid
+        products={initialProducts}
+        selectedCategory={selectedCategory}
+      />
 
       {/* Explorá por ciudad (Carrusel dinámico con ciudades de la provincia activa) */}
       <CityExploreBar provinceId={activeProvince} />

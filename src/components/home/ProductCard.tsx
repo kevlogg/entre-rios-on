@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { MapPin, CheckCircle, MessageCircle, Store, Tag } from 'lucide-react';
 import { Product } from '@/types';
 import { trackWhatsAppClick } from '@/lib/analytics/events';
+import { FavoriteButton } from '@/components/common/FavoriteButton';
 
 interface ProductCardProps {
   product: Product;
@@ -47,17 +48,19 @@ export function ProductCard({ product }: ProductCardProps) {
     : 'citrus-dulces-del-uruguay';
 
   return (
-    <article className="group bg-white rounded-2xl overflow-hidden border border-slate-200 shadow-2xs hover:shadow-lg transition-all duration-300 flex flex-col justify-between hover:-translate-y-0.5">
+    <article className="group bg-white rounded-2xl overflow-hidden border border-slate-200 shadow-2xs hover:shadow-lg transition-all duration-300 flex flex-col justify-between hover:-translate-y-0.5 relative">
       <div>
         {/* Product Image Container */}
-        <Link href={`/producto/${product.slug}`} className="block relative h-40 sm:h-44 w-full overflow-hidden bg-slate-100">
-          <Image
-            src={product.imageUrl}
-            alt={product.title}
-            fill
-            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
-            className="object-cover object-center group-hover:scale-105 transition-transform duration-500"
-          />
+        <div className="relative h-40 sm:h-44 w-full overflow-hidden bg-slate-100">
+          <Link href={`/producto/${product.slug}`} className="block w-full h-full">
+            <Image
+              src={product.imageUrl}
+              alt={product.title}
+              fill
+              sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+              className="object-cover object-center group-hover:scale-105 transition-transform duration-500"
+            />
+          </Link>
 
           {/* City & Category Badges */}
           <div className="absolute top-2 left-2 flex flex-wrap items-center gap-1 z-10">
@@ -67,13 +70,16 @@ export function ProductCard({ product }: ProductCardProps) {
             </span>
           </div>
 
-          {product.isFeatured && (
-            <div className="absolute top-2 right-2 bg-amber-500 text-white text-[9px] font-extrabold uppercase px-1.5 py-0.5 rounded-md shadow-xs flex items-center gap-0.5">
-              <Tag className="w-2.5 h-2.5" />
-              Destacado
-            </div>
-          )}
-        </Link>
+          <div className="absolute top-2 right-2 z-20 flex items-center gap-1.5">
+            {product.isFeatured && (
+              <span className="bg-amber-500 text-white text-[9px] font-extrabold uppercase px-1.5 py-0.5 rounded-md shadow-xs flex items-center gap-0.5">
+                <Tag className="w-2.5 h-2.5" />
+                Destacado
+              </span>
+            )}
+            <FavoriteButton itemId={product.id} itemType="auto" itemTitle={product.title} />
+          </div>
+        </div>
 
         {/* Content Details */}
         <div className="p-3.5 space-y-2">

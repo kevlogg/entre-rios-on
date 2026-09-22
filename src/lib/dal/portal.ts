@@ -741,7 +741,7 @@ export async function getHeroSlides(provinceId?: string): Promise<BannerSlide[]>
   return [...HERO_SLIDES_SANTA_FE_MOCK, ...HERO_SLIDES_MOCK];
 }
 
-export async function getFeaturedProducts(cityId?: string, categoryId?: string): Promise<Product[]> {
+export async function getFeaturedProducts(cityId?: string, categoryId?: string, provinceId?: string): Promise<Product[]> {
   if (isSupabaseConfigured()) {
     try {
       const { createPublicClient } = await import('@/lib/supabase/public');
@@ -752,6 +752,9 @@ export async function getFeaturedProducts(cityId?: string, categoryId?: string):
       }
       if (categoryId && categoryId !== 'all') {
         query = query.eq('category_id', categoryId);
+      }
+      if (provinceId && provinceId !== 'all') {
+        query = query.eq('province_id', provinceId);
       }
       const { data, error } = await query;
       if (!error && data && data.length > 0) {
@@ -765,6 +768,8 @@ export async function getFeaturedProducts(cityId?: string, categoryId?: string):
           commerceName: p.commerce_name,
           cityId: p.city_id,
           cityName: p.city_name,
+          provinceId: p.province_id,
+          provinceName: p.province_name,
           imageUrl: p.image_url,
           category: p.category,
           categoryId: p.category_id,
@@ -781,6 +786,9 @@ export async function getFeaturedProducts(cityId?: string, categoryId?: string):
 
   await simulateNetworkDelay();
   let list = PRODUCTS_MOCK;
+  if (provinceId && provinceId !== 'all') {
+    list = list.filter((p) => !p.provinceId || p.provinceId === provinceId);
+  }
   if (cityId && cityId !== 'all') {
     list = list.filter((product) => product.cityId.toLowerCase() === cityId.toLowerCase());
   }

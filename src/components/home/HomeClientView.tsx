@@ -195,16 +195,14 @@ export function HomeClientView({
             </div>
 
             <div className="lg:col-span-4 flex justify-start lg:justify-end">
-              <a
-                href="https://wa.me/5493434567890?text=Hola%20equipo%20Entre%20R%C3%ADos%20ON%20M%C3%81S,%20quiero%20sumar%20mi%20comercio%20al%20directorio."
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-full sm:w-auto bg-gradient-to-r from-[#00ADB5] to-[#007C8A] hover:from-[#00E5E8] hover:to-[#00ADB5] text-white px-8 py-4 rounded-2xl font-extrabold text-base shadow-xl flex items-center justify-center gap-3 transition-transform active:scale-95 text-center"
+              <Link
+                href="/login?mode=signup&type=negocio_automotor"
+                className="w-full sm:w-auto bg-gradient-to-r from-[#00ADB5] to-[#007C8A] hover:from-[#00E5E8] hover:to-[#00ADB5] text-white px-8 py-4 rounded-2xl font-extrabold text-base shadow-xl flex items-center justify-center gap-3 transition-transform active:scale-95 text-center cursor-pointer"
               >
-                <MessageCircle className="w-5 h-5 fill-current" />
+                <Store className="w-5 h-5" />
                 <span>Sumar Mi Negocio Ahora</span>
                 <ArrowRight className="w-5 h-5" />
-              </a>
+              </Link>
             </div>
           </div>
         </section>

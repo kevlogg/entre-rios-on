@@ -30,7 +30,7 @@ export function Footer() {
 
             <div className="flex items-center gap-3 pt-2">
               <Link
-                href="#sumar-comercio"
+                href="/login?mode=signup&type=negocio_automotor"
                 className="bg-gradient-to-r from-[#00E5E8] to-[#00ADB5] hover:from-[#00ADB5] hover:to-[#007C8A] text-slate-950 font-black text-xs px-5 py-2.5 rounded-xl transition-all inline-flex items-center gap-1.5 shadow-md cursor-pointer"
               >
                 <Store className="w-3.5 h-3.5" />

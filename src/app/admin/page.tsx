@@ -24,6 +24,9 @@ export default function AdminPage() {
     'Hola, vi su negocio en el portal ON MÁS y me gustaría realizar una consulta.'
   );
 
+  const [userType, setUserType] = useState<'particular' | 'agencia' | 'negocio_automotor'>('agencia');
+  const [isSubscriptionActive, setIsSubscriptionActive] = useState<boolean>(true);
+
   React.useEffect(() => {
     async function loadRealData() {
       try {
@@ -37,6 +40,9 @@ export default function AdminPage() {
           router.push('/login');
           return;
         }
+
+        const rawType = (user.user_metadata?.user_type || 'agencia') as 'particular' | 'agencia' | 'negocio_automotor';
+        setUserType(rawType);
 
         let targetCommerce: any = null;
 
@@ -60,7 +66,6 @@ export default function AdminPage() {
             'Mi Empresa Comercial';
           const cleanSlug = merchantName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || 'comercio';
 
-          // Intentar vincular por slug si fue creado durante el registro sin owner_id asignado
           const { data: existingUnlinked } = await supabase
             .from('commerces')
             .select('*')
@@ -84,23 +89,22 @@ export default function AdminPage() {
           }
 
           if (!targetCommerce) {
-            // Intentar crear registro nuevo en Supabase
-            const { data: createdCommerce, error: insertErr } = await supabase
+            const { data: createdCommerce } = await supabase
               .from('commerces')
               .insert({
                 name: merchantName,
                 slug: cleanSlug,
-                category: 'Comercio General',
+                category: rawType === 'negocio_automotor' ? (user.user_metadata?.business_category || 'Negocio Automotor') : (rawType === 'agencia' ? 'Agencia Automotriz' : 'Particular'),
                 province_id: user.user_metadata?.province_id || 'santa-fe',
                 city_id: user.user_metadata?.city_id || 'rosario',
                 city_name: user.user_metadata?.city_name || 'Rosario',
-                description: `Comercio adherido al portal ON MÁS.`,
+                description: `Perfil registrado en el portal ON MÁS.`,
                 phone_whatsapp: user.user_metadata?.phone_whatsapp || '',
                 address: '',
                 logo_url: '/images/city-rosario.jpg',
                 cover_url: '/images/city-rosario.jpg',
                 is_verified: true,
-                is_subscription_active: true,
+                is_subscription_active: false,
                 owner_id: user.id,
               })
               .select()
@@ -108,33 +112,6 @@ export default function AdminPage() {
 
             if (createdCommerce) {
               targetCommerce = createdCommerce;
-            } else if (insertErr) {
-              // Si hubo conflicto de clave única por slug, reintentar con sufijo de ID de usuario
-              const fallbackSlugWithId = `${cleanSlug}-${user.id.slice(0, 6)}`;
-              const { data: retryCommerce } = await supabase
-                .from('commerces')
-                .insert({
-                  name: merchantName,
-                  slug: fallbackSlugWithId,
-                  category: 'Comercio General',
-                  province_id: user.user_metadata?.province_id || 'santa-fe',
-                  city_id: user.user_metadata?.city_id || 'rosario',
-                  city_name: user.user_metadata?.city_name || 'Rosario',
-                  description: `Comercio adherido al portal ON MÁS.`,
-                  phone_whatsapp: user.user_metadata?.phone_whatsapp || '',
-                  address: '',
-                  logo_url: '/images/city-rosario.jpg',
-                  cover_url: '/images/city-rosario.jpg',
-                  is_verified: true,
-                  is_subscription_active: true,
-                  owner_id: user.id,
-                })
-                .select()
-                .single();
-
-              if (retryCommerce) {
-                targetCommerce = retryCommerce;
-              }
             }
           }
         }
@@ -150,6 +127,9 @@ export default function AdminPage() {
         const cityName = targetCommerce?.city_name || user.user_metadata?.city_name || 'Rosario';
         const cleanSlug = merchantName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || 'comercio';
 
+        const hasActiveSub = targetCommerce?.is_subscription_active ?? (user.user_metadata?.is_subscription_active ?? false);
+        setIsSubscriptionActive(Boolean(hasActiveSub));
+
         const resolvedCommerce: Commerce = {
           id: targetCommerce?.id || `comm-${user.id}`,
           name: targetCommerce?.name || user.user_metadata?.commerce_name || merchantName,
@@ -163,7 +143,7 @@ export default function AdminPage() {
           rating: Number(targetCommerce?.rating || 5.0),
           reviewCount: targetCommerce?.review_count || 1,
           isVerified: targetCommerce?.is_verified ?? true,
-          isSubscriptionActive: targetCommerce?.is_subscription_active ?? true,
+          isSubscriptionActive: Boolean(hasActiveSub),
           logoUrl: targetCommerce?.logo_url || user.user_metadata?.logo_url || '/images/city-rosario.jpg',
           coverUrl: targetCommerce?.cover_url || user.user_metadata?.cover_url || '/images/city-rosario.jpg',
           phoneWhatsApp: targetCommerce?.phone_whatsapp || user.user_metadata?.phone_whatsapp || '',
@@ -280,6 +260,39 @@ export default function AdminPage() {
           {/* Main Tab Content */}
           <div className="flex-1 space-y-8">
 
+            {/* CARTEL DE INACTIVIDAD HASTA CONTRATAR PLAN */}
+            {!isSubscriptionActive && (
+              <div className="bg-gradient-to-r from-amber-500/10 via-purple-900/15 to-amber-500/10 border-2 border-amber-400 rounded-3xl p-6 sm:p-8 space-y-6 shadow-lg relative overflow-hidden">
+                <div className="flex flex-col sm:flex-row items-start gap-4">
+                  <div className="p-3 bg-amber-500 text-slate-950 rounded-2xl shrink-0 font-black text-2xl shadow-md">
+                    ⚠️
+                  </div>
+                  <div className="space-y-1 flex-1">
+                    <div className="inline-flex items-center gap-1.5 bg-amber-500/20 border border-amber-500/40 text-amber-800 text-[11px] font-black px-3 py-1 rounded-full uppercase tracking-wider">
+                      <span>Acción Requerida • Cuenta Inactiva</span>
+                    </div>
+                    <h2 className="text-xl sm:text-2xl font-black text-slate-900 mt-1">
+                      Tu cuenta está registrada pero NO ESTÁ VISIBLE NI ACTIVA en la plataforma
+                    </h2>
+                    <p className="text-xs sm:text-sm text-slate-600 font-medium leading-relaxed">
+                      Hasta que no contrates un plan no estarás visible ni activo en el portal automotor. Para comenzar a publicar y figurar en las búsquedas, elegí el plan adecuado para tu perfil de <strong className="uppercase text-purple-800 font-black">{userType === 'particular' ? 'Particular' : userType === 'agencia' ? 'Agencia / Concesionaria' : 'Negocio Automotor'}</strong>:
+                    </p>
+                  </div>
+                </div>
+
+                <div className="pt-2">
+                  <SubscriptionPlans
+                    commerceId={commerce.id}
+                    userType={userType}
+                    onPlanActivated={(planName) => {
+                      setCommerce({ ...commerce, isSubscriptionActive: true });
+                      setIsSubscriptionActive(true);
+                    }}
+                  />
+                </div>
+              </div>
+            )}
+
             {/* TAB 1: DASHBOARD & KPIS */}
             {activeTab === 'dashboard' && (
               <div className="space-y-8 animate-in fade-in duration-200">
@@ -288,13 +301,15 @@ export default function AdminPage() {
                   <div className="space-y-2">
                     <div className="inline-flex items-center gap-1.5 bg-white/20 text-white text-xs font-extrabold px-3 py-1 rounded-full uppercase">
                       <Sparkles className="w-3.5 h-3.5" />
-                      <span>Panel B2B • Comercio Activo</span>
+                      <span>Panel • {isSubscriptionActive ? 'Perfil Activo' : 'Perfil Pendiente de Plan'}</span>
                     </div>
                     <h1 className="text-2xl sm:text-4xl font-extrabold leading-tight">
                       ¡Hola, {commerce.name}!
                     </h1>
                     <p className="text-xs sm:text-sm text-slate-100 font-medium max-w-xl">
-                      Tu perfil en {commerce.cityName} se encuentra activo y recibiendo consultas directas en WhatsApp sin intermediarios ni comisiones.
+                      {isSubscriptionActive 
+                        ? `Tu perfil de ${userType} en ${commerce.cityName} se encuentra activo y listo para recibir consultas.`
+                        : `Contratá tu plan para activar tu presencia en ${commerce.cityName}.`}
                     </p>
                   </div>
 
@@ -348,7 +363,14 @@ export default function AdminPage() {
 
             {/* TAB 4: SUBSCRIPTION */}
             {activeTab === 'subscription' && (
-              <SubscriptionPlans commerceId={commerce.id} />
+              <SubscriptionPlans
+                commerceId={commerce.id}
+                userType={userType}
+                onPlanActivated={(planName) => {
+                  setCommerce({ ...commerce, isSubscriptionActive: true });
+                  setIsSubscriptionActive(true);
+                }}
+              />
             )}
 
           </div>

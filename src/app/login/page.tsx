@@ -9,33 +9,36 @@ import { getCitiesByProvince } from '@/lib/constants/locations';
 
 type UserType = 'particular' | 'agencia' | 'negocio_automotor';
 
-const USER_TYPES: { id: UserType; icon: React.ReactNode; title: string; subtitle: string; color: string; borderColor: string; bgColor: string }[] = [
+const USER_TYPES: { id: UserType; icon: React.ReactNode; title: string; subtitle: string; planBadge: string; color: string; borderColor: string; bgColor: string }[] = [
   {
     id: 'particular',
     icon: <Car className="w-7 h-7" />,
     title: 'Particular',
-    subtitle: 'Quiero publicar o comprar un vehículo',
+    subtitle: 'Publicá tu vehículo particular',
+    planBadge: '1 auto x 30 días ($15.000)',
     color: 'text-blue-600',
     borderColor: 'border-blue-500',
-    bgColor: 'bg-blue-50',
+    bgColor: 'bg-blue-50/80',
   },
   {
     id: 'agencia',
     icon: <Building2 className="w-7 h-7" />,
     title: 'Agencia / Concesionaria',
-    subtitle: 'Tengo un negocio de venta de autos',
-    color: 'text-violet-600',
-    borderColor: 'border-violet-500',
-    bgColor: 'bg-violet-50',
+    subtitle: 'Venta profesional de autos y flota',
+    planBadge: 'Base $99.000 (30 autos) • Pro $199.000 (Ilimitado)',
+    color: 'text-purple-200',
+    borderColor: 'border-purple-600',
+    bgColor: 'bg-[#2A1B4E]',
   },
   {
     id: 'negocio_automotor',
     icon: <Wrench className="w-7 h-7" />,
-    title: 'Negocio Automotor',
-    subtitle: 'Taller, repuestos, seguros, lavado…',
-    color: 'text-emerald-600',
-    borderColor: 'border-emerald-500',
-    bgColor: 'bg-emerald-50',
+    title: 'Negocio del Mundo Automotor',
+    subtitle: 'Taller, repuestos, seguros, lavadero…',
+    planBadge: 'Base $49.000 • Pro $99.000',
+    color: 'text-emerald-400',
+    borderColor: 'border-emerald-600',
+    bgColor: 'bg-[#0F2A28]',
   },
 ];
 
@@ -56,10 +59,12 @@ function LoginFormContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const redirectTo = searchParams.get('redirectTo') || '/admin';
+  const initialMode = (searchParams.get('mode') as 'login' | 'signup' | 'forgot') || 'login';
+  const initialType = (searchParams.get('type') as UserType) || 'particular';
 
-  const [mode, setMode] = useState<'login' | 'signup' | 'forgot'>('login');
-  const [signupStep, setSignupStep] = useState<'type' | 'form'>('type');
-  const [userType, setUserType] = useState<UserType>('particular');
+  const [mode, setMode] = useState<'login' | 'signup' | 'forgot'>(initialMode);
+  const [signupStep, setSignupStep] = useState<'type' | 'form'>(searchParams.get('type') ? 'form' : 'type');
+  const [userType, setUserType] = useState<UserType>(initialType);
 
   // Auth Form State
   const [firstName, setFirstName] = useState('');
@@ -254,17 +259,21 @@ function LoginFormContent() {
                 key={type.id}
                 type="button"
                 onClick={() => handleSelectUserType(type.id)}
-                className={`w-full flex items-center gap-4 p-4 rounded-2xl border-2 transition-all duration-200 text-left group hover:shadow-md cursor-pointer
-                  border-slate-200 hover:${type.borderColor} hover:${type.bgColor}`}
+                className={`w-full flex items-center gap-4 p-4 rounded-2xl border-2 transition-all duration-200 text-left group hover:shadow-lg cursor-pointer ${type.bgColor} ${type.borderColor}`}
               >
-                <div className={`${type.color} transition-transform group-hover:scale-110`}>
+                <div className={`${type.color} transition-transform group-hover:scale-110 shrink-0`}>
                   {type.icon}
                 </div>
                 <div className="flex-1">
-                  <p className={`text-sm font-black ${type.color}`}>{type.title}</p>
-                  <p className="text-xs text-slate-500 mt-0.5">{type.subtitle}</p>
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+                    <p className={`text-sm font-black ${type.id === 'particular' ? 'text-slate-900' : 'text-white'}`}>{type.title}</p>
+                    <span className="text-[10px] font-extrabold px-2.5 py-0.5 rounded-full bg-white/20 text-slate-100 border border-white/20 w-fit">
+                      {type.planBadge}
+                    </span>
+                  </div>
+                  <p className={`text-xs mt-1 ${type.id === 'particular' ? 'text-slate-600' : 'text-slate-200'}`}>{type.subtitle}</p>
                 </div>
-                <ArrowRight className="w-4 h-4 text-slate-300 group-hover:text-slate-500 transition-colors" />
+                <ArrowRight className={`w-4 h-4 transition-transform group-hover:translate-x-1 ${type.id === 'particular' ? 'text-slate-400' : 'text-slate-200'}`} />
               </button>
             ))}
           </div>
