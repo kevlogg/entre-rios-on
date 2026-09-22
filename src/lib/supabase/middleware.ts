@@ -39,8 +39,23 @@ export async function updateSession(request: NextRequest) {
 
   const pathname = request.nextUrl.pathname;
 
-  // Protege las rutas de /admin y /superadmin si no hay sesión activa
-  if (!user && (pathname.startsWith('/admin') || pathname.startsWith('/superadmin'))) {
+  // 1. Rutas de SuperAdmin: Acceso exclusivo a /superadmin/login
+  if (pathname.startsWith('/superadmin')) {
+    if (pathname === '/superadmin/login') {
+      return supabaseResponse;
+    }
+    // Redirige al login EXCLUSIVO de SuperAdmin si no tiene cookie activa
+    const hasSuperAdminCookie = request.cookies.has('onmas_superadmin_session');
+    if (!hasSuperAdminCookie) {
+      const url = request.nextUrl.clone();
+      url.pathname = '/superadmin/login';
+      return NextResponse.redirect(url);
+    }
+    return supabaseResponse;
+  }
+
+  // 2. Protege las rutas de /admin (Comercios/B2B) si no hay usuario activo
+  if (!user && pathname.startsWith('/admin')) {
     const url = request.nextUrl.clone();
     url.pathname = '/login';
     url.searchParams.set('redirectTo', pathname);

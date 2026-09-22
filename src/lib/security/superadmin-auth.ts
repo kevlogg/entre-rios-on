@@ -61,6 +61,7 @@ export function loginSuperAdmin(email: string, password: string): { success: boo
 
   if (typeof window !== 'undefined') {
     localStorage.setItem(SUPERADMIN_SESSION_KEY, JSON.stringify(user));
+    document.cookie = 'onmas_superadmin_session=true; path=/; max-age=86400';
   }
 
   return { success: true, message: 'Acceso concedido', user };
@@ -69,5 +70,6 @@ export function loginSuperAdmin(email: string, password: string): { success: boo
 export function logoutSuperAdmin(): void {
   if (typeof window !== 'undefined') {
     localStorage.removeItem(SUPERADMIN_SESSION_KEY);
+    document.cookie = 'onmas_superadmin_session=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
   }
 }
