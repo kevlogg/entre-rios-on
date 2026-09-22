@@ -4,149 +4,62 @@ import React, { useState, useEffect, useCallback } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { ArrowRight, ChevronLeft, ChevronRight, MapPin } from 'lucide-react';
-
-interface HeroSlide {
-  id: string;
-  titleLine1: string;
-  titleLine2: string;
-  subtitle: string;
-  caption: string;
-  handwriting: string;
-  image: string;
-  location: string;
-  ctaText: string;
-  ctaHref: string;
-}
-
-const SANTA_FE_SLIDES: HeroSlide[] = [
-  {
-    id: 'rosario',
-    titleLine1: 'SANTA FE,',
-    titleLine2: 'SIEMPRE ON MÁS',
-    subtitle: 'Comprá. Vendé. Publicá. Conectá.',
-    caption: 'Toda la provincia en un solo lugar.',
-    handwriting: '“Monumento a la Bandera & Polo Comercial Litoraleño”',
-    image: '/images/hero-rosario.jpg',
-    location: 'Rosario & Río Paraná, Santa Fe',
-    ctaText: 'Explorá Comercios de Rosario',
-    ctaHref: '/santa-fe/rosario',
-  },
-  {
-    id: 'santa-fe-capital',
-    titleLine1: 'SANTA FE CAPITAL',
-    titleLine2: 'COSTANERA SETÚBAL',
-    subtitle: 'Gastronomía, Historia & Polo Universitario',
-    caption: 'Conectando locales, servicios y emprendedores santafesinos por WhatsApp.',
-    handwriting: '“Tradición de alfajores y cerveza tirada al atardecer”',
-    image: '/images/city-santa-fe-capital.jpg',
-    location: 'Santa Fe Capital',
-    ctaText: 'Ver Productos de Santa Fe',
-    ctaHref: '/santa-fe/santa-fe-capital',
-  },
-  {
-    id: 'rafaela',
-    titleLine1: 'RAFAELA &',
-    titleLine2: 'CUENCA LÁCTEA',
-    subtitle: 'Potencia Agroindustrial & Diseño Regional',
-    caption: 'Quesos de autor, fiambres artesanales y carpintería maciza de vanguardia.',
-    handwriting: '“Orgullo productivo del oeste santafesino”',
-    image: '/images/city-rafaela.jpg',
-    location: 'Rafaela, Santa Fe',
-    ctaText: 'Ver Productos de Rafaela',
-    ctaHref: '/santa-fe/rafaela',
-  },
-  {
-    id: 'reconquista',
-    titleLine1: 'SUR & NORTE',
-    titleLine2: 'SANTAFESINO',
-    subtitle: 'Venado Tuerto, Reconquista, Esperanza & Santo Tomé',
-    caption: 'Impulsando comercios y pymes de toda la provincia.',
-    handwriting: '“La provincia conectada en un solo click”',
-    image: '/images/city-rosario.jpg',
-    location: 'Provincia de Santa Fe',
-    ctaText: 'Explorar Ciudades de Santa Fe',
-    ctaHref: '/santa-fe',
-  },
-];
-
-const ENTRE_RIOS_SLIDES: HeroSlide[] = [
-  {
-    id: 'parana',
-    titleLine1: 'ENTRE RÍOS,',
-    titleLine2: 'SIEMPRE ON MÁS',
-    subtitle: 'Comprá. Vendé. Publicá. Conectá.',
-    caption: 'Toda la provincia en un solo lugar.',
-    handwriting: '“Nuestra gente, nuestros lugares, más oportunidades”',
-    image: '/images/hero-parana.jpg',
-    location: 'Costanera & Barrancas de Paraná',
-    ctaText: 'Explorá Ofertas de Paraná',
-    ctaHref: '/entre-rios/parana',
-  },
-  {
-    id: 'colon',
-    titleLine1: 'COLÓN &',
-    titleLine2: 'EL PALMAR',
-    subtitle: 'Fiesta Nacional de la Artesanía & Playas de Arena Blanca',
-    caption: 'Descubrí talleres de cerámica, orfebrería y gastronomía costera.',
-    handwriting: '“Cultura viva a orillas del Uruguay”',
-    image: '/images/hero-artesania.jpg',
-    location: 'Colón, Entre Ríos',
-    ctaText: 'Ver Productos de Colón',
-    ctaHref: '/entre-rios/colon',
-  },
-  {
-    id: 'concordia',
-    titleLine1: 'CORAZÓN',
-    titleLine2: 'CITRÍCOLA',
-    subtitle: 'Citrus, Arándanos & Aguas Termales de Concordia',
-    caption: 'Productores litoraleños comercializando directo con WhatsApp.',
-    handwriting: '“Sabores autóctonos con sello regional”',
-    image: '/images/city-concordia.jpg',
-    location: 'Concordia & Salto Grande',
-    ctaText: 'Ver Productores de Concordia',
-    ctaHref: '/entre-rios/concordia',
-  },
-  {
-    id: 'gualeguaychu',
-    titleLine1: 'VIÑEDOS Y',
-    titleLine2: 'CARNAVAL',
-    subtitle: 'Bodegas Boutique & Enoturismo en Gualeguaychú',
-    caption: 'Recorré la ruta del vino entrerriano y propuestas de diseño.',
-    handwriting: '“La magia y alegría de nuestro Litoral”',
-    image: '/images/city-gualeguaychu.jpg',
-    location: 'Gualeguaychú, Entre Ríos',
-    ctaText: 'Descubrir Gualeguaychú',
-    ctaHref: '/entre-rios/gualeguaychu',
-  },
-];
+import { getBannersByProvince, BannerItem } from '@/lib/services/banner-store';
 
 interface ClientHeroBannerProps {
   provinceId?: string;
 }
 
 export function ClientHeroBanner({ provinceId = 'santa-fe' }: ClientHeroBannerProps) {
-  const slides = provinceId === 'entre-rios' ? ENTRE_RIOS_SLIDES : SANTA_FE_SLIDES;
+  const [banners, setBanners] = useState<BannerItem[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
 
-  // Reset index when province changes
-  useEffect(() => {
-    setCurrentIndex(0);
+  const loadBanners = useCallback(() => {
+    const activeBanners = getBannersByProvince(provinceId);
+    setBanners(activeBanners);
   }, [provinceId]);
 
+  // Load banners on mount or province change, and listen for SuperAdmin live updates
+  useEffect(() => {
+    loadBanners();
+    setCurrentIndex(0);
+
+    const handleUpdate = () => {
+      loadBanners();
+    };
+
+    window.addEventListener('onmas_banners_updated', handleUpdate);
+    return () => {
+      window.removeEventListener('onmas_banners_updated', handleUpdate);
+    };
+  }, [provinceId, loadBanners]);
+
   const nextSlide = useCallback(() => {
-    setCurrentIndex((prev) => (prev + 1) % slides.length);
-  }, [slides.length]);
+    if (banners.length === 0) return;
+    setCurrentIndex((prev) => (prev + 1) % banners.length);
+  }, [banners.length]);
 
   const prevSlide = useCallback(() => {
-    setCurrentIndex((prev) => (prev - 1 + slides.length) % slides.length);
-  }, [slides.length]);
+    if (banners.length === 0) return;
+    setCurrentIndex((prev) => (prev - 1 + banners.length) % banners.length);
+  }, [banners.length]);
 
   useEffect(() => {
+    if (banners.length <= 1) return;
     const interval = setInterval(nextSlide, 5000);
     return () => clearInterval(interval);
-  }, [nextSlide]);
+  }, [nextSlide, banners.length]);
 
-  const activeSlide = slides[currentIndex] || slides[0];
+  if (banners.length === 0) return null;
+
+  const activeBanner = banners[currentIndex] || banners[0];
+
+  const locationText = activeBanner.location || (provinceId === 'entre-rios' ? 'Entre Ríos ON' : 'Santa Fe ON');
+  const titleLine1 = activeBanner.titleLine1 || (provinceId === 'entre-rios' ? 'ENTRE RÍOS,' : 'SANTA FE,');
+  const titleLine2 = activeBanner.titleLine2 || 'SIEMPRE ON MÁS';
+  const subtitleText = activeBanner.subtitle || 'Comprá. Vendé. Publicá. Conectá.';
+  const ctaText = activeBanner.ctaText || 'Explorar Portal';
+  const ctaHref = activeBanner.ctaHref || (provinceId === 'entre-rios' ? '/entre-rios' : '/santa-fe');
 
   return (
     <section 
@@ -154,7 +67,7 @@ export function ClientHeroBanner({ provinceId = 'santa-fe' }: ClientHeroBannerPr
       className="relative w-full overflow-hidden bg-slate-950 min-h-[420px] sm:min-h-[480px] flex items-center shadow-lg group"
     >
       {/* Background Images with Fade Transition */}
-      {slides.map((slide, idx) => (
+      {banners.map((slide, idx) => (
         <div
           key={slide.id}
           className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${
@@ -162,8 +75,8 @@ export function ClientHeroBanner({ provinceId = 'santa-fe' }: ClientHeroBannerPr
           }`}
         >
           <Image
-            src={slide.image}
-            alt={slide.titleLine1 + ' ' + slide.titleLine2}
+            src={slide.imageUrl}
+            alt={titleLine1 + ' ' + titleLine2}
             fill
             priority={idx === 0}
             className="object-cover object-center transform scale-105 group-hover:scale-100 transition-transform duration-1000"
@@ -179,76 +92,78 @@ export function ClientHeroBanner({ provinceId = 'santa-fe' }: ClientHeroBannerPr
           <div className="lg:col-span-8 space-y-5">
             <div className="inline-flex items-center gap-1.5 bg-gradient-to-r from-[#00ADB5] to-[#007C8A] text-white text-xs font-extrabold px-3 py-1 rounded-full uppercase tracking-wider shadow-md">
               <MapPin className="w-3.5 h-3.5" />
-              <span>{activeSlide.location}</span>
+              <span>{locationText}</span>
             </div>
 
             <div className="space-y-1">
               <h1 className="text-4xl sm:text-6xl font-black tracking-tight text-white uppercase drop-shadow-md">
-                {activeSlide.titleLine1}
+                {titleLine1}
               </h1>
               <h2 className="text-4xl sm:text-6xl font-black tracking-tight text-white uppercase drop-shadow-md flex items-center gap-3">
-                {activeSlide.titleLine2.includes('ON') ? (
+                {titleLine2.includes('ON') ? (
                   <>SIEMPRE <span className="text-[#00E5E8] drop-shadow-lg">ON</span> <span className="text-[#0B66FF] drop-shadow-lg">MÁS</span></>
                 ) : (
-                  <span className="text-[#00E5E8] drop-shadow-lg">{activeSlide.titleLine2}</span>
+                  <span className="text-[#00E5E8] drop-shadow-lg">{titleLine2}</span>
                 )}
               </h2>
             </div>
 
             <div className="space-y-1 text-slate-100 font-bold text-lg sm:text-2xl drop-shadow-sm">
-              <p>{activeSlide.subtitle}</p>
+              <p>{subtitleText}</p>
               <p className="text-slate-200 font-medium text-base sm:text-xl">
-                {activeSlide.caption}
+                Toda la provincia en un solo lugar.
               </p>
             </div>
 
             <div className="pt-3 flex flex-wrap items-center gap-4">
               <Link
-                href={activeSlide.ctaHref}
+                href={ctaHref}
                 className="inline-flex items-center gap-3 bg-gradient-to-r from-[#00ADB5] via-[#007C8A] to-[#0047BA] hover:from-[#00E5E8] hover:to-[#0B66FF] text-white px-7 py-3.5 rounded-2xl font-extrabold text-base shadow-xl hover:shadow-2xl transition-all transform hover:-translate-y-0.5 active:scale-95"
               >
-                <span>{activeSlide.ctaText}</span>
+                <span>{ctaText}</span>
                 <ArrowRight className="w-5 h-5" />
               </Link>
 
               {/* Clean Nav Controls */}
-              <div className="flex items-center gap-2 bg-black/40 backdrop-blur-md px-3 py-1.5 rounded-2xl border border-white/20">
-                <button
-                  onClick={prevSlide}
-                  className="text-white/80 hover:text-white p-1.5 rounded-full hover:bg-white/20 transition-colors cursor-pointer"
-                  aria-label="Slide anterior"
-                >
-                  <ChevronLeft className="w-5 h-5" />
-                </button>
+              {banners.length > 1 && (
+                <div className="flex items-center gap-2 bg-black/40 backdrop-blur-md px-3 py-1.5 rounded-2xl border border-white/20">
+                  <button
+                    onClick={prevSlide}
+                    className="text-white/80 hover:text-white p-1.5 rounded-full hover:bg-white/20 transition-colors cursor-pointer"
+                    aria-label="Slide anterior"
+                  >
+                    <ChevronLeft className="w-5 h-5" />
+                  </button>
 
-                <div className="flex items-center gap-1.5 px-2">
-                  {slides.map((_, idx) => (
-                    <button
-                      key={idx}
-                      onClick={() => setCurrentIndex(idx)}
-                      className={`h-2.5 rounded-full transition-all duration-300 cursor-pointer ${
-                        idx === currentIndex ? 'w-7 bg-[#00E5E8]' : 'w-2.5 bg-white/50 hover:bg-white/80'
-                      }`}
-                      aria-label={`Ir a slide ${idx + 1}`}
-                    />
-                  ))}
+                  <div className="flex items-center gap-1.5 px-2">
+                    {banners.map((_, idx) => (
+                      <button
+                        key={idx}
+                        onClick={() => setCurrentIndex(idx)}
+                        className={`h-2.5 rounded-full transition-all duration-300 cursor-pointer ${
+                          idx === currentIndex ? 'w-7 bg-[#00E5E8]' : 'w-2.5 bg-white/50 hover:bg-white/80'
+                        }`}
+                        aria-label={`Ir a slide ${idx + 1}`}
+                      />
+                    ))}
+                  </div>
+
+                  <button
+                    onClick={nextSlide}
+                    className="text-white/80 hover:text-white p-1.5 rounded-full hover:bg-white/20 transition-colors cursor-pointer"
+                    aria-label="Slide siguiente"
+                  >
+                    <ChevronRight className="w-5 h-5" />
+                  </button>
                 </div>
-
-                <button
-                  onClick={nextSlide}
-                  className="text-white/80 hover:text-white p-1.5 rounded-full hover:bg-white/20 transition-colors cursor-pointer"
-                  aria-label="Slide siguiente"
-                >
-                  <ChevronRight className="w-5 h-5" />
-                </button>
-              </div>
+              )}
             </div>
           </div>
 
           <div className="lg:col-span-4 hidden lg:flex justify-end">
             <div className="bg-white/10 backdrop-blur-md border border-white/20 p-6 rounded-3xl text-right max-w-xs rotate-1 shadow-2xl transition-all duration-500">
               <p className="font-handwritten text-3xl sm:text-4xl text-white font-bold leading-snug drop-shadow-md">
-                {activeSlide.handwriting}
+                “Nuestra gente, nuestros lugares, más oportunidades”
               </p>
             </div>
           </div>

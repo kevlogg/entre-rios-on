@@ -1,75 +1,32 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { City } from '@/types';
 import { PROVINCES } from '@/lib/constants/locations';
-import { Image as ImageIcon, Plus, Trash2, CheckCircle, Upload, Monitor, Smartphone, RefreshCw } from 'lucide-react';
+import { Image as ImageIcon, Plus, Trash2, CheckCircle, Upload, Monitor, Smartphone, RefreshCw, ExternalLink } from 'lucide-react';
+import { getBannersByProvince, saveBannersByProvince, BannerItem } from '@/lib/services/banner-store';
 
 interface GeoCustomizerManagerProps {
-  initialCities: City[];
+  initialCities?: City[];
 }
-
-export interface RealBannerItem {
-  id: string;
-  provinceId: string;
-  imageUrl: string;
-  device: 'desktop' | 'mobile' | 'all';
-}
-
-// Banners reales por provincia que se ven actualmente en la página de inicio (Inicio)
-const INITIAL_REAL_BANNERS: RealBannerItem[] = [
-  // Entre Ríos Banners Reales de Inicio
-  {
-    id: 'b-er-1',
-    provinceId: 'entre-rios',
-    imageUrl: '/images/hero-artesania.jpg',
-    device: 'desktop',
-  },
-  {
-    id: 'b-er-2',
-    provinceId: 'entre-rios',
-    imageUrl: '/images/prod-dorado.jpg',
-    device: 'desktop',
-  },
-  {
-    id: 'b-er-3',
-    provinceId: 'entre-rios',
-    imageUrl: '/images/commerce-bodega.jpg',
-    device: 'mobile',
-  },
-
-  // Santa Fe Banners Reales de Inicio
-  {
-    id: 'b-sf-1',
-    provinceId: 'santa-fe',
-    imageUrl: '/images/hero-rosario.jpg',
-    device: 'desktop',
-  },
-  {
-    id: 'b-sf-2',
-    provinceId: 'santa-fe',
-    imageUrl: '/images/prod-dulces.jpg',
-    device: 'desktop',
-  },
-  {
-    id: 'b-sf-3',
-    provinceId: 'santa-fe',
-    imageUrl: '/images/city-santa-fe-capital.jpg',
-    device: 'mobile',
-  },
-];
 
 export function GeoCustomizerManager({ initialCities }: GeoCustomizerManagerProps) {
   const [selectedProvinceId, setSelectedProvinceId] = useState('entre-rios');
-  const [banners, setBanners] = useState<RealBannerItem[]>(INITIAL_REAL_BANNERS);
+  const [banners, setBanners] = useState<BannerItem[]>([]);
 
-  // Form para nuevo banner (solo dispositivo e imagen, sin nombre ni página destino)
-  const [newBannerDevice, setNewBannerDevice] = useState<'desktop' | 'mobile' | 'all'>('desktop');
+  // Form para nuevo banner (dispositivo + imagen)
+  const [newBannerDevice, setNewBannerDevice] = useState<'desktop' | 'mobile' | 'all'>('all');
   const [newBannerImage, setNewBannerImage] = useState<string | null>(null);
 
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
 
   const currentProv = PROVINCES.find((p) => p.id === selectedProvinceId) || PROVINCES[0];
+
+  // Cargar banners desde el banner store al cambiar la provincia seleccionada
+  useEffect(() => {
+    const loaded = getBannersByProvince(selectedProvinceId);
+    setBanners(loaded);
+  }, [selectedProvinceId]);
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>, callback: (base64: string) => void) => {
     const file = e.target.files?.[0];
@@ -87,34 +44,47 @@ export function GeoCustomizerManager({ initialCities }: GeoCustomizerManagerProp
     e.preventDefault();
     if (!newBannerImage) return;
 
-    const banner: RealBannerItem = {
+    const newBanner: BannerItem = {
       id: `b-${Date.now()}`,
       provinceId: selectedProvinceId,
       imageUrl: newBannerImage,
       device: newBannerDevice,
+      location: `${currentProv.name} ON`,
+      titleLine1: `${currentProv.name.toUpperCase()},`,
+      titleLine2: 'SIEMPRE ON MÁS',
+      subtitle: 'Comprá. Vendé. Publicá. Conectá.',
+      ctaText: `Explorar ${currentProv.name}`,
+      ctaHref: `/${selectedProvinceId}`,
     };
 
-    setBanners([banner, ...banners]);
+    const updated = [newBanner, ...banners];
+    setBanners(updated);
+    saveBannersByProvince(selectedProvinceId, updated);
+
     setNewBannerImage(null);
-    setSuccessMsg(`¡Nuevo banner cargado para la provincia de ${currentProv.name}!`);
+    setSuccessMsg(`¡Nuevo banner publicado para la página principal de ${currentProv.name}!`);
     setTimeout(() => setSuccessMsg(null), 3500);
   };
 
   const handleChangeBannerImage = (id: string, e: React.ChangeEvent<HTMLInputElement>) => {
     handleFileUpload(e, (base64) => {
-      setBanners(banners.map((b) => (b.id === id ? { ...b, imageUrl: base64 } : b)));
-      setSuccessMsg('Imagen del banner actualizada correctamente.');
+      const updated = banners.map((b) => (b.id === id ? { ...b, imageUrl: base64 } : b));
+      setBanners(updated);
+      saveBannersByProvince(selectedProvinceId, updated);
+
+      setSuccessMsg('Imagen del banner actualizada exitosamente.');
       setTimeout(() => setSuccessMsg(null), 3000);
     });
   };
 
   const handleDeleteBanner = (id: string) => {
-    setBanners(banners.filter((b) => b.id !== id));
+    const updated = banners.filter((b) => b.id !== id);
+    setBanners(updated);
+    saveBannersByProvince(selectedProvinceId, updated);
+
     setSuccessMsg('Banner eliminado correctamente.');
     setTimeout(() => setSuccessMsg(null), 3000);
   };
-
-  const currentProvinceBanners = banners.filter((b) => b.provinceId === selectedProvinceId);
 
   return (
     <div className="space-y-8">
@@ -124,14 +94,14 @@ export function GeoCustomizerManager({ initialCities }: GeoCustomizerManagerProp
           <div>
             <span className="text-xs font-black uppercase tracking-widest text-[#0047BA] flex items-center gap-1.5">
               <ImageIcon className="w-4 h-4 text-[#00ADB5]" />
-              Gestión de Banners Publicitarios (Página de Inicio)
+              Gestión de Banners Publicitarios de Inicio
             </span>
             <h2 className="text-xl font-black text-slate-900 mt-1">
-              Banners de Inicio: <span className="text-[#0047BA]">{currentProv.name}</span>
+              Provincia: <span className="text-[#0047BA]">{currentProv.name}</span>
             </h2>
           </div>
 
-          {/* Buttons de selección de provincia */}
+          {/* Botones de selección de provincia */}
           <div className="flex gap-2">
             {PROVINCES.map((prov) => (
               <button
@@ -167,9 +137,19 @@ export function GeoCustomizerManager({ initialCities }: GeoCustomizerManagerProp
               Cargar Nuevo Banner para {currentProv.name}
             </h3>
             <p className="text-xs text-slate-500">
-              Suba una imagen directa para los banners que se mostrarán en la página principal de {currentProv.name}.
+              Suba las imágenes que se mostrarán en el carrusel de inicio de {currentProv.name}.
             </p>
           </div>
+
+          <a
+            href={`/${selectedProvinceId}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hidden sm:inline-flex items-center gap-1.5 text-xs font-extrabold text-[#0047BA] hover:underline"
+          >
+            <span>Ver Inicio {currentProv.name}</span>
+            <ExternalLink className="w-3.5 h-3.5" />
+          </a>
         </div>
 
         <form onSubmit={handleAddBanner} className="space-y-4">
@@ -183,9 +163,9 @@ export function GeoCustomizerManager({ initialCities }: GeoCustomizerManagerProp
                 onChange={(e) => setNewBannerDevice(e.target.value as any)}
                 className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2.5 text-xs font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#00ADB5]"
               >
+                <option value="all">🌐 Todos los dispositivos</option>
                 <option value="desktop">💻 Escritorio (Desktop)</option>
                 <option value="mobile">📱 Celular (Mobile)</option>
-                <option value="all">🌐 Todos los dispositivos</option>
               </select>
             </div>
 
@@ -204,7 +184,7 @@ export function GeoCustomizerManager({ initialCities }: GeoCustomizerManagerProp
 
           {/* Preview del banner a subir */}
           {newBannerImage && (
-            <div className="relative h-40 w-full rounded-2xl overflow-hidden border-2 border-emerald-400 shadow-sm">
+            <div className="relative h-44 w-full rounded-2xl overflow-hidden border-2 border-emerald-400 shadow-sm">
               <img src={newBannerImage} alt="Previsualización de Banner" className="w-full h-full object-cover" />
               <div className="absolute top-2 left-2 bg-emerald-600 text-white text-[10px] font-black px-2.5 py-1 rounded-full uppercase">
                 Vista Previa de Carga
@@ -218,7 +198,7 @@ export function GeoCustomizerManager({ initialCities }: GeoCustomizerManagerProp
             className="w-full sm:w-auto bg-[#0047BA] hover:bg-[#002878] disabled:opacity-50 text-white px-6 py-3 rounded-xl font-extrabold text-xs shadow-md transition-all cursor-pointer flex items-center justify-center gap-2"
           >
             <Plus className="w-4 h-4" />
-            <span>Subir Banner a {currentProv.name}</span>
+            <span>Publicar Banner en {currentProv.name}</span>
           </button>
         </form>
       </div>
@@ -229,23 +209,23 @@ export function GeoCustomizerManager({ initialCities }: GeoCustomizerManagerProp
           <div>
             <h3 className="text-base font-black text-slate-900 flex items-center gap-2">
               <ImageIcon className="w-5 h-5 text-[#0047BA]" />
-              Banners Activos en {currentProv.name} ({currentProvinceBanners.length})
+              Banners Activos en el Inicio de {currentProv.name} ({banners.length})
             </h3>
             <p className="text-xs text-slate-500">
-              Estas son las imágenes reales que los usuarios ven al ingresar al portal de {currentProv.name}.
+              Estas son las imágenes que ven los visitantes al ingresar al portal de {currentProv.name}.
             </p>
           </div>
         </div>
 
-        {currentProvinceBanners.length === 0 ? (
+        {banners.length === 0 ? (
           <div className="p-12 text-center border-2 border-dashed border-slate-200 rounded-2xl space-y-2">
             <ImageIcon className="w-10 h-10 text-slate-300 mx-auto" />
-            <p className="text-xs font-bold text-slate-500">No hay banners configurados para {currentProv.name}.</p>
-            <p className="text-[11px] text-slate-400">Utilice el formulario de arriba para cargar imágenes.</p>
+            <p className="text-xs font-bold text-slate-500">No hay banners activos para {currentProv.name}.</p>
+            <p className="text-[11px] text-slate-400">Cargue una nueva imagen arriba para mostrar banners en la portada.</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {currentProvinceBanners.map((banner, index) => (
+            {banners.map((banner, index) => (
               <div
                 key={banner.id}
                 className="bg-slate-50 rounded-2xl p-4 border border-slate-200 shadow-xs space-y-3 flex flex-col justify-between"
@@ -265,24 +245,24 @@ export function GeoCustomizerManager({ initialCities }: GeoCustomizerManagerProp
                         <Smartphone className="w-3 h-3" /> Mobile
                       </span>
                     )}
-                    {banner.device === 'all' && (
+                    {(!banner.device || banner.device === 'all') && (
                       <span className="inline-flex items-center gap-1 text-[10px] bg-purple-100 text-purple-900 font-extrabold px-2.5 py-0.5 rounded-full">
-                        🌐 General
+                        🌐 Todos los dispositivos
                       </span>
                     )}
                   </div>
                 </div>
 
                 {/* Previsualización del Banner Real */}
-                <div className="relative h-44 w-full rounded-xl overflow-hidden border border-slate-300 shadow-xs bg-slate-900 group">
+                <div className="relative h-48 w-full rounded-xl overflow-hidden border border-slate-300 shadow-xs bg-slate-900 group">
                   <img
                     src={banner.imageUrl}
                     alt={`Banner ${index + 1}`}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                   />
-                  <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                    <span className="text-white text-xs font-bold bg-black/60 px-3 py-1.5 rounded-full backdrop-blur-xs">
-                      Imagen Real del Sitio
+                  <div className="absolute inset-0 bg-black/25 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                    <span className="text-white text-xs font-extrabold bg-black/70 px-3.5 py-1.5 rounded-full backdrop-blur-xs">
+                      Imagen Real del Hero
                     </span>
                   </div>
                 </div>
@@ -291,7 +271,7 @@ export function GeoCustomizerManager({ initialCities }: GeoCustomizerManagerProp
                 <div className="flex items-center gap-2 pt-1">
                   <label className="flex-1 bg-[#00ADB5] hover:bg-[#007C8A] text-white py-2 px-3 rounded-xl text-xs font-extrabold flex items-center justify-center gap-1.5 cursor-pointer transition-colors shadow-xs">
                     <RefreshCw className="w-3.5 h-3.5" />
-                    <span>Cambiar Imagen</span>
+                    <span>Cambiar Foto</span>
                     <input
                       type="file"
                       accept="image/*"
