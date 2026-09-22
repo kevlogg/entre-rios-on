@@ -70,7 +70,7 @@ export function SuperAdminDashboardClient({
   const tabs: TabDef[] = [
     { id: 'commerces', label: 'Comercios B2B', icon: Store, badge: `${initialCommerces.length}` },
     { id: 'cash-payments', label: 'Pagos en Efectivo', icon: CreditCard, badge: 'Nuevos' },
-    { id: 'geo-customizer', label: 'Provincias, Banners & Colores', icon: MapPin },
+    { id: 'geo-customizer', label: 'Banners', icon: MapPin },
     { id: 'raffles', label: 'Sorteos ON MÁS', icon: Gift },
     { id: 'jobs', label: 'Empleos & Trabajo', icon: Briefcase },
     { id: 'news', label: 'Noticias & Moderación', icon: Newspaper },
