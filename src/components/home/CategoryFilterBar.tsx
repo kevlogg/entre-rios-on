@@ -1,19 +1,26 @@
 'use client';
 
 import React, { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { CATEGORIES_LIST } from '@/lib/constants/categories';
 import { Sparkles, ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface CategoryFilterBarProps {
-  selectedCategory: string;
-  onSelectCategory: (categoryId: string) => void;
+  selectedCategory?: string;
+  onSelectCategory?: (categoryId: string) => void;
+  navigateOnSelect?: boolean;
 }
 
 export function CategoryFilterBar({
-  selectedCategory,
+  selectedCategory: externalSelectedCat,
   onSelectCategory,
+  navigateOnSelect = true,
 }: CategoryFilterBarProps) {
+  const router = useRouter();
+  const [internalSelectedCat, setInternalSelectedCat] = useState<string>('all');
   const [currentPage, setCurrentPage] = useState<number>(0);
+
+  const selectedCat = externalSelectedCat !== undefined ? externalSelectedCat : internalSelectedCat;
 
   const ITEMS_PER_PAGE = 8; // 2 rows x 4 columns = 8 cards per view
   const totalPages = Math.ceil(CATEGORIES_LIST.length / ITEMS_PER_PAGE);
@@ -22,6 +29,25 @@ export function CategoryFilterBar({
     currentPage * ITEMS_PER_PAGE,
     (currentPage + 1) * ITEMS_PER_PAGE
   );
+
+  const handleCategoryClick = (catId: string) => {
+    if (onSelectCategory) {
+      onSelectCategory(catId);
+    } else {
+      setInternalSelectedCat(catId);
+    }
+
+    if (navigateOnSelect && typeof window !== 'undefined') {
+      if (!window.location.pathname.endsWith('/catalogo')) {
+        router.push(`/catalogo?categoria=${catId}`);
+      } else {
+        const gridElem = document.getElementById('productos-grid') || document.getElementById('catalogo');
+        if (gridElem) {
+          gridElem.scrollIntoView({ behavior: 'smooth' });
+        }
+      }
+    }
+  };
 
   const handleNextPage = () => {
     setCurrentPage((prev) => (prev + 1) % totalPages);
@@ -67,6 +93,15 @@ export function CategoryFilterBar({
               <ChevronRight className="w-4 h-4 stroke-[2.5]" />
             </button>
           </div>
+
+          {selectedCat !== 'all' && (
+            <button
+              onClick={() => handleCategoryClick('all')}
+              className="text-xs font-extrabold text-[#00ADB5] hover:text-[#0047BA] transition-colors hidden sm:flex items-center gap-1"
+            >
+              <span>Mostrar todas</span>
+            </button>
+          )}
         </div>
       </div>
 
@@ -74,12 +109,12 @@ export function CategoryFilterBar({
       <div className="relative">
         <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-3.5">
           {visibleCategories.map((cat) => {
-            const isSelected = selectedCategory === cat.id;
+            const isSelected = selectedCat === cat.id;
 
             return (
               <button
                 key={cat.id}
-                onClick={() => onSelectCategory(cat.id)}
+                onClick={() => handleCategoryClick(cat.id)}
                 className={`group flex items-center rounded-2xl border transition-all text-left overflow-hidden h-20 sm:h-24 cursor-pointer ${
                   isSelected
                     ? 'bg-gradient-to-r from-[#00ADB5] to-[#007C8A] text-white border-[#00ADB5] shadow-md ring-2 ring-[#00ADB5]'

@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { CATEGORIES_LIST } from '@/lib/constants/categories';
 import { ArrowRight, ChevronLeft, ChevronRight, LayoutGrid } from 'lucide-react';
 
@@ -13,6 +14,7 @@ export function CategoryIconBar({
   selectedCategory: externalSelectedCat,
   onSelectCategory,
 }: CategoryIconBarProps) {
+  const router = useRouter();
   const [internalSelectedCat, setInternalSelectedCat] = useState<string>('all');
   const [currentPage, setCurrentPage] = useState<number>(0);
 
@@ -33,9 +35,15 @@ export function CategoryIconBar({
       setInternalSelectedCat(catId);
     }
 
-    const offersSection = document.getElementById('ofertas-destacadas') || document.getElementById('catalogo');
-    if (offersSection) {
-      offersSection.scrollIntoView({ behavior: 'smooth' });
+    if (typeof window !== 'undefined') {
+      if (!window.location.pathname.endsWith('/catalogo')) {
+        router.push(`/catalogo?categoria=${catId}`);
+      } else {
+        const offersSection = document.getElementById('ofertas-destacadas') || document.getElementById('catalogo');
+        if (offersSection) {
+          offersSection.scrollIntoView({ behavior: 'smooth' });
+        }
+      }
     }
   };
 
