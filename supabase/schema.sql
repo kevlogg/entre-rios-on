@@ -241,6 +241,100 @@ CREATE POLICY "Public Insert Raffle Participants" ON public.raffle_participants 
 DROP POLICY IF EXISTS "Public Insert WhatsApp Clicks" ON public.whatsapp_clicks;
 CREATE POLICY "Public Insert WhatsApp Clicks" ON public.whatsapp_clicks FOR INSERT WITH CHECK (true);
 
+-- 10. TABLA DE EMPLEOS Y OPORTUNIDADES LABORALES
+CREATE TABLE IF NOT EXISTS public.jobs (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  title TEXT NOT NULL,
+  company TEXT NOT NULL,
+  city_name TEXT NOT NULL,
+  province_id TEXT DEFAULT 'entre-rios',
+  job_type TEXT DEFAULT 'Tiempo Completo',
+  salary TEXT DEFAULT 'A convenir',
+  description TEXT NOT NULL,
+  phone_whatsapp TEXT NOT NULL,
+  status TEXT DEFAULT 'APPROVED' CHECK (status IN ('PENDING', 'APPROVED', 'REJECTED')),
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- 11. TABLA DE PAGOS EN EFECTIVO B2B
+CREATE TABLE IF NOT EXISTS public.cash_payments (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  commerce_name TEXT NOT NULL,
+  owner_name TEXT NOT NULL,
+  phone_whatsapp TEXT NOT NULL,
+  plan_name TEXT NOT NULL CHECK (plan_name IN ('Bronce', 'Plata', 'Oro')),
+  amount NUMERIC(12,2) NOT NULL,
+  city_name TEXT NOT NULL,
+  status TEXT DEFAULT 'PENDING' CHECK (status IN ('PENDING', 'APPROVED', 'REJECTED')),
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- 12. TABLA DE SOLICITUDES MI SITIO WEB
+CREATE TABLE IF NOT EXISTS public.web_requests (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  business_name TEXT NOT NULL,
+  contact_name TEXT NOT NULL,
+  phone_whatsapp TEXT NOT NULL,
+  email TEXT,
+  desired_domain TEXT,
+  notes TEXT,
+  status TEXT DEFAULT 'PENDING' CHECK (status IN ('PENDING', 'CONTACTED', 'IN_DEVELOPMENT')),
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- 13. TABLA DE CONFIGURACIÓN VISUAL Y BANNERS POR PROVINCIA
+CREATE TABLE IF NOT EXISTS public.province_configs (
+  id TEXT PRIMARY KEY,
+  name TEXT NOT NULL,
+  banner_desktop TEXT NOT NULL,
+  banner_mobile TEXT NOT NULL,
+  text_color TEXT DEFAULT '#0047BA',
+  button_bg_color TEXT DEFAULT '#00ADB5',
+  card_accent_color TEXT DEFAULT '#00E5E8',
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- 14. TABLA DE SERVICIOS DE TURISMO
+CREATE TABLE IF NOT EXISTS public.tourism_services (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  name TEXT NOT NULL,
+  category TEXT NOT NULL,
+  city_name TEXT NOT NULL,
+  province_id TEXT DEFAULT 'entre-rios',
+  price TEXT NOT NULL,
+  plan_tier TEXT DEFAULT 'Plata' CHECK (plan_tier IN ('Bronce', 'Plata', 'Oro')),
+  image_url TEXT NOT NULL,
+  is_verified BOOLEAN DEFAULT true,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- Habilitar RLS en nuevas tablas
+ALTER TABLE public.jobs ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.cash_payments ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.web_requests ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.province_configs ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.tourism_services ENABLE ROW LEVEL SECURITY;
+
+-- Politicas de lectura pública
+DROP POLICY IF EXISTS "Public Read Jobs" ON public.jobs;
+CREATE POLICY "Public Read Jobs" ON public.jobs FOR SELECT USING (true);
+
+DROP POLICY IF EXISTS "Public Read Tourism Services" ON public.tourism_services;
+CREATE POLICY "Public Read Tourism Services" ON public.tourism_services FOR SELECT USING (true);
+
+DROP POLICY IF EXISTS "Public Read Province Configs" ON public.province_configs;
+CREATE POLICY "Public Read Province Configs" ON public.province_configs FOR SELECT USING (true);
+
+-- Permisos de Inserción Pública para Postulaciones y Solicitudes
+DROP POLICY IF EXISTS "Public Insert Jobs" ON public.jobs;
+CREATE POLICY "Public Insert Jobs" ON public.jobs FOR INSERT WITH CHECK (true);
+
+DROP POLICY IF EXISTS "Public Insert Web Requests" ON public.web_requests;
+CREATE POLICY "Public Insert Web Requests" ON public.web_requests FOR INSERT WITH CHECK (true);
+
+DROP POLICY IF EXISTS "Public Insert Cash Payments" ON public.cash_payments;
+CREATE POLICY "Public Insert Cash Payments" ON public.cash_payments FOR INSERT WITH CHECK (true);
+
 -- ========================================================
 -- DATOS SEMILLA (SEED DATA)
 -- ========================================================
