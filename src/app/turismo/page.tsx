@@ -3,61 +3,18 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { Compass, ArrowLeft, MapPin, Sparkles, Sun, Waves, Hotel, ExternalLink, MessageCircle } from 'lucide-react';
 import { DynamicLayoutWrapper } from '@/components/layout/DynamicLayoutWrapper';
+import { getTourismServices } from '@/lib/dal/portal';
 
 export const revalidate = 60;
 
-const DESTINOS_TURISMO = [
-  {
-    id: 't1',
-    name: 'Complejo Termal & Spa Federación',
-    city: 'Federación',
-    province: 'Entre Ríos',
-    category: 'Termas & Relax',
-    rating: '4.9 ★★★★★',
-    imageUrl: '/images/city-federacion.jpg',
-    description: 'Parque termal pionero a orillas del Lago Salto Grande con piscinas cubiertas, parque acuático y zona de relajación.',
-    phoneWhatsApp: '5493456411223',
-  },
-  {
-    id: 't2',
-    name: 'Playas de Arena Blanca & Ribera del Uruguay',
-    city: 'Colón',
-    province: 'Entre Ríos',
-    category: 'Playas & Naútica',
-    rating: '4.8 ★★★★★',
-    imageUrl: '/images/city-colon.jpg',
-    description: 'Kilómetros de islas, bancos de arena blanca y excursiones en catamarán sobre el río Uruguay.',
-    phoneWhatsApp: '5493447451234',
-  },
-  {
-    id: 't3',
-    name: 'Bodega Boutique & Enoturismo Litoral',
-    city: 'Gualeguaychú',
-    province: 'Entre Ríos',
-    category: 'Enoturismo & Sabores',
-    rating: '4.9 ★★★★★',
-    imageUrl: '/images/city-gualeguaychu.jpg',
-    description: 'Visitas guiadas entre viñedos regionales, degustaciones de Tannat y Chardonnay, con almuerzos campestres.',
-    phoneWhatsApp: '5493446584321',
-  },
-  {
-    id: 't4',
-    name: 'Barrancas del Paraná & Parque Urquiza',
-    city: 'Paraná',
-    province: 'Entre Ríos',
-    category: 'Paseos Urbano-Culturales',
-    rating: '4.7 ★★★★★',
-    imageUrl: '/images/city-parana.jpg',
-    description: 'Miradores panorámicos sobre el río Paraná, paseos gastronómicos en Puerto Sánchez y patrimonio histórico.',
-    phoneWhatsApp: '5493434112233',
-  },
-];
+export default async function TurismoPage() {
+  const servicios = await getTourismServices();
 
-export default function TurismoPage() {
   return (
     <DynamicLayoutWrapper>
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 w-full">
         {/* Breadcrumb */}
+
         <div className="flex items-center gap-2 text-xs font-bold text-slate-500">
           <Link href="/" className="hover:text-[#00ADB5] flex items-center gap-1">
             <ArrowLeft className="w-3.5 h-3.5" />
@@ -112,7 +69,7 @@ export default function TurismoPage() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {DESTINOS_TURISMO.map((item) => (
+            {servicios.map((item) => (
               <div key={item.id} className="bg-white rounded-3xl overflow-hidden border border-slate-200 shadow-xs hover:shadow-md transition-shadow flex flex-col sm:flex-row">
                 <div className="relative h-48 sm:h-auto sm:w-52 bg-slate-100 shrink-0">
                   <Image src={item.imageUrl} alt={item.name} fill className="object-cover" />
@@ -126,12 +83,13 @@ export default function TurismoPage() {
                     <div className="flex items-center justify-between">
                       <span className="text-xs font-bold text-[#00ADB5] flex items-center gap-1">
                         <MapPin className="w-3.5 h-3.5" />
-                        {item.city}, {item.province}
+                        {item.cityName}, {item.provinceId === 'santa-fe' ? 'Santa Fe' : 'Entre Ríos'}
                       </span>
                       <span className="text-xs font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-md">
-                        {item.rating}
+                        {item.price}
                       </span>
                     </div>
+
 
                     <h3 className="text-base font-extrabold text-slate-900 leading-snug">{item.name}</h3>
                     <p className="text-xs text-slate-500 line-clamp-3 leading-relaxed">{item.description}</p>

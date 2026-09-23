@@ -1,7 +1,8 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Globe, MessageCircle, Clock, CheckCircle2, Building, Mail, Phone, ExternalLink } from 'lucide-react';
+import { getWebRequests } from '@/lib/dal/portal';
 
 interface WebRequest {
   id: string;
@@ -11,35 +12,43 @@ interface WebRequest {
   email: string;
   desiredDomain: string;
   notes: string;
-  date: string;
-  status: 'pendiente' | 'contactado' | 'en-desarrollo';
+  date?: string;
+  status: string;
 }
 
 export function WebRequestsManager() {
-  const [requests, setRequests] = useState<WebRequest[]>([
-    {
-      id: 'web-1',
-      businessName: 'Comedor El Dorado',
-      contactName: 'Carlos Gómez',
-      phone: '3434123456',
-      email: 'contacto@eldorado.com.ar',
-      desiredDomain: 'comedoreldorado.com.ar',
-      notes: 'Quiero tener la carta completa con fotos y menú del día para reservas.',
-      date: '2026-09-21 17:40',
-      status: 'pendiente'
-    },
-    {
-      id: 'web-2',
-      businessName: 'Alfarería Delta',
-      contactName: 'Laura Fernández',
-      phone: '3434991122',
-      email: 'alfajores@delta.com.ar',
-      desiredDomain: 'alfareriadelta.com',
-      notes: 'Sitio de artesanías con tienda online para enviar a todo el país.',
-      date: '2026-09-20 12:10',
-      status: 'contactado'
+  const [requests, setRequests] = useState<WebRequest[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    async function loadRequests() {
+      try {
+        const data = await getWebRequests();
+        if (data) {
+          setRequests(
+            data.map((r) => ({
+              id: r.id,
+              businessName: r.businessName,
+              contactName: r.contactName,
+              phone: r.phoneWhatsApp,
+              email: r.email || '',
+              desiredDomain: r.desiredDomain || '',
+              notes: r.notes || '',
+              status: r.status || 'PENDING',
+              date: r.createdAt ? new Date(r.createdAt).toLocaleString('es-AR') : undefined,
+            }))
+          );
+        }
+      } catch (e) {
+        console.warn('Error cargando solicitudes web:', e);
+      } finally {
+        setIsLoading(false);
+      }
     }
-  ]);
+    loadRequests();
+  }, []);
+
+
 
   const handleUpdateStatus = (reqId: string, newStatus: 'contactado' | 'en-desarrollo') => {
     setRequests((prev) =>

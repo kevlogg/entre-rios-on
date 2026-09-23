@@ -98,3 +98,96 @@ export interface BannerSlide {
   cityTag: string;
   publishedAt: string;
 }
+
+export interface JobItem {
+  id: string;
+  title: string;
+  company: string;
+  cityName: string;
+  provinceId?: string;
+  jobType: string;
+  salary: string;
+  description: string;
+  phoneWhatsApp: string;
+  status?: string;
+  createdAt?: string;
+}
+
+export interface TourismService {
+  id: string;
+  name: string;
+  category: string;
+  cityName: string;
+  provinceId?: string;
+  price: string;
+  planTier?: string;
+  imageUrl: string;
+  description?: string;
+  phoneWhatsApp?: string;
+  isVerified?: boolean;
+  createdAt?: string;
+}
+
+
+export interface ClassifiedItem {
+  id: string;
+  title: string;
+  category: string;
+  provinceId?: string;
+  cityName: string;
+  price: string;
+  imageUrl: string;
+  description: string;
+  phoneWhatsApp: string;
+  status?: string;
+  createdAt?: string;
+}
+
+export interface WebRequest {
+  id: string;
+  businessName: string;
+  contactName: string;
+  phoneWhatsApp: string;
+  email?: string;
+  desiredDomain?: string;
+  notes?: string;
+  status?: string;
+  createdAt?: string;
+}
+
+export interface CashPayment {
+  id: string;
+  commerceName: string;
+  ownerName: string;
+  phoneWhatsApp: string;
+  planName: string;
+  amount: number;
+  cityName: string;
+  status?: string;
+  createdAt?: string;
+}
+
+export interface Raffle {
+  id: string;
+  title: string;
+  prize: string;
+  sponsorName: string;
+  imageUrl: string;
+  drawDate: string;
+  status: 'ACTIVE' | 'DRAWN' | 'CANCELLED';
+  winnerName?: string;
+  winnerPhone?: string;
+  createdAt?: string;
+}
+
+export interface RaffleParticipant {
+  id: string;
+  raffleId: string;
+  fullName: string;
+  phoneWhatsApp: string;
+  provinceId?: string;
+  cityName: string;
+  email?: string;
+  createdAt?: string;
+}
+

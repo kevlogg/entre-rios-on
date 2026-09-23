@@ -18,6 +18,7 @@ import {
   MousePointerClick,
   Send
 } from 'lucide-react';
+import { createWebRequestAction } from '@/server/actions/superadmin';
 
 export default function MiSitioWebPage() {
   const [businessName, setBusinessName] = useState('');
@@ -27,29 +28,26 @@ export default function MiSitioWebPage() {
   const [desiredDomain, setDesiredDomain] = useState('');
   const [notes, setNotes] = useState('');
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!businessName || !contactName || !phone) return;
+    if (!businessName || !contactName || !phone || isSubmitting) return;
 
-    // Send request simulation (storing in localStorage for SuperAdmin)
-    const newRequest = {
-      id: `web-${Date.now()}`,
-      businessName,
-      contactName,
-      phone,
-      email,
-      desiredDomain: desiredDomain || `${businessName.toLowerCase().replace(/\s+/g, '')}.com.ar`,
-      notes: notes || 'Solicitud de sitio web propio',
-      date: new Date().toLocaleString('es-AR'),
-      status: 'pendiente'
-    };
-
+    setIsSubmitting(true);
     try {
-      const existing = JSON.parse(localStorage.getItem('onmas_web_requests') || '[]');
-      localStorage.setItem('onmas_web_requests', JSON.stringify([newRequest, ...existing]));
+      await createWebRequestAction({
+        businessName,
+        contactName,
+        phoneWhatsApp: phone,
+        email,
+        desiredDomain: desiredDomain || `${businessName.toLowerCase().replace(/\s+/g, '')}.com.ar`,
+        notes: notes || 'Solicitud de sitio web propio',
+      });
     } catch (e) {
-      // ignore
+      console.warn('Error guardando solicitud web:', e);
+    } finally {
+      setIsSubmitting(false);
     }
 
     setIsSubmitted(true);
@@ -58,6 +56,7 @@ export default function MiSitioWebPage() {
     const waMsg = `Hola equipo ON MÁS! Solicito la creación de Mi Sitio Web Propio para mi comercio "${businessName}". Contacto: ${contactName} (${phone}). Dominio deseado: ${desiredDomain || 'A definir'}.`;
     window.open(`https://wa.me/5493434567890?text=${encodeURIComponent(waMsg)}`, '_blank');
   };
+
 
   return (
     <div className="min-h-screen flex flex-col bg-[#fbf9f5]">

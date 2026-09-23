@@ -304,16 +304,30 @@ CREATE TABLE IF NOT EXISTS public.tourism_services (
   price TEXT NOT NULL,
   plan_tier TEXT DEFAULT 'Plata' CHECK (plan_tier IN ('Bronce', 'Plata', 'Oro')),
   image_url TEXT NOT NULL,
+  description TEXT,
+  phone_whatsapp TEXT,
   is_verified BOOLEAN DEFAULT true,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
--- Habilitar RLS en nuevas tablas
+-- Migración de columnas por si la tabla ya existe
+ALTER TABLE public.tourism_services ADD COLUMN IF NOT EXISTS description TEXT;
+ALTER TABLE public.tourism_services ADD COLUMN IF NOT EXISTS phone_whatsapp TEXT;
+
+-- Habilitar RLS en perfiles y nuevas tablas
+ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.jobs ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.cash_payments ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.web_requests ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.province_configs ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.tourism_services ENABLE ROW LEVEL SECURITY;
+
+-- Politicas de perfiles
+DROP POLICY IF EXISTS "Public Read Profiles" ON public.profiles;
+CREATE POLICY "Public Read Profiles" ON public.profiles FOR SELECT USING (true);
+
+DROP POLICY IF EXISTS "Users Update Own Profile" ON public.profiles;
+CREATE POLICY "Users Update Own Profile" ON public.profiles FOR UPDATE USING (auth.uid() = id);
 
 -- Politicas de lectura pública
 DROP POLICY IF EXISTS "Public Read Jobs" ON public.jobs;
@@ -334,6 +348,33 @@ CREATE POLICY "Public Insert Web Requests" ON public.web_requests FOR INSERT WIT
 
 DROP POLICY IF EXISTS "Public Insert Cash Payments" ON public.cash_payments;
 CREATE POLICY "Public Insert Cash Payments" ON public.cash_payments FOR INSERT WITH CHECK (true);
+
+-- ========================================================
+-- 15. TRIGGER AUTOMÁTICO DE PERFILES EN SUPABASE AUTH
+-- ========================================================
+CREATE OR REPLACE FUNCTION public.handle_new_user()
+RETURNS TRIGGER AS $$
+BEGIN
+  INSERT INTO public.profiles (id, email, full_name, role, province_id, city_name)
+  VALUES (
+    NEW.id,
+    NEW.email,
+    COALESCE(NEW.raw_user_meta_data->>'full_name', NEW.raw_user_meta_data->>'commerce_name', 'Usuario ON MÁS'),
+    COALESCE(NEW.raw_user_meta_data->>'role', 'MERCHANT_ADMIN'),
+    COALESCE(NEW.raw_user_meta_data->>'province_id', 'santa-fe'),
+    COALESCE(NEW.raw_user_meta_data->>'city_name', 'Rosario')
+  )
+  ON CONFLICT (id) DO UPDATE SET
+    email = EXCLUDED.email,
+    updated_at = NOW();
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
+CREATE TRIGGER on_auth_user_created
+  AFTER INSERT ON auth.users
+  FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
 
 -- ========================================================
 -- DATOS SEMILLA (SEED DATA)
@@ -366,3 +407,17 @@ ON CONFLICT (id) DO UPDATE SET
   image_url = EXCLUDED.image_url,
   is_featured = EXCLUDED.is_featured,
   commerce_count = EXCLUDED.commerce_count;
+
+-- Sorteo Inicial Semilla
+INSERT INTO public.raffles (id, title, prize, sponsor_name, image_url, draw_date, status)
+VALUES (
+  'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11',
+  'Sorteo Estancia Termal Federación 2026',
+  '2 Noches para 2 personas + Pases Termales Libre + Cena Litoraleña',
+  'Termas Federación & Posada Sol',
+  '/images/city-federacion.jpg',
+  NOW() + INTERVAL '30 days',
+  'ACTIVE'
+)
+ON CONFLICT (id) DO NOTHING;
+

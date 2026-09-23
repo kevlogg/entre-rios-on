@@ -1,58 +1,52 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { CreditCard, CheckCircle2, Clock, DollarSign, Store, ShieldCheck, AlertCircle, MessageCircle } from 'lucide-react';
+import { getCashPayments } from '@/lib/dal/portal';
 
 interface CashPaymentRequest {
   id: string;
   commerceName: string;
   ownerName: string;
   phone: string;
-  planName: 'Bronce' | 'Plata' | 'Oro';
+  planName: string;
   amount: number;
   city: string;
-  date: string;
-  status: 'pendiente' | 'aprobado';
+  date?: string;
+  status: string;
 }
 
 export function CashPaymentsManager() {
-  const [requests, setRequests] = useState<CashPaymentRequest[]>([
-    {
-      id: 'cash-101',
-      commerceName: 'Bodega La Candelaria',
-      ownerName: 'Marcos Benítez',
-      phone: '3454891234',
-      planName: 'Oro',
-      amount: 45000,
-      city: 'Concordia',
-      date: '2026-09-21 18:30',
-      status: 'pendiente'
-    },
-    {
-      id: 'cash-102',
-      commerceName: 'Alfajores Del Litoral',
-      ownerName: 'Sofía Giménez',
-      phone: '3435112233',
-      planName: 'Plata',
-      amount: 28000,
-      city: 'Paraná',
-      date: '2026-09-21 14:15',
-      status: 'pendiente'
-    },
-    {
-      id: 'cash-103',
-      commerceName: 'Paraná Mobile Repair',
-      ownerName: 'Esteban Ramírez',
-      phone: '3434998877',
-      planName: 'Bronce',
-      amount: 15000,
-      city: 'Paraná',
-      date: '2026-09-20 11:00',
-      status: 'aprobado'
-    }
-  ]);
-
+  const [requests, setRequests] = useState<CashPaymentRequest[]>([]);
   const [notification, setNotification] = useState<string | null>(null);
+
+  useEffect(() => {
+    async function loadCashPayments() {
+      try {
+        const fetched = await getCashPayments();
+        if (fetched) {
+          setRequests(
+            fetched.map((p) => ({
+              id: p.id,
+              commerceName: p.commerceName,
+              ownerName: p.ownerName,
+              phone: p.phoneWhatsApp,
+              planName: p.planName,
+              amount: p.amount,
+              city: p.cityName,
+              status: p.status || 'PENDING',
+              date: p.createdAt ? new Date(p.createdAt).toLocaleString('es-AR') : undefined,
+            }))
+          );
+        }
+      } catch (e) {
+        console.warn('Error cargando pagos en efectivo:', e);
+      }
+    }
+    loadCashPayments();
+  }, []);
+
+
 
   const handleApprove = (reqId: string, commerceName: string, planName: string) => {
     setRequests((prev) =>

@@ -16,13 +16,15 @@ import {
   Sparkles,
   Send
 } from 'lucide-react';
+import { getJobs } from '@/lib/dal/portal';
+import { createJobAction } from '@/server/actions/superadmin';
 
 interface JobItem {
   id: string;
   title: string;
   company: string;
   city: string;
-  type: 'Tiempo Completo' | 'Medio Tiempo' | 'Pasantía';
+  type: string;
   salary: string;
   description: string;
   phone: string;
@@ -103,7 +105,7 @@ const INITIAL_CANDIDATES: CandidateProfile[] = [
 ];
 
 export default function EmpleosPage() {
-  const [jobs, setJobs] = useState<JobItem[]>(INITIAL_JOBS);
+  const [jobs, setJobs] = useState<JobItem[]>([]);
   const [candidates, setCandidates] = useState<CandidateProfile[]>(INITIAL_CANDIDATES);
   const [activeTab, setActiveTab] = useState<'offers' | 'candidates'>('offers');
   const [selectedCity, setSelectedCity] = useState('all');
@@ -117,6 +119,7 @@ export default function EmpleosPage() {
   const [newSalary, setNewSalary] = useState('');
   const [newDescription, setNewDescription] = useState('');
   const [newPhone, setNewPhone] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Candidate Submission State
   const [showCandidateModal, setShowCandidateModal] = useState(false);
@@ -128,6 +131,31 @@ export default function EmpleosPage() {
   const [candPhone, setCandPhone] = useState('');
 
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
+
+  React.useEffect(() => {
+    async function loadJobsFromSupabase() {
+      try {
+        const fetched = await getJobs();
+        if (fetched) {
+          const mapped: JobItem[] = fetched.map((j) => ({
+            id: j.id,
+            title: j.title,
+            company: j.company,
+            city: j.cityName,
+            type: j.jobType || 'Tiempo Completo',
+            salary: j.salary || 'A convenir',
+            description: j.description,
+            phone: j.phoneWhatsApp,
+          }));
+          setJobs(mapped);
+        }
+      } catch (e) {
+        console.warn('Error al cargar empleos:', e);
+      }
+    }
+    loadJobsFromSupabase();
+  }, []);
+
 
   const filteredJobs = jobs.filter((j) => {
     const matchesCity = selectedCity === 'all' || j.city.toLowerCase() === selectedCity.toLowerCase();
@@ -147,10 +175,11 @@ export default function EmpleosPage() {
     return matchesCity && matchesQuery;
   });
 
-  const handleCreateJob = (e: React.FormEvent) => {
+  const handleCreateJob = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newTitle || !newCompany || !newPhone) return;
+    if (!newTitle || !newCompany || !newPhone || isSubmitting) return;
 
+    setIsSubmitting(true);
     const newJob: JobItem = {
       id: `j-${Date.now()}`,
       title: newTitle,
@@ -162,6 +191,21 @@ export default function EmpleosPage() {
       phone: newPhone
     };
 
+    try {
+      await createJobAction({
+        title: newTitle,
+        company: newCompany,
+        cityName: newCity,
+        salary: newSalary || 'A convenir',
+        description: newDescription || 'Búsqueda activa publicada en ON MÁS.',
+        phoneWhatsApp: newPhone,
+      });
+    } catch (err) {
+      console.warn('Error al crear empleo:', err);
+    } finally {
+      setIsSubmitting(false);
+    }
+
     setJobs([newJob, ...jobs]);
     setShowOfferModal(false);
     setNewTitle('');
@@ -172,6 +216,7 @@ export default function EmpleosPage() {
     setSuccessMsg(`¡Tu oferta laboral "${newJob.title}" fue publicada exitosamente en Empleos ON MÁS!`);
     setTimeout(() => setSuccessMsg(null), 4000);
   };
+
 
   const handleCreateCandidate = (e: React.FormEvent) => {
     e.preventDefault();

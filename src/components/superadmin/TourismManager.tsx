@@ -1,7 +1,9 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Compass, Plus, CheckCircle2, MapPin, Umbrella, Star, ShieldCheck, ExternalLink } from 'lucide-react';
+import { getTourismServices } from '@/lib/dal/portal';
+import { createTourismServiceAction } from '@/server/actions/superadmin';
 
 interface TourismService {
   id: string;
@@ -9,40 +11,12 @@ interface TourismService {
   category: string;
   city: string;
   price: string;
-  plan: 'Bronce' | 'Plata' | 'Oro';
+  plan: string;
   imageUrl: string;
 }
 
 export function TourismManager() {
-  const [services, setServices] = useState<TourismService[]>([
-    {
-      id: 'tour-1',
-      name: 'Paseo Guiado en Lancha por Islas del Paraná',
-      category: 'Excursión / Náutica',
-      city: 'Paraná',
-      price: '$18.000 / pers.',
-      plan: 'Oro',
-      imageUrl: 'https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&w=600&q=80'
-    },
-    {
-      id: 'tour-2',
-      name: 'Cabañas Termales Sol de Colón',
-      category: 'Alojamiento & Termas',
-      city: 'Colón',
-      price: '$45.000 / noche',
-      plan: 'Plata',
-      imageUrl: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=600&q=80'
-    },
-    {
-      id: 'tour-3',
-      name: 'Degustación & Visita Guiada Viñedos La Candelaria',
-      category: 'Enoturismo / Bodegas',
-      city: 'Concordia',
-      price: '$22.000 / pers.',
-      plan: 'Oro',
-      imageUrl: 'https://images.unsplash.com/photo-1510812431401-41d2bd2722f3?auto=format&fit=crop&w=600&q=80'
-    }
-  ]);
+  const [services, setServices] = useState<TourismService[]>([]);
 
   const [name, setName] = useState('');
   const [category, setCategory] = useState('Alojamiento & Termas');
@@ -51,11 +25,38 @@ export function TourismManager() {
   const [plan, setPlan] = useState<'Bronce' | 'Plata' | 'Oro'>('Plata');
   const [imageUrl, setImageUrl] = useState('');
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleCreateService = (e: React.FormEvent) => {
+  useEffect(() => {
+    async function loadServices() {
+      try {
+        const fetched = await getTourismServices();
+        if (fetched) {
+          setServices(
+            fetched.map((t) => ({
+              id: t.id,
+              name: t.name,
+              category: t.category,
+              city: t.cityName,
+              price: t.price,
+              plan: t.planTier || 'Plata',
+              imageUrl: t.imageUrl,
+            }))
+          );
+        }
+      } catch (e) {
+        console.warn('Error cargando servicios turísticos:', e);
+      }
+    }
+    loadServices();
+  }, []);
+
+
+  const handleCreateService = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name) return;
+    if (!name || isSubmitting) return;
 
+    setIsSubmitting(true);
     const newService: TourismService = {
       id: `tour-${Date.now()}`,
       name,
@@ -66,6 +67,21 @@ export function TourismManager() {
       imageUrl: imageUrl || 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=600&q=80'
     };
 
+    try {
+      await createTourismServiceAction({
+        name,
+        category,
+        cityName: city,
+        price: price || 'Consultar tarifa',
+        planTier: plan,
+        imageUrl: imageUrl || '/images/city-federacion.jpg',
+      });
+    } catch (e) {
+      console.warn('Error creando servicio de turismo:', e);
+    } finally {
+      setIsSubmitting(false);
+    }
+
     setServices([newService, ...services]);
     setName('');
     setPrice('');
@@ -73,6 +89,7 @@ export function TourismManager() {
     setSuccessMsg(`¡Servicio de Turismo "${newService.name}" creado exitosamente!`);
     setTimeout(() => setSuccessMsg(null), 3000);
   };
+
 
   return (
     <div className="space-y-8">

@@ -1,64 +1,63 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Briefcase, Plus, CheckCircle2, UserCheck, MapPin, Building, Calendar, ArrowRight, ShieldCheck } from 'lucide-react';
+import { getJobs } from '@/lib/dal/portal';
+import { createJobAction } from '@/server/actions/superadmin';
 
 interface JobOffer {
   id: string;
   title: string;
   company: string;
   city: string;
-  type: 'Tiempo Completo' | 'Medio Tiempo' | 'Pasantía';
+  type: string;
   salary: string;
   applicantsCount: number;
-  status: 'activa' | 'cerrada';
+  status: string;
 }
 
 export function JobsManager() {
-  const [jobs, setJobs] = useState<JobOffer[]>([
-    {
-      id: 'job-1',
-      title: 'Vendedor / Atención al Cliente B2B',
-      company: 'Citrus & Dulces Concordia',
-      city: 'Concordia',
-      type: 'Tiempo Completo',
-      salary: '$650.000 / mes',
-      applicantsCount: 14,
-      status: 'activa'
-    },
-    {
-      id: 'job-2',
-      title: 'Cocinero de Especialidad Pescados de Río',
-      company: 'Comedor El Dorado',
-      city: 'Paraná',
-      type: 'Tiempo Completo',
-      salary: '$720.000 / mes',
-      applicantsCount: 8,
-      status: 'activa'
-    },
-    {
-      id: 'job-3',
-      title: 'Recepcionista para Complejo Termal',
-      company: 'Posada Sol de Federación',
-      city: 'Federación',
-      type: 'Medio Tiempo',
-      salary: '$420.000 / mes',
-      applicantsCount: 22,
-      status: 'activa'
-    }
-  ]);
+  const [jobs, setJobs] = useState<JobOffer[]>([]);
 
   const [title, setTitle] = useState('');
   const [company, setCompany] = useState('');
   const [city, setCity] = useState('Paraná');
   const [salary, setSalary] = useState('');
-  const [type, setType] = useState<'Tiempo Completo' | 'Medio Tiempo' | 'Pasantía'>('Tiempo Completo');
+  const [type, setType] = useState<string>('Tiempo Completo');
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleCreateJob = (e: React.FormEvent) => {
+  useEffect(() => {
+    async function loadJobs() {
+      try {
+        const fetched = await getJobs();
+        if (fetched) {
+          setJobs(
+            fetched.map((j) => ({
+              id: j.id,
+              title: j.title,
+              company: j.company,
+              city: j.cityName,
+              type: j.jobType || 'Tiempo Completo',
+              salary: j.salary || 'A convenir',
+              applicantsCount: 0,
+              status: j.status || 'activa',
+            }))
+          );
+        }
+      } catch (e) {
+        console.warn('Error cargando empleos:', e);
+      }
+    }
+    loadJobs();
+  }, []);
+
+
+  const handleCreateJob = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!title || !company) return;
+    if (!title || !company || isSubmitting) return;
 
+    setIsSubmitting(true);
     const newJob: JobOffer = {
       id: `job-${Date.now()}`,
       title,
@@ -70,6 +69,22 @@ export function JobsManager() {
       status: 'activa'
     };
 
+    try {
+      await createJobAction({
+        title,
+        company,
+        cityName: city,
+        jobType: type,
+        salary: salary || 'A convenir',
+        description: `Búsqueda laboral publicada para ${company} en ${city}.`,
+        phoneWhatsApp: '5493434567890',
+      });
+    } catch (e) {
+      console.warn('Error creando trabajo en Supabase:', e);
+    } finally {
+      setIsSubmitting(false);
+    }
+
     setJobs([newJob, ...jobs]);
     setTitle('');
     setCompany('');
@@ -77,6 +92,7 @@ export function JobsManager() {
     setSuccessMsg(`¡Búsqueda laboral "${newJob.title}" publicada en la sección Empleos!`);
     setTimeout(() => setSuccessMsg(null), 3000);
   };
+
 
   return (
     <div className="space-y-8">

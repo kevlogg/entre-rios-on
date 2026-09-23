@@ -1,8 +1,9 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Gift, Trophy, Ticket, Users, RefreshCw, CheckCircle2, Sparkles, MapPin, Phone, Plus } from 'lucide-react';
 import { drawRaffleWinnerAction } from '@/server/actions/superadmin';
+import { getRaffles } from '@/lib/dal/portal';
 
 interface ActiveRaffle {
   id: string;
@@ -12,7 +13,7 @@ interface ActiveRaffle {
   endDate: string;
   participantsCount: number;
   imageUrl: string;
-  status: 'activo' | 'finalizado';
+  status: string;
 }
 
 interface PastWinner {
@@ -33,49 +34,37 @@ const MOCK_PARTICIPANTS = [
   { id: '5', name: 'Lucía Maidana', city: 'Federación', phone: '3456 422334' },
 ];
 
-const PAST_WINNERS_HISTORY: PastWinner[] = [
-  {
-    id: 'pw-1',
-    raffleTitle: 'Sorteo Termal Villa Elisa 2x1',
-    drawDate: '15 Agosto, 2026',
-    winnerName: 'Esteban Ramírez',
-    winnerCity: 'Concepción del Uruguay',
-    winnerPhone: '3442 554433',
-    prize: 'Pase Full Termas + Almuerzo'
-  },
-  {
-    id: 'pw-2',
-    raffleTitle: 'Voucher Gastronómico $150.000',
-    drawDate: '30 Julio, 2026',
-    winnerName: 'Carolina Rossi',
-    winnerCity: 'Paraná',
-    winnerPhone: '343 4889900',
-    prize: 'Cena para 4 personas en El Dorado'
-  },
-  {
-    id: 'pw-3',
-    raffleTitle: 'Pase de Aventura & Kayak Paraná',
-    drawDate: '10 Junio, 2026',
-    winnerName: 'Gonzalo Fernández',
-    winnerCity: 'Gualeguaychú',
-    winnerPhone: '3446 612233',
-    prize: 'Excursión Guiada en Kayak'
-  }
-];
+const PAST_WINNERS_HISTORY: PastWinner[] = [];
 
 export function RafflesManager() {
-  const [raffles, setRaffles] = useState<ActiveRaffle[]>([
-    {
-      id: 'raffle-1',
-      title: 'Sorteo Estancia Termal Federación 3D/2N',
-      prize: 'Alojamiento 3 días y 2 noches con pases libres',
-      city: 'Federación',
-      endDate: '30 Septiembre, 2026',
-      participantsCount: 3420,
-      imageUrl: 'https://images.unsplash.com/photo-1540555700478-4be289fbecef?auto=format&fit=crop&w=600&q=80',
-      status: 'activo'
+  const [raffles, setRaffles] = useState<ActiveRaffle[]>([]);
+
+  useEffect(() => {
+    async function loadRaffles() {
+      try {
+        const fetched = await getRaffles();
+        if (fetched) {
+          setRaffles(
+            fetched.map((r) => ({
+              id: r.id,
+              title: r.title,
+              prize: r.prize,
+              city: 'Federación',
+              endDate: r.drawDate ? new Date(r.drawDate).toLocaleDateString('es-AR') : 'Próximamente',
+              participantsCount: 0,
+              imageUrl: r.imageUrl || '/images/city-federacion.jpg',
+              status: r.status,
+            }))
+          );
+        }
+      } catch (e) {
+        console.warn('Error cargando sorteos:', e);
+      }
     }
-  ]);
+    loadRaffles();
+  }, []);
+
+
 
   const [pastWinners, setPastWinners] = useState<PastWinner[]>(PAST_WINNERS_HISTORY);
 

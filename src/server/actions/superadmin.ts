@@ -221,3 +221,108 @@ export async function drawRaffleWinnerAction(
     return { success: false, message: `Error en sorteador: ${(err as Error).message}` };
   }
 }
+
+export async function createTourismServiceAction(serviceData: {
+  name: string;
+  category: string;
+  cityName: string;
+  provinceId?: string;
+  price: string;
+  planTier?: string;
+  imageUrl?: string;
+}): Promise<{ success: boolean; message: string }> {
+  try {
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+
+    if (supabaseUrl && !supabaseUrl.includes('your-supabase-project')) {
+      const supabase = await createClient();
+      const { error } = await supabase.from('tourism_services').insert({
+        name: serviceData.name,
+        category: serviceData.category,
+        city_name: serviceData.cityName,
+        province_id: serviceData.provinceId || 'entre-rios',
+        price: serviceData.price,
+        plan_tier: serviceData.planTier || 'Plata',
+        image_url: serviceData.imageUrl || '/images/city-federacion.jpg',
+        is_verified: true,
+      });
+
+      if (error) {
+        return { success: false, message: `Error en Supabase: ${error.message}` };
+      }
+
+      revalidatePath('/turismo');
+      revalidatePath('/superadmin');
+      return { success: true, message: 'Servicio turístico registrado con éxito en Supabase.' };
+    }
+
+    revalidatePath('/turismo');
+    revalidatePath('/superadmin');
+    return { success: true, message: 'Servicio turístico guardado en modo demostración.' };
+  } catch (err) {
+    return { success: false, message: `Error: ${(err as Error).message}` };
+  }
+}
+
+export async function deleteTourismServiceAction(serviceId: string): Promise<{ success: boolean; message: string }> {
+  try {
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+
+    if (supabaseUrl && !supabaseUrl.includes('your-supabase-project')) {
+      const supabase = await createClient();
+      const { error } = await supabase.from('tourism_services').delete().eq('id', serviceId);
+
+      if (error) {
+        return { success: false, message: `Error eliminando servicio: ${error.message}` };
+      }
+
+      revalidatePath('/turismo');
+      revalidatePath('/superadmin');
+      return { success: true, message: 'Servicio turístico eliminado.' };
+    }
+
+    revalidatePath('/turismo');
+    return { success: true, message: 'Servicio eliminado en modo demostración.' };
+  } catch (err) {
+    return { success: false, message: `Error: ${(err as Error).message}` };
+  }
+}
+
+export async function createCashPaymentAction(paymentData: {
+  commerceName: string;
+  ownerName: string;
+  phoneWhatsApp: string;
+  planName: 'Bronce' | 'Plata' | 'Oro';
+  amount: number;
+  cityName: string;
+}): Promise<{ success: boolean; message: string }> {
+  try {
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+
+    if (supabaseUrl && !supabaseUrl.includes('your-supabase-project')) {
+      const supabase = await createClient();
+      const { error } = await supabase.from('cash_payments').insert({
+        commerce_name: paymentData.commerceName,
+        owner_name: paymentData.ownerName,
+        phone_whatsapp: paymentData.phoneWhatsApp,
+        plan_name: paymentData.planName,
+        amount: paymentData.amount,
+        city_name: paymentData.cityName,
+        status: 'PENDING',
+      });
+
+      if (error) {
+        return { success: false, message: `Error registrando pago: ${error.message}` };
+      }
+
+      revalidatePath('/superadmin');
+      return { success: true, message: 'Solicitud de pago en efectivo registrada en Supabase.' };
+    }
+
+    revalidatePath('/superadmin');
+    return { success: true, message: 'Pago en efectivo registrado en modo demostración.' };
+  } catch (err) {
+    return { success: false, message: `Error: ${(err as Error).message}` };
+  }
+}
+

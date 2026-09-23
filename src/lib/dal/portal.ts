@@ -1,4 +1,18 @@
-import { City, Commerce, Product, CommunityEvent, BannerSlide } from '@/types';
+import { 
+  City, 
+  Commerce, 
+  Product, 
+  CommunityEvent, 
+  BannerSlide, 
+  JobItem, 
+  TourismService, 
+  ClassifiedItem, 
+  WebRequest, 
+  CashPayment, 
+  Raffle, 
+  RaffleParticipant 
+} from '@/types';
+
 import { ALL_CITIES } from '@/lib/constants/locations';
 
 // Mock Cities Data
@@ -660,7 +674,7 @@ export async function getCities(): Promise<City[]> {
       const { createPublicClient } = await import('@/lib/supabase/public');
       const supabase = createPublicClient();
       const { data, error } = await supabase.from('cities').select('*');
-      if (!error && data && data.length > 0) {
+      if (!error && Array.isArray(data)) {
         return data.map((c) => ({
           id: c.id,
           name: c.name,
@@ -685,8 +699,9 @@ export async function getCityBySlug(slug: string): Promise<City | undefined> {
     try {
       const { createPublicClient } = await import('@/lib/supabase/public');
       const supabase = createPublicClient();
-      const { data, error } = await supabase.from('cities').select('*').or(`slug.eq.${slug},id.eq.${slug}`).single();
-      if (!error && data) {
+      const { data, error } = await supabase.from('cities').select('*').or(`slug.eq.${slug},id.eq.${slug}`).maybeSingle();
+      if (!error) {
+        if (!data) return undefined;
         return {
           id: data.id,
           name: data.name,
@@ -699,7 +714,7 @@ export async function getCityBySlug(slug: string): Promise<City | undefined> {
         };
       }
     } catch (e) {
-      console.warn('Fallback to mock city detail:', e);
+      console.warn('Error fetching city from Supabase:', e);
     }
   }
   await simulateNetworkDelay();
@@ -716,7 +731,7 @@ export async function getHeroSlides(provinceId?: string): Promise<BannerSlide[]>
         query = query.eq('province_id', provinceId);
       }
       const { data, error } = await query;
-      if (!error && data && data.length > 0) {
+      if (!error && Array.isArray(data)) {
         return data.map((slide) => ({
           id: slide.id,
           title: slide.title,
@@ -757,7 +772,7 @@ export async function getFeaturedProducts(cityId?: string, categoryId?: string, 
         query = query.eq('province_id', provinceId);
       }
       const { data, error } = await query;
-      if (!error && data && data.length > 0) {
+      if (!error && Array.isArray(data)) {
         return data.map((p) => ({
           id: p.id,
           title: p.title,
@@ -807,8 +822,9 @@ export async function getProductBySlug(slug: string): Promise<Product | undefine
     try {
       const { createPublicClient } = await import('@/lib/supabase/public');
       const supabase = createPublicClient();
-      const { data, error } = await supabase.from('products').select('*').or(`slug.eq.${slug},id.eq.${slug}`).single();
-      if (!error && data) {
+      const { data, error } = await supabase.from('products').select('*').or(`slug.eq.${slug},id.eq.${slug}`).maybeSingle();
+      if (!error) {
+        if (!data) return undefined;
         return {
           id: data.id,
           title: data.title,
@@ -829,7 +845,7 @@ export async function getProductBySlug(slug: string): Promise<Product | undefine
         };
       }
     } catch (e) {
-      console.warn('Fallback to mock product detail:', e);
+      console.warn('Error fetching product from Supabase:', e);
     }
   }
 
@@ -843,7 +859,7 @@ export async function getAllCommerces(): Promise<Commerce[]> {
       const { createPublicClient } = await import('@/lib/supabase/public');
       const supabase = createPublicClient();
       const { data, error } = await supabase.from('commerces').select('*');
-      if (!error && data && data.length > 0) {
+      if (!error && Array.isArray(data)) {
         return data.map((c) => ({
           id: c.id,
           name: c.name,
@@ -895,7 +911,8 @@ export async function getCommerceBySlug(slug: string): Promise<Commerce | undefi
 
       const { data, error } = await query.limit(1);
 
-      if (!error && data && data.length > 0) {
+      if (!error) {
+        if (!data || data.length === 0) return undefined;
         const item = data[0];
         return {
           id: item.id,
@@ -969,7 +986,7 @@ export async function getProductsByCommerce(commerceId: string): Promise<Product
       const { createPublicClient } = await import('@/lib/supabase/public');
       const supabase = createPublicClient();
       const { data, error } = await supabase.from('products').select('*').eq('commerce_id', commerceId);
-      if (!error && data && data.length > 0) {
+      if (!error && Array.isArray(data)) {
         return data.map((p) => ({
           id: p.id,
           title: p.title,
@@ -1008,7 +1025,7 @@ export async function getUpcomingEvents(cityId?: string): Promise<CommunityEvent
         query = query.eq('city_id', cityId);
       }
       const { data, error } = await query;
-      if (!error && data && data.length > 0) {
+      if (!error && Array.isArray(data)) {
         return data.map((e) => ({
           id: e.id,
           title: e.title,
@@ -1046,8 +1063,9 @@ export async function getEventById(id: string): Promise<CommunityEvent | undefin
     try {
       const { createPublicClient } = await import('@/lib/supabase/public');
       const supabase = createPublicClient();
-      const { data, error } = await supabase.from('community_events').select('*').eq('id', id).single();
-      if (!error && data) {
+      const { data, error } = await supabase.from('community_events').select('*').eq('id', id).maybeSingle();
+      if (!error) {
+        if (!data) return undefined;
         return {
           id: data.id,
           title: data.title,
@@ -1069,7 +1087,7 @@ export async function getEventById(id: string): Promise<CommunityEvent | undefin
         };
       }
     } catch (e) {
-      console.warn('Fallback to mock event detail:', e);
+      console.warn('Error fetching event from Supabase:', e);
     }
   }
 
@@ -1089,4 +1107,331 @@ export async function getBentoHighlights(): Promise<{
     weekendEvent: events[0] || COMMUNITY_EVENTS_MOCK[0],
   };
 }
+
+export async function getJobs(provinceId?: string, cityName?: string): Promise<JobItem[]> {
+  if (isSupabaseConfigured()) {
+    try {
+      const { createPublicClient } = await import('@/lib/supabase/public');
+      const supabase = createPublicClient();
+      let query = supabase.from('jobs').select('*').order('created_at', { ascending: false });
+      if (provinceId && provinceId !== 'all') {
+        query = query.eq('province_id', provinceId);
+      }
+      if (cityName && cityName !== 'all') {
+        query = query.ilike('city_name', `%${cityName}%`);
+      }
+      const { data, error } = await query;
+      if (!error && Array.isArray(data)) {
+        return data.map((j) => ({
+          id: j.id,
+          title: j.title,
+          company: j.company,
+          cityName: j.city_name,
+          provinceId: j.province_id,
+          jobType: j.job_type,
+          salary: j.salary,
+          description: j.description,
+          phoneWhatsApp: j.phone_whatsapp,
+          status: j.status,
+          createdAt: j.created_at,
+        }));
+      }
+    } catch (e) {
+      console.warn('Fallback to mock jobs:', e);
+    }
+  }
+
+  await simulateNetworkDelay();
+  return [
+    {
+      id: 'j1',
+      title: 'Vendedor B2B & Atención de Showroom',
+      company: 'Citrus & Dulces del Uruguay',
+      cityName: 'Concordia',
+      provinceId: 'entre-rios',
+      jobType: 'Tiempo Completo',
+      salary: '$650.000 / mes',
+      description: 'Buscamos persona proactiva con experiencia en ventas comerciales, manejo de WhatsApp Business y atención al cliente.',
+      phoneWhatsApp: '5493454891234',
+    },
+    {
+      id: 'j2',
+      title: 'Cocinero de Especialidad Pescados de Río',
+      company: 'Comedor El Dorado',
+      cityName: 'Paraná',
+      provinceId: 'entre-rios',
+      jobType: 'Tiempo Completo',
+      salary: '$720.000 / mes',
+      description: 'Restaurante de barranca solicita cocinero con experiencia comprobable en pescados a la parrilla y minutas.',
+      phoneWhatsApp: '5493434123456',
+    },
+    {
+      id: 'j3',
+      title: 'Recepcionista para Complejo Termal',
+      company: 'Posada Sol de Federación',
+      cityName: 'Federación',
+      provinceId: 'entre-rios',
+      jobType: 'Medio Tiempo',
+      salary: '$420.000 / mes',
+      description: 'Atención al huésped, gestión de reservas y asesoramiento turístico. Buena presencia e idioma inglés deseable.',
+      phoneWhatsApp: '5493456112233',
+    },
+    {
+      id: 'j4',
+      title: 'Encargado de Logística & Reparto Regional',
+      company: 'Alfarería & Cerámica Delta',
+      cityName: 'Colón',
+      provinceId: 'entre-rios',
+      jobType: 'Tiempo Completo',
+      salary: '$580.000 / mes',
+      description: 'Despacho de encomiendas, embalaje de productos delicados y coordinación de fleteros en la provincia.',
+      phoneWhatsApp: '5493447998877',
+    },
+  ];
+}
+
+export async function getTourismServices(provinceId?: string, category?: string): Promise<TourismService[]> {
+  if (isSupabaseConfigured()) {
+    try {
+      const { createPublicClient } = await import('@/lib/supabase/public');
+      const supabase = createPublicClient();
+      let query = supabase.from('tourism_services').select('*').order('created_at', { ascending: false });
+      if (provinceId && provinceId !== 'all') {
+        query = query.eq('province_id', provinceId);
+      }
+      if (category && category !== 'all') {
+        query = query.ilike('category', `%${category}%`);
+      }
+      const { data, error } = await query;
+      if (!error && Array.isArray(data)) {
+        return data.map((t) => ({
+          id: t.id,
+          name: t.name,
+          category: t.category,
+          cityName: t.city_name,
+          provinceId: t.province_id,
+          price: t.price,
+          planTier: t.plan_tier,
+          imageUrl: t.image_url,
+          description: t.description || 'Experiencia turística destacada en el litoral.',
+          phoneWhatsApp: t.phone_whatsapp || '5493456411223',
+          isVerified: t.is_verified,
+          createdAt: t.created_at,
+        }));
+      }
+    } catch (e) {
+      console.warn('Fallback to mock tourism services:', e);
+    }
+  }
+
+  await simulateNetworkDelay();
+  return [
+    {
+      id: 't1',
+      name: 'Complejo Termal & Spa Federación',
+      category: 'Termas & Relax',
+      cityName: 'Federación',
+      provinceId: 'entre-rios',
+      price: 'Desde $12.500',
+      planTier: 'Oro',
+      imageUrl: '/images/city-federacion.jpg',
+      description: 'Parque termal pionero a orillas del Lago Salto Grande con piscinas cubiertas, parque acuático y zona de relajación.',
+      phoneWhatsApp: '5493456411223',
+      isVerified: true,
+    },
+    {
+      id: 't2',
+      name: 'Playas de Arena Blanca & Ribera del Uruguay',
+      category: 'Playas & Náutica',
+      cityName: 'Colón',
+      provinceId: 'entre-rios',
+      price: 'Entrada Libre',
+      planTier: 'Plata',
+      imageUrl: '/images/city-colon.jpg',
+      description: 'Kilómetros de islas, bancos de arena blanca y excursiones en catamarán sobre el río Uruguay.',
+      phoneWhatsApp: '5493447451234',
+      isVerified: true,
+    },
+    {
+      id: 't3',
+      name: 'Bodega Boutique & Enoturismo Litoral',
+      category: 'Enoturismo & Vinos',
+      cityName: 'Gualeguaychú',
+      provinceId: 'entre-rios',
+      price: 'Degustación $18.000',
+      planTier: 'Oro',
+      imageUrl: '/images/city-gualeguaychu.jpg',
+      description: 'Visitas guiadas entre viñedos regionales, degustaciones de Tannat y Chardonnay, con almuerzos campestres.',
+      phoneWhatsApp: '5493446584321',
+      isVerified: true,
+    },
+    {
+      id: 't4',
+      name: 'Barrancas del Paraná & Parque Urquiza',
+      category: 'Paseos Urbano-Culturales',
+      cityName: 'Paraná',
+      provinceId: 'entre-rios',
+      price: 'Paseo Guiado Gratis',
+      planTier: 'Bronce',
+      imageUrl: '/images/city-parana.jpg',
+      description: 'Miradores panorámicos sobre el río Paraná, paseos gastronómicos en Puerto Sánchez y patrimonio histórico.',
+      phoneWhatsApp: '5493434112233',
+      isVerified: true,
+    },
+  ];
+}
+
+
+export async function getClassifieds(category?: string): Promise<ClassifiedItem[]> {
+  if (isSupabaseConfigured()) {
+    try {
+      const { createPublicClient } = await import('@/lib/supabase/public');
+      const supabase = createPublicClient();
+      let query = supabase.from('classifieds').select('*').eq('status', 'APPROVED').order('created_at', { ascending: false });
+      if (category && category !== 'all') {
+        query = query.ilike('category', `%${category}%`);
+      }
+      const { data, error } = await query;
+      if (!error && Array.isArray(data)) {
+        return data.map((c) => ({
+          id: c.id,
+          title: c.title,
+          category: c.category,
+          provinceId: c.province_id,
+          cityName: c.city_name,
+          price: c.price,
+          imageUrl: c.image_url,
+          description: c.description,
+          phoneWhatsApp: c.phone_whatsapp,
+          status: c.status,
+          createdAt: c.created_at,
+        }));
+      }
+    } catch (e) {
+      console.warn('Fallback to mock classifieds:', e);
+    }
+  }
+
+  await simulateNetworkDelay();
+  return [];
+}
+
+export async function getWebRequests(): Promise<WebRequest[]> {
+  if (isSupabaseConfigured()) {
+    try {
+      const { createPublicClient } = await import('@/lib/supabase/public');
+      const supabase = createPublicClient();
+      const { data, error } = await supabase.from('web_requests').select('*').order('created_at', { ascending: false });
+      if (!error && Array.isArray(data)) {
+        return data.map((r) => ({
+          id: r.id,
+          businessName: r.business_name,
+          contactName: r.contact_name,
+          phoneWhatsApp: r.phone_whatsapp,
+          email: r.email,
+          desiredDomain: r.desired_domain,
+          notes: r.notes,
+          status: r.status,
+          createdAt: r.created_at,
+        }));
+      }
+    } catch (e) {
+      console.warn('Fallback to mock web requests:', e);
+    }
+  }
+
+  await simulateNetworkDelay();
+  return [
+    {
+      id: 'wr-1',
+      businessName: 'Bodega La Candelaria',
+      contactName: 'Carlos Gómez',
+      phoneWhatsApp: '5493446584321',
+      email: 'contacto@lacandelaria.com',
+      desiredDomain: 'bodegalacandelaria.com.ar',
+      notes: 'Solicitud de sitio e-commerce para catálogo de vinos y reservas enológicas.',
+      status: 'PENDING',
+      createdAt: new Date().toISOString(),
+    },
+    {
+      id: 'wr-2',
+      businessName: 'Alfarería & Cerámica Delta',
+      contactName: 'Mariana Benítez',
+      phoneWhatsApp: '5493447451234',
+      email: 'ventas@alfareriadelta.com.ar',
+      desiredDomain: 'alfareriadelta.com.ar',
+      notes: 'Sitio institucional con muestra de obras de barro litoraleño.',
+      status: 'CONTACTED',
+      createdAt: new Date().toISOString(),
+    }
+  ];
+}
+
+export async function getCashPayments(): Promise<CashPayment[]> {
+  if (isSupabaseConfigured()) {
+    try {
+      const { createPublicClient } = await import('@/lib/supabase/public');
+      const supabase = createPublicClient();
+      const { data, error } = await supabase.from('cash_payments').select('*').order('created_at', { ascending: false });
+      if (!error && Array.isArray(data)) {
+        return data.map((p) => ({
+          id: p.id,
+          commerceName: p.commerce_name,
+          ownerName: p.owner_name,
+          phoneWhatsApp: p.phone_whatsapp,
+          planName: p.plan_name,
+          amount: Number(p.amount),
+          cityName: p.city_name,
+          status: p.status,
+          createdAt: p.created_at,
+        }));
+      }
+    } catch (e) {
+      console.warn('Fallback to mock cash payments:', e);
+    }
+  }
+
+  await simulateNetworkDelay();
+  return [];
+}
+
+export async function getRaffles(): Promise<Raffle[]> {
+  if (isSupabaseConfigured()) {
+    try {
+      const { createPublicClient } = await import('@/lib/supabase/public');
+      const supabase = createPublicClient();
+      const { data, error } = await supabase.from('raffles').select('*').order('created_at', { ascending: false });
+      if (!error && Array.isArray(data)) {
+        return data.map((r) => ({
+          id: r.id,
+          title: r.title,
+          prize: r.prize,
+          sponsorName: r.sponsor_name,
+          imageUrl: r.image_url,
+          drawDate: r.draw_date,
+          status: r.status,
+          winnerName: r.winner_name,
+          winnerPhone: r.winner_phone,
+          createdAt: r.created_at,
+        }));
+      }
+    } catch (e) {
+      console.warn('Fallback to mock raffles:', e);
+    }
+  }
+
+  await simulateNetworkDelay();
+  return [
+    {
+      id: 'raf-1',
+      title: 'Sorteo Estancia Termal Federación 2026',
+      prize: '2 Noches para 2 personas + Pases Termales + Cena Litoraleña',
+      sponsorName: 'Termas Federación & Posada Sol',
+      imageUrl: '/images/city-federacion.jpg',
+      drawDate: '2026-09-30',
+      status: 'ACTIVE',
+    },
+  ];
+}
+
 
