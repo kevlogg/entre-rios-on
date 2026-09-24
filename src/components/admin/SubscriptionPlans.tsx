@@ -102,10 +102,10 @@ export function SubscriptionPlans({
         </div>
       )}
 
-      {/* ==================== PLANES ON MÁS (BRONCE, PLATA, ORO) ==================== */}
+      {/* ==================== PLANES ON MÁS (BRONCE $29k, PLATA $49k, ORO $99k) ==================== */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-stretch max-w-6xl mx-auto">
         
-        {/* 1. PLAN BRONCE ($15.000) */}
+        {/* 1. PLAN BRONCE ($29.000) */}
         <div className="bg-slate-50/80 border-2 border-slate-200 rounded-3xl p-6 flex flex-col justify-between space-y-6 transition-all hover:border-amber-600/50">
           <div className="space-y-4">
             <div className="flex items-center justify-between">
@@ -120,7 +120,7 @@ export function SubscriptionPlans({
             </div>
 
             <div className="py-3 border-y border-slate-200">
-              <span className="text-4xl font-black text-slate-900">$15.000</span>
+              <span className="text-4xl font-black text-slate-900">$29.000</span>
               <span className="text-xs font-bold text-slate-400"> / mes</span>
             </div>
 
@@ -146,17 +146,17 @@ export function SubscriptionPlans({
 
           <div className="space-y-2 pt-2">
             <button
-              onClick={() => handleSelectPlan('BRONCE', 'Plan Bronce ($15.000)')}
+              onClick={() => handleSelectPlan('BRONCE', 'Plan Bronce ($29.000)')}
               disabled={loadingTier === 'BRONCE'}
               className="w-full bg-[#0047BA] hover:bg-[#002878] text-white py-3.5 rounded-2xl font-black text-xs transition-transform active:scale-95 cursor-pointer shadow-md flex items-center justify-center gap-2"
             >
-              <span>{loadingTier === 'BRONCE' ? 'Procesando...' : 'Pagar con MercadoPago ($15.000)'}</span>
+              <span>{loadingTier === 'BRONCE' ? 'Procesando...' : 'Pagar con MercadoPago ($29.000)'}</span>
               <ArrowRight className="w-4 h-4" />
             </button>
 
             <button
               type="button"
-              onClick={() => handleCashPaymentRequest('Plan Bronce', 15000)}
+              onClick={() => handleCashPaymentRequest('Plan Bronce', 29000)}
               disabled={loadingTier === 'cash_Plan Bronce'}
               className="w-full bg-white border border-slate-200 hover:bg-slate-100 text-slate-800 py-2.5 rounded-xl font-extrabold text-xs transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
             >
@@ -166,7 +166,7 @@ export function SubscriptionPlans({
           </div>
         </div>
 
-        {/* 2. PLAN PLATA ($35.000) - RECOMENDADO */}
+        {/* 2. PLAN PLATA ($49.000) - RECOMENDADO */}
         <div className="relative bg-gradient-to-b from-blue-50/90 via-white to-slate-50 border-2 border-[#00ADB5] rounded-3xl p-6 flex flex-col justify-between space-y-6 shadow-xl">
           <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-gradient-to-r from-[#00ADB5] to-[#0047BA] text-white text-[11px] font-black px-4 py-1 rounded-full uppercase tracking-wider shadow-md flex items-center gap-1.5">
             <Star className="w-3.5 h-3.5 fill-current" />
@@ -186,7 +186,7 @@ export function SubscriptionPlans({
             </div>
 
             <div className="py-3 border-y border-slate-200">
-              <span className="text-4xl font-black text-[#0047BA]">$35.000</span>
+              <span className="text-4xl font-black text-[#0047BA]">$49.000</span>
               <span className="text-xs font-bold text-slate-400"> / mes</span>
             </div>
 
@@ -216,17 +216,17 @@ export function SubscriptionPlans({
 
           <div className="space-y-2 pt-2">
             <button
-              onClick={() => handleSelectPlan('PLATA', 'Plan Plata ($35.000)')}
+              onClick={() => handleSelectPlan('PLATA', 'Plan Plata ($49.000)')}
               disabled={loadingTier === 'PLATA'}
               className="w-full bg-gradient-to-r from-[#00ADB5] to-[#0047BA] hover:from-[#00969d] hover:to-[#002878] text-white py-3.5 rounded-2xl font-black text-xs shadow-lg transition-transform active:scale-95 cursor-pointer flex items-center justify-center gap-2"
             >
-              <span>{loadingTier === 'PLATA' ? 'Procesando...' : 'Pagar con MercadoPago ($35.000)'}</span>
+              <span>{loadingTier === 'PLATA' ? 'Procesando...' : 'Pagar con MercadoPago ($49.000)'}</span>
               <ArrowRight className="w-4 h-4" />
             </button>
 
             <button
               type="button"
-              onClick={() => handleCashPaymentRequest('Plan Plata', 35000)}
+              onClick={() => handleCashPaymentRequest('Plan Plata', 49000)}
               disabled={loadingTier === 'cash_Plan Plata'}
               className="w-full bg-slate-100 hover:bg-slate-200 text-slate-800 py-2.5 rounded-xl font-extrabold text-xs transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
             >
@@ -236,7 +236,7 @@ export function SubscriptionPlans({
           </div>
         </div>
 
-        {/* 3. PLAN ORO ($65.000) - MÁXIMO ALCANCE / PORTADA PROVINCIAL */}
+        {/* 3. PLAN ORO ($99.000) - MÁXIMO ALCANCE / PORTADA PROVINCIAL */}
         <div className="relative bg-gradient-to-b from-[#1F1138] via-[#160b29] to-[#0d051a] border-2 border-amber-400 rounded-3xl p-6 flex flex-col justify-between space-y-6 shadow-2xl text-white">
           <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-gradient-to-r from-amber-400 via-amber-500 to-amber-600 text-slate-950 text-[11px] font-black px-4 py-1 rounded-full uppercase tracking-wider shadow-lg flex items-center gap-1.5">
             <Award className="w-3.5 h-3.5 fill-current" />
@@ -256,7 +256,7 @@ export function SubscriptionPlans({
             </div>
 
             <div className="py-3 border-y border-purple-800/80">
-              <span className="text-4xl font-black text-amber-300">$65.000</span>
+              <span className="text-4xl font-black text-amber-300">$99.000</span>
               <span className="text-xs font-bold text-purple-300"> / mes</span>
             </div>
 
@@ -286,17 +286,17 @@ export function SubscriptionPlans({
 
           <div className="space-y-2 pt-2">
             <button
-              onClick={() => handleSelectPlan('ORO', 'Plan Oro ($65.000)')}
+              onClick={() => handleSelectPlan('ORO', 'Plan Oro ($99.000)')}
               disabled={loadingTier === 'ORO'}
               className="w-full bg-gradient-to-r from-amber-400 via-amber-500 to-amber-600 hover:from-amber-300 hover:to-amber-500 text-slate-950 py-3.5 rounded-2xl font-black text-xs shadow-xl transition-transform active:scale-95 cursor-pointer flex items-center justify-center gap-2"
             >
-              <span>{loadingTier === 'ORO' ? 'Procesando...' : 'Pagar con MercadoPago ($65.000)'}</span>
+              <span>{loadingTier === 'ORO' ? 'Procesando...' : 'Pagar con MercadoPago ($99.000)'}</span>
               <ArrowRight className="w-4 h-4" />
             </button>
 
             <button
               type="button"
-              onClick={() => handleCashPaymentRequest('Plan Oro', 65000)}
+              onClick={() => handleCashPaymentRequest('Plan Oro', 99000)}
               disabled={loadingTier === 'cash_Plan Oro'}
               className="w-full bg-white/10 hover:bg-white/20 text-white py-2.5 rounded-xl font-extrabold text-xs transition-colors flex items-center justify-center gap-1.5 cursor-pointer border border-white/20"
             >

@@ -4,9 +4,9 @@ export async function createSubscriptionPreferenceAction(planTier: 'BRONCE' | 'P
   try {
     // Definición de planes B2B ON MÁS
     const plans = {
-      BRONCE: { title: 'Membresía ON MÁS - Plan Bronce', price: 15000 },
-      PLATA: { title: 'Membresía ON MÁS - Plan Plata (Destacado)', price: 35000 },
-      ORO: { title: 'Membresía ON MÁS - Plan Oro (Portada Provincial)', price: 65000 },
+      BRONCE: { title: 'Membresía ON MÁS - Plan Bronce', price: 29000 },
+      PLATA: { title: 'Membresía ON MÁS - Plan Plata (Destacado)', price: 49000 },
+      ORO: { title: 'Membresía ON MÁS - Plan Oro (Portada Provincial)', price: 99000 },
     };
 
     const selectedPlan = plans[planTier] || plans.BRONCE;
