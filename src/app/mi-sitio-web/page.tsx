@@ -36,7 +36,7 @@ export default function MiSitioWebPage() {
 
     setIsSubmitting(true);
     try {
-      await createWebRequestAction({
+      const res = await createWebRequestAction({
         businessName,
         contactName,
         phoneWhatsApp: phone,
@@ -44,6 +44,10 @@ export default function MiSitioWebPage() {
         desiredDomain: desiredDomain || `${businessName.toLowerCase().replace(/\s+/g, '')}.com.ar`,
         notes: notes || 'Solicitud de sitio web propio',
       });
+
+      if (res && !res.success) {
+        alert(`Atención: ${res.message}`);
+      }
     } catch (e) {
       console.warn('Error guardando solicitud web:', e);
     } finally {

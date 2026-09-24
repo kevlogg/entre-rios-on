@@ -346,8 +346,20 @@ CREATE POLICY "Public Insert Jobs" ON public.jobs FOR INSERT WITH CHECK (true);
 DROP POLICY IF EXISTS "Public Insert Web Requests" ON public.web_requests;
 CREATE POLICY "Public Insert Web Requests" ON public.web_requests FOR INSERT WITH CHECK (true);
 
+DROP POLICY IF EXISTS "Public Read Web Requests" ON public.web_requests;
+CREATE POLICY "Public Read Web Requests" ON public.web_requests FOR SELECT USING (true);
+
+DROP POLICY IF EXISTS "Public Update Web Requests" ON public.web_requests;
+CREATE POLICY "Public Update Web Requests" ON public.web_requests FOR ALL USING (true);
+
 DROP POLICY IF EXISTS "Public Insert Cash Payments" ON public.cash_payments;
 CREATE POLICY "Public Insert Cash Payments" ON public.cash_payments FOR INSERT WITH CHECK (true);
+
+DROP POLICY IF EXISTS "Public Read Cash Payments" ON public.cash_payments;
+CREATE POLICY "Public Read Cash Payments" ON public.cash_payments FOR SELECT USING (true);
+
+DROP POLICY IF EXISTS "Public Update Cash Payments" ON public.cash_payments;
+CREATE POLICY "Public Update Cash Payments" ON public.cash_payments FOR ALL USING (true);
 
 -- ========================================================
 -- 15. TRIGGER AUTOMÁTICO DE PERFILES EN SUPABASE AUTH (ROBUSTO & SEGURA)
