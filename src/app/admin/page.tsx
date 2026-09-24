@@ -275,7 +275,7 @@ export default function AdminPage() {
                       Tu cuenta está registrada pero NO ESTÁ VISIBLE NI ACTIVA en la plataforma
                     </h2>
                     <p className="text-xs sm:text-sm text-slate-600 font-medium leading-relaxed">
-                      Hasta que no contrates un plan no estarás visible ni activo en el portal automotor. Para comenzar a publicar y figurar en las búsquedas, elegí el plan adecuado para tu perfil de <strong className="uppercase text-purple-800 font-black">{userType === 'particular' ? 'Particular' : userType === 'agencia' ? 'Agencia / Concesionaria' : 'Negocio Automotor'}</strong>:
+                      Hasta que no contrates un plan no estarás visible ni activo en el portal ON MÁS. Para comenzar a publicar y figurar en las búsquedas, elegí el plan adecuado para tu negocio:
                     </p>
                   </div>
                 </div>
@@ -308,7 +308,7 @@ export default function AdminPage() {
                     </h1>
                     <p className="text-xs sm:text-sm text-slate-100 font-medium max-w-xl">
                       {isSubscriptionActive 
-                        ? `Tu perfil de ${userType} en ${commerce.cityName} se encuentra activo y listo para recibir consultas.`
+                        ? `Tu perfil comercial en ${commerce.cityName} se encuentra activo y listo para recibir consultas.`
                         : `Contratá tu plan para activar tu presencia en ${commerce.cityName}.`}
                     </p>
                   </div>
