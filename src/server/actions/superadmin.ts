@@ -288,6 +288,20 @@ export async function deleteTourismServiceAction(serviceId: string): Promise<{ s
   }
 }
 
+import { createClient as createSupabaseJSClient } from '@supabase/supabase-js';
+
+function getAdminClient() {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  const key = serviceKey || anonKey;
+
+  if (url && key) {
+    return createSupabaseJSClient(url, key);
+  }
+  return null;
+}
+
 export async function createCashPaymentAction(paymentData: {
   commerceName: string;
   ownerName: string;
@@ -298,30 +312,32 @@ export async function createCashPaymentAction(paymentData: {
   commerceId?: string;
 }): Promise<{ success: boolean; message: string }> {
   try {
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const adminSupabase = getAdminClient();
+    if (!adminSupabase) {
+      return { success: false, message: 'No se pudo conectar con Supabase.' };
+    }
 
-    if (supabaseUrl && !supabaseUrl.includes('your-supabase-project')) {
-      const supabase = await createClient();
-      const { error } = await supabase.from('cash_payments').insert({
-        commerce_name: paymentData.commerceName,
-        owner_name: paymentData.ownerName,
-        phone_whatsapp: paymentData.phoneWhatsApp,
-        plan_name: paymentData.planName,
-        amount: paymentData.amount,
-        city_name: paymentData.cityName,
-        status: 'PENDING',
-      });
+    const rawPlan = (paymentData.planName || '').toLowerCase();
+    const cleanPlanName = rawPlan.includes('oro') ? 'Oro' : rawPlan.includes('plata') ? 'Plata' : 'Bronce';
 
-      if (error) {
-        return { success: false, message: `Error registrando pago: ${error.message}` };
-      }
+    const { error } = await adminSupabase.from('cash_payments').insert({
+      commerce_name: paymentData.commerceName || 'Comercio Adherido',
+      owner_name: paymentData.ownerName || 'Titular',
+      phone_whatsapp: paymentData.phoneWhatsApp || '5493434001122',
+      plan_name: cleanPlanName,
+      amount: paymentData.amount || 29000,
+      city_name: paymentData.cityName || 'Entre Ríos',
+      status: 'PENDING',
+    });
 
-      revalidatePath('/superadmin');
-      return { success: true, message: 'Solicitud de pago en efectivo registrada en Supabase.' };
+    if (error) {
+      console.warn('Error insertando pago en efectivo:', error.message);
+      return { success: false, message: `Error registrando pago en Supabase: ${error.message}` };
     }
 
     revalidatePath('/superadmin');
-    return { success: true, message: 'Pago en efectivo registrado correctamente.' };
+    revalidatePath('/admin');
+    return { success: true, message: 'Solicitud de pago en efectivo registrada en Supabase.' };
   } catch (err) {
     return { success: false, message: `Error: ${(err as Error).message}` };
   }
@@ -333,42 +349,36 @@ export async function approveCashPaymentAction(
   commerceId?: string
 ): Promise<{ success: boolean; message: string }> {
   try {
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const adminSupabase = getAdminClient();
+    if (!adminSupabase) {
+      return { success: false, message: 'No se pudo conectar a Supabase.' };
+    }
 
-    if (supabaseUrl && !supabaseUrl.includes('your-supabase-project')) {
-      const supabase = await createClient();
+    const { error: payErr } = await adminSupabase
+      .from('cash_payments')
+      .update({ status: 'APPROVED' })
+      .eq('id', paymentId);
 
-      // 1. Actualizar estado del pago en efectivo a APPROVED
-      const { error: payErr } = await supabase
-        .from('cash_payments')
-        .update({ status: 'APPROVED' })
-        .eq('id', paymentId);
+    if (payErr) {
+      return { success: false, message: `Error al aprobar pago: ${payErr.message}` };
+    }
 
-      if (payErr) {
-        return { success: false, message: `Error al aprobar pago: ${payErr.message}` };
-      }
-
-      // 2. Activar la suscripción del comercio en la tabla commerces
-      if (commerceId) {
-        await supabase
-          .from('commerces')
-          .update({ is_subscription_active: true, is_verified: true })
-          .eq('id', commerceId);
-      } else if (commerceName) {
-        await supabase
-          .from('commerces')
-          .update({ is_subscription_active: true, is_verified: true })
-          .ilike('name', `%${commerceName}%`);
-      }
-
-      revalidatePath('/superadmin');
-      revalidatePath('/admin');
-      revalidatePath('/comercios');
-      return { success: true, message: 'Pago en efectivo aprobado y comercio activado exitosamente.' };
+    if (commerceId) {
+      await adminSupabase
+        .from('commerces')
+        .update({ is_subscription_active: true, is_verified: true })
+        .eq('id', commerceId);
+    } else if (commerceName) {
+      await adminSupabase
+        .from('commerces')
+        .update({ is_subscription_active: true, is_verified: true })
+        .ilike('name', `%${commerceName}%`);
     }
 
     revalidatePath('/superadmin');
-    return { success: true, message: 'Pago en efectivo aprobado correctamente.' };
+    revalidatePath('/admin');
+    revalidatePath('/comercios');
+    return { success: true, message: 'Pago en efectivo aprobado y comercio activado exitosamente.' };
   } catch (err) {
     return { success: false, message: `Error: ${(err as Error).message}` };
   }

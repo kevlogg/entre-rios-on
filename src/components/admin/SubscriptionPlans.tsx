@@ -162,12 +162,12 @@ export function SubscriptionPlans({
 
             <button
               type="button"
-              onClick={() => handleCashPaymentRequest('Plan Bronce', 29000)}
-              disabled={loadingTier === 'cash_Plan Bronce'}
+              onClick={() => handleCashPaymentRequest('Bronce', 29000)}
+              disabled={loadingTier === 'cash_Bronce'}
               className="w-full bg-white border border-slate-200 hover:bg-slate-100 text-slate-800 py-2.5 rounded-xl font-extrabold text-xs transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
             >
               <DollarSign className="w-3.5 h-3.5 text-emerald-600" />
-              <span>{loadingTier === 'cash_Plan Bronce' ? 'Enviando aviso...' : 'Ya pagué en efectivo (Notificar SuperAdmin)'}</span>
+              <span>{loadingTier === 'cash_Bronce' ? 'Enviando aviso...' : 'Ya pagué en efectivo (Notificar SuperAdmin)'}</span>
             </button>
           </div>
         </div>
@@ -232,12 +232,12 @@ export function SubscriptionPlans({
 
             <button
               type="button"
-              onClick={() => handleCashPaymentRequest('Plan Plata', 49000)}
-              disabled={loadingTier === 'cash_Plan Plata'}
+              onClick={() => handleCashPaymentRequest('Plata', 49000)}
+              disabled={loadingTier === 'cash_Plata'}
               className="w-full bg-slate-100 hover:bg-slate-200 text-slate-800 py-2.5 rounded-xl font-extrabold text-xs transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
             >
               <DollarSign className="w-3.5 h-3.5 text-emerald-600" />
-              <span>{loadingTier === 'cash_Plan Plata' ? 'Enviando aviso...' : 'Ya pagué en efectivo (Notificar SuperAdmin)'}</span>
+              <span>{loadingTier === 'cash_Plata' ? 'Enviando aviso...' : 'Ya pagué en efectivo (Notificar SuperAdmin)'}</span>
             </button>
           </div>
         </div>
@@ -302,12 +302,12 @@ export function SubscriptionPlans({
 
             <button
               type="button"
-              onClick={() => handleCashPaymentRequest('Plan Oro', 99000)}
-              disabled={loadingTier === 'cash_Plan Oro'}
+              onClick={() => handleCashPaymentRequest('Oro', 99000)}
+              disabled={loadingTier === 'cash_Oro'}
               className="w-full bg-white/10 hover:bg-white/20 text-white py-2.5 rounded-xl font-extrabold text-xs transition-colors flex items-center justify-center gap-1.5 cursor-pointer border border-white/20"
             >
               <DollarSign className="w-3.5 h-3.5 text-amber-400" />
-              <span>{loadingTier === 'cash_Plan Oro' ? 'Enviando aviso...' : 'Ya pagué en efectivo (Notificar SuperAdmin)'}</span>
+              <span>{loadingTier === 'cash_Oro' ? 'Enviando aviso...' : 'Ya pagué en efectivo (Notificar SuperAdmin)'}</span>
             </button>
           </div>
         </div>
