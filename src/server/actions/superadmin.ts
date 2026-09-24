@@ -316,16 +316,35 @@ export async function createCashPaymentAction(paymentData: {
       return { success: false, message: 'No se pudo conectar con Supabase.' };
     }
 
+    let resolvedName = paymentData.commerceName || 'Comercio Adherido';
+    let resolvedOwner = paymentData.ownerName || 'Titular';
+    let resolvedPhone = paymentData.phoneWhatsApp || '5493434001122';
+    let resolvedCity = paymentData.cityName || 'Entre Ríos / Santa Fe';
+
+    if (paymentData.commerceId && paymentData.commerceId.startsWith('c')) {
+      const { data: comm } = await adminSupabase
+        .from('commerces')
+        .select('*')
+        .eq('id', paymentData.commerceId)
+        .maybeSingle();
+
+      if (comm) {
+        resolvedName = comm.name || resolvedName;
+        resolvedPhone = comm.phone_whatsapp || resolvedPhone;
+        resolvedCity = comm.city_name || resolvedCity;
+      }
+    }
+
     const rawPlan = (paymentData.planName || '').toLowerCase();
     const cleanPlanName = rawPlan.includes('oro') ? 'Oro' : rawPlan.includes('plata') ? 'Plata' : 'Bronce';
 
     const { error } = await adminSupabase.from('cash_payments').insert({
-      commerce_name: paymentData.commerceName || 'Comercio Adherido',
-      owner_name: paymentData.ownerName || 'Titular',
-      phone_whatsapp: paymentData.phoneWhatsApp || '5493434001122',
+      commerce_name: resolvedName,
+      owner_name: resolvedOwner,
+      phone_whatsapp: resolvedPhone,
       plan_name: cleanPlanName,
       amount: paymentData.amount || 29000,
-      city_name: paymentData.cityName || 'Entre Ríos',
+      city_name: resolvedCity,
       status: 'PENDING',
     });
 
@@ -337,6 +356,75 @@ export async function createCashPaymentAction(paymentData: {
     revalidatePath('/superadmin');
     revalidatePath('/admin');
     return { success: true, message: 'Solicitud de pago en efectivo registrada en Supabase.' };
+  } catch (err) {
+    return { success: false, message: `Error: ${(err as Error).message}` };
+  }
+}
+
+export async function getPendingCashPaymentForCommerceAction(
+  commerceId?: string,
+  commerceName?: string
+): Promise<{
+  hasPending: boolean;
+  pendingPayment?: {
+    id: string;
+    planName: string;
+    amount: number;
+    createdAt?: string;
+  };
+}> {
+  try {
+    const adminSupabase = getAdminClient();
+    if (!adminSupabase) return { hasPending: false };
+
+    let query = adminSupabase.from('cash_payments').select('*').eq('status', 'PENDING');
+
+    if (commerceName) {
+      query = query.ilike('commerce_name', `%${commerceName}%`);
+    }
+
+    const { data, error } = await query.order('created_at', { ascending: false }).limit(1);
+
+    if (error || !data || data.length === 0) {
+      return { hasPending: false };
+    }
+
+    const pending = data[0];
+    return {
+      hasPending: true,
+      pendingPayment: {
+        id: pending.id,
+        planName: pending.plan_name || 'Bronce',
+        amount: Number(pending.amount || 0),
+        createdAt: pending.created_at,
+      },
+    };
+  } catch (err) {
+    return { hasPending: false };
+  }
+}
+
+export async function cancelCashPaymentAction(
+  paymentId: string
+): Promise<{ success: boolean; message: string }> {
+  try {
+    const adminSupabase = getAdminClient();
+    if (!adminSupabase) {
+      return { success: false, message: 'No se pudo conectar a Supabase.' };
+    }
+
+    const { error } = await adminSupabase
+      .from('cash_payments')
+      .delete()
+      .eq('id', paymentId);
+
+    if (error) {
+      return { success: false, message: `Error al cancelar solicitud: ${error.message}` };
+    }
+
+    revalidatePath('/superadmin');
+    revalidatePath('/admin');
+    return { success: true, message: 'Solicitud de pago en efectivo cancelada correctamente.' };
   } catch (err) {
     return { success: false, message: `Error: ${(err as Error).message}` };
   }
