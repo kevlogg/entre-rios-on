@@ -350,23 +350,24 @@ DROP POLICY IF EXISTS "Public Insert Cash Payments" ON public.cash_payments;
 CREATE POLICY "Public Insert Cash Payments" ON public.cash_payments FOR INSERT WITH CHECK (true);
 
 -- ========================================================
--- 15. TRIGGER AUTOMÁTICO DE PERFILES EN SUPABASE AUTH
+-- 15. TRIGGER AUTOMÁTICO DE PERFILES EN SUPABASE AUTH (ROBUSTO & SEGURA)
 -- ========================================================
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS TRIGGER AS $$
 BEGIN
-  INSERT INTO public.profiles (id, email, full_name, role, province_id, city_name)
+  INSERT INTO public.profiles (id, email, full_name, role)
   VALUES (
     NEW.id,
     NEW.email,
     COALESCE(NEW.raw_user_meta_data->>'full_name', NEW.raw_user_meta_data->>'commerce_name', 'Usuario ON MÁS'),
-    COALESCE(NEW.raw_user_meta_data->>'role', 'MERCHANT_ADMIN'),
-    COALESCE(NEW.raw_user_meta_data->>'province_id', 'santa-fe'),
-    COALESCE(NEW.raw_user_meta_data->>'city_name', 'Rosario')
+    COALESCE(NEW.raw_user_meta_data->>'role', 'MERCHANT_ADMIN')
   )
   ON CONFLICT (id) DO UPDATE SET
     email = EXCLUDED.email,
     updated_at = NOW();
+  RETURN NEW;
+EXCEPTION WHEN OTHERS THEN
+  -- Evitar que errores secundarios de esquema impidan la creación del usuario en Auth
   RETURN NEW;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
