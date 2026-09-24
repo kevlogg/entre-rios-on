@@ -260,36 +260,33 @@ export default function AdminPage() {
           {/* Main Tab Content */}
           <div className="flex-1 space-y-8">
 
-            {/* CARTEL DE INACTIVIDAD HASTA CONTRATAR PLAN */}
+            {/* CARTEL DE INACTIVIDAD CON ACCESO A SUSCRIPCIÓN */}
             {!isSubscriptionActive && (
-              <div className="bg-gradient-to-r from-amber-500/10 via-purple-900/15 to-amber-500/10 border-2 border-amber-400 rounded-3xl p-6 sm:p-8 space-y-6 shadow-lg relative overflow-hidden">
-                <div className="flex flex-col sm:flex-row items-start gap-4">
-                  <div className="p-3 bg-amber-500 text-slate-950 rounded-2xl shrink-0 font-black text-2xl shadow-md">
+              <div className="bg-gradient-to-r from-amber-500/10 via-amber-500/5 to-amber-500/10 border-2 border-amber-400 rounded-3xl p-5 sm:p-6 shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                <div className="flex items-start sm:items-center gap-3.5">
+                  <div className="p-3 bg-amber-500 text-slate-950 rounded-2xl shrink-0 font-black text-xl shadow-xs">
                     ⚠️
                   </div>
-                  <div className="space-y-1 flex-1">
-                    <div className="inline-flex items-center gap-1.5 bg-amber-500/20 border border-amber-500/40 text-amber-800 text-[11px] font-black px-3 py-1 rounded-full uppercase tracking-wider">
-                      <span>Acción Requerida • Cuenta Inactiva</span>
+                  <div className="space-y-0.5">
+                    <div className="inline-flex items-center gap-1.5 bg-amber-500/20 border border-amber-500/40 text-amber-900 text-[10px] font-black px-2.5 py-0.5 rounded-full uppercase tracking-wider">
+                      Acción Requerida • Cuenta Inactiva
                     </div>
-                    <h2 className="text-xl sm:text-2xl font-black text-slate-900 mt-1">
-                      Tu cuenta está registrada pero NO ESTÁ VISIBLE NI ACTIVA en la plataforma
-                    </h2>
-                    <p className="text-xs sm:text-sm text-slate-600 font-medium leading-relaxed">
-                      Hasta que no contrates un plan no estarás visible ni activo en el portal ON MÁS. Para comenzar a publicar y figurar en las búsquedas, elegí el plan adecuado para tu negocio:
+                    <h3 className="text-base sm:text-lg font-black text-slate-900 mt-0.5">
+                      Tu cuenta aún no está activa en el portal ON MÁS
+                    </h3>
+                    <p className="text-xs text-slate-600 font-medium">
+                      Hasta que no contrates un plan no estarás visible en las búsquedas. Elegí un plan para comenzar a publicar.
                     </p>
                   </div>
                 </div>
 
-                <div className="pt-2">
-                  <SubscriptionPlans
-                    commerceId={commerce.id}
-                    userType={userType}
-                    onPlanActivated={(planName) => {
-                      setCommerce({ ...commerce, isSubscriptionActive: true });
-                      setIsSubscriptionActive(true);
-                    }}
-                  />
-                </div>
+                <button
+                  onClick={() => setActiveTab('subscription')}
+                  className="w-full sm:w-auto bg-[#0047BA] hover:bg-[#002878] text-white px-5 py-3 rounded-2xl font-black text-xs shadow-md transition-all active:scale-95 shrink-0 flex items-center justify-center gap-2 cursor-pointer"
+                >
+                  <ShieldCheck className="w-4 h-4 text-[#00E5E8]" />
+                  <span>Ver Planes de Suscripción</span>
+                </button>
               </div>
             )}
 
