@@ -425,5 +425,86 @@ export async function getCashPaymentsAction(): Promise<{
   }
 }
 
+export async function getWebRequestsAction(): Promise<{
+  success: boolean;
+  data: Array<{
+    id: string;
+    businessName: string;
+    contactName: string;
+    phoneWhatsApp: string;
+    email: string;
+    desiredDomain: string;
+    notes: string;
+    status: string;
+    createdAt?: string;
+  }>;
+}> {
+  try {
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+
+    if (supabaseUrl && !supabaseUrl.includes('your-supabase-project')) {
+      const supabase = await createClient();
+      const { data, error } = await supabase
+        .from('web_requests')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.warn('Error fetching web requests:', error.message);
+        return { success: false, data: [] };
+      }
+
+      return {
+        success: true,
+        data: (data || []).map((r: any) => ({
+          id: r.id,
+          businessName: r.business_name || 'Comercio',
+          contactName: r.contact_name || 'Contacto',
+          phoneWhatsApp: r.phone_whatsapp || '',
+          email: r.email || '',
+          desiredDomain: r.desired_domain || '',
+          notes: r.notes || '',
+          status: r.status || 'PENDING',
+          createdAt: r.created_at,
+        })),
+      };
+    }
+
+    return { success: true, data: [] };
+  } catch (err) {
+    return { success: false, data: [] };
+  }
+}
+
+export async function updateWebRequestStatusAction(
+  requestId: string,
+  status: string
+): Promise<{ success: boolean; message: string }> {
+  try {
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+
+    if (supabaseUrl && !supabaseUrl.includes('your-supabase-project')) {
+      const supabase = await createClient();
+      const { error } = await supabase
+        .from('web_requests')
+        .update({ status })
+        .eq('id', requestId);
+
+      if (error) {
+        return { success: false, message: `Error en Supabase: ${error.message}` };
+      }
+
+      revalidatePath('/superadmin');
+      return { success: true, message: 'Estado de solicitud web actualizado.' };
+    }
+
+    revalidatePath('/superadmin');
+    return { success: true, message: 'Estado actualizado correctamente.' };
+  } catch (err) {
+    return { success: false, message: `Error: ${(err as Error).message}` };
+  }
+}
+
+
 
 
