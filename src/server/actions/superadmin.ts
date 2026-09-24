@@ -374,4 +374,56 @@ export async function approveCashPaymentAction(
   }
 }
 
+export async function getCashPaymentsAction(): Promise<{
+  success: boolean;
+  data: Array<{
+    id: string;
+    commerceName: string;
+    ownerName: string;
+    phoneWhatsApp: string;
+    planName: string;
+    amount: number;
+    cityName: string;
+    status: string;
+    createdAt?: string;
+  }>;
+}> {
+  try {
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+
+    if (supabaseUrl && !supabaseUrl.includes('your-supabase-project')) {
+      const supabase = await createClient();
+      const { data, error } = await supabase
+        .from('cash_payments')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.warn('Error fetching cash payments:', error.message);
+        return { success: false, data: [] };
+      }
+
+      return {
+        success: true,
+        data: (data || []).map((p: any) => ({
+          id: p.id,
+          commerceName: p.commerce_name || 'Comercio',
+          ownerName: p.owner_name || 'Titular',
+          phoneWhatsApp: p.phone_whatsapp || '',
+          planName: p.plan_name || 'Plan ON MÁS',
+          amount: Number(p.amount || 0),
+          cityName: p.city_name || 'Entre Ríos',
+          status: p.status || 'PENDING',
+          createdAt: p.created_at,
+        })),
+      };
+    }
+
+    return { success: true, data: [] };
+  } catch (err) {
+    return { success: false, data: [] };
+  }
+}
+
+
 

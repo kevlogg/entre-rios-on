@@ -9,6 +9,9 @@ export type UserType = 'comercio' | 'turismo' | 'particular' | string;
 
 interface SubscriptionPlansProps {
   commerceId?: string;
+  commerceName?: string;
+  cityName?: string;
+  phoneWhatsApp?: string;
   userType?: UserType;
   currentTier?: string;
   onPlanActivated?: (planName: string) => void;
@@ -16,6 +19,9 @@ interface SubscriptionPlansProps {
 
 export function SubscriptionPlans({
   commerceId = 'comm-default',
+  commerceName,
+  cityName,
+  phoneWhatsApp,
   userType = 'comercio',
   currentTier,
   onPlanActivated,
@@ -27,12 +33,12 @@ export function SubscriptionPlans({
     setLoadingTier(`cash_${planName}`);
     try {
       const res = await createCashPaymentAction({
-        commerceName: 'Comercio Adherido',
+        commerceName: commerceName || 'Comercio Adherido',
         ownerName: 'Titular',
-        phoneWhatsApp: '5493434001122',
+        phoneWhatsApp: phoneWhatsApp || '5493434001122',
         planName,
         amount,
-        cityName: 'Entre Ríos / Santa Fe',
+        cityName: cityName || 'Entre Ríos / Santa Fe',
         commerceId,
       });
       if (res.success) {

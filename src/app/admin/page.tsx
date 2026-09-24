@@ -362,6 +362,9 @@ export default function AdminPage() {
             {activeTab === 'subscription' && (
               <SubscriptionPlans
                 commerceId={commerce.id}
+                commerceName={commerce.name}
+                cityName={commerce.cityName}
+                phoneWhatsApp={commerce.phoneWhatsApp}
                 userType={userType}
                 onPlanActivated={(planName) => {
                   setCommerce({ ...commerce, isSubscriptionActive: true });
