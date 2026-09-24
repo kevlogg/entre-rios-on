@@ -32,7 +32,7 @@ export function CashPaymentsManager() {
     setLoading(true);
     try {
       const res = await getCashPaymentsAction();
-      if (res.success && res.data && res.data.length > 0) {
+      if (res.success && Array.isArray(res.data)) {
         setRequests(
           res.data.map((p) => ({
             id: p.id,
@@ -46,23 +46,6 @@ export function CashPaymentsManager() {
             date: p.createdAt ? new Date(p.createdAt).toLocaleString('es-AR') : undefined,
           }))
         );
-      } else {
-        const fetched = await getCashPayments();
-        if (fetched) {
-          setRequests(
-            fetched.map((p) => ({
-              id: p.id,
-              commerceName: p.commerceName,
-              ownerName: p.ownerName,
-              phone: p.phoneWhatsApp,
-              planName: p.planName,
-              amount: p.amount,
-              city: p.cityName,
-              status: p.status || 'PENDING',
-              date: p.createdAt ? new Date(p.createdAt).toLocaleString('es-AR') : undefined,
-            }))
-          );
-        }
       }
     } catch (e) {
       console.warn('Error cargando pagos en efectivo:', e);

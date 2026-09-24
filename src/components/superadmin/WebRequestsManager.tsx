@@ -37,7 +37,7 @@ export function WebRequestsManager() {
     setIsLoading(true);
     try {
       const res = await getWebRequestsAction();
-      if (res.success && res.data && res.data.length > 0) {
+      if (res.success && Array.isArray(res.data)) {
         setRequests(
           res.data.map((r) => ({
             id: r.id,
@@ -51,23 +51,6 @@ export function WebRequestsManager() {
             date: r.createdAt ? new Date(r.createdAt).toLocaleString('es-AR') : undefined,
           }))
         );
-      } else {
-        const data = await getWebRequests();
-        if (data) {
-          setRequests(
-            data.map((r) => ({
-              id: r.id,
-              businessName: r.businessName,
-              contactName: r.contactName,
-              phone: r.phoneWhatsApp,
-              email: r.email || '',
-              desiredDomain: r.desiredDomain || '',
-              notes: r.notes || '',
-              status: r.status || 'PENDING',
-              date: r.createdAt ? new Date(r.createdAt).toLocaleString('es-AR') : undefined,
-            }))
-          );
-        }
       }
     } catch (e) {
       console.warn('Error cargando solicitudes web:', e);
