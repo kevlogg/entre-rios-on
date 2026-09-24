@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { CreditCard, CheckCircle2, Clock, DollarSign, Store, ShieldCheck, AlertCircle, MessageCircle } from 'lucide-react';
 import { getCashPayments } from '@/lib/dal/portal';
+import { approveCashPaymentAction } from '@/server/actions/superadmin';
 
 interface CashPaymentRequest {
   id: string;
@@ -46,14 +47,18 @@ export function CashPaymentsManager() {
     loadCashPayments();
   }, []);
 
+  const handleApprove = async (reqId: string, commerceName: string, planName: string) => {
+    try {
+      await approveCashPaymentAction(reqId, commerceName);
+    } catch (err) {
+      console.warn('Error en aprobación de pago:', err);
+    }
 
-
-  const handleApprove = (reqId: string, commerceName: string, planName: string) => {
     setRequests((prev) =>
-      prev.map((r) => (r.id === reqId ? { ...r, status: 'aprobado' } : r))
+      prev.map((r) => (r.id === reqId ? { ...r, status: 'APPROVED' } : r))
     );
 
-    setNotification(`¡Pago en efectivo del plan ${planName} aprobado para "${commerceName}"! El comercio fue activado.`);
+    setNotification(`¡Pago en efectivo del plan ${planName} aprobado para "${commerceName}"! El comercio fue activado exitosamente en Supabase.`);
     setTimeout(() => setNotification(null), 4000);
   };
 

@@ -3,6 +3,8 @@
 import React, { useState } from 'react';
 import { ShieldCheck, Check, Sparkles, Star, ArrowRight, Car, Building2, Wrench, Zap } from 'lucide-react';
 import { createSubscriptionPreferenceAction } from '@/server/actions/subscription';
+import { createCashPaymentAction } from '@/server/actions/superadmin';
+import { DollarSign, Clock } from 'lucide-react';
 
 export type UserType = 'particular' | 'agencia' | 'negocio_automotor';
 
@@ -22,6 +24,28 @@ export function SubscriptionPlans({
   const [loadingTier, setLoadingTier] = useState<string | null>(null);
   const [activatedSuccess, setActivatedSuccess] = useState<string | null>(null);
 
+  const handleCashPaymentRequest = async (planName: string, amount: number) => {
+    setLoadingTier(`cash_${planName}`);
+    try {
+      const res = await createCashPaymentAction({
+        commerceName: 'Comercio Adherido',
+        ownerName: 'Titular',
+        phoneWhatsApp: '5493434001122',
+        planName,
+        amount,
+        cityName: 'Entre Ríos',
+        commerceId,
+      });
+      if (res.success) {
+        setActivatedSuccess(`¡Solicitud de Pago en Efectivo Enviada! Notificamos al equipo SuperAdmin para verificar tu pago del plan "${planName}" y activar tu cuenta en la plataforma.`);
+      }
+    } catch (err) {
+      console.warn('Error al solicitar verificación de pago en efectivo:', err);
+    } finally {
+      setLoadingTier(null);
+    }
+  };
+
   const handleSelectPlan = async (planKey: string, planName: string) => {
     setLoadingTier(planKey);
     try {
@@ -34,7 +58,7 @@ export function SubscriptionPlans({
         if (onPlanActivated) {
           onPlanActivated(planName);
         }
-        setActivatedSuccess(`¡Plan "${planName}" contratado y activado exitosamente! Tu cuenta ya está activa en la plataforma.`);
+        setActivatedSuccess(`¡Plan "${planName}" seleccionado! Redirigiendo a pasarela de pago...`);
         setTimeout(() => setActivatedSuccess(null), 5000);
       }
     } catch (err) {
@@ -125,14 +149,26 @@ export function SubscriptionPlans({
               </ul>
             </div>
 
-            <button
-              onClick={() => handleSelectPlan('particular_15k', 'Particular 1 Auto ($15.000)')}
-              disabled={loadingTier === 'particular_15k'}
-              className="w-full bg-gradient-to-r from-blue-600 to-[#002878] hover:from-blue-700 hover:to-[#0047BA] text-white py-4 rounded-2xl font-black text-sm shadow-lg transition-transform active:scale-95 cursor-pointer flex items-center justify-center gap-2"
-            >
-              <span>{loadingTier === 'particular_15k' ? 'Procesando...' : 'Contratar Plan Particular ($15.000)'}</span>
-              <ArrowRight className="w-4 h-4" />
-            </button>
+            <div className="space-y-2">
+              <button
+                onClick={() => handleSelectPlan('particular_15k', 'Particular 1 Auto ($15.000)')}
+                disabled={loadingTier === 'particular_15k'}
+                className="w-full bg-gradient-to-r from-blue-600 to-[#002878] hover:from-blue-700 hover:to-[#0047BA] text-white py-4 rounded-2xl font-black text-sm shadow-lg transition-transform active:scale-95 cursor-pointer flex items-center justify-center gap-2"
+              >
+                <span>{loadingTier === 'particular_15k' ? 'Procesando...' : 'Contratar con MercadoPago ($15.000)'}</span>
+                <ArrowRight className="w-4 h-4" />
+              </button>
+
+              <button
+                type="button"
+                onClick={() => handleCashPaymentRequest('Particular 1 Auto', 15000)}
+                disabled={loadingTier === 'cash_Particular 1 Auto'}
+                className="w-full bg-slate-100 hover:bg-slate-200 text-slate-800 py-2.5 rounded-xl font-extrabold text-xs transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
+              >
+                <DollarSign className="w-3.5 h-3.5 text-emerald-600" />
+                <span>{loadingTier === 'cash_Particular 1 Auto' ? 'Enviando aviso...' : 'Ya pagué en efectivo (Notificar SuperAdmin)'}</span>
+              </button>
+            </div>
           </div>
         </div>
       )}
@@ -177,13 +213,25 @@ export function SubscriptionPlans({
               </ul>
             </div>
 
-            <button
-              onClick={() => handleSelectPlan('agencia_base_99k', 'Agencia Base ($99.000)')}
-              disabled={loadingTier === 'agencia_base_99k'}
-              className="w-full bg-[#2A1B4E] hover:bg-[#392468] text-white py-3.5 rounded-2xl font-black text-xs transition-transform active:scale-95 cursor-pointer shadow-md"
-            >
-              {loadingTier === 'agencia_base_99k' ? 'Procesando...' : 'Elegir Plan Base ($99.000)'}
-            </button>
+            <div className="space-y-2">
+              <button
+                onClick={() => handleSelectPlan('agencia_base_99k', 'Agencia Base ($99.000)')}
+                disabled={loadingTier === 'agencia_base_99k'}
+                className="w-full bg-[#2A1B4E] hover:bg-[#392468] text-white py-3.5 rounded-2xl font-black text-xs transition-transform active:scale-95 cursor-pointer shadow-md"
+              >
+                {loadingTier === 'agencia_base_99k' ? 'Procesando...' : 'Pagar con MercadoPago ($99.000)'}
+              </button>
+
+              <button
+                type="button"
+                onClick={() => handleCashPaymentRequest('Agencia Base', 99000)}
+                disabled={loadingTier === 'cash_Agencia Base'}
+                className="w-full bg-slate-100 hover:bg-slate-200 text-slate-800 py-2.5 rounded-xl font-extrabold text-xs transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
+              >
+                <DollarSign className="w-3.5 h-3.5 text-emerald-600" />
+                <span>{loadingTier === 'cash_Agencia Base' ? 'Enviando aviso...' : 'Ya pagué en efectivo (Notificar SuperAdmin)'}</span>
+              </button>
+            </div>
           </div>
 
           {/* Plan Pro Agencia (Violeta Oscuro Premium) */}
@@ -232,14 +280,26 @@ export function SubscriptionPlans({
               </ul>
             </div>
 
-            <button
-              onClick={() => handleSelectPlan('agencia_pro_199k', 'Agencia Pro ($199.000)')}
-              disabled={loadingTier === 'agencia_pro_199k'}
-              className="w-full bg-gradient-to-r from-amber-400 via-amber-500 to-amber-600 hover:from-amber-300 hover:to-amber-500 text-slate-950 py-3.5 rounded-2xl font-black text-xs shadow-xl transition-transform active:scale-95 cursor-pointer flex items-center justify-center gap-2"
-            >
-              <span>{loadingTier === 'agencia_pro_199k' ? 'Procesando...' : 'Elegir Plan Pro ($199.000)'}</span>
-              <ArrowRight className="w-4 h-4" />
-            </button>
+            <div className="space-y-2">
+              <button
+                onClick={() => handleSelectPlan('agencia_pro_199k', 'Agencia Pro ($199.000)')}
+                disabled={loadingTier === 'agencia_pro_199k'}
+                className="w-full bg-gradient-to-r from-amber-400 via-amber-500 to-amber-600 hover:from-amber-300 hover:to-amber-500 text-slate-950 py-3.5 rounded-2xl font-black text-xs shadow-xl transition-transform active:scale-95 cursor-pointer flex items-center justify-center gap-2"
+              >
+                <span>{loadingTier === 'agencia_pro_199k' ? 'Procesando...' : 'Pagar con MercadoPago ($199.000)'}</span>
+                <ArrowRight className="w-4 h-4" />
+              </button>
+
+              <button
+                type="button"
+                onClick={() => handleCashPaymentRequest('Agencia Pro', 199000)}
+                disabled={loadingTier === 'cash_Agencia Pro'}
+                className="w-full bg-white/10 hover:bg-white/20 text-white py-2.5 rounded-xl font-extrabold text-xs transition-colors flex items-center justify-center gap-1.5 cursor-pointer border border-white/20"
+              >
+                <DollarSign className="w-3.5 h-3.5 text-amber-400" />
+                <span>{loadingTier === 'cash_Agencia Pro' ? 'Enviando aviso...' : 'Ya pagué en efectivo (Notificar SuperAdmin)'}</span>
+              </button>
+            </div>
           </div>
         </div>
       )}
@@ -280,13 +340,25 @@ export function SubscriptionPlans({
               </ul>
             </div>
 
-            <button
-              onClick={() => handleSelectPlan('negocio_base_49k', 'Negocio Base ($49.000)')}
-              disabled={loadingTier === 'negocio_base_49k'}
-              className="w-full bg-[#0F2A28] hover:bg-[#183E3B] text-white py-3.5 rounded-2xl font-black text-xs transition-transform active:scale-95 cursor-pointer shadow-md"
-            >
-              {loadingTier === 'negocio_base_49k' ? 'Procesando...' : 'Elegir Plan Base ($49.000)'}
-            </button>
+            <div className="space-y-2">
+              <button
+                onClick={() => handleSelectPlan('negocio_base_49k', 'Negocio Base ($49.000)')}
+                disabled={loadingTier === 'negocio_base_49k'}
+                className="w-full bg-[#0F2A28] hover:bg-[#183E3B] text-white py-3.5 rounded-2xl font-black text-xs transition-transform active:scale-95 cursor-pointer shadow-md"
+              >
+                {loadingTier === 'negocio_base_49k' ? 'Procesando...' : 'Pagar con MercadoPago ($49.000)'}
+              </button>
+
+              <button
+                type="button"
+                onClick={() => handleCashPaymentRequest('Negocio Base', 49000)}
+                disabled={loadingTier === 'cash_Negocio Base'}
+                className="w-full bg-slate-100 hover:bg-slate-200 text-slate-800 py-2.5 rounded-xl font-extrabold text-xs transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
+              >
+                <DollarSign className="w-3.5 h-3.5 text-emerald-600" />
+                <span>{loadingTier === 'cash_Negocio Base' ? 'Enviando aviso...' : 'Ya pagué en efectivo (Notificar SuperAdmin)'}</span>
+              </button>
+            </div>
           </div>
 
           {/* Plan Pro Negocio */}
@@ -331,14 +403,26 @@ export function SubscriptionPlans({
               </ul>
             </div>
 
-            <button
-              onClick={() => handleSelectPlan('negocio_pro_99k', 'Negocio Pro ($99.000)')}
-              disabled={loadingTier === 'negocio_pro_99k'}
-              className="w-full bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-400 hover:from-emerald-300 hover:to-teal-300 text-slate-950 py-3.5 rounded-2xl font-black text-xs shadow-lg transition-transform active:scale-95 cursor-pointer flex items-center justify-center gap-2"
-            >
-              <span>{loadingTier === 'negocio_pro_99k' ? 'Procesando...' : 'Elegir Plan Pro ($99.000)'}</span>
-              <ArrowRight className="w-4 h-4" />
-            </button>
+            <div className="space-y-2">
+              <button
+                onClick={() => handleSelectPlan('negocio_pro_99k', 'Negocio Pro ($99.000)')}
+                disabled={loadingTier === 'negocio_pro_99k'}
+                className="w-full bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-400 hover:from-emerald-300 hover:to-teal-300 text-slate-950 py-3.5 rounded-2xl font-black text-xs shadow-lg transition-transform active:scale-95 cursor-pointer flex items-center justify-center gap-2"
+              >
+                <span>{loadingTier === 'negocio_pro_99k' ? 'Procesando...' : 'Pagar con MercadoPago ($99.000)'}</span>
+                <ArrowRight className="w-4 h-4" />
+              </button>
+
+              <button
+                type="button"
+                onClick={() => handleCashPaymentRequest('Negocio Pro', 99000)}
+                disabled={loadingTier === 'cash_Negocio Pro'}
+                className="w-full bg-white/10 hover:bg-white/20 text-white py-2.5 rounded-xl font-extrabold text-xs transition-colors flex items-center justify-center gap-1.5 cursor-pointer border border-white/20"
+              >
+                <DollarSign className="w-3.5 h-3.5 text-emerald-400" />
+                <span>{loadingTier === 'cash_Negocio Pro' ? 'Enviando aviso...' : 'Ya pagué en efectivo (Notificar SuperAdmin)'}</span>
+              </button>
+            </div>
           </div>
         </div>
       )}

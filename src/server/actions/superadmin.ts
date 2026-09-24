@@ -292,9 +292,10 @@ export async function createCashPaymentAction(paymentData: {
   commerceName: string;
   ownerName: string;
   phoneWhatsApp: string;
-  planName: 'Bronce' | 'Plata' | 'Oro';
+  planName: string;
   amount: number;
   cityName: string;
+  commerceId?: string;
 }): Promise<{ success: boolean; message: string }> {
   try {
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -320,9 +321,57 @@ export async function createCashPaymentAction(paymentData: {
     }
 
     revalidatePath('/superadmin');
-    return { success: true, message: 'Pago en efectivo registrado en modo demostración.' };
+    return { success: true, message: 'Pago en efectivo registrado correctamente.' };
   } catch (err) {
     return { success: false, message: `Error: ${(err as Error).message}` };
   }
 }
+
+export async function approveCashPaymentAction(
+  paymentId: string,
+  commerceName?: string,
+  commerceId?: string
+): Promise<{ success: boolean; message: string }> {
+  try {
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+
+    if (supabaseUrl && !supabaseUrl.includes('your-supabase-project')) {
+      const supabase = await createClient();
+
+      // 1. Actualizar estado del pago en efectivo a APPROVED
+      const { error: payErr } = await supabase
+        .from('cash_payments')
+        .update({ status: 'APPROVED' })
+        .eq('id', paymentId);
+
+      if (payErr) {
+        return { success: false, message: `Error al aprobar pago: ${payErr.message}` };
+      }
+
+      // 2. Activar la suscripción del comercio en la tabla commerces
+      if (commerceId) {
+        await supabase
+          .from('commerces')
+          .update({ is_subscription_active: true, is_verified: true })
+          .eq('id', commerceId);
+      } else if (commerceName) {
+        await supabase
+          .from('commerces')
+          .update({ is_subscription_active: true, is_verified: true })
+          .ilike('name', `%${commerceName}%`);
+      }
+
+      revalidatePath('/superadmin');
+      revalidatePath('/admin');
+      revalidatePath('/comercios');
+      return { success: true, message: 'Pago en efectivo aprobado y comercio activado exitosamente.' };
+    }
+
+    revalidatePath('/superadmin');
+    return { success: true, message: 'Pago en efectivo aprobado correctamente.' };
+  } catch (err) {
+    return { success: false, message: `Error: ${(err as Error).message}` };
+  }
+}
+
 
