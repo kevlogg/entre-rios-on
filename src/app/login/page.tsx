@@ -227,18 +227,19 @@ function LoginFormContent() {
           }
         }
 
-        // Auto-login si no requiere confirmación
-        const { data: signInData } = await supabase.auth.signInWithPassword({ email, password });
-        if (signInData?.session) {
-          setMessage({ type: 'success', text: '¡Cuenta registrada e iniciada con éxito! Redirigiendo...' });
-          window.location.href = needsBusiness ? '/admin' : computedRedirect;
-        } else {
-          setMessage({
-            type: 'success',
-            text: `¡Registro exitoso! Enviamos un correo de confirmación a ${email}. Revisá tu casilla (y Spam) para activar tu cuenta.`,
-          });
-          setLoading(false);
+        // Auto-login y Redirección Inmediata al Panel /admin
+        let session = authData?.session;
+        if (!session) {
+          try {
+            const { data: signInData } = await supabase.auth.signInWithPassword({ email, password });
+            session = signInData?.session;
+          } catch {}
         }
+
+        setMessage({ type: 'success', text: '¡Cuenta registrada con éxito! Redirigiendo a tu panel de control...' });
+        setTimeout(() => {
+          window.location.href = needsBusiness ? '/admin' : computedRedirect;
+        }, 600);
       } else if (mode === 'login') {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) {
