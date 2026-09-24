@@ -75,7 +75,7 @@ export function SuperAdminDashboardClient({
     { id: 'jobs', label: 'Empleos & Trabajo', icon: Briefcase },
     { id: 'news', label: 'Noticias & Moderación', icon: Newspaper },
     { id: 'tourism', label: 'Servicios de Turismo', icon: Compass },
-    { id: 'web-requests', label: 'Solicitudes "Mi Sitio Web"', icon: Globe, badge: '3' },
+    { id: 'web-requests', label: 'Solicitudes "Mi Sitio Web"', icon: Globe, badge: 'Nuevos' },
   ];
 
   return (

@@ -89,30 +89,29 @@ export async function createWebRequestAction(requestData: {
   notes?: string;
 }): Promise<{ success: boolean; message: string }> {
   try {
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-    if (supabaseUrl && !supabaseUrl.includes('your-supabase-project')) {
-      const supabase = await createClient();
-      const { error } = await supabase.from('web_requests').insert({
-        business_name: requestData.businessName,
-        contact_name: requestData.contactName,
-        phone_whatsapp: requestData.phoneWhatsApp,
-        email: requestData.email,
-        desired_domain: requestData.desiredDomain,
-        notes: requestData.notes,
-        status: 'PENDING'
-      });
+    const adminSupabase = getAdminClient();
+    if (!adminSupabase) {
+      return { success: false, message: 'No se pudo conectar con Supabase.' };
+    }
 
-      if (error) {
-        return { success: false, message: `Error guardando en Supabase: ${error.message}` };
-      }
+    const { error } = await adminSupabase.from('web_requests').insert({
+      business_name: requestData.businessName,
+      contact_name: requestData.contactName,
+      phone_whatsapp: requestData.phoneWhatsApp,
+      email: requestData.email || '',
+      desired_domain: requestData.desiredDomain || '',
+      notes: requestData.notes || '',
+      status: 'PENDING'
+    });
 
-      revalidatePath('/mi-sitio-web');
-      revalidatePath('/superadmin');
-      return { success: true, message: 'Solicitud enviada e ingresada en Supabase.' };
+    if (error) {
+      console.warn('Error registrando solicitud web en Supabase:', error.message);
+      return { success: false, message: `Error guardando en Supabase: ${error.message}` };
     }
 
     revalidatePath('/mi-sitio-web');
-    return { success: true, message: 'Solicitud registrada correctamente.' };
+    revalidatePath('/superadmin');
+    return { success: true, message: 'Solicitud enviada e ingresada en Supabase.' };
   } catch (err) {
     return { success: false, message: `Error: ${(err as Error).message}` };
   }
