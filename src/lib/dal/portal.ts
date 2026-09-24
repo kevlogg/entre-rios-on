@@ -858,7 +858,7 @@ export async function getAllCommerces(): Promise<Commerce[]> {
     try {
       const { createPublicClient } = await import('@/lib/supabase/public');
       const supabase = createPublicClient();
-      const { data, error } = await supabase.from('commerces').select('*');
+      const { data, error } = await supabase.from('commerces').select('*').order('created_at', { ascending: false });
       if (!error && Array.isArray(data)) {
         return data.map((c) => ({
           id: c.id,

@@ -16,6 +16,10 @@ export function CommerceApprovalTable({ commerces: initialCommerces }: CommerceA
   const [cityFilter, setCityFilter] = useState('all');
   const [typeFilter, setTypeFilter] = useState<'all' | 'comercio' | 'turismo' | 'particular'>('all');
 
+  React.useEffect(() => {
+    setCommerces(initialCommerces);
+  }, [initialCommerces]);
+
   const toggleVerification = async (id: string) => {
     const target = commerces.find((c) => c.id === id);
     if (!target) return;
@@ -46,7 +50,7 @@ export function CommerceApprovalTable({ commerces: initialCommerces }: CommerceA
     if (typeFilter === 'comercio') {
       matchesType = !catLower.includes('turismo') && !catLower.includes('particular') && !catLower.includes('vecino');
     } else if (typeFilter === 'turismo') {
-      matchesType = catLower.includes('turismo') || catLower.includes('hotel') || catLower.includes('termas') || catLower.includes('gastronomia');
+      matchesType = catLower.includes('turismo') || catLower.includes('alojamiento') || catLower.includes('hotel') || catLower.includes('termas') || catLower.includes('posada') || catLower.includes('cabaña');
     } else if (typeFilter === 'particular') {
       matchesType = catLower.includes('particular') || catLower.includes('vecino');
     }

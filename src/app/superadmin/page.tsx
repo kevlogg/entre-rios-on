@@ -3,7 +3,8 @@ import { getAllCommerces, getUpcomingEvents, getCities } from '@/lib/dal/portal'
 import { SuperAdminHeader } from '@/components/superadmin/SuperAdminHeader';
 import { SuperAdminDashboardClient } from '@/components/superadmin/SuperAdminDashboardClient';
 
-export const revalidate = 60;
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 export default async function SuperAdminPage() {
   const [commerces, events, cities] = await Promise.all([
