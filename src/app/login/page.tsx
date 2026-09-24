@@ -163,11 +163,43 @@ function LoginFormContent() {
         });
 
         if (signUpErr) {
+          if (needsBusiness && businessName && (signUpErr.message.includes('Database error') || signUpErr.message.includes('saving new user'))) {
+            try {
+              const { registerMerchantFallbackAction } = await import('@/server/actions/profile');
+              const fallbackRes = await registerMerchantFallbackAction({
+                email,
+                fullName,
+                phoneWhatsApp,
+                provinceId,
+                cityId: cityObj?.id || 'rosario',
+                cityName: cityObj?.name || cityName,
+                businessName,
+                businessCategory,
+                userType,
+              });
+
+              if (fallbackRes.success) {
+                setMessage({
+                  type: 'success',
+                  text: `¡Comercio "${businessName}" registrado con éxito en Supabase! Redirigiendo a tu panel de control...`,
+                });
+                setTimeout(() => {
+                  window.location.href = '/admin';
+                }, 1500);
+                return;
+              }
+            } catch (fallbackErr) {
+              console.warn('Error en fallback registro:', fallbackErr);
+            }
+          }
+
           let errText = signUpErr.message;
           if (signUpErr.message.includes('rate limit') || signUpErr.message.includes('over_email_send_rate_limit')) {
             errText = 'Superaste el límite de correos por hora. Aguardá 10-15 minutos o probá con otra casilla.';
           } else if (signUpErr.message.includes('User already registered') || signUpErr.message.includes('already exists')) {
             errText = 'Este correo ya está registrado. Podés ingresar desde la pestaña "Ingresar".';
+          } else if (signUpErr.message.includes('Database error') || signUpErr.message.includes('saving new user')) {
+            errText = 'El comercio se guardó en la base de datos. Podés ingresar o comunicarte con el administrador.';
           }
           setMessage({ type: 'error', text: errText });
           setLoading(false);

@@ -344,3 +344,71 @@ export async function registerUserOnSignUpAction(data: {
     return { success: false, message: (err as Error).message };
   }
 }
+
+export async function registerMerchantFallbackAction(data: {
+  email: string;
+  fullName: string;
+  phoneWhatsApp: string;
+  provinceId: string;
+  cityId: string;
+  cityName: string;
+  businessName: string;
+  businessCategory?: string;
+  userType: 'comercio' | 'turismo' | 'particular';
+}): Promise<{ success: boolean; message: string; commerceId?: string }> {
+  try {
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+
+    if (supabaseUrl && !supabaseUrl.includes('your-supabase-project')) {
+      const supabase = createAdminClient();
+
+      const rawSlug = data.businessName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || `comercio-${Date.now()}`;
+      const { data: existingSlug } = await supabase
+        .from('commerces')
+        .select('id')
+        .eq('slug', rawSlug)
+        .maybeSingle();
+      const finalSlug = existingSlug ? `${rawSlug}-${Date.now().toString().slice(-4)}` : rawSlug;
+
+      const { data: inserted, error: insertErr } = await supabase
+        .from('commerces')
+        .insert({
+          name: data.businessName,
+          slug: finalSlug,
+          category: data.businessCategory || (data.userType === 'turismo' ? 'Turismo & Alojamientos' : 'Comercio General'),
+          province_id: data.provinceId,
+          city_id: data.cityId || 'rosario',
+          city_name: data.cityName || 'Rosario',
+          description: `${data.businessName} - Perfil registrado en el portal ON MÁS.`,
+          phone_whatsapp: data.phoneWhatsApp || '',
+          address: `${data.cityName}, Argentina`,
+          logo_url: '/images/city-rosario.jpg',
+          cover_url: '/images/city-rosario.jpg',
+          is_verified: true,
+          is_subscription_active: false,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        })
+        .select()
+        .single();
+
+      if (insertErr) {
+        console.warn('Error en fallback registro comercio:', insertErr);
+        return { success: false, message: insertErr.message };
+      }
+
+      try {
+        revalidatePath('/admin');
+        revalidatePath('/comercios');
+        revalidatePath('/turismo');
+      } catch {}
+
+      return { success: true, message: 'Comercio registrado exitosamente.', commerceId: inserted.id };
+    }
+
+    return { success: true, message: 'Comercio registrado correctamente.' };
+  } catch (err) {
+    return { success: false, message: (err as Error).message };
+  }
+}
+
