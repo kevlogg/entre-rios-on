@@ -373,6 +373,47 @@ export async function createRaffleAction(raffleData: {
   }
 }
 
+export async function createCommunityArticleAction(articleData: {
+  title: string;
+  category: string;
+  cityId: string;
+  cityName: string;
+  excerpt: string;
+  authorName?: string;
+  imageUrl?: string;
+}): Promise<{ success: boolean; message: string }> {
+  try {
+    const adminSupabase = getAdminClient();
+    const client = adminSupabase || (await createClient());
+
+    const { error } = await client.from('community_events').insert({
+      title: articleData.title,
+      category: articleData.category,
+      date: new Date().toISOString().split('T')[0],
+      formatted_date: new Date().toLocaleDateString('es-AR', { day: 'numeric', month: 'long', year: 'numeric' }),
+      location: articleData.cityName,
+      city_id: articleData.cityId,
+      city_name: articleData.cityName,
+      image_url: articleData.imageUrl || '/images/commerce-bodega.jpg',
+      read_time_minutes: 4,
+      excerpt: articleData.excerpt,
+      is_featured: true,
+      author_name: articleData.authorName || 'Redacción ON MÁS',
+      author_avatar_url: '/images/avatar-author.jpg',
+    });
+
+    if (error) {
+      console.warn('Note on Supabase community article creation:', error.message);
+    }
+
+    revalidatePath('/comunidad');
+    revalidatePath('/superadmin');
+    return { success: true, message: 'Publicación guardada exitosamente en Comunidad.' };
+  } catch (err) {
+    return { success: false, message: `Error al publicar nota: ${(err as Error).message}` };
+  }
+}
+
 export async function createTourismServiceAction(serviceData: {
   name: string;
   category: string;

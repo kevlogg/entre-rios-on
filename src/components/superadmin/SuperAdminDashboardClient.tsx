@@ -73,7 +73,7 @@ export function SuperAdminDashboardClient({
     { id: 'geo-customizer', label: 'Banners', icon: MapPin },
     { id: 'raffles', label: 'Sorteos ON MÁS', icon: Gift },
     { id: 'jobs', label: 'Empleos & Trabajo', icon: Briefcase },
-    { id: 'news', label: 'Noticias & Moderación', icon: Newspaper },
+    { id: 'news', label: 'Comunidad', icon: Newspaper },
     { id: 'tourism', label: 'Servicios de Turismo', icon: Compass },
     { id: 'web-requests', label: 'Solicitudes "Mi Sitio Web"', icon: Globe, badge: 'Nuevos' },
   ];
