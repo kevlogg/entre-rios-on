@@ -30,11 +30,19 @@ export function CatalogManager({ commerce, products, onAddProduct, onDeleteProdu
   const [description, setDescription] = useState('');
   const [images, setImages] = useState<string[]>([]);
 
+  const plan = commerce?.plan || 'Bronce';
+  const maxProducts = plan === 'Oro' ? Infinity : plan === 'Plata' ? 20 : 5;
+  const isLimitReached = products.length >= maxProducts;
+
   const togglePause = (id: string) => {
     setPausedMap((prev) => ({ ...prev, [id]: !prev[id] }));
   };
 
   const handleOpenNewModal = () => {
+    if (isLimitReached) {
+      alert(`Has alcanzado el límite de ${maxProducts} productos / servicios para tu Plan ${plan}. Para agregar más publicaciones, por favor actualizá tu plan a ${plan === 'Bronce' ? 'Plata (hasta 20 productos)' : 'Oro (Ilimitados)'}.`);
+      return;
+    }
     setEditingProduct(null);
     setTitle('');
     setPrice('');
@@ -59,6 +67,11 @@ export function CatalogManager({ commerce, products, onAddProduct, onDeleteProdu
   const handleSaveProduct = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!title || !price || isSubmitting) return;
+
+    if (!editingProduct && isLimitReached) {
+      alert(`Límite alcanzado (${maxProducts} productos). Actualizá tu plan para publicar más.`);
+      return;
+    }
 
     setIsSubmitting(true);
     const selectedCatObj = CATEGORIES_LIST.find((c) => c.id === category);
@@ -153,10 +166,21 @@ export function CatalogManager({ commerce, products, onAddProduct, onDeleteProdu
       {/* Section Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-4">
         <div>
-          <h3 className="text-xl font-extrabold text-[#0047BA] flex items-center gap-2">
-            <ShoppingBag className="w-5 h-5 text-[#00ADB5]" />
-            <span>Gestión del Catálogo de Productos</span>
-          </h3>
+          <div className="flex items-center gap-3">
+            <h3 className="text-xl font-extrabold text-[#0047BA] flex items-center gap-2">
+              <ShoppingBag className="w-5 h-5 text-[#00ADB5]" />
+              <span>Gestión del Catálogo de Productos</span>
+            </h3>
+            <span className={`px-3 py-0.5 rounded-full text-xs font-black border ${
+              plan === 'Oro'
+                ? 'bg-purple-100 text-purple-900 border-purple-300'
+                : plan === 'Plata'
+                ? 'bg-cyan-100 text-[#0047BA] border-cyan-300'
+                : 'bg-amber-100 text-amber-900 border-amber-300'
+            }`}>
+              Plan {plan}: {products.length} / {maxProducts === Infinity ? '∞ Ilimitado' : maxProducts}
+            </span>
+          </div>
           <p className="text-xs text-slate-500 font-medium mt-1">
             Administrá tus publicaciones en tiempo real. Los cambios se reflejan inmediatamente en el portal.
           </p>
@@ -164,12 +188,34 @@ export function CatalogManager({ commerce, products, onAddProduct, onDeleteProdu
 
         <button
           onClick={handleOpenNewModal}
-          className="bg-gradient-to-r from-[#00ADB5] to-[#007C8A] hover:from-[#00E5E8] hover:to-[#00ADB5] text-white px-5 py-2.5 rounded-2xl font-extrabold text-xs shadow-md flex items-center justify-center gap-2 transition-transform active:scale-95 cursor-pointer"
+          disabled={isLimitReached}
+          className={`px-5 py-2.5 rounded-2xl font-extrabold text-xs shadow-md flex items-center justify-center gap-2 transition-transform active:scale-95 cursor-pointer ${
+            isLimitReached
+              ? 'bg-slate-300 text-slate-500 cursor-not-allowed shadow-none'
+              : 'bg-gradient-to-r from-[#00ADB5] to-[#007C8A] hover:from-[#00E5E8] hover:to-[#00ADB5] text-white'
+          }`}
         >
           <Plus className="w-4 h-4" />
-          <span>Publicar Nuevo Producto</span>
+          <span>{isLimitReached ? 'Límite Alcanzado' : 'Publicar Nuevo Producto'}</span>
         </button>
       </div>
+
+      {/* BANNER ALERTA DE LÍMITE ALCANZADO */}
+      {isLimitReached && (
+        <div className="bg-amber-50 border-2 border-amber-300 rounded-2xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-amber-950 animate-in fade-in">
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-amber-200 text-amber-900 rounded-xl font-bold shrink-0">⚠️</div>
+            <div>
+              <h4 className="font-extrabold text-sm text-amber-900">
+                Límite de Catálogo Alcanzado ({products.length} / {maxProducts} publicaciones)
+              </h4>
+              <p className="text-xs text-amber-800 font-medium mt-0.5">
+                Tu <strong>Plan {plan}</strong> te permite publicar hasta {maxProducts} productos o servicios. Para publicar más ofertas, podés solicitar una mejora de plan.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Products Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">

@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { ShieldCheck, Check, Sparkles, Star, ArrowRight, Building2, Zap, DollarSign, Award, Clock, XCircle } from 'lucide-react';
+import { ShieldCheck, Check, Sparkles, Star, ArrowRight, Building2, Zap, DollarSign, Award, XCircle, X } from 'lucide-react';
 import { createSubscriptionPreferenceAction } from '@/server/actions/subscription';
 import { 
   createCashPaymentAction, 
@@ -20,6 +20,22 @@ interface SubscriptionPlansProps {
   currentTier?: string;
   onPlanActivated?: (planName: string) => void;
 }
+
+const PLAN_FEATURES = [
+  '1. Presencia local en directorio ON MÁS',
+  '2. Botón directo a WhatsApp (sin comisiones)',
+  '3. Catálogo de hasta 5 productos / servicios',
+  '4. Posicionamiento destacado en guía local y categoría',
+  '5. Catálogo de hasta 20 productos / servicios',
+  '6. Métricas en tiempo real (visitas y clics a WhatsApp)',
+  '7. Insignia Comercio Verificado Plata',
+  '8. Destacado TOP en portada provincial',
+  '9. Catálogo ILIMITADO de productos y servicios',
+  '10. Cobertura especial y notas de prensa / editoriales',
+  '11. Insignia Gold / Comercio Verificado Oro',
+  '12. Soporte prioritario 24/7 y asesoramiento comercial',
+  '13. Publicidad y visibilidad exclusiva dentro del sitio web y en redes sociales',
+];
 
 export function SubscriptionPlans({
   commerceId = 'comm-default',
@@ -117,6 +133,43 @@ export function SubscriptionPlans({
     }
   };
 
+  const renderFeaturesList = (maxIncluded: number, cardType: 'bronce' | 'plata' | 'oro') => {
+    return (
+      <ul className="space-y-2.5 text-xs font-semibold">
+        {PLAN_FEATURES.map((featureText, index) => {
+          const itemNum = index + 1;
+          const isIncluded = itemNum <= maxIncluded;
+
+          if (isIncluded) {
+            return (
+              <li key={itemNum} className={`flex items-start gap-2 ${
+                cardType === 'oro' 
+                  ? (itemNum > 7 ? 'text-amber-300 font-extrabold' : 'text-purple-100 font-semibold')
+                  : cardType === 'plata'
+                  ? (itemNum >= 4 ? 'text-slate-900 font-bold' : 'text-slate-800 font-medium')
+                  : (itemNum === 3 ? 'text-slate-900 font-bold' : 'text-slate-800 font-medium')
+              }`}>
+                <Check className={`w-4 h-4 shrink-0 mt-0.5 font-black ${
+                  cardType === 'oro' ? 'text-amber-400' : 'text-emerald-600'
+                }`} />
+                <span>{featureText}</span>
+              </li>
+            );
+          } else {
+            return (
+              <li key={itemNum} className={`flex items-start gap-2 line-through font-normal ${
+                cardType === 'oro' ? 'text-purple-300/40' : 'text-slate-400/90'
+              }`}>
+                <X className="w-4 h-4 text-rose-500 shrink-0 mt-0.5 font-bold" />
+                <span>{featureText}</span>
+              </li>
+            );
+          }
+        })}
+      </ul>
+    );
+  };
+
   return (
     <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-sm space-y-8 animate-in fade-in duration-200">
       
@@ -128,16 +181,16 @@ export function SubscriptionPlans({
             <span>PLANES Y SUSCRIPCIONES ON MÁS</span>
           </span>
           <h3 className="text-2xl font-black text-[#0047BA] leading-tight mt-1">
-            Elegí tu Plan de Suscripción ON MÁS
+            Elegí tu Plan de Suscripción Comercial / Turismo
           </h3>
           <p className="text-xs text-slate-500 font-semibold mt-1">
-            Planes a medida sin comisiones por venta. Activación directa para figurar en la plataforma.
+            Comparativa transparente de beneficios. Todas las funciones detalladas con tilde (incluido) o cruz (no incluido).
           </p>
         </div>
 
         <div className="bg-emerald-50 border border-emerald-200 text-emerald-800 px-4 py-2 rounded-2xl text-xs font-black inline-flex items-center gap-2 shrink-0">
           <ShieldCheck className="w-4 h-4 text-emerald-600" />
-          <span>Comisiones 0% en Todos los Planes</span>
+          <span>Sin Comisiones por Venta (0%)</span>
         </div>
       </div>
 
@@ -185,8 +238,8 @@ export function SubscriptionPlans({
       {/* ==================== PLANES ON MÁS (BRONCE $29k, PLATA $49k, ORO $99k) ==================== */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-stretch max-w-6xl mx-auto">
         
-        {/* 1. PLAN BRONCE ($29.000) */}
-        <div className={`bg-slate-50/80 border-2 border-slate-200 rounded-3xl p-6 flex flex-col justify-between space-y-6 transition-all ${
+        {/* 1. PLAN BRONCE ($29.000) - Puntos 1 al 3 */}
+        <div className={`bg-slate-50/90 border-2 border-slate-200 rounded-3xl p-6 flex flex-col justify-between space-y-6 transition-all ${
           pendingPayment ? 'opacity-65 grayscale-[20%]' : 'hover:border-amber-600/50'
         }`}>
           <div className="space-y-4">
@@ -196,9 +249,10 @@ export function SubscriptionPlans({
               </span>
               <Building2 className="w-6 h-6 text-amber-700" />
             </div>
+
             <div className="space-y-1">
               <h4 className="text-2xl font-black text-slate-900">Plan Bronce</h4>
-              <p className="text-xs text-slate-500 font-medium">Presencia institucional en tu ciudad</p>
+              <p className="text-xs text-slate-500 font-medium">Presencia inicial en el portal regional</p>
             </div>
 
             <div className="py-3 border-y border-slate-200">
@@ -206,33 +260,17 @@ export function SubscriptionPlans({
               <span className="text-xs font-bold text-slate-400"> / mes</span>
             </div>
 
-            <ul className="space-y-3 text-xs text-slate-700 font-semibold">
-              <li className="flex items-center gap-2">
-                <Check className="w-4 h-4 text-emerald-600 shrink-0" />
-                <span>Presencia local en directorio ON MÁS</span>
-              </li>
-              <li className="flex items-center gap-2">
-                <Check className="w-4 h-4 text-emerald-600 shrink-0" />
-                <span>Botón directo a WhatsApp (sin comisiones)</span>
-              </li>
-              <li className="flex items-center gap-2">
-                <Check className="w-4 h-4 text-emerald-600 shrink-0" />
-                <span>Ficha institucional con datos y ubicación</span>
-              </li>
-              <li className="flex items-center gap-2">
-                <Check className="w-4 h-4 text-emerald-600 shrink-0" />
-                <span>Catálogo de hasta <strong>5 productos / servicios</strong></span>
-              </li>
-            </ul>
+            {/* Lista de 13 Puntos con Tildes (1-3) y Cruces (4-13) */}
+            {renderFeaturesList(3, 'bronce')}
           </div>
 
-          <div className="space-y-2 pt-2">
+          <div className="space-y-2 pt-4 border-t border-slate-200">
             <button
               onClick={() => handleSelectPlan('BRONCE', 'Plan Bronce ($29.000)')}
               disabled={Boolean(pendingPayment) || loadingTier === 'BRONCE'}
               className="w-full bg-[#0047BA] hover:bg-[#002878] text-white py-3.5 rounded-2xl font-black text-xs transition-transform active:scale-95 cursor-pointer shadow-md flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              <span>{loadingTier === 'BRONCE' ? 'Procesando...' : 'Pagar con MercadoPago ($29.000)'}</span>
+              <span>{loadingTier === 'BRONCE' ? 'Procesando...' : 'Contratar Plan Bronce ($29.000)'}</span>
               <ArrowRight className="w-4 h-4" />
             </button>
 
@@ -254,7 +292,7 @@ export function SubscriptionPlans({
           </div>
         </div>
 
-        {/* 2. PLAN PLATA ($49.000) - RECOMENDADO */}
+        {/* 2. PLAN PLATA ($49.000) - Puntos 1 al 7 */}
         <div className={`relative bg-gradient-to-b from-blue-50/90 via-white to-slate-50 border-2 border-[#00ADB5] rounded-3xl p-6 flex flex-col justify-between space-y-6 shadow-xl ${
           pendingPayment ? 'opacity-65 grayscale-[20%]' : ''
         }`}>
@@ -270,6 +308,7 @@ export function SubscriptionPlans({
               </span>
               <Zap className="w-6 h-6 text-[#00ADB5]" />
             </div>
+
             <div className="space-y-1">
               <h4 className="text-2xl font-black text-slate-900">Plan Plata</h4>
               <p className="text-xs text-slate-500 font-medium">Para comercios en crecimiento activo</p>
@@ -280,37 +319,17 @@ export function SubscriptionPlans({
               <span className="text-xs font-bold text-slate-400"> / mes</span>
             </div>
 
-            <ul className="space-y-3 text-xs text-slate-700 font-semibold">
-              <li className="flex items-center gap-2">
-                <Check className="w-4 h-4 text-emerald-600 shrink-0" />
-                <span>Posicionamiento <strong>destacado en guía local</strong> y categoría</span>
-              </li>
-              <li className="flex items-center gap-2">
-                <Check className="w-4 h-4 text-emerald-600 shrink-0" />
-                <span>Catálogo de hasta <strong>20 productos / servicios</strong></span>
-              </li>
-              <li className="flex items-center gap-2">
-                <Check className="w-4 h-4 text-emerald-600 shrink-0" />
-                <span>Métricas en tiempo real (visitas y clics a WhatsApp)</span>
-              </li>
-              <li className="flex items-center gap-2">
-                <Check className="w-4 h-4 text-emerald-600 shrink-0" />
-                <span>Insignia <strong>Comercio Verificado Plata</strong></span>
-              </li>
-              <li className="flex items-center gap-2">
-                <Check className="w-4 h-4 text-emerald-600 shrink-0" />
-                <span>Botón directo a WhatsApp (sin comisiones)</span>
-              </li>
-            </ul>
+            {/* Lista de 13 Puntos con Tildes (1-7) y Cruces (8-13) */}
+            {renderFeaturesList(7, 'plata')}
           </div>
 
-          <div className="space-y-2 pt-2">
+          <div className="space-y-2 pt-4 border-t border-slate-200">
             <button
               onClick={() => handleSelectPlan('PLATA', 'Plan Plata ($49.000)')}
               disabled={Boolean(pendingPayment) || loadingTier === 'PLATA'}
               className="w-full bg-gradient-to-r from-[#00ADB5] to-[#0047BA] hover:from-[#00969d] hover:to-[#002878] text-white py-3.5 rounded-2xl font-black text-xs shadow-lg transition-transform active:scale-95 cursor-pointer flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              <span>{loadingTier === 'PLATA' ? 'Procesando...' : 'Pagar con MercadoPago ($49.000)'}</span>
+              <span>{loadingTier === 'PLATA' ? 'Procesando...' : 'Contratar Plan Plata ($49.000)'}</span>
               <ArrowRight className="w-4 h-4" />
             </button>
 
@@ -332,7 +351,7 @@ export function SubscriptionPlans({
           </div>
         </div>
 
-        {/* 3. PLAN ORO ($99.000) - MÁXIMO ALCANCE / PORTADA PROVINCIAL */}
+        {/* 3. PLAN ORO ($99.000) - Puntos 1 al 13 COMPLETOS */}
         <div className={`relative bg-gradient-to-b from-[#1F1138] via-[#160b29] to-[#0d051a] border-2 border-amber-400 rounded-3xl p-6 flex flex-col justify-between space-y-6 shadow-2xl text-white ${
           pendingPayment ? 'opacity-65 grayscale-[20%]' : ''
         }`}>
@@ -348,6 +367,7 @@ export function SubscriptionPlans({
               </span>
               <Star className="w-6 h-6 text-amber-400 fill-amber-400/20" />
             </div>
+
             <div className="space-y-1">
               <h4 className="text-2xl font-black text-white">Plan Oro</h4>
               <p className="text-xs text-purple-200 font-medium">Liderazgo y máxima cobertura provincial</p>
@@ -358,37 +378,17 @@ export function SubscriptionPlans({
               <span className="text-xs font-bold text-purple-300"> / mes</span>
             </div>
 
-            <ul className="space-y-3 text-xs text-purple-100 font-bold">
-              <li className="flex items-center gap-2">
-                <Check className="w-4 h-4 text-amber-400 shrink-0" />
-                <span>Destacado <strong>TOP #1 en portada provincial</strong> (Entre Ríos y Santa Fe)</span>
-              </li>
-              <li className="flex items-center gap-2">
-                <Check className="w-4 h-4 text-amber-400 shrink-0" />
-                <span>Catálogo <strong>ILIMITADO</strong> de productos y servicios</span>
-              </li>
-              <li className="flex items-center gap-2">
-                <Check className="w-4 h-4 text-amber-400 shrink-0" />
-                <span>Cobertura especial y <strong>notas de prensa / editoriales</strong></span>
-              </li>
-              <li className="flex items-center gap-2">
-                <Check className="w-4 h-4 text-amber-400 shrink-0" />
-                <span>Insignia <strong>Gold / Comercio Verificado Oro</strong></span>
-              </li>
-              <li className="flex items-center gap-2">
-                <Check className="w-4 h-4 text-amber-400 shrink-0" />
-                <span>Soporte prioritario 24/7 y asesoramiento comercial</span>
-              </li>
-            </ul>
+            {/* Lista de 13 Puntos TODOS INCLUIDOS (1-13) */}
+            {renderFeaturesList(13, 'oro')}
           </div>
 
-          <div className="space-y-2 pt-2">
+          <div className="space-y-2 pt-4 border-t border-purple-800/80">
             <button
               onClick={() => handleSelectPlan('ORO', 'Plan Oro ($99.000)')}
               disabled={Boolean(pendingPayment) || loadingTier === 'ORO'}
               className="w-full bg-gradient-to-r from-amber-400 via-amber-500 to-amber-600 hover:from-amber-300 hover:to-amber-500 text-slate-950 py-3.5 rounded-2xl font-black text-xs shadow-xl transition-transform active:scale-95 cursor-pointer flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              <span>{loadingTier === 'ORO' ? 'Procesando...' : 'Pagar con MercadoPago ($99.000)'}</span>
+              <span>{loadingTier === 'ORO' ? 'Procesando...' : 'Contratar Plan Oro ($99.000)'}</span>
               <ArrowRight className="w-4 h-4" />
             </button>
 
@@ -415,3 +415,4 @@ export function SubscriptionPlans({
     </div>
   );
 }
+
