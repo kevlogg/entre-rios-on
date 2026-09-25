@@ -55,13 +55,15 @@ export async function createJobAction(jobData: {
     const client = adminSupabase || (await createClient());
 
     const initialStatus = jobData.isSuperAdmin ? 'APPROVED' : 'PENDING';
+    const modality = jobData.workModality || 'Presencial';
 
-    const { error } = await client.from('jobs').insert({
+    // Intento 1: Con columna work_modality
+    const { error: err1 } = await client.from('jobs').insert({
       title: jobData.title,
       company: jobData.company,
       city_name: jobData.cityName,
       province_id: jobData.provinceId || 'entre-rios',
-      work_modality: jobData.workModality || 'Presencial',
+      work_modality: modality,
       job_type: jobData.jobType || 'Tiempo Completo',
       salary: jobData.salary || 'A convenir',
       description: jobData.description,
@@ -69,18 +71,47 @@ export async function createJobAction(jobData: {
       status: initialStatus,
     });
 
-    if (error) {
-      return { success: false, message: `Error registrando en Supabase: ${error.message}` };
+    if (!err1) {
+      revalidatePath('/empleos');
+      revalidatePath('/superadmin');
+      return {
+        success: true,
+        message: jobData.isSuperAdmin
+          ? 'Búsqueda laboral publicada directamente en la web.'
+          : 'Oferta laboral enviada a revisión. Quedará pendiente de aprobación por el equipo SuperAdmin.',
+      };
     }
 
-    revalidatePath('/empleos');
-    revalidatePath('/superadmin');
-    return {
-      success: true,
-      message: jobData.isSuperAdmin
-        ? 'Búsqueda laboral publicada directamente en la web.'
-        : 'Oferta laboral enviada a revisión. Quedará pendiente de aprobación por el equipo SuperAdmin.',
-    };
+    // Intento 2: Si Supabase reporta falta de columna work_modality en cache, reintentar integrándolo en job_type
+    if (err1.message.includes('work_modality') || err1.message.includes('schema cache')) {
+      const fallbackJobType = `${jobData.jobType || 'Tiempo Completo'} • ${modality}`;
+      const { error: err2 } = await client.from('jobs').insert({
+        title: jobData.title,
+        company: jobData.company,
+        city_name: jobData.cityName,
+        province_id: jobData.provinceId || 'entre-rios',
+        job_type: fallbackJobType,
+        salary: jobData.salary || 'A convenir',
+        description: jobData.description,
+        phone_whatsapp: jobData.phoneWhatsApp,
+        status: initialStatus,
+      });
+
+      if (!err2) {
+        revalidatePath('/empleos');
+        revalidatePath('/superadmin');
+        return {
+          success: true,
+          message: jobData.isSuperAdmin
+            ? 'Búsqueda laboral publicada directamente en la web.'
+            : 'Oferta laboral enviada a revisión. Quedará pendiente de aprobación por el equipo SuperAdmin.',
+        };
+      }
+
+      return { success: false, message: `Error registrando en Supabase: ${err2.message}` };
+    }
+
+    return { success: false, message: `Error registrando en Supabase: ${err1.message}` };
   } catch (err) {
     return { success: false, message: `Error: ${(err as Error).message}` };
   }
@@ -120,20 +151,30 @@ export async function getAllJobsAction(statusFilter?: string): Promise<{
 
     return {
       success: true,
-      data: (data || []).map((j: any) => ({
-        id: j.id,
-        title: j.title,
-        company: j.company,
-        cityName: j.city_name || 'Paraná',
-        provinceId: j.province_id || 'entre-rios',
-        workModality: j.work_modality || 'Presencial',
-        jobType: j.job_type || 'Tiempo Completo',
-        salary: j.salary || 'A convenir',
-        description: j.description || '',
-        phoneWhatsApp: j.phone_whatsapp || '',
-        status: j.status || 'APPROVED',
-        createdAt: j.created_at,
-      })),
+      data: (data || []).map((j: any) => {
+        let rawJobType = j.job_type || 'Tiempo Completo';
+        let resolvedModality = j.work_modality || 'Presencial';
+        if (rawJobType.includes(' • ')) {
+          const parts = rawJobType.split(' • ');
+          rawJobType = parts[0];
+          resolvedModality = parts[1] || resolvedModality;
+        }
+
+        return {
+          id: j.id,
+          title: j.title,
+          company: j.company,
+          cityName: j.city_name || 'Paraná',
+          provinceId: j.province_id || 'entre-rios',
+          workModality: resolvedModality,
+          jobType: rawJobType,
+          salary: j.salary || 'A convenir',
+          description: j.description || '',
+          phoneWhatsApp: j.phone_whatsapp || '',
+          status: j.status || 'APPROVED',
+          createdAt: j.created_at,
+        };
+      }),
     };
   } catch (err) {
     return { success: false, data: [] };

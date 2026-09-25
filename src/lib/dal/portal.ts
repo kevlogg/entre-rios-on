@@ -1122,20 +1122,30 @@ export async function getJobs(provinceId?: string, cityName?: string): Promise<J
       }
       const { data, error } = await query;
       if (!error && Array.isArray(data)) {
-        return data.map((j) => ({
-          id: j.id,
-          title: j.title,
-          company: j.company,
-          cityName: j.city_name,
-          provinceId: j.province_id,
-          workModality: j.work_modality || 'Presencial',
-          jobType: j.job_type,
-          salary: j.salary,
-          description: j.description,
-          phoneWhatsApp: j.phone_whatsapp,
-          status: j.status,
-          createdAt: j.created_at,
-        }));
+        return data.map((j) => {
+          let rawJobType = j.job_type || 'Tiempo Completo';
+          let resolvedModality = j.work_modality || 'Presencial';
+          if (rawJobType.includes(' • ')) {
+            const parts = rawJobType.split(' • ');
+            rawJobType = parts[0];
+            resolvedModality = parts[1] || resolvedModality;
+          }
+
+          return {
+            id: j.id,
+            title: j.title,
+            company: j.company,
+            cityName: j.city_name,
+            provinceId: j.province_id,
+            workModality: resolvedModality,
+            jobType: rawJobType,
+            salary: j.salary,
+            description: j.description,
+            phoneWhatsApp: j.phone_whatsapp,
+            status: j.status,
+            createdAt: j.created_at,
+          };
+        });
       }
     } catch (e) {
       console.warn('Fallback to mock jobs:', e);
