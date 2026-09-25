@@ -1,12 +1,26 @@
 import { NextResponse, type NextRequest } from 'next/server';
-import { createPublicClient } from '@/lib/supabase/public';
+import { createClient as createSupabaseJSClient } from '@supabase/supabase-js';
 import { checkRateLimit, getClientIp } from '@/lib/security/rateLimit';
 import { WhatsAppLeadSchema } from '@/lib/security/validation';
 
+function getAdminClient() {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  const key = serviceKey || anonKey;
+
+  if (url && key) {
+    return createSupabaseJSClient(url, key, {
+      auth: { persistSession: false, autoRefreshToken: false },
+    });
+  }
+  return null;
+}
+
 export async function GET(request: NextRequest) {
-  // 1. Verificación de Rate Limit (Máximo 20 clics por minuto por IP)
+  // 1. Verificación de Rate Limit (Máximo 60 clics por minuto por IP)
   const clientIp = getClientIp(request.headers);
-  const rateCheck = checkRateLimit(`wa_lead:${clientIp}`, { limit: 20, windowMs: 60 * 1000 });
+  const rateCheck = checkRateLimit(`wa_lead:${clientIp}`, { limit: 60, windowMs: 60 * 1000 });
 
   if (!rateCheck.success) {
     return NextResponse.json(
@@ -15,61 +29,88 @@ export async function GET(request: NextRequest) {
     );
   }
 
-  // 2. Validación de parámetros con Zod
+  // 2. Validación de parámetros
   const { searchParams } = new URL(request.url);
+  const rawPhone = searchParams.get('phone') || undefined;
+  const rawMsg = searchParams.get('message') || undefined;
+  const rawCommerceId = searchParams.get('commerceId') || undefined;
+  const rawProductId = searchParams.get('productId') || undefined;
+  const rawCityId = searchParams.get('cityId') || undefined;
+
   const parseResult = WhatsAppLeadSchema.safeParse({
-    phone: searchParams.get('phone') || undefined,
-    message: searchParams.get('message') || undefined,
-    commerceId: searchParams.get('commerceId') || undefined,
-    productId: searchParams.get('productId') || undefined,
-    cityId: searchParams.get('cityId') || undefined,
+    phone: rawPhone,
+    message: rawMsg,
+    commerceId: rawCommerceId,
+    productId: rawProductId,
+    cityId: rawCityId,
   });
 
-  if (!parseResult.success) {
-    return NextResponse.json({ error: 'Parámetros inválidos' }, { status: 400 });
-  }
-
-  const { phone, message, commerceId, productId, cityId } = parseResult.data;
+  const { phone, message, commerceId, productId, cityId } = parseResult.success
+    ? parseResult.data
+    : {
+        phone: rawPhone,
+        message: rawMsg,
+        commerceId: rawCommerceId,
+        productId: rawProductId,
+        cityId: rawCityId,
+      };
 
   // Normalizar número telefónico
-  const cleanPhone = (phone || '5493447451234').replace(/\D/g, '');
+  const cleanPhone = (phone || '5493434001122').replace(/\D/g, '');
 
   try {
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-    if (supabaseUrl && !supabaseUrl.includes('your-supabase-project')) {
-      const supabase = createPublicClient();
+    const adminSupabase = getAdminClient();
+
+    if (adminSupabase && commerceId) {
       const userAgent = request.headers.get('user-agent') || 'Unknown';
 
-      // 1. Insertar el evento de lead en whatsapp_clicks
-      await supabase.from('whatsapp_clicks').insert({
-        commerce_id: commerceId || null,
-        product_id: productId || null,
-        city_id: cityId || null,
-        user_agent: userAgent,
-      });
+      // 1. Buscar comercio por ID, Slug u Owner ID
+      const { data: comms } = await adminSupabase
+        .from('commerces')
+        .select('id, whatsapp_clicks_count')
+        .or(`id.eq.${commerceId},slug.eq.${commerceId},owner_id.eq.${commerceId}`)
+        .limit(1);
 
-      // 2. Si hay commerceId, incrementar whatsapp_clicks_count acumulativo en commerces
-      if (commerceId) {
-        const { data: comm } = await supabase
+      if (comms && comms.length > 0) {
+        const comm = comms[0];
+        const nextClicks = Number(comm.whatsapp_clicks_count || 0) + 1;
+
+        // 2. Incrementar acumulativo en la fila del comercio
+        const { error: updateErr } = await adminSupabase
           .from('commerces')
-          .select('id, whatsapp_clicks_count')
-          .or(`id.eq.${commerceId},slug.eq.${commerceId}`)
-          .maybeSingle();
+          .update({ whatsapp_clicks_count: nextClicks })
+          .eq('id', comm.id);
 
-        if (comm) {
-          const nextClicks = Number(comm.whatsapp_clicks_count || 0) + 1;
-          await supabase
-            .from('commerces')
-            .update({ whatsapp_clicks_count: nextClicks })
-            .eq('id', comm.id);
+        if (updateErr) {
+          console.warn('Error incrementando whatsapp_clicks_count:', updateErr.message);
         }
+
+        // 3. Registrar el evento individual en la tabla whatsapp_clicks
+        const { error: insertErr } = await adminSupabase.from('whatsapp_clicks').insert({
+          commerce_id: comm.id,
+          product_id: productId || null,
+          city_id: cityId || null,
+          user_agent: userAgent,
+        });
+
+        if (insertErr) {
+          console.warn('Note on whatsapp_clicks insert:', insertErr.message);
+        }
+      } else {
+        // Fallback insert si no encontró coincidencia directa
+        await adminSupabase.from('whatsapp_clicks').insert({
+          commerce_id: commerceId,
+          product_id: productId || null,
+          city_id: cityId || null,
+          user_agent: userAgent,
+        });
       }
     }
   } catch (err) {
-    console.warn('Error registrando lead de WhatsApp en Supabase:', err);
+    console.warn('Error registrando lead de WhatsApp en API:', err);
   }
 
-  // Generar enlace seguro de WhatsApp Web / App
+  // Generar enlace de WhatsApp y redirigir 302
   const encodedText = encodeURIComponent(message || '');
   const waUrl = `https://wa.me/${cleanPhone}?text=${encodedText}`;
 
