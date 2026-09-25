@@ -25,7 +25,7 @@ export async function createProductAction(productData: Partial<Product>): Promis
       if (user) {
         const { data: userComm } = await supabase
           .from('commerces')
-          .select('id, name, city_id, city_name, province_id, phone_whatsapp')
+          .select('id, name, city_id, city_name, province_id, phone_whatsapp, subscription_tier')
           .eq('owner_id', user.id)
           .order('created_at', { ascending: false })
           .limit(1)
@@ -38,6 +38,24 @@ export async function createProductAction(productData: Partial<Product>): Promis
           if (!targetCityName) targetCityName = userComm.city_name;
           if (!targetProvinceId) targetProvinceId = userComm.province_id;
           if (!targetPhone) targetPhone = userComm.phone_whatsapp;
+
+          // Validar límite del plan en el servidor
+          const rawTier = (userComm.subscription_tier || 'BRONCE').toUpperCase();
+          const maxAllowed = rawTier.includes('ORO') ? Infinity : rawTier.includes('PLATA') ? 20 : 5;
+
+          if (maxAllowed !== Infinity) {
+            const { count: currentCount } = await supabase
+              .from('products')
+              .select('id', { count: 'exact', head: true })
+              .eq('commerce_id', userComm.id);
+
+            if ((currentCount || 0) >= maxAllowed) {
+              return {
+                success: false,
+                message: `Límite alcanzado: Tu Plan ${rawTier.charAt(0) + rawTier.slice(1).toLowerCase()} permite hasta ${maxAllowed} productos. Podés mejorar tu plan para publicar más.`,
+              };
+            }
+          }
         }
       }
 
