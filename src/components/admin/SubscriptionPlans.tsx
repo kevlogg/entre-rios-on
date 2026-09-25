@@ -21,21 +21,38 @@ interface SubscriptionPlansProps {
   onPlanActivated?: (planName: string) => void;
 }
 
-const PLAN_FEATURES = [
-  'Presencia local en directorio ON MÁS',
-  'Botón directo a WhatsApp (sin comisiones)',
-  'Catálogo de hasta 5 productos / servicios',
-  'Posicionamiento destacado en guía local y categoría',
-  'Catálogo de hasta 20 productos / servicios',
-  'Métricas en tiempo real (visitas y clics a WhatsApp)',
-  'Insignia Comercio Verificado Plata',
-  'Destacado TOP en portada provincial',
-  'Catálogo ILIMITADO de productos y servicios',
-  'Cobertura especial y notas de prensa / editoriales',
-  'Insignia Gold / Comercio Verificado Oro',
-  'Soporte prioritario 24/7 y asesoramiento comercial',
-  'Publicidad y visibilidad exclusiva dentro del sitio web y en redes sociales',
+const BASE_FEATURES = [
+  { id: 1, text: 'Presencia local en directorio ON MÁS' },
+  { id: 2, text: 'Botón directo a WhatsApp (sin comisiones)' },
+  { id: 3, catalog: true, text: '' },
+  { id: 4, text: 'Posicionamiento destacado en guía local y categoría' },
+  { id: 5, text: 'Métricas en tiempo real (visitas y clics a WhatsApp)' },
+  { id: 6, text: 'Insignia Comercio Verificado Plata' },
+  { id: 7, text: 'Destacado TOP en portada provincial' },
+  { id: 8, text: 'Cobertura especial y notas de prensa / editoriales' },
+  { id: 9, text: 'Insignia Gold / Comercio Verificado Oro' },
+  { id: 10, text: 'Soporte prioritario 24/7 y asesoramiento comercial' },
+  { id: 11, text: 'Publicidad y visibilidad exclusiva dentro del sitio web y en redes sociales' },
 ];
+
+const getFeaturesForPlan = (cardType: 'bronce' | 'plata' | 'oro') => {
+  const catalogText = 
+    cardType === 'bronce'
+      ? 'Catálogo de hasta 5 productos / servicios'
+      : cardType === 'plata'
+      ? 'Catálogo de hasta 20 productos / servicios'
+      : 'Catálogo ILIMITADO de productos y servicios';
+
+  const maxIncluded = cardType === 'bronce' ? 3 : cardType === 'plata' ? 6 : 11;
+
+  return BASE_FEATURES.map((item, index) => {
+    const itemNum = index + 1;
+    const isIncluded = itemNum <= maxIncluded;
+    const text = item.catalog ? catalogText : item.text;
+
+    return { itemNum, isIncluded, text };
+  });
+};
 
 export function SubscriptionPlans({
   commerceId = 'comm-default',
@@ -133,18 +150,16 @@ export function SubscriptionPlans({
     }
   };
 
-  const renderFeaturesList = (maxIncluded: number, cardType: 'bronce' | 'plata' | 'oro') => {
+  const renderFeaturesList = (cardType: 'bronce' | 'plata' | 'oro') => {
+    const features = getFeaturesForPlan(cardType);
     return (
       <ul className="space-y-2.5 text-xs font-semibold">
-        {PLAN_FEATURES.map((featureText, index) => {
-          const itemNum = index + 1;
-          const isIncluded = itemNum <= maxIncluded;
-
+        {features.map(({ itemNum, isIncluded, text }) => {
           if (isIncluded) {
             return (
               <li key={itemNum} className={`flex items-start gap-2 ${
                 cardType === 'oro' 
-                  ? (itemNum > 7 ? 'text-amber-300 font-extrabold' : 'text-purple-100 font-semibold')
+                  ? (itemNum > 6 ? 'text-amber-300 font-extrabold' : 'text-purple-100 font-semibold')
                   : cardType === 'plata'
                   ? (itemNum >= 4 ? 'text-slate-900 font-bold' : 'text-slate-800 font-medium')
                   : (itemNum === 3 ? 'text-slate-900 font-bold' : 'text-slate-800 font-medium')
@@ -152,7 +167,7 @@ export function SubscriptionPlans({
                 <Check className={`w-4 h-4 shrink-0 mt-0.5 font-black ${
                   cardType === 'oro' ? 'text-amber-400' : 'text-emerald-600'
                 }`} />
-                <span>{featureText}</span>
+                <span>{text}</span>
               </li>
             );
           } else {
@@ -161,7 +176,7 @@ export function SubscriptionPlans({
                 cardType === 'oro' ? 'text-purple-300/50' : 'text-slate-400'
               }`}>
                 <X className="w-4 h-4 text-rose-500 shrink-0 mt-0.5 font-bold" />
-                <span>{featureText}</span>
+                <span>{text}</span>
               </li>
             );
           }
@@ -260,8 +275,8 @@ export function SubscriptionPlans({
               <span className="text-xs font-bold text-slate-400"> / mes</span>
             </div>
 
-            {/* Lista de 13 Puntos con Tildes (1-3) y Cruces (4-13) */}
-            {renderFeaturesList(3, 'bronce')}
+            {/* Lista de características del Plan Bronce */}
+            {renderFeaturesList('bronce')}
           </div>
 
           <div className="space-y-2 pt-4 border-t border-slate-200">
@@ -319,8 +334,8 @@ export function SubscriptionPlans({
               <span className="text-xs font-bold text-slate-400"> / mes</span>
             </div>
 
-            {/* Lista de 13 Puntos con Tildes (1-7) y Cruces (8-13) */}
-            {renderFeaturesList(7, 'plata')}
+            {/* Lista de características del Plan Plata */}
+            {renderFeaturesList('plata')}
           </div>
 
           <div className="space-y-2 pt-4 border-t border-slate-200">
@@ -378,8 +393,8 @@ export function SubscriptionPlans({
               <span className="text-xs font-bold text-purple-300"> / mes</span>
             </div>
 
-            {/* Lista de 13 Puntos TODOS INCLUIDOS (1-13) */}
-            {renderFeaturesList(13, 'oro')}
+            {/* Lista de características del Plan Oro */}
+            {renderFeaturesList('oro')}
           </div>
 
           <div className="space-y-2 pt-4 border-t border-purple-800/80">
