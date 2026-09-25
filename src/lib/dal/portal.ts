@@ -1113,7 +1113,7 @@ export async function getJobs(provinceId?: string, cityName?: string): Promise<J
     try {
       const { createPublicClient } = await import('@/lib/supabase/public');
       const supabase = createPublicClient();
-      let query = supabase.from('jobs').select('*').order('created_at', { ascending: false });
+      let query = supabase.from('jobs').select('*').eq('status', 'APPROVED').order('created_at', { ascending: false });
       if (provinceId && provinceId !== 'all') {
         query = query.eq('province_id', provinceId);
       }
@@ -1128,6 +1128,7 @@ export async function getJobs(provinceId?: string, cityName?: string): Promise<J
           company: j.company,
           cityName: j.city_name,
           provinceId: j.province_id,
+          workModality: j.work_modality || 'Presencial',
           jobType: j.job_type,
           salary: j.salary,
           description: j.description,

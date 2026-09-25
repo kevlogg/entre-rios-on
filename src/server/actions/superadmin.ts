@@ -43,38 +43,152 @@ export async function createJobAction(jobData: {
   company: string;
   cityName: string;
   provinceId?: string;
+  workModality?: string;
   jobType?: string;
   salary?: string;
   description: string;
   phoneWhatsApp: string;
+  isSuperAdmin?: boolean;
 }): Promise<{ success: boolean; message: string }> {
   try {
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-    if (supabaseUrl && !supabaseUrl.includes('your-supabase-project')) {
-      const supabase = await createClient();
-      const { error } = await supabase.from('jobs').insert({
-        title: jobData.title,
-        company: jobData.company,
-        city_name: jobData.cityName,
-        province_id: jobData.provinceId || 'entre-rios',
-        job_type: jobData.jobType || 'Tiempo Completo',
-        salary: jobData.salary || 'A convenir',
-        description: jobData.description,
-        phone_whatsapp: jobData.phoneWhatsApp,
-        status: 'APPROVED'
-      });
+    const adminSupabase = getAdminClient();
+    const client = adminSupabase || (await createClient());
 
-      if (error) {
-        return { success: false, message: `Error registrando en Supabase: ${error.message}` };
-      }
+    const initialStatus = jobData.isSuperAdmin ? 'APPROVED' : 'PENDING';
 
-      revalidatePath('/empleos');
-      revalidatePath('/superadmin');
-      return { success: true, message: 'Oferta laboral registrada exitosamente en Supabase.' };
+    const { error } = await client.from('jobs').insert({
+      title: jobData.title,
+      company: jobData.company,
+      city_name: jobData.cityName,
+      province_id: jobData.provinceId || 'entre-rios',
+      work_modality: jobData.workModality || 'Presencial',
+      job_type: jobData.jobType || 'Tiempo Completo',
+      salary: jobData.salary || 'A convenir',
+      description: jobData.description,
+      phone_whatsapp: jobData.phoneWhatsApp,
+      status: initialStatus,
+    });
+
+    if (error) {
+      return { success: false, message: `Error registrando en Supabase: ${error.message}` };
     }
 
     revalidatePath('/empleos');
-    return { success: true, message: 'Empleo publicado correctamente.' };
+    revalidatePath('/superadmin');
+    return {
+      success: true,
+      message: jobData.isSuperAdmin
+        ? 'Búsqueda laboral publicada directamente en la web.'
+        : 'Oferta laboral enviada a revisión. Quedará pendiente de aprobación por el equipo SuperAdmin.',
+    };
+  } catch (err) {
+    return { success: false, message: `Error: ${(err as Error).message}` };
+  }
+}
+
+export async function getAllJobsAction(statusFilter?: string): Promise<{
+  success: boolean;
+  data: Array<{
+    id: string;
+    title: string;
+    company: string;
+    cityName: string;
+    provinceId?: string;
+    workModality?: string;
+    jobType: string;
+    salary: string;
+    description: string;
+    phoneWhatsApp: string;
+    status: string;
+    createdAt?: string;
+  }>;
+}> {
+  try {
+    const adminSupabase = getAdminClient();
+    const client = adminSupabase || (await createClient());
+
+    let query = client.from('jobs').select('*').order('created_at', { ascending: false });
+    if (statusFilter) {
+      query = query.eq('status', statusFilter);
+    }
+
+    const { data, error } = await query;
+    if (error) {
+      console.warn('Error cargando empleos:', error.message);
+      return { success: false, data: [] };
+    }
+
+    return {
+      success: true,
+      data: (data || []).map((j: any) => ({
+        id: j.id,
+        title: j.title,
+        company: j.company,
+        cityName: j.city_name || 'Paraná',
+        provinceId: j.province_id || 'entre-rios',
+        workModality: j.work_modality || 'Presencial',
+        jobType: j.job_type || 'Tiempo Completo',
+        salary: j.salary || 'A convenir',
+        description: j.description || '',
+        phoneWhatsApp: j.phone_whatsapp || '',
+        status: j.status || 'APPROVED',
+        createdAt: j.created_at,
+      })),
+    };
+  } catch (err) {
+    return { success: false, data: [] };
+  }
+}
+
+export async function approveJobAction(jobId: string): Promise<{ success: boolean; message: string }> {
+  try {
+    const adminSupabase = getAdminClient();
+    const client = adminSupabase || (await createClient());
+
+    const { error } = await client.from('jobs').update({ status: 'APPROVED' }).eq('id', jobId);
+    if (error) {
+      return { success: false, message: `Error aprobando empleo: ${error.message}` };
+    }
+
+    revalidatePath('/empleos');
+    revalidatePath('/superadmin');
+    return { success: true, message: 'Oferta laboral aprobada y publicada en la web.' };
+  } catch (err) {
+    return { success: false, message: `Error: ${(err as Error).message}` };
+  }
+}
+
+export async function rejectJobAction(jobId: string): Promise<{ success: boolean; message: string }> {
+  try {
+    const adminSupabase = getAdminClient();
+    const client = adminSupabase || (await createClient());
+
+    const { error } = await client.from('jobs').update({ status: 'REJECTED' }).eq('id', jobId);
+    if (error) {
+      return { success: false, message: `Error rechazando empleo: ${error.message}` };
+    }
+
+    revalidatePath('/empleos');
+    revalidatePath('/superadmin');
+    return { success: true, message: 'Oferta laboral rechazada.' };
+  } catch (err) {
+    return { success: false, message: `Error: ${(err as Error).message}` };
+  }
+}
+
+export async function deleteJobAction(jobId: string): Promise<{ success: boolean; message: string }> {
+  try {
+    const adminSupabase = getAdminClient();
+    const client = adminSupabase || (await createClient());
+
+    const { error } = await client.from('jobs').delete().eq('id', jobId);
+    if (error) {
+      return { success: false, message: `Error eliminando empleo: ${error.message}` };
+    }
+
+    revalidatePath('/empleos');
+    revalidatePath('/superadmin');
+    return { success: true, message: 'Oferta laboral eliminada.' };
   } catch (err) {
     return { success: false, message: `Error: ${(err as Error).message}` };
   }

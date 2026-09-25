@@ -105,6 +105,7 @@ export interface JobItem {
   company: string;
   cityName: string;
   provinceId?: string;
+  workModality?: string;
   jobType: string;
   salary: string;
   description: string;

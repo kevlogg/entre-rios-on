@@ -248,6 +248,7 @@ CREATE TABLE IF NOT EXISTS public.jobs (
   company TEXT NOT NULL,
   city_name TEXT NOT NULL,
   province_id TEXT DEFAULT 'entre-rios',
+  work_modality TEXT DEFAULT 'Presencial' CHECK (work_modality IN ('Presencial', 'Híbrido', 'Remoto')),
   job_type TEXT DEFAULT 'Tiempo Completo',
   salary TEXT DEFAULT 'A convenir',
   description TEXT NOT NULL,
@@ -255,6 +256,9 @@ CREATE TABLE IF NOT EXISTS public.jobs (
   status TEXT DEFAULT 'APPROVED' CHECK (status IN ('PENDING', 'APPROVED', 'REJECTED')),
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+
+-- Migración de columna work_modality por si la tabla ya existe
+ALTER TABLE public.jobs ADD COLUMN IF NOT EXISTS work_modality TEXT DEFAULT 'Presencial';
 
 -- 11. TABLA DE PAGOS EN EFECTIVO B2B
 CREATE TABLE IF NOT EXISTS public.cash_payments (
