@@ -22,19 +22,19 @@ interface SubscriptionPlansProps {
 }
 
 const PLAN_FEATURES = [
-  '1. Presencia local en directorio ON MÁS',
-  '2. Botón directo a WhatsApp (sin comisiones)',
-  '3. Catálogo de hasta 5 productos / servicios',
-  '4. Posicionamiento destacado en guía local y categoría',
-  '5. Catálogo de hasta 20 productos / servicios',
-  '6. Métricas en tiempo real (visitas y clics a WhatsApp)',
-  '7. Insignia Comercio Verificado Plata',
-  '8. Destacado TOP en portada provincial',
-  '9. Catálogo ILIMITADO de productos y servicios',
-  '10. Cobertura especial y notas de prensa / editoriales',
-  '11. Insignia Gold / Comercio Verificado Oro',
-  '12. Soporte prioritario 24/7 y asesoramiento comercial',
-  '13. Publicidad y visibilidad exclusiva dentro del sitio web y en redes sociales',
+  'Presencia local en directorio ON MÁS',
+  'Botón directo a WhatsApp (sin comisiones)',
+  'Catálogo de hasta 5 productos / servicios',
+  'Posicionamiento destacado en guía local y categoría',
+  'Catálogo de hasta 20 productos / servicios',
+  'Métricas en tiempo real (visitas y clics a WhatsApp)',
+  'Insignia Comercio Verificado Plata',
+  'Destacado TOP en portada provincial',
+  'Catálogo ILIMITADO de productos y servicios',
+  'Cobertura especial y notas de prensa / editoriales',
+  'Insignia Gold / Comercio Verificado Oro',
+  'Soporte prioritario 24/7 y asesoramiento comercial',
+  'Publicidad y visibilidad exclusiva dentro del sitio web y en redes sociales',
 ];
 
 export function SubscriptionPlans({
@@ -157,8 +157,8 @@ export function SubscriptionPlans({
             );
           } else {
             return (
-              <li key={itemNum} className={`flex items-start gap-2 line-through font-normal ${
-                cardType === 'oro' ? 'text-purple-300/40' : 'text-slate-400/90'
+              <li key={itemNum} className={`flex items-start gap-2 font-normal ${
+                cardType === 'oro' ? 'text-purple-300/50' : 'text-slate-400'
               }`}>
                 <X className="w-4 h-4 text-rose-500 shrink-0 mt-0.5 font-bold" />
                 <span>{featureText}</span>
