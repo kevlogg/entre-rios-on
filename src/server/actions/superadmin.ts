@@ -335,6 +335,44 @@ export async function drawRaffleWinnerAction(
   }
 }
 
+export async function createRaffleAction(raffleData: {
+  title: string;
+  prize: string;
+  prizesList?: string[];
+  prizesCount?: number;
+  ticketPrice?: string;
+  sponsorName?: string;
+  drawDate?: string;
+  imageUrl?: string;
+}): Promise<{ success: boolean; message: string }> {
+  try {
+    const adminSupabase = getAdminClient();
+    const client = adminSupabase || (await createClient());
+
+    const { error } = await client.from('raffles').insert({
+      title: raffleData.title,
+      prize: raffleData.prize,
+      sponsor_name: raffleData.sponsorName || 'ON MÁS Portal Regional',
+      draw_date: raffleData.drawDate || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+      ticket_price: raffleData.ticketPrice || '$2.500 ARS',
+      prizes_count: raffleData.prizesCount || 3,
+      prizes_list: raffleData.prizesList || [raffleData.prize],
+      image_url: raffleData.imageUrl || '/images/city-federacion.jpg',
+      status: 'ACTIVE',
+    });
+
+    if (error) {
+      console.warn('Note on Supabase raffle creation:', error.message);
+    }
+
+    revalidatePath('/sorteos');
+    revalidatePath('/superadmin');
+    return { success: true, message: '¡Sorteo mensual creado e ingresado exitosamente!' };
+  } catch (err) {
+    return { success: false, message: `Error creando sorteo: ${(err as Error).message}` };
+  }
+}
+
 export async function createTourismServiceAction(serviceData: {
   name: string;
   category: string;

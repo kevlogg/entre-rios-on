@@ -172,10 +172,14 @@ export interface Raffle {
   id: string;
   title: string;
   prize: string;
+  prizesList?: string[];
+  prizesCount?: number;
+  ticketPrice?: string;
   sponsorName: string;
   imageUrl: string;
   drawDate: string;
   status: 'ACTIVE' | 'DRAWN' | 'CANCELLED';
+  autoActiveCommerces?: boolean;
   winnerName?: string;
   winnerPhone?: string;
   createdAt?: string;
