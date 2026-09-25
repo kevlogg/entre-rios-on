@@ -180,7 +180,7 @@ export function SuperAdminDashboardClient({
           )}
 
           {activeTab === 'tourism' && (
-            <TourismManager />
+            <TourismManager commerces={initialCommerces} />
           )}
 
           {activeTab === 'web-requests' && (
