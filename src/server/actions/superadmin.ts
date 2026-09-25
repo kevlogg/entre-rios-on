@@ -8,31 +8,20 @@ export async function toggleCommerceVerificationAction(
   currentStatus: boolean
 ): Promise<{ success: boolean; message: string }> {
   try {
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const adminSupabase = getAdminClient();
+    const client = adminSupabase || (await createClient());
 
-    if (supabaseUrl && !supabaseUrl.includes('your-supabase-project')) {
-      const supabase = await createClient();
+    const { error } = await client
+      .from('commerces')
+      .update({ is_verified: !currentStatus })
+      .eq('id', commerceId);
 
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        return { success: false, message: 'No autorizado.' };
-      }
-
-      const { error } = await supabase
-        .from('commerces')
-        .update({ is_verified: !currentStatus })
-        .eq('id', commerceId);
-
-      if (error) {
-        return { success: false, message: `Error cambiando estado: ${error.message}` };
-      }
-
-      revalidatePath('/superadmin');
-      return { success: true, message: 'Estado de verificación actualizado en Supabase.' };
+    if (error) {
+      return { success: false, message: `Error cambiando estado: ${error.message}` };
     }
 
     revalidatePath('/superadmin');
-    return { success: true, message: 'Verificación actualizada.' };
+    return { success: true, message: 'Estado de verificación actualizado en Supabase.' };
   } catch (err) {
     return { success: false, message: `Error inesperado: ${(err as Error).message}` };
   }
@@ -465,33 +454,28 @@ export async function createTourismServiceAction(serviceData: {
   imageUrl?: string;
 }): Promise<{ success: boolean; message: string }> {
   try {
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const adminSupabase = getAdminClient();
+    const client = adminSupabase || (await createClient());
 
-    if (supabaseUrl && !supabaseUrl.includes('your-supabase-project')) {
-      const supabase = await createClient();
-      const { error } = await supabase.from('tourism_services').insert({
-        name: serviceData.name,
-        category: serviceData.category,
-        city_name: serviceData.cityName,
-        province_id: serviceData.provinceId || 'entre-rios',
-        price: serviceData.price,
-        plan_tier: serviceData.planTier || 'Plata',
-        image_url: serviceData.imageUrl || '/images/city-federacion.jpg',
-        is_verified: true,
-      });
+    const { error } = await client.from('tourism_services').insert({
+      name: serviceData.name,
+      category: serviceData.category,
+      city_name: serviceData.cityName,
+      province_id: serviceData.provinceId || 'entre-rios',
+      price: serviceData.price,
+      plan_tier: serviceData.planTier || 'Plata',
+      image_url: serviceData.imageUrl || '/images/city-federacion.jpg',
+      is_verified: true,
+    });
 
-      if (error) {
-        return { success: false, message: `Error en Supabase: ${error.message}` };
-      }
-
-      revalidatePath('/turismo');
-      revalidatePath('/superadmin');
-      return { success: true, message: 'Servicio turístico registrado con éxito en Supabase.' };
+    if (error) {
+      console.warn('Error insertando servicio turístico:', error.message);
+      return { success: false, message: `Error en Supabase: ${error.message}` };
     }
 
     revalidatePath('/turismo');
     revalidatePath('/superadmin');
-    return { success: true, message: 'Servicio turístico guardado en modo demostración.' };
+    return { success: true, message: 'Servicio turístico registrado con éxito en Supabase.' };
   } catch (err) {
     return { success: false, message: `Error: ${(err as Error).message}` };
   }
@@ -499,23 +483,18 @@ export async function createTourismServiceAction(serviceData: {
 
 export async function deleteTourismServiceAction(serviceId: string): Promise<{ success: boolean; message: string }> {
   try {
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const adminSupabase = getAdminClient();
+    const client = adminSupabase || (await createClient());
 
-    if (supabaseUrl && !supabaseUrl.includes('your-supabase-project')) {
-      const supabase = await createClient();
-      const { error } = await supabase.from('tourism_services').delete().eq('id', serviceId);
+    const { error } = await client.from('tourism_services').delete().eq('id', serviceId);
 
-      if (error) {
-        return { success: false, message: `Error eliminando servicio: ${error.message}` };
-      }
-
-      revalidatePath('/turismo');
-      revalidatePath('/superadmin');
-      return { success: true, message: 'Servicio turístico eliminado.' };
+    if (error) {
+      return { success: false, message: `Error eliminando servicio: ${error.message}` };
     }
 
     revalidatePath('/turismo');
-    return { success: true, message: 'Servicio eliminado en modo demostración.' };
+    revalidatePath('/superadmin');
+    return { success: true, message: 'Servicio turístico eliminado.' };
   } catch (err) {
     return { success: false, message: `Error: ${(err as Error).message}` };
   }
