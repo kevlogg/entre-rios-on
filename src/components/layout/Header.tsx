@@ -13,7 +13,8 @@ import {
   ChevronDown,
   Sparkles,
   Crown,
-  Building2
+  Building2,
+  User
 } from 'lucide-react';
 import { trackCitySelect, trackSearchQuery } from '@/lib/analytics/events';
 import { PROVINCES, getCitiesByProvince, getProvinceBySlug, getCityBySlug } from '@/lib/constants/locations';
@@ -32,6 +33,75 @@ export function Header({ selectedCityId = 'all' }: HeaderProps) {
   const [isProvinceDropdownOpen, setIsProvinceDropdownOpen] = useState(false);
   const [isCityDropdownOpen, setIsCityDropdownOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  // User & Commerce Auth State
+  const [currentUser, setCurrentUser] = useState<any>(null);
+  const [userCommerce, setUserCommerce] = useState<{ name: string; logoUrl?: string; initial: string } | null>(null);
+
+  useEffect(() => {
+    async function checkAuthAndCommerce() {
+      try {
+        const { createClient } = await import('@/lib/supabase/client');
+        const supabase = createClient();
+
+        const { data: { user } } = await supabase.auth.getUser();
+
+        if (user) {
+          setCurrentUser(user);
+
+          const { data: commerces } = await supabase
+            .from('commerces')
+            .select('name, logo_url')
+            .eq('owner_id', user.id)
+            .order('created_at', { ascending: false })
+            .limit(1);
+
+          const commerceObj = commerces && commerces.length > 0 ? commerces[0] : null;
+
+          const commerceName =
+            commerceObj?.name ||
+            user.user_metadata?.commerce_name ||
+            user.user_metadata?.full_name ||
+            user.email?.split('@')[0] ||
+            'Mi Comercio';
+
+          const rawLogo = commerceObj?.logo_url || user.user_metadata?.logo_url || '';
+          const hasValidCustomLogo =
+            rawLogo &&
+            !rawLogo.includes('city-rosario.jpg') &&
+            (rawLogo.startsWith('http') || rawLogo.startsWith('data:') || rawLogo.startsWith('/uploads'));
+
+          const initialChar = commerceName.trim().charAt(0).toUpperCase() || 'M';
+
+          setUserCommerce({
+            name: commerceName,
+            logoUrl: hasValidCustomLogo ? rawLogo : undefined,
+            initial: initialChar,
+          });
+        } else {
+          setCurrentUser(null);
+          setUserCommerce(null);
+        }
+      } catch (err) {
+        console.warn('Error verificando autenticación en Header:', err);
+      }
+    }
+
+    checkAuthAndCommerce();
+
+    import('@/lib/supabase/client').then(({ createClient }) => {
+      const supabase = createClient();
+      const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+        if (!session?.user) {
+          setCurrentUser(null);
+          setUserCommerce(null);
+        } else {
+          checkAuthAndCommerce();
+        }
+      });
+      return () => subscription.unsubscribe();
+    }).catch(() => {});
+  }, []);
 
   // Sync state from URL pathname
   useEffect(() => {
@@ -249,13 +319,45 @@ export function Header({ selectedCityId = 'all' }: HeaderProps) {
 
           {/* Action CTAs */}
           <div className="hidden md:flex items-center gap-2">
-            <Link
-              href="/admin"
-              className="px-3.5 py-2 rounded-xl text-xs font-extrabold text-[#00ADB5] hover:bg-cyan-50 transition-colors flex items-center gap-1.5 border border-cyan-200"
-            >
-              <Store className="w-3.5 h-3.5 text-[#00ADB5]" />
-              <span>Mi Negocio</span>
-            </Link>
+            {!currentUser ? (
+              <Link
+                href="/login"
+                className="px-3.5 py-2 rounded-xl text-xs font-extrabold text-[#0047BA] hover:bg-cyan-50 transition-colors flex items-center gap-1.5 border border-slate-200 hover:border-[#00ADB5]"
+                title="Ingresar o Registrarse"
+              >
+                <User className="w-3.5 h-3.5 text-[#00ADB5]" />
+                <span>Ingresar / Crear cuenta</span>
+              </Link>
+            ) : (
+              <Link
+                href="/admin"
+                className="flex items-center gap-2.5 bg-slate-50 hover:bg-cyan-50/80 border border-slate-200 hover:border-[#00ADB5] p-1 pr-3 rounded-2xl transition-all shadow-2xs cursor-pointer group"
+                title={`Panel de Administración: ${userCommerce?.name || 'Mi Negocio'}`}
+              >
+                {userCommerce?.logoUrl ? (
+                  <div className="relative w-8 h-8 rounded-xl overflow-hidden border border-slate-300 group-hover:border-[#00ADB5] bg-white shrink-0 shadow-2xs">
+                    <Image
+                      src={userCommerce.logoUrl}
+                      alt={userCommerce.name}
+                      fill
+                      className="object-cover"
+                    />
+                  </div>
+                ) : (
+                  <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-[#0047BA] to-[#00ADB5] text-white flex items-center justify-center font-black text-sm shadow-2xs shrink-0">
+                    {userCommerce?.initial || 'M'}
+                  </div>
+                )}
+                <div className="flex flex-col text-left">
+                  <span className="text-[11px] font-black text-slate-900 group-hover:text-[#0047BA] leading-tight truncate max-w-[120px]">
+                    {userCommerce?.name || 'Mi Comercio'}
+                  </span>
+                  <span className="text-[9px] font-extrabold text-[#00ADB5] uppercase tracking-wider">
+                    Mi Negocio
+                  </span>
+                </div>
+              </Link>
+            )}
 
             <Link
               href="/login?mode=signup&type=negocio_automotor"

@@ -31,6 +31,75 @@ export function ClientHeader() {
   const [isProvinceDropdownOpen, setIsProvinceDropdownOpen] = useState(false);
   const [isCityDropdownOpen, setIsCityDropdownOpen] = useState(false);
 
+  // User & Commerce Auth State
+  const [currentUser, setCurrentUser] = useState<any>(null);
+  const [userCommerce, setUserCommerce] = useState<{ name: string; logoUrl?: string; initial: string } | null>(null);
+
+  useEffect(() => {
+    async function checkAuthAndCommerce() {
+      try {
+        const { createClient } = await import('@/lib/supabase/client');
+        const supabase = createClient();
+
+        const { data: { user } } = await supabase.auth.getUser();
+
+        if (user) {
+          setCurrentUser(user);
+
+          const { data: commerces } = await supabase
+            .from('commerces')
+            .select('name, logo_url')
+            .eq('owner_id', user.id)
+            .order('created_at', { ascending: false })
+            .limit(1);
+
+          const commerceObj = commerces && commerces.length > 0 ? commerces[0] : null;
+
+          const commerceName =
+            commerceObj?.name ||
+            user.user_metadata?.commerce_name ||
+            user.user_metadata?.full_name ||
+            user.email?.split('@')[0] ||
+            'Mi Comercio';
+
+          const rawLogo = commerceObj?.logo_url || user.user_metadata?.logo_url || '';
+          const hasValidCustomLogo =
+            rawLogo &&
+            !rawLogo.includes('city-rosario.jpg') &&
+            (rawLogo.startsWith('http') || rawLogo.startsWith('data:') || rawLogo.startsWith('/uploads'));
+
+          const initialChar = commerceName.trim().charAt(0).toUpperCase() || 'M';
+
+          setUserCommerce({
+            name: commerceName,
+            logoUrl: hasValidCustomLogo ? rawLogo : undefined,
+            initial: initialChar,
+          });
+        } else {
+          setCurrentUser(null);
+          setUserCommerce(null);
+        }
+      } catch (err) {
+        console.warn('Error verificando autenticación en ClientHeader:', err);
+      }
+    }
+
+    checkAuthAndCommerce();
+
+    import('@/lib/supabase/client').then(({ createClient }) => {
+      const supabase = createClient();
+      const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+        if (!session?.user) {
+          setCurrentUser(null);
+          setUserCommerce(null);
+        } else {
+          checkAuthAndCommerce();
+        }
+      });
+      return () => subscription.unsubscribe();
+    }).catch(() => {});
+  }, []);
+
   // Sync state from URL pathname
   useEffect(() => {
     if (!pathname) return;
@@ -246,17 +315,47 @@ export function ClientHeader() {
             </button>
           </form>
 
-          {/* User Actions: Panel Comercio (Mi Negocio) & Carrito */}
-          <div className="flex items-center gap-3 sm:gap-5">
-            {/* Panel B2B Comercio */}
-            <Link 
-              href="/admin" 
-              className="flex flex-col items-center text-[#0047BA] hover:text-[#00ADB5] transition-colors"
-              title="Panel de Administración del Comercio"
-            >
-              <Store className="w-5 h-5 text-[#00ADB5]" />
-              <span className="text-[11px] font-extrabold mt-0.5">Mi Negocio</span>
-            </Link>
+          {/* User Actions: Ingresar / Crear cuenta (si no está logueado) o Perfil Comercio (si está logueado) */}
+          <div className="flex items-center gap-3 sm:gap-4">
+            {!currentUser ? (
+              <Link 
+                href="/login" 
+                className="flex items-center gap-2 bg-slate-50 hover:bg-cyan-50/80 text-[#0047BA] hover:text-[#00ADB5] border border-slate-200 hover:border-[#00ADB5] px-3.5 py-2 rounded-2xl text-xs font-extrabold transition-all shadow-2xs cursor-pointer shrink-0"
+                title="Ingresar o Registrarse"
+              >
+                <User className="w-4 h-4 text-[#00ADB5]" />
+                <span>Ingresar / Crear cuenta</span>
+              </Link>
+            ) : (
+              <Link 
+                href="/admin" 
+                className="flex items-center gap-2.5 bg-slate-50 hover:bg-cyan-50/80 border border-slate-200 hover:border-[#00ADB5] p-1 pr-3 rounded-2xl transition-all shadow-2xs cursor-pointer group shrink-0"
+                title={`Panel de Administración: ${userCommerce?.name || 'Mi Negocio'}`}
+              >
+                {userCommerce?.logoUrl ? (
+                  <div className="relative w-8 h-8 rounded-xl overflow-hidden border border-slate-300 group-hover:border-[#00ADB5] bg-white shrink-0 shadow-2xs">
+                    <Image
+                      src={userCommerce.logoUrl}
+                      alt={userCommerce.name}
+                      fill
+                      className="object-cover"
+                    />
+                  </div>
+                ) : (
+                  <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-[#0047BA] to-[#00ADB5] text-white flex items-center justify-center font-black text-sm shadow-2xs shrink-0">
+                    {userCommerce?.initial || 'M'}
+                  </div>
+                )}
+                <div className="hidden sm:flex flex-col text-left">
+                  <span className="text-[11px] font-black text-slate-900 group-hover:text-[#0047BA] leading-tight truncate max-w-[120px]">
+                    {userCommerce?.name || 'Mi Comercio'}
+                  </span>
+                  <span className="text-[9px] font-extrabold text-[#00ADB5] uppercase tracking-wider">
+                    Mi Negocio
+                  </span>
+                </div>
+              </Link>
+            )}
 
             {/* Mobile Hamburger Toggle */}
             <button
@@ -299,7 +398,39 @@ export function ClientHeader() {
 
       {/* Mobile Drawer Menu */}
       {isMobileMenuOpen && (
-        <div className="md:hidden bg-white border-t border-slate-200 px-4 pt-3 pb-6 space-y-4 animate-in fade-in duration-200">
+        <div className="md:hidden bg-white border-t border-slate-200 px-4 pt-4 pb-6 space-y-4 animate-in fade-in duration-200">
+          
+          {/* User Account / Commerce Panel Mobile CTA */}
+          {!currentUser ? (
+            <Link
+              href="/login"
+              onClick={() => setIsMobileMenuOpen(false)}
+              className="flex items-center justify-center gap-2 py-3 px-4 rounded-2xl bg-cyan-50/80 border border-cyan-200 text-xs font-black text-[#0047BA] shadow-2xs"
+            >
+              <User className="w-4 h-4 text-[#00ADB5]" />
+              <span>Ingresar / Crear cuenta</span>
+            </Link>
+          ) : (
+            <Link
+              href="/admin"
+              onClick={() => setIsMobileMenuOpen(false)}
+              className="flex items-center gap-3 p-2.5 rounded-2xl bg-cyan-50/60 border border-cyan-200 text-xs font-black text-slate-900 shadow-2xs"
+            >
+              {userCommerce?.logoUrl ? (
+                <div className="relative w-9 h-9 rounded-xl overflow-hidden border border-slate-300 bg-white shrink-0">
+                  <Image src={userCommerce.logoUrl} alt={userCommerce.name} fill className="object-cover" />
+                </div>
+              ) : (
+                <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-[#0047BA] to-[#00ADB5] text-white flex items-center justify-center font-black text-sm shrink-0">
+                  {userCommerce?.initial || 'M'}
+                </div>
+              )}
+              <div className="flex flex-col text-left">
+                <span className="font-black text-slate-900 text-xs">{userCommerce?.name}</span>
+                <span className="text-[10px] text-[#00ADB5] font-bold">Ir a Mi Negocio (Panel)</span>
+              </div>
+            </Link>
+          )}
           <div className="space-y-2">
             <label className="block text-xs font-bold text-slate-600">Provincia</label>
             <div className="flex gap-2">
