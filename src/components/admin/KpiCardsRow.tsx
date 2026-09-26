@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { MessageCircle, Eye, ShoppingBag, ShieldCheck, ArrowUpRight } from 'lucide-react';
+import { MessageCircle, Eye, ShoppingBag, ShieldCheck, TrendingUp, CheckCircle2 } from 'lucide-react';
 
 interface KpiCardsRowProps {
   productCount: number;
@@ -17,77 +17,103 @@ export function KpiCardsRow({
   const kpis = [
     {
       title: 'Consultas a WhatsApp',
-      value: `${whatsappClicksCount}`,
-      change: whatsappClicksCount > 0 ? `+${whatsappClicksCount} este mes` : 'Sin consultas aún',
-      isPositive: whatsappClicksCount > 0,
+      value: whatsappClicksCount.toLocaleString('es-AR'),
+      subtext: whatsappClicksCount > 0 ? `${whatsappClicksCount} contacto${whatsappClicksCount === 1 ? '' : 's'} directo${whatsappClicksCount === 1 ? '' : 's'}` : 'Sin consultas registradas aún',
       icon: MessageCircle,
-      iconBg: 'bg-cyan-100 text-[#00ADB5]',
-      description: 'Clicks directos a tu chat comercial',
+      gradient: 'from-emerald-500/20 via-emerald-500/5 to-transparent',
+      borderColor: 'border-emerald-200/80 hover:border-emerald-400',
+      iconContainerBg: 'bg-emerald-500 text-white shadow-emerald-500/30',
+      tagBg: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+      accentBar: 'bg-emerald-500',
+      unitLabel: 'clics recibidos',
     },
     {
       title: 'Visualizaciones de Perfil',
-      value: `${profileViewsCount}`,
-      change: profileViewsCount > 0 ? `+${profileViewsCount} este mes` : 'Nuevo en el portal',
-      isPositive: profileViewsCount > 0,
+      value: profileViewsCount.toLocaleString('es-AR'),
+      subtext: profileViewsCount > 0 ? `${profileViewsCount} visita${profileViewsCount === 1 ? '' : 's'} a tu ficha` : 'Nuevo comercio registrado',
       icon: Eye,
-      iconBg: 'bg-blue-100 text-[#0047BA]',
-      description: 'Visitas a la ficha del negocio',
+      gradient: 'from-cyan-500/20 via-cyan-500/5 to-transparent',
+      borderColor: 'border-cyan-200/80 hover:border-[#00ADB5]',
+      iconContainerBg: 'bg-gradient-to-tr from-[#0047BA] to-[#00ADB5] text-white shadow-cyan-500/30',
+      tagBg: 'bg-cyan-50 text-[#0047BA] border-cyan-200',
+      accentBar: 'bg-[#00ADB5]',
+      unitLabel: 'vistas en guía',
     },
     {
-      title: 'Productos Exhibidos',
-      value: `${productCount}`,
-      change: 'Activos en catálogo',
-      isPositive: true,
+      title: 'Productos en Catálogo',
+      value: productCount.toLocaleString('es-AR'),
+      subtext: productCount > 0 ? `${productCount} ítem${productCount === 1 ? '' : 's'} activo${productCount === 1 ? '' : 's'} en tienda` : 'Sin productos cargados aún',
       icon: ShoppingBag,
-      iconBg: 'bg-amber-100 text-amber-600',
-      description: 'Catálogo con compra por WhatsApp',
+      gradient: 'from-purple-500/20 via-purple-500/5 to-transparent',
+      borderColor: 'border-purple-200/80 hover:border-purple-400',
+      iconContainerBg: 'bg-purple-600 text-white shadow-purple-500/30',
+      tagBg: 'bg-purple-50 text-purple-700 border-purple-200',
+      accentBar: 'bg-purple-500',
+      unitLabel: 'ofertas activas',
     },
     {
-      title: 'Estado de Cuenta',
-      value: '100% Verificado',
-      change: 'Sin Comisiones 0%',
-      isPositive: true,
+      title: 'Estado del Perfil',
+      value: 'Verificado',
+      subtext: 'Sin comisiones 0% por ventas',
       icon: ShieldCheck,
-      iconBg: 'bg-[#00ADB5] text-white',
-      description: 'Plan Socio ON MÁS',
+      gradient: 'from-amber-500/20 via-amber-500/5 to-transparent',
+      borderColor: 'border-amber-200/80 hover:border-amber-400',
+      iconContainerBg: 'bg-gradient-to-tr from-amber-500 to-amber-600 text-white shadow-amber-500/30',
+      tagBg: 'bg-amber-50 text-amber-800 border-amber-200',
+      accentBar: 'bg-amber-500',
+      unitLabel: 'Socio ON MÁS',
     },
   ];
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
       {kpis.map((kpi, idx) => {
         const IconComponent = kpi.icon;
         return (
           <div
             key={idx}
-            className="bg-white rounded-3xl p-5 border border-slate-200 shadow-xs hover:shadow-md transition-all space-y-3 flex flex-col justify-between"
+            className={`relative group bg-white rounded-3xl p-5 sm:p-6 border ${kpi.borderColor} shadow-xs hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 flex flex-col justify-between overflow-hidden`}
           >
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-extrabold text-slate-500 uppercase tracking-wider">
-                {kpi.title}
-              </span>
-              <div className={`w-9 h-9 rounded-2xl flex items-center justify-center font-bold ${kpi.iconBg}`}>
-                <IconComponent className="w-4 h-4" />
+            {/* Top Accent Color Line */}
+            <div className={`absolute top-0 left-0 right-0 h-1.5 ${kpi.accentBar} opacity-80 group-hover:opacity-100 transition-opacity`} />
+
+            {/* Background Soft Radial Glow */}
+            <div className={`absolute -right-8 -bottom-8 w-32 h-32 rounded-full bg-gradient-to-br ${kpi.gradient} blur-2xl pointer-events-none opacity-60 group-hover:opacity-100 transition-opacity`} />
+
+            <div className="relative z-10 space-y-4">
+              {/* Header: Title & Vibrant Icon Badge */}
+              <div className="flex items-center justify-between gap-2">
+                <span className="text-xs font-black uppercase tracking-wider text-slate-500 group-hover:text-slate-700 transition-colors">
+                  {kpi.title}
+                </span>
+                <div className={`w-10 h-10 rounded-2xl flex items-center justify-center shadow-md transition-transform group-hover:scale-110 duration-200 ${kpi.iconContainerBg}`}>
+                  <IconComponent className="w-5 h-5" />
+                </div>
+              </div>
+
+              {/* Main Metric Value & Unit */}
+              <div>
+                <div className="flex items-baseline gap-2">
+                  <span className="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight leading-none">
+                    {kpi.value}
+                  </span>
+                  <span className="text-[11px] font-bold text-slate-400">
+                    {kpi.unitLabel}
+                  </span>
+                </div>
               </div>
             </div>
 
-            <div>
-              <div className="text-2xl sm:text-3xl font-black text-slate-900 leading-none">
-                {kpi.value}
-              </div>
-              <p className="text-xs text-slate-500 font-semibold mt-1">
-                {kpi.description}
-              </p>
-            </div>
-
-            <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-xs font-bold">
-              <span className={`px-2 py-0.5 rounded-md flex items-center gap-0.5 ${
-                kpi.isPositive ? 'text-emerald-700 bg-emerald-50' : 'text-slate-600 bg-slate-100'
-              }`}>
-                {kpi.isPositive && <ArrowUpRight className="w-3 h-3" />}
-                {kpi.change}
+            {/* Bottom Status Badge */}
+            <div className="relative z-10 pt-4 mt-3 border-t border-slate-100 flex items-center justify-between">
+              <span className={`text-[11px] font-extrabold px-2.5 py-1 rounded-xl border flex items-center gap-1.5 ${kpi.tagBg}`}>
+                {kpi.title === 'Estado del Perfil' ? (
+                  <CheckCircle2 className="w-3.5 h-3.5 text-amber-600 shrink-0" />
+                ) : (
+                  <TrendingUp className="w-3.5 h-3.5 shrink-0" />
+                )}
+                <span>{kpi.subtext}</span>
               </span>
-              <span className="text-slate-400 text-[10px]">En tiempo real</span>
             </div>
           </div>
         );
@@ -95,3 +121,4 @@ export function KpiCardsRow({
     </div>
   );
 }
+
