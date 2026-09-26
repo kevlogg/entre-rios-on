@@ -91,16 +91,18 @@ export function KpiCardsRow({
                 </div>
               </div>
 
-              {/* Main Metric Value & Unit */}
+              {/* Main Metric Value & Unit Label */}
               <div>
-                <div className="flex items-baseline gap-2">
-                  <span className="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight leading-none">
-                    {kpi.value}
-                  </span>
-                  <span className="text-[11px] font-bold text-slate-400">
+                <span className={`font-black tracking-tight leading-none block ${
+                  kpi.value === 'Verificado' ? 'text-2xl sm:text-3xl text-[#0047BA]' : 'text-3xl sm:text-4xl text-slate-900'
+                }`}>
+                  {kpi.value}
+                </span>
+                {kpi.unitLabel && (
+                  <span className="text-[10px] font-extrabold text-slate-400 block mt-1.5 uppercase tracking-wider">
                     {kpi.unitLabel}
                   </span>
-                </div>
+                )}
               </div>
             </div>
 
