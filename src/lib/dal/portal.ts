@@ -1026,7 +1026,8 @@ export async function getUpcomingEvents(cityId?: string): Promise<CommunityEvent
       }
       const { data, error } = await query;
       if (!error && Array.isArray(data)) {
-        return data.map((e) => ({
+        const approvedOnly = data.filter((e: any) => !e.status || e.status === 'APPROVED');
+        return approvedOnly.map((e) => ({
           id: e.id,
           title: e.title,
           category: e.category,

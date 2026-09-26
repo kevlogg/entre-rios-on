@@ -411,10 +411,13 @@ export async function createCommunityArticleAction(articleData: {
   excerpt: string;
   authorName?: string;
   imageUrl?: string;
+  status?: string;
+  isSuperAdmin?: boolean;
 }): Promise<{ success: boolean; message: string }> {
   try {
     const adminSupabase = getAdminClient();
     const client = adminSupabase || (await createClient());
+    const status = articleData.isSuperAdmin ? 'APPROVED' : (articleData.status || 'PENDING');
 
     const { error } = await client.from('community_events').insert({
       title: articleData.title,
@@ -428,8 +431,9 @@ export async function createCommunityArticleAction(articleData: {
       read_time_minutes: 4,
       excerpt: articleData.excerpt,
       is_featured: true,
-      author_name: articleData.authorName || 'Redacción ON MÁS',
+      author_name: articleData.authorName || 'Vecino / Redacción ON MÁS',
       author_avatar_url: '/images/avatar-author.jpg',
+      status: status,
     });
 
     if (error) {
@@ -438,9 +442,109 @@ export async function createCommunityArticleAction(articleData: {
 
     revalidatePath('/comunidad');
     revalidatePath('/superadmin');
-    return { success: true, message: 'Publicación guardada exitosamente en Comunidad.' };
+    return {
+      success: true,
+      message: articleData.isSuperAdmin
+        ? 'Publicación subida exitosamente a la sección Comunidad.'
+        : 'Nota enviada exitosamente. Quedó en revisión por el equipo SuperAdmin antes de su publicación.',
+    };
   } catch (err) {
     return { success: false, message: `Error al publicar nota: ${(err as Error).message}` };
+  }
+}
+
+export async function approveCommunityArticleAction(articleId: string): Promise<{ success: boolean; message: string }> {
+  try {
+    const adminSupabase = getAdminClient();
+    const client = adminSupabase || (await createClient());
+
+    const { error } = await client.from('community_events').update({ status: 'APPROVED' }).eq('id', articleId);
+    if (error) {
+      console.warn('Error aprobando nota de comunidad en Supabase:', error.message);
+    }
+
+    revalidatePath('/comunidad');
+    revalidatePath('/superadmin');
+    return { success: true, message: 'Nota de comunidad aprobada y publicada en la web.' };
+  } catch (err) {
+    return { success: false, message: `Error: ${(err as Error).message}` };
+  }
+}
+
+export async function rejectCommunityArticleAction(articleId: string): Promise<{ success: boolean; message: string }> {
+  try {
+    const adminSupabase = getAdminClient();
+    const client = adminSupabase || (await createClient());
+
+    const { error } = await client.from('community_events').update({ status: 'REJECTED' }).eq('id', articleId);
+    if (error) {
+      console.warn('Error rechazando nota de comunidad en Supabase:', error.message);
+    }
+
+    revalidatePath('/comunidad');
+    revalidatePath('/superadmin');
+    return { success: true, message: 'Nota de comunidad rechazada.' };
+  } catch (err) {
+    return { success: false, message: `Error: ${(err as Error).message}` };
+  }
+}
+
+export async function deleteCommunityArticleAction(articleId: string): Promise<{ success: boolean; message: string }> {
+  try {
+    const adminSupabase = getAdminClient();
+    const client = adminSupabase || (await createClient());
+
+    const { error } = await client.from('community_events').delete().eq('id', articleId);
+    if (error) {
+      console.warn('Error eliminando nota de comunidad en Supabase:', error.message);
+    }
+
+    revalidatePath('/comunidad');
+    revalidatePath('/superadmin');
+    return { success: true, message: 'Nota de comunidad eliminada.' };
+  } catch (err) {
+    return { success: false, message: `Error: ${(err as Error).message}` };
+  }
+}
+
+export async function getAllCommunityArticlesAction(statusFilter?: string): Promise<{ success: boolean; data: any[]; message?: string }> {
+  try {
+    const adminSupabase = getAdminClient();
+    const client = adminSupabase || (await createClient());
+
+    let query = client.from('community_events').select('*').order('created_at', { ascending: false });
+    if (statusFilter) {
+      query = query.eq('status', statusFilter);
+    }
+
+    const { data, error } = await query;
+    if (error) {
+      return { success: false, data: [], message: error.message };
+    }
+
+    const mapped = (data || []).map((e: any) => ({
+      id: e.id,
+      title: e.title,
+      category: e.category,
+      date: e.date,
+      formattedDate: e.formatted_date || e.date,
+      location: e.location || e.city_name,
+      cityId: e.city_id,
+      cityName: e.city_name,
+      imageUrl: e.image_url || '/images/commerce-bodega.jpg',
+      readTimeMinutes: e.read_time_minutes || 4,
+      excerpt: e.excerpt,
+      isFeatured: e.is_featured ?? true,
+      status: e.status || 'APPROVED',
+      author: {
+        name: e.author_name || 'Redacción ON MÁS',
+        avatarUrl: e.author_avatar_url || '/images/avatar-author.jpg',
+      },
+    }));
+
+    return { success: true, data: mapped };
+  } catch (err) {
+    return { success: false, data: [], message: (err as Error).message };
   }
 }
 
