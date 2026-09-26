@@ -6,25 +6,16 @@ import {
   Gift,
   Trophy,
   Ticket,
-  Users,
-  RefreshCw,
   CheckCircle2,
   Sparkles,
-  MapPin,
   Phone,
   Plus,
-  Store,
   Upload,
   X,
-  Building2,
-  Calendar,
-  DollarSign,
-  ShieldCheck
 } from 'lucide-react';
-import { drawRaffleWinnerAction, createRaffleAction } from '@/server/actions/superadmin';
+import { createRaffleAction } from '@/server/actions/superadmin';
 import { getRaffles, getAllCommerces } from '@/lib/dal/portal';
 import { uploadImageToSupabase } from '@/lib/supabase/storage';
-import { Commerce } from '@/types';
 
 interface ActiveRaffleItem {
   id: string;
@@ -78,13 +69,14 @@ export function RafflesManager() {
   const [raffles, setRaffles] = useState<ActiveRaffleItem[]>([]);
   const [activeCommercesCount, setActiveCommercesCount] = useState<number>(0);
 
-  // Form State
+  // Form State: Hasta 5 Premios
   const [title, setTitle] = useState('');
   const [mainPrize, setMainPrize] = useState('');
   const [prize2, setPrize2] = useState('');
   const [prize3, setPrize3] = useState('');
+  const [prize4, setPrize4] = useState('');
+  const [prize5, setPrize5] = useState('');
   const [ticketPrice, setTicketPrice] = useState('$2.500 ARS');
-  const [city, setCity] = useState('Federación');
   const [drawDate, setDrawDate] = useState('');
   const [autoActiveCommerces, setAutoActiveCommerces] = useState(true);
   const [imageUrl, setImageUrl] = useState('');
@@ -96,15 +88,7 @@ export function RafflesManager() {
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
-  // Winner Draw State
-  const [winner, setWinner] = useState<{
-    name: string;
-    city: string;
-    phone: string;
-    type: string;
-  } | null>(null);
-  const [isDrawing, setIsDrawing] = useState(false);
-  const [pastWinners, setPastWinners] = useState<PastWinner[]>(PAST_WINNERS_HISTORY);
+  const [pastWinners] = useState<PastWinner[]>(PAST_WINNERS_HISTORY);
 
   useEffect(() => {
     async function loadData() {
@@ -121,7 +105,7 @@ export function RafflesManager() {
               title: r.title,
               prize: r.prize,
               prizesList: r.prizesList || [r.prize],
-              prizesCount: r.prizesCount || 3,
+              prizesCount: r.prizesCount || (r.prizesList?.length || 1),
               ticketPrice: r.ticketPrice || '$2.500 ARS',
               city: 'Entre Ríos',
               drawDate: r.drawDate ? new Date(r.drawDate).toLocaleDateString('es-AR') : '31 de Octubre, 2026',
@@ -171,13 +155,16 @@ export function RafflesManager() {
     setIsSubmitting(true);
     setErrorMsg(null);
 
-    const prizesList = [
-      `1º Premio: ${mainPrize.trim()}`,
-      prize2.trim() ? `2º Premio: ${prize2.trim()}` : '2º Premio: Canasta de Sabores Litoraleños',
-      prize3.trim() ? `3º Premio: ${prize3.trim()}` : '3º Premio: Voucher de $50.000 ARS para compras',
-    ];
+    const rawPrizes = [
+      mainPrize.trim() ? `1º Premio: ${mainPrize.trim()}` : '',
+      prize2.trim() ? `2º Premio: ${prize2.trim()}` : '',
+      prize3.trim() ? `3º Premio: ${prize3.trim()}` : '',
+      prize4.trim() ? `4º Premio: ${prize4.trim()}` : '',
+      prize5.trim() ? `5º Premio: ${prize5.trim()}` : '',
+    ].filter(Boolean);
 
-    const finalImageUrl = imageUrl || imagePreview || 'https://images.unsplash.com/photo-1540555700478-4be289fbecef?auto=format&fit=crop&w=600&q=80';
+    const prizesList = rawPrizes.length > 0 ? rawPrizes : [`1º Premio: ${mainPrize.trim()}`];
+    const finalImageUrl = imageUrl || imagePreview || '/images/city-federacion.jpg';
 
     const newRaffle: ActiveRaffleItem = {
       id: `raffle-${Date.now()}`,
@@ -186,7 +173,7 @@ export function RafflesManager() {
       prizesList,
       prizesCount: prizesList.length,
       ticketPrice: ticketPrice.trim() || '$2.500 ARS',
-      city,
+      city: 'Entre Ríos',
       drawDate: drawDate.trim() || '31 de Octubre, 2026',
       imageUrl: finalImageUrl,
       status: 'ACTIVE',
@@ -211,6 +198,8 @@ export function RafflesManager() {
         setMainPrize('');
         setPrize2('');
         setPrize3('');
+        setPrize4('');
+        setPrize5('');
         setDrawDate('');
         setImageUrl('');
         setImagePreview(null);
@@ -222,57 +211,11 @@ export function RafflesManager() {
     } catch (err) {
       console.warn('Fallback local creación de sorteo:', err);
       setRaffles([newRaffle, ...raffles]);
-      setSuccessMsg(`¡Sorteo "${newRaffle.title}" publicado en modo demostración!`);
+      setSuccessMsg(`¡Sorteo "${newRaffle.title}" publicado exitosamente!`);
       setTimeout(() => setSuccessMsg(null), 4000);
     } finally {
       setIsSubmitting(false);
     }
-  };
-
-  // Draw Winner Function
-  const drawWinner = async () => {
-    setIsDrawing(true);
-    setWinner(null);
-
-    const isCommerceWinner = Math.random() > 0.4; // 60% chance of commerce winner
-
-    setTimeout(() => {
-      let selWinner;
-      if (isCommerceWinner) {
-        const commerceWinners = [
-          { name: 'Alfarería & Cerámica Delta', city: 'Colón', phone: '5493447451234', type: 'Comercio con Plan Activo' },
-          { name: 'Comedor Costanera El Dorado', city: 'Paraná', phone: '5493434229876', type: 'Comercio con Plan Activo' },
-          { name: 'La Candelaria Viñedos', city: 'Gualeguaychú', phone: '5493446584321', type: 'Comercio con Plan Activo' },
-          { name: 'Citrus & Dulces del Uruguay', city: 'Concordia', phone: '5493454112233', type: 'Comercio con Plan Activo' },
-        ];
-        selWinner = commerceWinners[Math.floor(Math.random() * commerceWinners.length)];
-      } else {
-        const ticketWinners = [
-          { name: 'Gabriel Benítez', city: 'Concordia', phone: '5493454998877', type: 'Ticket Comprado (WhatsApp)' },
-          { name: 'María Elena Rossi', city: 'Paraná', phone: '5493434223344', type: 'Ticket Comprado (WhatsApp)' },
-          { name: 'Rodrigo Casaux', city: 'Colón', phone: '5493447411223', type: 'Ticket Comprado (WhatsApp)' },
-        ];
-        selWinner = ticketWinners[Math.floor(Math.random() * ticketWinners.length)];
-      }
-
-      setWinner(selWinner);
-      setIsDrawing(false);
-
-      // Add to past winners history
-      setPastWinners([
-        {
-          id: `pw-${Date.now()}`,
-          raffleTitle: raffles[0]?.title || 'Sorteo Mensual ON MÁS',
-          drawDate: new Date().toLocaleDateString('es-AR', { day: 'numeric', month: 'long', year: 'numeric' }),
-          winnerName: selWinner.name,
-          winnerCity: selWinner.city,
-          winnerPhone: selWinner.phone,
-          prize: raffles[0]?.prize || 'Premio Principal Sorteo Mensual',
-          ticketType: selWinner.type.includes('Comercio') ? 'Comercio Plan Activo' : 'Ticket Comprado',
-        },
-        ...pastWinners,
-      ]);
-    }, 1500);
   };
 
   return (
@@ -302,7 +245,7 @@ export function RafflesManager() {
         </div>
       </div>
 
-      {/* Formulario: Crear Sorteo Mensual */}
+      {/* Formulario: Crear Sorteo Mensual (Hasta 5 premios) */}
       <div className="bg-white rounded-3xl p-6 border border-slate-200 shadow-sm space-y-6">
         <div className="space-y-1">
           <span className="text-xs font-black uppercase tracking-widest text-[#0047BA] flex items-center gap-1.5">
@@ -310,10 +253,10 @@ export function RafflesManager() {
             Configuración de Nuevo Sorteo Mensual
           </span>
           <h3 className="text-lg font-black text-slate-900 mt-1">
-            Crear Sorteo del Mes con Premios & Precio de Ticket
+            Crear Sorteo del Mes (Hasta 5 Premios)
           </h3>
           <p className="text-xs text-slate-500">
-            Definí la grilla de premios y el valor del ticket para usuarios no registrados / sin plan activo.
+            Definí el título, el valor del ticket y hasta 5 premios para los participantes.
           </p>
         </div>
 
@@ -362,7 +305,7 @@ export function RafflesManager() {
               />
             </div>
 
-            {/* Premio Principal (1º Premio) */}
+            {/* 1º Premio Principal */}
             <div className="space-y-1">
               <label className="block text-xs font-bold text-slate-700">1º Premio Principal *</label>
               <input
@@ -377,44 +320,50 @@ export function RafflesManager() {
 
             {/* 2º Premio */}
             <div className="space-y-1">
-              <label className="block text-xs font-bold text-slate-700">2º Premio Adicional</label>
+              <label className="block text-xs font-bold text-slate-700">2º Premio (opcional)</label>
               <input
                 type="text"
                 value={prize2}
                 onChange={(e) => setPrize2(e.target.value)}
-                placeholder="Ej. Canasta de Productos Regionales & Caja de Vinos Tannat"
+                placeholder="Ej. Canasta de Productos Regionales"
                 className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2.5 text-xs text-slate-800 font-medium"
               />
             </div>
 
             {/* 3º Premio */}
             <div className="space-y-1">
-              <label className="block text-xs font-bold text-slate-700">3º Premio Adicional</label>
+              <label className="block text-xs font-bold text-slate-700">3º Premio (opcional)</label>
               <input
                 type="text"
                 value={prize3}
                 onChange={(e) => setPrize3(e.target.value)}
-                placeholder="Ej. Voucher por $50.000 ARS para compras en el catálogo"
+                placeholder="Ej. Voucher por $50.000 ARS para compras"
                 className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2.5 text-xs text-slate-800 font-medium"
               />
             </div>
 
-            {/* Ciudad / Destino */}
+            {/* 4º Premio */}
             <div className="space-y-1">
-              <label className="block text-xs font-bold text-slate-700">Ciudad Sede / Destino</label>
-              <select
-                value={city}
-                onChange={(e) => setCity(e.target.value)}
-                className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2.5 text-xs text-slate-800 font-bold"
-              >
-                <option value="Federación">Federación</option>
-                <option value="Colón">Colón</option>
-                <option value="Gualeguaychú">Gualeguaychú</option>
-                <option value="Paraná">Paraná</option>
-                <option value="Concordia">Concordia</option>
-                <option value="Rosario">Rosario</option>
-                <option value="Santa Fe Capital">Santa Fe Capital</option>
-              </select>
+              <label className="block text-xs font-bold text-slate-700">4º Premio (opcional)</label>
+              <input
+                type="text"
+                value={prize4}
+                onChange={(e) => setPrize4(e.target.value)}
+                placeholder="Ej. Set de Vinos Tannat & Quesos"
+                className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2.5 text-xs text-slate-800 font-medium"
+              />
+            </div>
+
+            {/* 5º Premio */}
+            <div className="space-y-1">
+              <label className="block text-xs font-bold text-slate-700">5º Premio (opcional)</label>
+              <input
+                type="text"
+                value={prize5}
+                onChange={(e) => setPrize5(e.target.value)}
+                placeholder="Ej. Descuento exclusivo 50% en locales adheridos"
+                className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2.5 text-xs text-slate-800 font-medium"
+              />
             </div>
 
             {/* Fecha del Sorteo */}
@@ -430,8 +379,8 @@ export function RafflesManager() {
             </div>
 
             {/* Inclusión automática de comercios activos */}
-            <div className="space-y-1 flex flex-col justify-center">
-              <label className="text-xs font-bold text-slate-700 flex items-center gap-2 cursor-pointer pt-4">
+            <div className="space-y-1 flex flex-col justify-center sm:col-span-2">
+              <label className="text-xs font-bold text-slate-700 flex items-center gap-2 cursor-pointer pt-2">
                 <input
                   type="checkbox"
                   checked={autoActiveCommerces}
@@ -448,7 +397,7 @@ export function RafflesManager() {
           {/* Subida de Portada del Sorteo */}
           <div className="space-y-2 pt-2 border-t border-slate-100">
             <label className="block text-xs font-bold text-slate-700 flex items-center justify-between">
-              <span>Portada del Sorteo (Almacenada en Supabase Storage)</span>
+              <span>Portada del Sorteo</span>
               {isUploadingImage && (
                 <span className="text-[11px] text-[#00ADB5] font-extrabold flex items-center gap-1 animate-pulse">
                   <Sparkles className="w-3.5 h-3.5 animate-spin" /> Subiendo imagen...
@@ -473,35 +422,19 @@ export function RafflesManager() {
                 </div>
               </div>
             ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <label className="border-2 border-dashed border-slate-300 hover:border-[#00ADB5] bg-slate-50 hover:bg-slate-100/80 rounded-2xl p-4 flex flex-col items-center justify-center text-center cursor-pointer transition-colors group">
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleImageFileChange}
-                    className="hidden"
-                  />
-                  <div className="p-2 rounded-full bg-white text-[#0047BA] shadow-xs mb-1 group-hover:scale-110 transition-transform">
-                    <Upload className="w-4 h-4 text-[#00ADB5]" />
-                  </div>
-                  <span className="text-xs font-extrabold text-slate-800">Cargar Portada del Sorteo</span>
-                  <span className="text-[10px] text-slate-400">JPG, PNG o WEBP</span>
-                </label>
-
-                <div className="space-y-1 flex flex-col justify-center bg-slate-50 p-4 rounded-2xl border border-slate-200">
-                  <label className="text-[11px] font-bold text-slate-600">O pegar URL directa:</label>
-                  <input
-                    type="text"
-                    value={imageUrl}
-                    onChange={(e) => {
-                      setImageUrl(e.target.value);
-                      setImagePreview(e.target.value || null);
-                    }}
-                    placeholder="https://images.unsplash.com/..."
-                    className="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs text-slate-800"
-                  />
+              <label className="border-2 border-dashed border-slate-300 hover:border-[#00ADB5] bg-slate-50 hover:bg-slate-100/80 rounded-2xl p-4 flex flex-col items-center justify-center text-center cursor-pointer transition-colors group max-w-sm">
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageFileChange}
+                  className="hidden"
+                />
+                <div className="p-2 rounded-full bg-white text-[#0047BA] shadow-xs mb-1 group-hover:scale-110 transition-transform">
+                  <Upload className="w-4 h-4 text-[#00ADB5]" />
                 </div>
-              </div>
+                <span className="text-xs font-extrabold text-slate-800">Cargar Portada del Sorteo</span>
+                <span className="text-[10px] text-slate-400">JPG, PNG o WEBP</span>
+              </label>
             )}
           </div>
 
@@ -522,87 +455,6 @@ export function RafflesManager() {
             </button>
           </div>
         </form>
-      </div>
-
-      {/* Sorteo Activo & Selector Aleatorio */}
-      <div className="bg-gradient-to-br from-slate-900 to-[#0047BA] rounded-3xl p-6 sm:p-8 text-white space-y-6 shadow-md">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div>
-            <span className="bg-amber-400 text-slate-950 text-xs font-black px-3 py-1 rounded-full uppercase tracking-wider">
-              Auditoría & Extracción de Ganador
-            </span>
-            <h4 className="text-2xl font-black mt-2">Extraer Ganador del Sorteo Mensual</h4>
-            <p className="text-xs text-slate-200 font-medium mt-1">
-              Combina automáticamente a todos los comercios adheridos con plan activo + usuarios que compraron su ticket vía WhatsApp.
-            </p>
-          </div>
-
-          <button
-            onClick={drawWinner}
-            disabled={isDrawing}
-            className="bg-gradient-to-r from-[#00ADB5] to-[#007C8A] hover:from-[#00E5E8] hover:to-[#00ADB5] disabled:opacity-50 text-white px-6 py-3.5 rounded-2xl font-extrabold text-sm shadow-xl flex items-center justify-center gap-2 transition-transform active:scale-95 shrink-0 cursor-pointer"
-          >
-            <RefreshCw className={`w-4 h-4 ${isDrawing ? 'animate-spin' : ''}`} />
-            <span>{isDrawing ? 'Sorteando Cupón...' : 'Extraer Ganador del Sorteo'}</span>
-          </button>
-        </div>
-
-        {/* Tarjeta Ganador Seleccionado */}
-        {winner && (
-          <div className="bg-white text-slate-900 rounded-2xl p-6 space-y-4 border-2 border-amber-400 animate-in fade-in zoom-in-95 duration-300 shadow-xl">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-              <div className="flex items-center gap-2 text-amber-600 font-black text-xs uppercase tracking-wider">
-                <Trophy className="w-5 h-5 text-amber-500 fill-current" />
-                <span>¡Ganador Seleccionado!</span>
-              </div>
-              <span className="text-xs font-black text-[#0047BA] bg-cyan-50 px-3 py-1 rounded-full border border-cyan-200">
-                Modalidad: {winner.type}
-              </span>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <div>
-                <span className="text-[10px] text-slate-400 font-extrabold uppercase block">Nombre / Ganador</span>
-                <p className="text-lg font-black text-slate-900">{winner.name}</p>
-              </div>
-
-              <div>
-                <span className="text-[10px] text-slate-400 font-extrabold uppercase block">Localidad</span>
-                <p className="text-sm font-bold text-[#0047BA] flex items-center gap-1">
-                  <MapPin className="w-3.5 h-3.5 text-[#00ADB5]" />
-                  {winner.city}
-                </p>
-              </div>
-
-              <div>
-                <span className="text-[10px] text-slate-400 font-extrabold uppercase block">Teléfono WhatsApp</span>
-                <p className="text-sm font-bold text-slate-800 flex items-center gap-1">
-                  <Phone className="w-3.5 h-3.5 text-emerald-600" />
-                  {winner.phone}
-                </p>
-              </div>
-            </div>
-
-            <div className="flex items-center justify-between text-xs font-bold pt-2 border-t border-slate-100">
-              <span className="text-emerald-700 flex items-center gap-1">
-                <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-                Cupón válido auditado en Entre Ríos ON MÁS
-              </span>
-
-              <a
-                href={`https://wa.me/${winner.phone.replace(/[^\d]/g, '')}?text=${encodeURIComponent(
-                  `¡Hola ${winner.name}! Te contactamos oficialmente del portal Entre Ríos ON MÁS para felicitarte porque sos el GANADOR del Sorteo Mensual!`
-                )}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="bg-[#25D366] hover:bg-[#20ba5a] text-white px-4 py-2 rounded-xl text-xs font-extrabold shadow-sm flex items-center gap-1.5"
-              >
-                <Phone className="w-3.5 h-3.5 fill-current" />
-                <span>Notificar por WhatsApp</span>
-              </a>
-            </div>
-          </div>
-        )}
       </div>
 
       {/* Listado de Sorteos Mensuales Activos */}
