@@ -3,8 +3,7 @@
 import React, { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { Header } from '@/components/layout/Header';
-import { Footer } from '@/components/layout/Footer';
+import { DynamicLayoutWrapper } from '@/components/layout/DynamicLayoutWrapper';
 import { 
   Globe, 
   Sparkles, 
@@ -63,9 +62,7 @@ export default function MiSitioWebPage() {
 
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#fbf9f5]">
-      <Header />
-
+    <DynamicLayoutWrapper>
       <main className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-12 w-full">
         {/* Hero Banner Section */}
         <section className="relative rounded-3xl overflow-hidden bg-gradient-to-r from-[#002878] via-[#0047BA] to-[#00ADB5] text-white p-8 sm:p-14 shadow-2xl">
@@ -254,8 +251,6 @@ export default function MiSitioWebPage() {
           )}
         </section>
       </main>
-
-      <Footer />
-    </div>
+    </DynamicLayoutWrapper>
   );
 }
