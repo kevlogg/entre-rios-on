@@ -55,6 +55,8 @@ CREATE TABLE IF NOT EXISTS public.commerces (
   description TEXT NOT NULL,
   rating NUMERIC(2,1) DEFAULT 5.0,
   review_count INT DEFAULT 0,
+  views_count BIGINT DEFAULT 0,
+  whatsapp_clicks_count BIGINT DEFAULT 0,
   is_verified BOOLEAN DEFAULT true,
   is_subscription_active BOOLEAN DEFAULT true,
   subscription_tier TEXT DEFAULT 'BRONCE' CHECK (subscription_tier IN ('BRONCE', 'PLATA', 'ORO')),
@@ -68,6 +70,11 @@ CREATE TABLE IF NOT EXISTS public.commerces (
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+
+-- Migración: agregar columnas de métricas si la tabla ya existe (idempotente)
+ALTER TABLE public.commerces ADD COLUMN IF NOT EXISTS views_count BIGINT DEFAULT 0;
+ALTER TABLE public.commerces ADD COLUMN IF NOT EXISTS whatsapp_clicks_count BIGINT DEFAULT 0;
+
 
 -- Agregar Clave Foránea de perfil a comercio
 ALTER TABLE public.profiles 
@@ -186,6 +193,15 @@ CREATE TABLE IF NOT EXISTS public.whatsapp_clicks (
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
+-- 9b. TABLA DE HISTORIAL GRANULAR DE VISTAS DE PERFIL DE COMERCIO
+CREATE TABLE IF NOT EXISTS public.profile_views (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  commerce_id UUID NOT NULL REFERENCES public.commerces(id) ON DELETE CASCADE,
+  user_agent TEXT,
+  ip_hash TEXT,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
 -- ========================================================
 -- ÍNDICES DE RENDIMIENTO DE CONSULTAS SQL
 -- ========================================================
@@ -198,6 +214,10 @@ CREATE INDEX IF NOT EXISTS idx_products_city ON public.products(city_id);
 CREATE INDEX IF NOT EXISTS idx_products_category ON public.products(category_id);
 CREATE INDEX IF NOT EXISTS idx_community_events_city ON public.community_events(city_id);
 CREATE INDEX IF NOT EXISTS idx_whatsapp_clicks_commerce ON public.whatsapp_clicks(commerce_id);
+CREATE INDEX IF NOT EXISTS idx_whatsapp_clicks_created ON public.whatsapp_clicks(created_at);
+CREATE INDEX IF NOT EXISTS idx_profile_views_commerce ON public.profile_views(commerce_id);
+CREATE INDEX IF NOT EXISTS idx_profile_views_created ON public.profile_views(created_at);
+
 
 -- ========================================================
 -- ROW LEVEL SECURITY (RLS) POLICIES
@@ -211,6 +231,7 @@ ALTER TABLE public.classifieds ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.raffles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.raffle_participants ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.whatsapp_clicks ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.profile_views ENABLE ROW LEVEL SECURITY;
 
 -- Lectura pública para elementos del portal
 DROP POLICY IF EXISTS "Public Read Cities" ON public.cities;
@@ -240,6 +261,17 @@ CREATE POLICY "Public Insert Raffle Participants" ON public.raffle_participants 
 
 DROP POLICY IF EXISTS "Public Insert WhatsApp Clicks" ON public.whatsapp_clicks;
 CREATE POLICY "Public Insert WhatsApp Clicks" ON public.whatsapp_clicks FOR INSERT WITH CHECK (true);
+
+-- La lectura de whatsapp_clicks y profile_views se permite también para que el admin pueda contar desde cliente
+DROP POLICY IF EXISTS "Public Read WhatsApp Clicks" ON public.whatsapp_clicks;
+CREATE POLICY "Public Read WhatsApp Clicks" ON public.whatsapp_clicks FOR SELECT USING (true);
+
+DROP POLICY IF EXISTS "Public Insert Profile Views" ON public.profile_views;
+CREATE POLICY "Public Insert Profile Views" ON public.profile_views FOR INSERT WITH CHECK (true);
+
+DROP POLICY IF EXISTS "Public Read Profile Views" ON public.profile_views;
+CREATE POLICY "Public Read Profile Views" ON public.profile_views FOR SELECT USING (true);
+
 
 -- 10. TABLA DE EMPLEOS Y OPORTUNIDADES LABORALES
 CREATE TABLE IF NOT EXISTS public.jobs (

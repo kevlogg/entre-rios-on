@@ -155,24 +155,33 @@ export default function AdminPage() {
 
         setCommerce(resolvedCommerce);
 
-        // 5. Cargar métricas reales (Clicks de WhatsApp y Vistas de Perfil)
+        // 5. Cargar métricas reales (WhatsApp Clicks y Vistas de Perfil)
         if (targetCommerce?.id) {
-          const { count: waCount } = await supabase
+          // Contar clicks de WhatsApp desde la tabla de eventos (source of truth)
+          const { count: waEventCount } = await supabase
             .from('whatsapp_clicks')
             .select('*', { count: 'exact', head: true })
-            .or(`commerce_id.eq.${targetCommerce.id},commerce_id.eq.${targetCommerce.slug}`);
+            .eq('commerce_id', targetCommerce.id);
 
+          // Contar vistas de perfil desde la tabla de historial granular
+          const { count: viewEventCount } = await supabase
+            .from('profile_views')
+            .select('*', { count: 'exact', head: true })
+            .eq('commerce_id', targetCommerce.id);
+
+          // Usar el máximo entre el contador acumulado en commerces y el conteo de eventos
+          // (por si la columna no se actualizó en algún momento)
           const totalWaClicks = Math.max(
-            waCount || 0,
+            waEventCount || 0,
             Number(targetCommerce.whatsapp_clicks_count || 0)
           );
 
-          setWaClicksCount(totalWaClicks);
-
           const totalViews = Math.max(
-            Number(targetCommerce.views_count || 0),
-            Number(targetCommerce.review_count || 0)
+            viewEventCount || 0,
+            Number(targetCommerce.views_count || 0)
           );
+
+          setWaClicksCount(totalWaClicks);
           setViewsCount(totalViews);
 
           // Cargar productos pertenecientes al comercio
@@ -211,6 +220,7 @@ export default function AdminPage() {
           setViewsCount(0);
           setProducts([]);
         }
+
       } catch (err) {
         console.warn('Error al cargar datos en Admin:', err);
       } finally {

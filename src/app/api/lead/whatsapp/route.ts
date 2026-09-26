@@ -7,6 +7,7 @@ function getAdminClient() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
   const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  // Preferir siempre la service key para bypasear RLS
   const key = serviceKey || anonKey;
 
   if (url && key) {
@@ -18,7 +19,7 @@ function getAdminClient() {
 }
 
 export async function GET(request: NextRequest) {
-  // 1. Verificación de Rate Limit (Máximo 60 clics por minuto por IP)
+  // 1. Rate Limit: máximo 60 clics por minuto por IP
   const clientIp = getClientIp(request.headers);
   const rateCheck = checkRateLimit(`wa_lead:${clientIp}`, { limit: 60, windowMs: 60 * 1000 });
 
@@ -29,7 +30,7 @@ export async function GET(request: NextRequest) {
     );
   }
 
-  // 2. Validación de parámetros
+  // 2. Validación y parseo de parámetros
   const { searchParams } = new URL(request.url);
   const rawPhone = searchParams.get('phone') || undefined;
   const rawMsg = searchParams.get('message') || undefined;
@@ -58,59 +59,67 @@ export async function GET(request: NextRequest) {
   // Normalizar número telefónico
   const cleanPhone = (phone || '5493434001122').replace(/\D/g, '');
 
+  // 3. Registrar métricas en Supabase (sin bloquear el redirect)
   try {
     const adminSupabase = getAdminClient();
 
     if (adminSupabase && commerceId) {
       const userAgent = request.headers.get('user-agent') || 'Unknown';
 
-      // 1. Buscar comercio por ID, Slug u Owner ID
-      const { data: comms } = await adminSupabase
+      // 3a. Buscar el comercio por ID, Slug u Owner ID para obtener UUID real
+      const { data: comms, error: fetchErr } = await adminSupabase
         .from('commerces')
         .select('id, whatsapp_clicks_count')
         .or(`id.eq.${commerceId},slug.eq.${commerceId},owner_id.eq.${commerceId}`)
         .limit(1);
 
+      if (fetchErr) {
+        console.error('[/api/lead/whatsapp] Error buscando comercio:', fetchErr.message, '| commerceId:', commerceId);
+      }
+
+      let realCommerceId = commerceId;
+
       if (comms && comms.length > 0) {
         const comm = comms[0];
+        realCommerceId = comm.id;
         const nextClicks = Number(comm.whatsapp_clicks_count || 0) + 1;
 
-        // 2. Incrementar acumulativo en la fila del comercio
+        // 3b. Incrementar contador acumulado en commerces.whatsapp_clicks_count (atómico)
         const { error: updateErr } = await adminSupabase
           .from('commerces')
           .update({ whatsapp_clicks_count: nextClicks })
           .eq('id', comm.id);
 
         if (updateErr) {
-          console.warn('Error incrementando whatsapp_clicks_count:', updateErr.message);
-        }
-
-        // 3. Registrar el evento individual en la tabla whatsapp_clicks
-        const { error: insertErr } = await adminSupabase.from('whatsapp_clicks').insert({
-          commerce_id: comm.id,
-          product_id: productId || null,
-          city_id: cityId || null,
-          user_agent: userAgent,
-        });
-
-        if (insertErr) {
-          console.warn('Note on whatsapp_clicks insert:', insertErr.message);
+          console.error('[/api/lead/whatsapp] Error actualizando whatsapp_clicks_count:', updateErr.message, '| commerce_id:', comm.id);
         }
       } else {
-        // Fallback insert si no encontró coincidencia directa
-        await adminSupabase.from('whatsapp_clicks').insert({
-          commerce_id: commerceId,
-          product_id: productId || null,
-          city_id: cityId || null,
-          user_agent: userAgent,
-        });
+        console.warn('[/api/lead/whatsapp] Comercio no encontrado para id:', commerceId, '— insertando click sin commerce_id resuelto');
       }
+
+      // 3c. Insertar evento individual en whatsapp_clicks (historial granular autrizable)
+      const isValidUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(realCommerceId || '');
+      const isValidProductUuid = productId && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(productId);
+
+      const { error: insertErr } = await adminSupabase.from('whatsapp_clicks').insert({
+        commerce_id: isValidUuid ? realCommerceId : null,
+        product_id: isValidProductUuid ? productId : null,
+        city_id: cityId || null,
+        user_agent: userAgent,
+      });
+
+      if (insertErr) {
+        console.error('[/api/lead/whatsapp] Error insertando en whatsapp_clicks:', insertErr.message);
+      }
+    } else if (!commerceId) {
+      console.warn('[/api/lead/whatsapp] No se recibió commerceId — click no registrado en métricas');
     }
   } catch (err) {
-    console.warn('Error registrando lead de WhatsApp en API:', err);
+    console.error('[/api/lead/whatsapp] Error inesperado registrando métrica:', err);
+    // No interrumpir el flujo — el redirect SIEMPRE debe ejecutarse
   }
 
-  // Generar enlace de WhatsApp y redirigir 302
+  // 4. Redirigir al WhatsApp (302 redirect — siempre, independientemente de errores de tracking)
   const encodedText = encodeURIComponent(message || '');
   const waUrl = `https://wa.me/${cleanPhone}?text=${encodedText}`;
 
