@@ -453,6 +453,56 @@ export async function createCommunityArticleAction(articleData: {
   }
 }
 
+export async function updateCommunityArticleAction(
+  articleId: string,
+  articleData: {
+    title: string;
+    category: string;
+    cityId: string;
+    cityName: string;
+    excerpt: string;
+    authorName?: string;
+    imageUrl?: string;
+  }
+): Promise<{ success: boolean; message: string }> {
+  try {
+    const adminSupabase = getAdminClient();
+    const client = adminSupabase || (await createClient());
+
+    const updatePayload: Record<string, any> = {
+      title: articleData.title,
+      category: articleData.category,
+      city_id: articleData.cityId,
+      city_name: articleData.cityName,
+      location: articleData.cityName,
+      excerpt: articleData.excerpt,
+    };
+
+    if (articleData.authorName) {
+      updatePayload.author_name = articleData.authorName;
+    }
+    if (articleData.imageUrl) {
+      updatePayload.image_url = articleData.imageUrl;
+    }
+
+    const { error } = await client
+      .from('community_events')
+      .update(updatePayload)
+      .eq('id', articleId);
+
+    if (error) {
+      console.warn('Error actualizando nota de comunidad en Supabase:', error.message);
+      return { success: false, message: `Error en Supabase: ${error.message}` };
+    }
+
+    revalidatePath('/comunidad');
+    revalidatePath('/superadmin');
+    return { success: true, message: 'Nota de comunidad actualizada exitosamente.' };
+  } catch (err) {
+    return { success: false, message: `Error al actualizar nota: ${(err as Error).message}` };
+  }
+}
+
 export async function approveCommunityArticleAction(articleId: string): Promise<{ success: boolean; message: string }> {
   try {
     const adminSupabase = getAdminClient();

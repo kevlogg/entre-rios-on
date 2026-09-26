@@ -16,10 +16,12 @@ import {
   CheckCircle2,
   Users,
   Clock,
-  ShieldCheck
+  ShieldCheck,
+  Pencil
 } from 'lucide-react';
 import {
   createCommunityArticleAction,
+  updateCommunityArticleAction,
   getAllCommunityArticlesAction,
   approveCommunityArticleAction,
   rejectCommunityArticleAction,
@@ -36,6 +38,7 @@ export function NewsManager({ events: initialEvents }: NewsManagerProps) {
   const [events, setEvents] = useState<CommunityEvent[]>(initialEvents);
   const [pendingEvents, setPendingEvents] = useState<CommunityEvent[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingArticle, setEditingArticle] = useState<CommunityEvent | null>(null);
 
   // Form State
   const [title, setTitle] = useState('');
@@ -51,6 +54,18 @@ export function NewsManager({ events: initialEvents }: NewsManagerProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+
+  const cityNameMap: Record<string, string> = {
+    gualeguaychu: 'Gualeguaychú',
+    parana: 'Paraná',
+    colon: 'Colón',
+    concordia: 'Concordia',
+    federacion: 'Federación',
+    'santa-fe-capital': 'Santa Fe Capital',
+    rosario: 'Rosario',
+    villaguay: 'Villaguay',
+    victoria: 'Victoria',
+  };
 
   const loadAllEvents = async () => {
     try {
@@ -77,6 +92,32 @@ export function NewsManager({ events: initialEvents }: NewsManagerProps) {
   useEffect(() => {
     loadAllEvents();
   }, []);
+
+  const handleOpenNewModal = () => {
+    setEditingArticle(null);
+    setTitle('');
+    setCategory('Turismo');
+    setCityId('gualeguaychu');
+    setExcerpt('');
+    setAuthorName('Redacción ON MÁS');
+    setImageUrl('');
+    setImagePreview(null);
+    setErrorMsg(null);
+    setIsModalOpen(true);
+  };
+
+  const handleOpenEditModal = (evt: CommunityEvent) => {
+    setEditingArticle(evt);
+    setTitle(evt.title || '');
+    setCategory((evt.category as any) || 'Turismo');
+    setCityId(evt.cityId || 'gualeguaychu');
+    setExcerpt(evt.excerpt || evt.fullStory || '');
+    setAuthorName(evt.author?.name || 'Redacción ON MÁS');
+    setImageUrl(evt.imageUrl || '');
+    setImagePreview(evt.imageUrl || null);
+    setErrorMsg(null);
+    setIsModalOpen(true);
+  };
 
   const handleApprove = async (id: string, title: string) => {
     try {
@@ -138,17 +179,7 @@ export function NewsManager({ events: initialEvents }: NewsManagerProps) {
     setImagePreview(null);
   };
 
-  const cityNameMap: Record<string, string> = {
-    gualeguaychu: 'Gualeguaychú',
-    parana: 'Paraná',
-    colon: 'Colón',
-    concordia: 'Concordia',
-    federacion: 'Federación',
-    'santa-fe-capital': 'Santa Fe Capital',
-    rosario: 'Rosario',
-  };
-
-  const handleCreateArticle = async (e: React.FormEvent) => {
+  const handleSubmitArticle = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!title.trim() || !excerpt.trim() || isSubmitting) return;
 
@@ -159,31 +190,55 @@ export function NewsManager({ events: initialEvents }: NewsManagerProps) {
     const finalImageUrl = imageUrl || imagePreview || '/images/commerce-bodega.jpg';
 
     try {
-      const res = await createCommunityArticleAction({
-        title: title.trim(),
-        category,
-        cityId,
-        cityName: selectedCityName,
-        excerpt: excerpt.trim(),
-        authorName: authorName.trim() || 'Redacción ON MÁS',
-        imageUrl: finalImageUrl,
-        isSuperAdmin: true,
-      });
+      if (editingArticle) {
+        // MODO EDICIÓN
+        const res = await updateCommunityArticleAction(editingArticle.id, {
+          title: title.trim(),
+          category,
+          cityId,
+          cityName: selectedCityName,
+          excerpt: excerpt.trim(),
+          authorName: authorName.trim() || 'Redacción ON MÁS',
+          imageUrl: finalImageUrl,
+        });
 
-      if (res.success) {
-        await loadAllEvents();
-        setIsModalOpen(false);
-        setTitle('');
-        setExcerpt('');
-        setImageUrl('');
-        setImagePreview(null);
-        setSuccessMsg(`¡Publicación "${title}" subida exitosamente a Comunidad!`);
-        setTimeout(() => setSuccessMsg(null), 4000);
+        if (res.success) {
+          await loadAllEvents();
+          setIsModalOpen(false);
+          setEditingArticle(null);
+          setSuccessMsg(`¡Nota "${title}" actualizada con éxito en la base de datos!`);
+          setTimeout(() => setSuccessMsg(null), 4000);
+        } else {
+          setErrorMsg(res.message);
+        }
       } else {
-        setErrorMsg(res.message);
+        // MODO CREACIÓN
+        const res = await createCommunityArticleAction({
+          title: title.trim(),
+          category,
+          cityId,
+          cityName: selectedCityName,
+          excerpt: excerpt.trim(),
+          authorName: authorName.trim() || 'Redacción ON MÁS',
+          imageUrl: finalImageUrl,
+          isSuperAdmin: true,
+        });
+
+        if (res.success) {
+          await loadAllEvents();
+          setIsModalOpen(false);
+          setTitle('');
+          setExcerpt('');
+          setImageUrl('');
+          setImagePreview(null);
+          setSuccessMsg(`¡Publicación "${title}" subida exitosamente a Comunidad!`);
+          setTimeout(() => setSuccessMsg(null), 4000);
+        } else {
+          setErrorMsg(res.message);
+        }
       }
     } catch (err) {
-      console.warn('Fallback local creación artículo:', err);
+      console.warn('Fallback local creación/edición artículo:', err);
       setIsModalOpen(false);
     } finally {
       setIsSubmitting(false);
@@ -254,8 +309,16 @@ export function NewsManager({ events: initialEvents }: NewsManagerProps) {
 
                 <div className="flex items-center justify-end gap-2 pt-1">
                   <button
+                    onClick={() => handleOpenEditModal(evt)}
+                    className="px-3 py-2 rounded-xl text-xs font-extrabold text-[#0047BA] bg-cyan-50 hover:bg-cyan-100 border border-cyan-200 cursor-pointer flex items-center gap-1"
+                  >
+                    <Pencil className="w-3.5 h-3.5" />
+                    <span>Editar</span>
+                  </button>
+
+                  <button
                     onClick={() => handleReject(evt.id)}
-                    className="px-3.5 py-2 rounded-xl text-xs font-extrabold text-rose-700 bg-rose-50 hover:bg-rose-100 border border-rose-200 cursor-pointer"
+                    className="px-3 py-2 rounded-xl text-xs font-extrabold text-rose-700 bg-rose-50 hover:bg-rose-100 border border-rose-200 cursor-pointer"
                   >
                     Rechazar
                   </button>
@@ -265,7 +328,7 @@ export function NewsManager({ events: initialEvents }: NewsManagerProps) {
                     className="px-4 py-2 rounded-xl text-xs font-black text-white bg-emerald-600 hover:bg-emerald-700 shadow-xs cursor-pointer flex items-center gap-1.5"
                   >
                     <CheckCircle2 className="w-4 h-4" />
-                    <span>Aprobar y Publicar en Comunidad</span>
+                    <span>Aprobar y Publicar</span>
                   </button>
                 </div>
               </div>
@@ -288,7 +351,7 @@ export function NewsManager({ events: initialEvents }: NewsManagerProps) {
           </div>
 
           <button
-            onClick={() => setIsModalOpen(true)}
+            onClick={handleOpenNewModal}
             className="bg-gradient-to-r from-[#00ADB5] to-[#007C8A] hover:from-[#00E5E8] hover:to-[#00ADB5] text-white px-5 py-2.5 rounded-2xl font-extrabold text-xs shadow-md flex items-center justify-center gap-2 transition-transform active:scale-95 cursor-pointer"
           >
             <Plus className="w-4 h-4" />
@@ -328,27 +391,40 @@ export function NewsManager({ events: initialEvents }: NewsManagerProps) {
                   <span className="font-bold text-slate-700">{evt.author?.name || 'Redacción ON MÁS'}</span>
                 </div>
 
-                <button
-                  onClick={() => handleDelete(evt.id)}
-                  className="p-1.5 text-rose-600 hover:bg-rose-100 rounded-lg transition-colors cursor-pointer"
-                  title="Eliminar Publicación de Comunidad"
-                >
-                  <Trash2 className="w-4 h-4" />
-                </button>
+                <div className="flex items-center gap-1">
+                  <button
+                    onClick={() => handleOpenEditModal(evt)}
+                    className="px-2.5 py-1.5 text-[#0047BA] hover:bg-cyan-50 rounded-lg transition-colors cursor-pointer flex items-center gap-1 text-xs font-extrabold"
+                    title="Editar Nota de Comunidad"
+                  >
+                    <Pencil className="w-4 h-4" />
+                    <span>Editar</span>
+                  </button>
+
+                  <button
+                    onClick={() => handleDelete(evt.id)}
+                    className="p-1.5 text-rose-600 hover:bg-rose-100 rounded-lg transition-colors cursor-pointer"
+                    title="Eliminar Publicación de Comunidad"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
               </div>
             </div>
           ))}
         </div>
       </div>
 
-      {/* Modal Redacción Directa SuperAdmin */}
+      {/* Modal Redacción / Edición SuperAdmin */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
           <div className="bg-white rounded-3xl max-w-lg w-full p-6 space-y-5 shadow-2xl animate-in fade-in zoom-in-95 duration-200 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between border-b border-slate-100 pb-3">
               <h3 className="text-lg font-extrabold text-[#0047BA] flex items-center gap-2">
                 <Sparkles className="w-5 h-5 text-[#00ADB5]" />
-                <span>Publicar Nota Directa en Comunidad ON MÁS</span>
+                <span>
+                  {editingArticle ? 'Editar Nota de Comunidad' : 'Publicar Nota Directa en Comunidad ON MÁS'}
+                </span>
               </h3>
               <button onClick={() => setIsModalOpen(false)} className="p-1 text-slate-400 hover:text-slate-600 cursor-pointer">
                 <X className="w-5 h-5" />
@@ -361,7 +437,7 @@ export function NewsManager({ events: initialEvents }: NewsManagerProps) {
               </div>
             )}
 
-            <form onSubmit={handleCreateArticle} className="space-y-4">
+            <form onSubmit={handleSubmitArticle} className="space-y-4">
               <div>
                 <label className="block text-xs font-bold text-slate-700 mb-1">Título de la Publicación *</label>
                 <input
@@ -503,7 +579,9 @@ export function NewsManager({ events: initialEvents }: NewsManagerProps) {
                   disabled={isSubmitting || isUploadingImage}
                   className="bg-gradient-to-r from-[#00ADB5] to-[#007C8A] hover:from-[#00E5E8] hover:to-[#00ADB5] text-white px-6 py-2.5 rounded-xl font-extrabold text-xs shadow-md disabled:opacity-50 cursor-pointer"
                 >
-                  {isSubmitting ? 'Publicando...' : 'Publicar Nota en Comunidad'}
+                  {isSubmitting 
+                    ? (editingArticle ? 'Guardando...' : 'Publicando...') 
+                    : (editingArticle ? 'Guardar Cambios' : 'Publicar Nota en Comunidad')}
                 </button>
               </div>
             </form>
