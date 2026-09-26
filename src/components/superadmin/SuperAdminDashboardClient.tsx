@@ -12,6 +12,7 @@ import { CashPaymentsManager } from '@/components/superadmin/CashPaymentsManager
 import { JobsManager } from '@/components/superadmin/JobsManager';
 import { TourismManager } from '@/components/superadmin/TourismManager';
 import { WebRequestsManager } from '@/components/superadmin/WebRequestsManager';
+import { KevDevPlanManager } from '@/components/superadmin/KevDevPlanManager';
 import { 
   Store, 
   MapPin, 
@@ -23,7 +24,8 @@ import {
   Crown,
   CreditCard,
   Sparkles,
-  ShieldCheck
+  ShieldCheck,
+  Code2
 } from 'lucide-react';
 
 interface SuperAdminDashboardClientProps {
@@ -39,7 +41,7 @@ export function SuperAdminDashboardClient({
 }: SuperAdminDashboardClientProps) {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<
-    'commerces' | 'cash-payments' | 'geo-customizer' | 'raffles' | 'jobs' | 'news' | 'tourism' | 'web-requests'
+    'commerces' | 'cash-payments' | 'geo-customizer' | 'raffles' | 'jobs' | 'news' | 'tourism' | 'web-requests' | 'plan-kevdev'
   >('commerces');
   const [isAuthChecked, setIsAuthChecked] = useState(false);
 
@@ -61,7 +63,7 @@ export function SuperAdminDashboardClient({
   }
 
   interface TabDef {
-    id: 'commerces' | 'cash-payments' | 'geo-customizer' | 'raffles' | 'jobs' | 'news' | 'tourism' | 'web-requests';
+    id: 'commerces' | 'cash-payments' | 'geo-customizer' | 'raffles' | 'jobs' | 'news' | 'tourism' | 'web-requests' | 'plan-kevdev';
     label: string;
     icon: React.ElementType;
     badge?: string;
@@ -76,6 +78,7 @@ export function SuperAdminDashboardClient({
     { id: 'news', label: 'Comunidad', icon: Newspaper },
     { id: 'tourism', label: 'Servicios de Turismo', icon: Compass },
     { id: 'web-requests', label: 'Solicitudes "Mi Sitio Web"', icon: Globe, badge: 'Nuevos' },
+    { id: 'plan-kevdev', label: 'Plan KevDev', icon: Code2, badge: 'Tramo 1' },
   ];
 
   return (
@@ -116,7 +119,7 @@ export function SuperAdminDashboardClient({
               Menú Principal
             </span>
             <span className="text-[10px] bg-cyan-100 text-[#0047BA] font-extrabold px-2 py-0.5 rounded-full">
-              8 Módulos
+              9 Módulos
             </span>
           </div>
 
@@ -185,6 +188,10 @@ export function SuperAdminDashboardClient({
 
           {activeTab === 'web-requests' && (
             <WebRequestsManager />
+          )}
+
+          {activeTab === 'plan-kevdev' && (
+            <KevDevPlanManager />
           )}
         </main>
 
