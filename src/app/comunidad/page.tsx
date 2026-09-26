@@ -208,7 +208,7 @@ export default function ComunidadPage() {
         setImageUrl('');
         setImagePreview(null);
         setSuccessMsg(
-          `¡Nota enviada a revisión! Tu propuesta "${title}" fue recibida exitosamente y se encuentra pendiente de validación por el equipo SuperAdmin antes de ser publicada.`
+          `¡Nota enviada a revisión! Tu propuesta "${title}" fue recibida exitosamente y se encuentra pendiente de validación por el equipo OnMás antes de ser publicada.`
         );
         setTimeout(() => setSuccessMsg(null), 8000);
       } else {
@@ -338,7 +338,7 @@ export default function ComunidadPage() {
               <Calendar className="w-5 h-5 text-[#00ADB5]" />
               <span>Agenda de Eventos Destacados</span>
             </h2>
-            <span className="text-xs text-slate-500 font-medium">Actualizado por la Comunidad & SuperAdmin</span>
+            <span className="text-xs text-slate-500 font-medium">Actualizado por la Comunidad & OnMás</span>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -447,7 +447,7 @@ export default function ComunidadPage() {
                     <FileText className="w-5 h-5 text-[#00ADB5]" />
                     Sumar Nota a la Comunidad
                   </h3>
-                  <p className="text-[11px] text-slate-500 font-medium">Sujeta a validación previa del equipo SuperAdmin.</p>
+                  <p className="text-[11px] text-slate-500 font-medium">Sujeta a validación previa del equipo OnMás.</p>
                 </div>
                 <button
                   onClick={() => setShowNoteModal(false)}
@@ -591,7 +591,7 @@ export default function ComunidadPage() {
 
                 <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 text-[11px] text-amber-900 font-medium flex items-center gap-2">
                   <ShieldAlert className="w-4 h-4 text-amber-600 shrink-0" />
-                  <span>Tu nota pasará a revisión previa por el equipo SuperAdmin antes de publicarse en la web.</span>
+                  <span>Tu nota pasará a revisión previa por el equipo OnMás antes de publicarse en la web.</span>
                 </div>
 
                 <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-100">
@@ -608,7 +608,7 @@ export default function ComunidadPage() {
                     disabled={isSubmitting || isUploadingImage}
                     className="bg-gradient-to-r from-[#00ADB5] to-[#0047BA] hover:from-[#00E5E8] hover:to-[#00ADB5] text-white px-6 py-2.5 rounded-xl font-black text-xs shadow-md disabled:opacity-50 cursor-pointer"
                   >
-                    {isSubmitting ? 'Enviando a Revisión...' : 'Enviar Nota a Revisión SuperAdmin'}
+                    {isSubmitting ? 'Enviando a Revisión...' : 'Enviar Nota a Revisión OnMás'}
                   </button>
                 </div>
               </form>

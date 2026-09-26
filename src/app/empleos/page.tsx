@@ -259,7 +259,7 @@ export default function EmpleosPage() {
         setNewDescription('');
         setNewPhone('');
         setSuccessMsg(
-          `¡Oferta laboral enviada a revisión! Tu aviso para "${newTitle}" fue recibido y se encuentra pendiente de aprobación por el equipo SuperAdmin para verificar que la información sea legal. Una vez aprobada, aparecerá visible públicamente.`
+          `¡Oferta laboral enviada a revisión! Tu aviso para "${newTitle}" fue recibido y se encuentra pendiente de aprobación por el equipo OnMás para verificar que la información sea legal. Una vez aprobada, aparecerá visible públicamente.`
         );
         setTimeout(() => setSuccessMsg(null), 8000);
       } else {
@@ -569,7 +569,7 @@ export default function EmpleosPage() {
                     <Briefcase className="w-5 h-5 text-[#00ADB5]" />
                     Publicar Oferta Laboral
                   </h3>
-                  <p className="text-[11px] text-slate-500 font-medium">Suelta a revisión previa del equipo SuperAdmin.</p>
+                  <p className="text-[11px] text-slate-500 font-medium">Sujeta a revisión previa del equipo OnMás.</p>
                 </div>
                 <button
                   onClick={() => setShowOfferModal(false)}
@@ -702,7 +702,7 @@ export default function EmpleosPage() {
 
                 <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 text-[11px] text-amber-900 font-medium flex items-center gap-2">
                   <ShieldAlert className="w-4 h-4 text-amber-600 shrink-0" />
-                  <span>Tu publicación pasará a revisión por el SuperAdmin antes de mostrarse en la web.</span>
+                  <span>Tu publicación pasará a revisión por el equipo OnMás antes de mostrarse en la web.</span>
                 </div>
 
                 <button
@@ -710,7 +710,7 @@ export default function EmpleosPage() {
                   disabled={isSubmitting}
                   className="w-full bg-gradient-to-r from-[#00ADB5] to-[#0047BA] text-white py-3 rounded-xl font-extrabold text-xs shadow-md transition-all active:scale-98 cursor-pointer"
                 >
-                  {isSubmitting ? 'Enviando a Revisión...' : 'Enviar Oferta a Revisión SuperAdmin'}
+                  {isSubmitting ? 'Enviando a Revisión...' : 'Enviar Oferta a Revisión OnMás'}
                 </button>
               </form>
             </div>

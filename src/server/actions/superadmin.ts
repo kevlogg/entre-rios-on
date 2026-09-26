@@ -67,7 +67,7 @@ export async function createJobAction(jobData: {
         success: true,
         message: jobData.isSuperAdmin
           ? 'Búsqueda laboral publicada directamente en la web.'
-          : 'Oferta laboral enviada a revisión. Quedará pendiente de aprobación por el equipo SuperAdmin.',
+          : 'Oferta laboral enviada a revisión. Quedará pendiente de aprobación por el equipo OnMás.',
       };
     }
 
@@ -93,7 +93,7 @@ export async function createJobAction(jobData: {
           success: true,
           message: jobData.isSuperAdmin
             ? 'Búsqueda laboral publicada directamente en la web.'
-            : 'Oferta laboral enviada a revisión. Quedará pendiente de aprobación por el equipo SuperAdmin.',
+            : 'Oferta laboral enviada a revisión. Quedará pendiente de aprobación por el equipo OnMás.',
         };
       }
 
@@ -446,7 +446,7 @@ export async function createCommunityArticleAction(articleData: {
       success: true,
       message: articleData.isSuperAdmin
         ? 'Publicación subida exitosamente a la sección Comunidad.'
-        : 'Nota enviada exitosamente. Quedó en revisión por el equipo SuperAdmin antes de su publicación.',
+        : 'Nota enviada exitosamente. Quedó en revisión por el equipo OnMás antes de su publicación.',
     };
   } catch (err) {
     return { success: false, message: `Error al publicar nota: ${(err as Error).message}` };
