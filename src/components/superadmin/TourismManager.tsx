@@ -26,7 +26,8 @@ import { getTourismServices } from '@/lib/dal/portal';
 import {
   createTourismServiceAction,
   deleteTourismServiceAction,
-  toggleCommerceVerificationAction
+  toggleCommerceVerificationAction,
+  toggleCommerceSubscriptionAction
 } from '@/server/actions/superadmin';
 import { uploadImageToSupabase } from '@/lib/supabase/storage';
 import { Commerce } from '@/types';
@@ -221,7 +222,16 @@ export function TourismManager({ commerces: initialCommerces = [] }: TourismMana
     );
   };
 
-  const toggleSubscription = (id: string) => {
+  const toggleSubscription = async (id: string) => {
+    const target = commercesList.find((c) => c.id === id);
+    if (!target) return;
+
+    try {
+      await toggleCommerceSubscriptionAction(id, target.isSubscriptionActive);
+    } catch (err) {
+      console.warn('Subscription Action error:', err);
+    }
+
     setCommercesList((prev) =>
       prev.map((c) => (c.id === id ? { ...c, isSubscriptionActive: !c.isSubscriptionActive } : c))
     );

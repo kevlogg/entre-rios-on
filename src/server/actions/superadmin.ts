@@ -27,6 +27,39 @@ export async function toggleCommerceVerificationAction(
   }
 }
 
+export async function toggleCommerceSubscriptionAction(
+  commerceId: string,
+  currentStatus: boolean
+): Promise<{ success: boolean; message: string }> {
+  try {
+    const adminSupabase = getAdminClient();
+    const client = adminSupabase || (await createClient());
+    const newStatus = !currentStatus;
+
+    const { error } = await client
+      .from('commerces')
+      .update({ is_subscription_active: newStatus })
+      .eq('id', commerceId);
+
+    if (error) {
+      return { success: false, message: `Error cambiando suscripción: ${error.message}` };
+    }
+
+    revalidatePath('/comercios');
+    revalidatePath('/catalogo');
+    revalidatePath('/turismo');
+    revalidatePath('/superadmin');
+    return {
+      success: true,
+      message: newStatus
+        ? 'Plan activado exitosamente. El comercio y sus productos ahora se muestran públicamente.'
+        : 'Plan desactivado. El comercio y sus productos fueron ocultados.',
+    };
+  } catch (err) {
+    return { success: false, message: `Error inesperado: ${(err as Error).message}` };
+  }
+}
+
 export async function createJobAction(jobData: {
   title: string;
   company: string;

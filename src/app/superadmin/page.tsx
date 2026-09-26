@@ -8,7 +8,7 @@ export const revalidate = 0;
 
 export default async function SuperAdminPage() {
   const [commerces, events, cities] = await Promise.all([
-    getAllCommerces(),
+    getAllCommerces(true),
     getUpcomingEvents(),
     getCities(),
   ]);

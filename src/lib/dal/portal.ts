@@ -757,6 +757,11 @@ export async function getHeroSlides(provinceId?: string): Promise<BannerSlide[]>
 }
 
 export async function getFeaturedProducts(cityId?: string, categoryId?: string, provinceId?: string): Promise<Product[]> {
+  const activeCommerces = await getAllCommerces(false);
+  const activeCommerceIds = new Set(activeCommerces.map((c) => c.id.toLowerCase()));
+  const activeCommerceSlugs = new Set(activeCommerces.map((c) => c.slug.toLowerCase()));
+  const activeCommerceNames = new Set(activeCommerces.map((c) => c.name.toLowerCase()));
+
   if (isSupabaseConfigured()) {
     try {
       const { createPublicClient } = await import('@/lib/supabase/public');
@@ -773,7 +778,14 @@ export async function getFeaturedProducts(cityId?: string, categoryId?: string, 
       }
       const { data, error } = await query;
       if (!error && Array.isArray(data)) {
-        return data.map((p) => ({
+        const activeProducts = data.filter((p) => {
+          if (!p.commerce_id && !p.commerce_name) return true;
+          const cId = (p.commerce_id || '').toLowerCase();
+          const cName = (p.commerce_name || '').toLowerCase();
+          return activeCommerceIds.has(cId) || activeCommerceSlugs.has(cId) || activeCommerceNames.has(cName);
+        });
+
+        return activeProducts.map((p) => ({
           id: p.id,
           title: p.title,
           slug: p.slug,
@@ -800,7 +812,13 @@ export async function getFeaturedProducts(cityId?: string, categoryId?: string, 
   }
 
   await simulateNetworkDelay();
-  let list = PRODUCTS_MOCK;
+  let list = PRODUCTS_MOCK.filter((p) => {
+    if (!p.commerceId) return true;
+    const cId = p.commerceId.toLowerCase();
+    const cName = (p.commerceName || '').toLowerCase();
+    return activeCommerceIds.has(cId) || activeCommerceSlugs.has(cId) || activeCommerceNames.has(cName);
+  });
+
   if (provinceId && provinceId !== 'all') {
     list = list.filter((p) => !p.provinceId || p.provinceId === provinceId);
   }
@@ -818,6 +836,11 @@ export async function getFeaturedProducts(cityId?: string, categoryId?: string, 
 }
 
 export async function getProductBySlug(slug: string): Promise<Product | undefined> {
+  const activeCommerces = await getAllCommerces(false);
+  const activeCommerceIds = new Set(activeCommerces.map((c) => c.id.toLowerCase()));
+  const activeCommerceSlugs = new Set(activeCommerces.map((c) => c.slug.toLowerCase()));
+  const activeCommerceNames = new Set(activeCommerces.map((c) => c.name.toLowerCase()));
+
   if (isSupabaseConfigured()) {
     try {
       const { createPublicClient } = await import('@/lib/supabase/public');
@@ -825,6 +848,13 @@ export async function getProductBySlug(slug: string): Promise<Product | undefine
       const { data, error } = await supabase.from('products').select('*').or(`slug.eq.${slug},id.eq.${slug}`).maybeSingle();
       if (!error) {
         if (!data) return undefined;
+        if (data.commerce_id || data.commerce_name) {
+          const cId = (data.commerce_id || '').toLowerCase();
+          const cName = (data.commerce_name || '').toLowerCase();
+          if (!activeCommerceIds.has(cId) && !activeCommerceSlugs.has(cId) && !activeCommerceNames.has(cName)) {
+            return undefined;
+          }
+        }
         return {
           id: data.id,
           title: data.title,
@@ -850,15 +880,29 @@ export async function getProductBySlug(slug: string): Promise<Product | undefine
   }
 
   await simulateNetworkDelay();
-  return PRODUCTS_MOCK.find((p) => p.slug === slug || p.id === slug);
+  const mockFound = PRODUCTS_MOCK.find((p) => p.slug === slug || p.id === slug);
+  if (mockFound && mockFound.commerceId) {
+    const cId = mockFound.commerceId.toLowerCase();
+    const cName = (mockFound.commerceName || '').toLowerCase();
+    if (!activeCommerceIds.has(cId) && !activeCommerceSlugs.has(cId) && !activeCommerceNames.has(cName)) {
+      return undefined;
+    }
+  }
+  return mockFound;
 }
 
-export async function getAllCommerces(): Promise<Commerce[]> {
+export async function getAllCommerces(includeInactive: boolean = false): Promise<Commerce[]> {
   if (isSupabaseConfigured()) {
     try {
       const { createPublicClient } = await import('@/lib/supabase/public');
       const supabase = createPublicClient();
-      const { data, error } = await supabase.from('commerces').select('*').order('created_at', { ascending: false });
+      let query = supabase.from('commerces').select('*').order('created_at', { ascending: false });
+
+      if (!includeInactive) {
+        query = query.or('is_subscription_active.eq.true,is_subscription_active.is.null');
+      }
+
+      const { data, error } = await query;
       if (!error && Array.isArray(data)) {
         return data.map((c) => ({
           id: c.id,
@@ -871,7 +915,7 @@ export async function getAllCommerces(): Promise<Commerce[]> {
           rating: Number(c.rating),
           reviewCount: c.review_count,
           isVerified: c.is_verified,
-          isSubscriptionActive: c.is_subscription_active,
+          isSubscriptionActive: c.is_subscription_active ?? true,
           logoUrl: c.logo_url,
           coverUrl: c.cover_url,
           phoneWhatsApp: c.phone_whatsapp,
@@ -885,7 +929,9 @@ export async function getAllCommerces(): Promise<Commerce[]> {
   }
 
   await simulateNetworkDelay();
-  return Object.values(COMMERCES_MOCK);
+  const allCommerces = Object.values(COMMERCES_MOCK);
+  if (includeInactive) return allCommerces;
+  return allCommerces.filter((c) => c.isSubscriptionActive !== false);
 }
 
 export async function getCommerceBySlug(slug: string): Promise<Commerce | undefined> {
@@ -981,6 +1027,15 @@ export async function getCommerceBySlug(slug: string): Promise<Commerce | undefi
 }
 
 export async function getProductsByCommerce(commerceId: string): Promise<Product[]> {
+  const activeCommerces = await getAllCommerces(false);
+  const isCommerceActive = activeCommerces.some(
+    (c) =>
+      c.id.toLowerCase() === commerceId.toLowerCase() ||
+      c.slug.toLowerCase() === commerceId.toLowerCase() ||
+      c.name.toLowerCase() === commerceId.toLowerCase()
+  );
+  if (!isCommerceActive) return [];
+
   if (isSupabaseConfigured()) {
     try {
       const { createPublicClient } = await import('@/lib/supabase/public');
@@ -1203,6 +1258,11 @@ export async function getJobs(provinceId?: string, cityName?: string): Promise<J
 }
 
 export async function getTourismServices(provinceId?: string, category?: string): Promise<TourismService[]> {
+  const activeCommerces = await getAllCommerces(false);
+  const activeCommerceIds = new Set(activeCommerces.map((c) => c.id.toLowerCase()));
+  const activeCommerceSlugs = new Set(activeCommerces.map((c) => c.slug.toLowerCase()));
+  const activeCommerceNames = new Set(activeCommerces.map((c) => c.name.toLowerCase()));
+
   if (isSupabaseConfigured()) {
     try {
       const { createPublicClient } = await import('@/lib/supabase/public');
@@ -1216,7 +1276,17 @@ export async function getTourismServices(provinceId?: string, category?: string)
       }
       const { data, error } = await query;
       if (!error && Array.isArray(data)) {
-        return data.map((t) => ({
+        const activeTourism = data.filter((t) => {
+          if (t.is_subscription_active === false || t.is_active === false) return false;
+          if (t.commerce_id) {
+            const cId = t.commerce_id.toLowerCase();
+            const cName = (t.name || '').toLowerCase();
+            return activeCommerceIds.has(cId) || activeCommerceSlugs.has(cId) || activeCommerceNames.has(cName);
+          }
+          return true;
+        });
+
+        return activeTourism.map((t) => ({
           id: t.id,
           name: t.name,
           category: t.category,

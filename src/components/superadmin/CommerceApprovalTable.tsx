@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import Image from 'next/image';
 import { Commerce } from '@/types';
 import { ShieldCheck, CheckCircle2, XCircle, Search, Filter, Store, MapPin, Plus, Sparkles, MessageCircle } from 'lucide-react';
-import { toggleCommerceVerificationAction } from '@/server/actions/superadmin';
+import { toggleCommerceVerificationAction, toggleCommerceSubscriptionAction } from '@/server/actions/superadmin';
 
 interface CommerceApprovalTableProps {
   commerces: Commerce[];
@@ -35,7 +35,16 @@ export function CommerceApprovalTable({ commerces: initialCommerces }: CommerceA
     );
   };
 
-  const toggleSubscription = (id: string) => {
+  const toggleSubscription = async (id: string) => {
+    const target = commerces.find((c) => c.id === id);
+    if (!target) return;
+
+    try {
+      await toggleCommerceSubscriptionAction(id, target.isSubscriptionActive);
+    } catch (err) {
+      console.warn('Subscription Action error:', err);
+    }
+
     setCommerces((prev) =>
       prev.map((c) => (c.id === id ? { ...c, isSubscriptionActive: !c.isSubscriptionActive } : c))
     );
