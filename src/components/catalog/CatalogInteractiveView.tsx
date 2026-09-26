@@ -16,21 +16,25 @@ export function CatalogInteractiveView({ initialProducts }: CatalogInteractiveVi
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
 
-  // Read URL search params on mount or popstate (e.g. /catalogo?categoria=tech-hogar)
+  // Read URL search params on mount or popstate (e.g. /catalogo?q=vino or /catalogo?categoria=tech-hogar)
   useEffect(() => {
-    const syncCategoryFromUrl = () => {
+    const syncFromUrl = () => {
       if (typeof window !== 'undefined') {
         const params = new URLSearchParams(window.location.search);
         const cat = params.get('categoria') || params.get('category');
+        const q = params.get('q') || params.get('search') || params.get('busqueda');
         if (cat) {
           setSelectedCategory(cat);
+        }
+        if (q) {
+          setSearchQuery(q);
         }
       }
     };
 
-    syncCategoryFromUrl();
-    window.addEventListener('popstate', syncCategoryFromUrl);
-    return () => window.removeEventListener('popstate', syncCategoryFromUrl);
+    syncFromUrl();
+    window.addEventListener('popstate', syncFromUrl);
+    return () => window.removeEventListener('popstate', syncFromUrl);
   }, []);
 
   const handleSelectCategory = (catId: string) => {

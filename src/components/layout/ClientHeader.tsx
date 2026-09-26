@@ -1,24 +1,43 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { 
   Search, 
   User, 
-  ShoppingCart, 
   Menu, 
   X, 
   ChevronDown,
   Sparkles,
   Store,
-  Crown,
   MapPin,
-  Building2
+  Building2,
+  ShoppingBag,
+  Briefcase,
+  Compass,
+  Gift,
+  Newspaper,
+  Globe,
+  Tag,
+  ArrowRight
 } from 'lucide-react';
 import { trackSearchQuery, trackCitySelect } from '@/lib/analytics/events';
 import { PROVINCES, getCitiesByProvince, getProvinceBySlug, getCityBySlug } from '@/lib/constants/locations';
+import { CATEGORIES_LIST } from '@/lib/constants/categories';
+import { getFeaturedProducts, getAllCommerces } from '@/lib/dal/portal';
+import { Product, Commerce } from '@/types';
+
+const SITE_PAGES = [
+  { name: 'Catálogo & Ofertas', href: '/catalogo', category: 'Sección del Sitio', icon: ShoppingBag, description: 'Explorá todos los productos y ofertas regionales', keywords: ['catalogo', 'oferta', 'producto', 'descuento', 'compras', 'precio', 'articulo', 'tienda'] },
+  { name: 'Comercios Adheridos', href: '/comercios', category: 'Sección del Sitio', icon: Store, description: 'Directorio unificado de locales y empresas', keywords: ['comercio', 'negocio', 'tienda', 'local', 'adherido', 'directorio', 'empresa'] },
+  { name: 'Bolsa de Empleos', href: '/empleos', category: 'Sección del Sitio', icon: Briefcase, description: 'Ofertas laborales y perfiles de candidatos', keywords: ['empleo', 'trabajo', 'busqueda', 'laboral', 'puesto', 'candidato', 'cv', 'postularme', 'contratar'] },
+  { name: 'Turismo, Termas & Spa', href: '/turismo', category: 'Sección del Sitio', icon: Compass, description: 'Termas, alojamientos y paseos turísticos', keywords: ['turismo', 'termas', 'hotel', 'posada', 'spa', 'paseo', 'viaje', 'vacaciones', 'gastronomia', 'alojamiento'] },
+  { name: 'Sorteos ON MÁS', href: '/sorteos', category: 'Sección del Sitio', icon: Gift, description: 'Participá en sorteos mensuales gratuitos', keywords: ['sorteo', 'premio', 'ganador', 'participar', 'concurso', 'gratuitos'] },
+  { name: 'Comunidad & Noticias', href: '/comunidad', category: 'Sección del Sitio', icon: Newspaper, description: 'Eventos comunitarios, agenda y noticias', keywords: ['comunidad', 'noticia', 'evento', 'festival', 'maraton', 'nota', 'agenda', 'cultura'] },
+  { name: 'Mi Sitio Web Propio', href: '/mi-sitio-web', category: 'Sección del Sitio', icon: Globe, description: 'Solicitá tu sitio web para tu comercio', keywords: ['sitio web', 'pagina web', 'dominio', 'crear web', 'mi sitio', 'diseño web'] },
+];
 
 export function ClientHeader() {
   const pathname = usePathname();
@@ -27,6 +46,8 @@ export function ClientHeader() {
   const [selectedProvince, setSelectedProvince] = useState<string>('santa-fe');
   const [selectedCity, setSelectedCity] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState('');
+  const [isSearchFocused, setIsSearchFocused] = useState(false);
+  
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isProvinceDropdownOpen, setIsProvinceDropdownOpen] = useState(false);
   const [isCityDropdownOpen, setIsCityDropdownOpen] = useState(false);
@@ -34,6 +55,40 @@ export function ClientHeader() {
   // User & Commerce Auth State
   const [currentUser, setCurrentUser] = useState<any>(null);
   const [userCommerce, setUserCommerce] = useState<{ name: string; logoUrl?: string; initial: string } | null>(null);
+
+  // Search Data Index
+  const [allProducts, setAllProducts] = useState<Product[]>([]);
+  const [allCommerces, setAllCommerces] = useState<Commerce[]>([]);
+
+  const searchContainerRef = useRef<HTMLDivElement>(null);
+
+  // Load search index on mount
+  useEffect(() => {
+    async function loadSearchIndex() {
+      try {
+        const [prods, comms] = await Promise.all([
+          getFeaturedProducts(),
+          getAllCommerces(false),
+        ]);
+        if (prods) setAllProducts(prods);
+        if (comms) setAllCommerces(comms);
+      } catch (e) {
+        console.warn('Error cargando índice de búsqueda:', e);
+      }
+    }
+    loadSearchIndex();
+  }, []);
+
+  // Close search dropdown on click outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (searchContainerRef.current && !searchContainerRef.current.contains(event.target as Node)) {
+        setIsSearchFocused(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   useEffect(() => {
     async function checkAuthAndCommerce() {
@@ -122,13 +177,11 @@ export function ClientHeader() {
   const currentProvinceObj = PROVINCES.find((p) => p.id === selectedProvince) || PROVINCES[0];
   const currentCityObj = availableCities.find((c) => c.id === selectedCity) || { id: 'all', name: 'Todas las ciudades', slug: '' };
 
-  // Helper to build geo-targeted URL for a section
   const getGeoUrl = (sectionSlug: string) => {
     const provSlug = currentProvinceObj.slug || 'santa-fe';
     const citySlug = currentCityObj.id !== 'all' ? (currentCityObj.slug || currentCityObj.id) : null;
 
     if (sectionSlug === '') {
-      // Home link
       if (citySlug) return `/${provSlug}/${citySlug}`;
       if (provSlug !== 'todas') return `/${provSlug}`;
       return '/';
@@ -166,17 +219,64 @@ export function ClientHeader() {
     }
   };
 
+  // Dynamic Live Search Results
+  const liveSearchResults = useMemo(() => {
+    const q = searchQuery.trim().toLowerCase();
+    if (q.length < 2) return null;
+
+    // 1. Pages/Sections match
+    const pages = SITE_PAGES.filter(p => 
+      p.name.toLowerCase().includes(q) || 
+      p.keywords.some(k => k.includes(q) || q.includes(k))
+    );
+
+    // 2. Categories match
+    const categories = CATEGORIES_LIST.filter(c =>
+      c.label.toLowerCase().includes(q) ||
+      c.id.toLowerCase().includes(q)
+    ).slice(0, 3);
+
+    // 3. Commerces match
+    const commerces = allCommerces.filter(c =>
+      c.name.toLowerCase().includes(q) ||
+      c.category.toLowerCase().includes(q) ||
+      c.cityName.toLowerCase().includes(q)
+    ).slice(0, 4);
+
+    // 4. Products match
+    const products = allProducts.filter(p =>
+      p.title.toLowerCase().includes(q) ||
+      p.category.toLowerCase().includes(q) ||
+      p.commerceName.toLowerCase().includes(q) ||
+      p.cityName.toLowerCase().includes(q)
+    ).slice(0, 4);
+
+    const totalCount = pages.length + categories.length + commerces.length + products.length;
+
+    return { pages, categories, commerces, products, totalCount };
+  }, [searchQuery, allCommerces, allProducts]);
+
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!searchQuery.trim()) return;
-    trackSearchQuery(searchQuery);
-    const catalogElem = document.getElementById('catalogo') || document.getElementById('ofertas-destacadas');
-    if (catalogElem) {
-      catalogElem.scrollIntoView({ behavior: 'smooth' });
+    const q = searchQuery.trim();
+    if (!q) return;
+
+    trackSearchQuery(q);
+    setIsSearchFocused(false);
+
+    // Direct page mapping check
+    const qLower = q.toLowerCase();
+    const pageMatch = SITE_PAGES.find(p => p.keywords.some(k => k === qLower));
+    
+    if (pageMatch) {
+      router.push(pageMatch.href);
+      return;
     }
+
+    // Default: Redirect to Catalog page with q param
+    router.push(`/catalogo?q=${encodeURIComponent(q)}`);
   };
 
-  // Navigation links leading to dedicated URLs with location context
   const navLinks: { name: string; href: string; slug: string }[] = [
     { name: 'Inicio', href: getGeoUrl(''), slug: '' },
     { name: 'Comercios Adheridos', href: getGeoUrl('comercios'), slug: 'comercios' },
@@ -198,8 +298,8 @@ export function ClientHeader() {
           <Link href="/" className="flex items-center gap-3 shrink-0">
             <div className="relative w-40 h-12 sm:w-48 sm:h-14">
               <Image
-                src="/logo.png"
-                alt="ON MÁS Portal"
+                src="/images/logo.png"
+                alt="ON MÁS - Portal Comercial & Regional"
                 fill
                 priority
                 className="object-contain object-left"
@@ -207,34 +307,28 @@ export function ClientHeader() {
             </div>
           </Link>
 
-          {/* Dual Location Selectors: Provincia & Ciudad */}
-          <div className="hidden lg:flex items-center gap-2 bg-slate-50 p-1.5 rounded-2xl border border-slate-200 shadow-2xs">
-            {/* Province Dropdown */}
+          {/* Location Selectors */}
+          <div className="hidden lg:flex items-center gap-1.5 bg-slate-50 border border-slate-200 rounded-2xl p-1 shadow-2xs">
+            
+            {/* Selector de Provincia */}
             <div className="relative">
               <button
-                type="button"
-                onClick={() => {
-                  setIsProvinceDropdownOpen(!isProvinceDropdownOpen);
-                  setIsCityDropdownOpen(false);
-                }}
-                className="flex items-center gap-1.5 bg-white hover:bg-slate-100 text-[#0047BA] px-3 py-1.5 rounded-xl text-xs font-bold border border-slate-200 transition-colors shadow-2xs"
+                onClick={() => setIsProvinceDropdownOpen(!isProvinceDropdownOpen)}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold text-slate-700 hover:bg-white transition-all cursor-pointer"
               >
                 <MapPin className="w-3.5 h-3.5 text-[#00ADB5]" />
-                <span className="truncate max-w-[110px]">{currentProvinceObj.name}</span>
-                <ChevronDown className={`w-3.5 h-3.5 text-slate-400 transition-transform duration-200 ${isProvinceDropdownOpen ? 'rotate-180' : ''}`} />
+                <span className="truncate max-w-[100px]">{currentProvinceObj.name}</span>
+                <ChevronDown className="w-3 h-3 text-slate-400" />
               </button>
 
               {isProvinceDropdownOpen && (
-                <div className="absolute left-0 mt-2 w-48 bg-white rounded-2xl shadow-xl border border-slate-200 py-1.5 z-50 animate-in fade-in slide-in-from-top-2 duration-150">
-                  <div className="px-3 py-1 text-[10px] font-black text-slate-400 uppercase tracking-wider border-b border-slate-100">
-                    Provincia
-                  </div>
+                <div className="absolute top-full left-0 mt-1.5 w-44 bg-white border border-slate-200 rounded-2xl shadow-xl py-1.5 z-50 animate-in fade-in duration-100">
                   {PROVINCES.map((prov) => (
                     <button
                       key={prov.id}
                       type="button"
                       onClick={() => handleProvinceSelect(prov.id)}
-                      className={`w-full text-left px-3 py-1.5 text-xs flex items-center justify-between hover:bg-slate-50 transition-colors ${
+                      className={`w-full text-left px-3.5 py-2 text-xs flex items-center justify-between hover:bg-slate-50 transition-colors ${
                         selectedProvince === prov.id ? 'font-bold text-[#0047BA] bg-cyan-50/50' : 'text-slate-700'
                       }`}
                     >
@@ -246,26 +340,21 @@ export function ClientHeader() {
               )}
             </div>
 
-            {/* City Dropdown */}
+            <span className="text-slate-300 font-light">|</span>
+
+            {/* Selector de Ciudad */}
             <div className="relative">
               <button
-                type="button"
-                onClick={() => {
-                  setIsCityDropdownOpen(!isCityDropdownOpen);
-                  setIsProvinceDropdownOpen(false);
-                }}
-                className="flex items-center gap-1.5 bg-white hover:bg-slate-100 text-[#0047BA] px-3 py-1.5 rounded-xl text-xs font-bold border border-slate-200 transition-colors shadow-2xs"
+                onClick={() => setIsCityDropdownOpen(!isCityDropdownOpen)}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold text-slate-700 hover:bg-white transition-all cursor-pointer"
               >
-                <Building2 className="w-3.5 h-3.5 text-[#00ADB5]" />
+                <Building2 className="w-3.5 h-3.5 text-[#0047BA]" />
                 <span className="truncate max-w-[130px]">{currentCityObj.name}</span>
-                <ChevronDown className={`w-3.5 h-3.5 text-slate-400 transition-transform duration-200 ${isCityDropdownOpen ? 'rotate-180' : ''}`} />
+                <ChevronDown className="w-3 h-3 text-slate-400" />
               </button>
 
               {isCityDropdownOpen && (
-                <div className="absolute left-0 mt-2 w-56 bg-white rounded-2xl shadow-xl border border-slate-200 py-1.5 z-50 animate-in fade-in slide-in-from-top-2 duration-150 max-h-64 overflow-y-auto">
-                  <div className="px-3 py-1 text-[10px] font-black text-slate-400 uppercase tracking-wider border-b border-slate-100">
-                    Ciudades ({currentProvinceObj.name})
-                  </div>
+                <div className="absolute top-full left-0 mt-1.5 w-52 max-h-60 overflow-y-auto bg-white border border-slate-200 rounded-2xl shadow-xl py-1.5 z-50 animate-in fade-in duration-100 scrollbar-none">
                   <button
                     type="button"
                     onClick={() => handleCitySelect('all', 'Todas las ciudades')}
@@ -294,28 +383,160 @@ export function ClientHeader() {
             </div>
           </div>
 
-          {/* Global Search Bar */}
-          <form 
-            onSubmit={handleSearchSubmit}
-            className="hidden md:flex flex-1 max-w-md relative items-center"
-          >
-            <input
-              type="text"
-              placeholder="Buscá productos, comercios, ofertas..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-slate-50 border border-slate-300 rounded-xl pl-4 pr-12 py-2 text-xs text-slate-800 placeholder-slate-400 focus:outline-hidden focus:ring-2 focus:ring-[#00ADB5] focus:bg-white transition-all"
-            />
-            <button
-              type="submit"
-              className="absolute right-1 top-1 bottom-1 bg-gradient-to-r from-[#00ADB5] to-[#0047BA] hover:from-[#007C8A] hover:to-[#002878] text-white px-3 rounded-lg flex items-center justify-center transition-all shadow-xs cursor-pointer"
-              aria-label="Buscar"
-            >
-              <Search className="w-3.5 h-3.5" />
-            </button>
-          </form>
+          {/* Buscador Global Interactivo (Desktop) */}
+          <div ref={searchContainerRef} className="hidden md:block flex-1 max-w-md relative">
+            <form onSubmit={handleSearchSubmit} className="relative flex items-center">
+              <input
+                type="text"
+                placeholder="Buscá productos, comercios, categorías, secciones..."
+                value={searchQuery}
+                onFocus={() => setIsSearchFocused(true)}
+                onChange={(e) => {
+                  setSearchQuery(e.target.value);
+                  setIsSearchFocused(true);
+                }}
+                className="w-full bg-slate-50 border border-slate-300 rounded-xl pl-4 pr-12 py-2 text-xs text-slate-800 placeholder-slate-400 focus:outline-hidden focus:ring-2 focus:ring-[#00ADB5] focus:bg-white transition-all"
+              />
+              <button
+                type="submit"
+                className="absolute right-1 top-1 bottom-1 bg-gradient-to-r from-[#00ADB5] to-[#0047BA] hover:from-[#007C8A] hover:to-[#002878] text-white px-3 rounded-lg flex items-center justify-center transition-all shadow-xs cursor-pointer"
+                aria-label="Buscar"
+              >
+                <Search className="w-3.5 h-3.5" />
+              </button>
+            </form>
 
-          {/* User Actions: Ingresar / Crear cuenta (si no está logueado) o Perfil Comercio (si está logueado) */}
+            {/* Desplegable de Resultados de Búsqueda en Vivo */}
+            {isSearchFocused && liveSearchResults && (
+              <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-slate-200 rounded-2xl shadow-2xl overflow-hidden z-50 max-h-[80vh] overflow-y-auto animate-in fade-in duration-150">
+                {liveSearchResults.totalCount === 0 ? (
+                  <div className="p-6 text-center text-slate-500 space-y-2">
+                    <Search className="w-8 h-8 text-slate-300 mx-auto" />
+                    <p className="text-xs font-bold text-slate-700">No encontramos coincidencias exactas</p>
+                    <p className="text-[11px] text-slate-400">Presioná Enter para buscar &ldquo;{searchQuery}&rdquo; en el catálogo general.</p>
+                  </div>
+                ) : (
+                  <div className="divide-y divide-slate-100">
+                    
+                    {/* Secciones / Páginas */}
+                    {liveSearchResults.pages.length > 0 && (
+                      <div className="p-3 bg-slate-50/60">
+                        <span className="text-[10px] font-black uppercase tracking-wider text-[#0047BA] block mb-2">
+                          Secciones del Sitio
+                        </span>
+                        <div className="space-y-1">
+                          {liveSearchResults.pages.map((p) => {
+                            const IconComponent = p.icon;
+                            return (
+                              <Link
+                                key={p.href}
+                                href={p.href}
+                                onClick={() => setIsSearchFocused(false)}
+                                className="flex items-center justify-between p-2 rounded-xl hover:bg-white transition-colors group cursor-pointer"
+                              >
+                                <div className="flex items-center gap-2.5">
+                                  <div className="w-7 h-7 rounded-lg bg-cyan-100 text-[#0047BA] flex items-center justify-center shrink-0">
+                                    <IconComponent className="w-4 h-4" />
+                                  </div>
+                                  <div>
+                                    <span className="text-xs font-extrabold text-slate-900 group-hover:text-[#0047BA] block">
+                                      {p.name}
+                                    </span>
+                                    <span className="text-[10px] text-slate-500">{p.description}</span>
+                                  </div>
+                                </div>
+                                <ArrowRight className="w-3.5 h-3.5 text-slate-400 group-hover:text-[#00ADB5] group-hover:translate-x-0.5 transition-all" />
+                              </Link>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Comercios */}
+                    {liveSearchResults.commerces.length > 0 && (
+                      <div className="p-3">
+                        <span className="text-[10px] font-black uppercase tracking-wider text-[#00ADB5] block mb-2">
+                          Comercios & Locales ({liveSearchResults.commerces.length})
+                        </span>
+                        <div className="space-y-1">
+                          {liveSearchResults.commerces.map((c) => (
+                            <Link
+                              key={c.id}
+                              href={`/comercio/${c.slug}`}
+                              onClick={() => setIsSearchFocused(false)}
+                              className="flex items-center justify-between p-2 rounded-xl hover:bg-slate-50 transition-colors group cursor-pointer"
+                            >
+                              <div className="flex items-center gap-2.5">
+                                <div className="relative w-8 h-8 rounded-lg overflow-hidden border border-slate-200 bg-slate-100 shrink-0">
+                                  <img src={c.logoUrl} alt={c.name} className="w-full h-full object-cover" />
+                                </div>
+                                <div>
+                                  <span className="text-xs font-extrabold text-slate-900 group-hover:text-[#0047BA] block">
+                                    {c.name}
+                                  </span>
+                                  <span className="text-[10px] text-slate-500">{c.category} • {c.cityName}</span>
+                                </div>
+                              </div>
+                              <span className="text-[10px] font-bold text-[#0047BA] bg-cyan-50 px-2 py-0.5 rounded-md">
+                                Ver Perfil
+                              </span>
+                            </Link>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Productos */}
+                    {liveSearchResults.products.length > 0 && (
+                      <div className="p-3">
+                        <span className="text-[10px] font-black uppercase tracking-wider text-emerald-700 block mb-2">
+                          Productos & Ofertas ({liveSearchResults.products.length})
+                        </span>
+                        <div className="space-y-1">
+                          {liveSearchResults.products.map((p) => (
+                            <Link
+                              key={p.id}
+                              href={`/producto/${p.slug}`}
+                              onClick={() => setIsSearchFocused(false)}
+                              className="flex items-center justify-between p-2 rounded-xl hover:bg-slate-50 transition-colors group cursor-pointer"
+                            >
+                              <div className="flex items-center gap-2.5">
+                                <div className="relative w-8 h-8 rounded-lg overflow-hidden border border-slate-200 bg-slate-100 shrink-0">
+                                  <img src={p.imageUrl} alt={p.title} className="w-full h-full object-cover" />
+                                </div>
+                                <div className="truncate max-w-[200px] sm:max-w-[260px]">
+                                  <span className="text-xs font-bold text-slate-900 group-hover:text-[#0047BA] block truncate">
+                                    {p.title}
+                                  </span>
+                                  <span className="text-[10px] text-slate-500">{p.commerceName}</span>
+                                </div>
+                              </div>
+                              <span className="text-xs font-black text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md shrink-0">
+                                {p.price ? `$${p.price.toLocaleString('es-AR')}` : 'Consultar'}
+                              </span>
+                            </Link>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Footer Ver Todos en Catálogo */}
+                    <Link
+                      href={`/catalogo?q=${encodeURIComponent(searchQuery)}`}
+                      onClick={() => setIsSearchFocused(false)}
+                      className="block p-3 text-center bg-cyan-50 hover:bg-cyan-100 text-[#0047BA] text-xs font-black transition-colors"
+                    >
+                      Ver todos los resultados para &ldquo;{searchQuery}&rdquo; en el Catálogo →
+                    </Link>
+
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* User Actions */}
           <div className="flex items-center gap-3 sm:gap-4">
             {!currentUser ? (
               <Link 
@@ -370,7 +591,7 @@ export function ClientHeader() {
         </div>
       </div>
 
-      {/* Secondary Horizontal Navigation Bar (Top 5 items only, NO cities) */}
+      {/* Secondary Horizontal Navigation Bar */}
       <nav className="hidden md:block border-t border-slate-100 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <ul className="flex items-center justify-start gap-1 sm:gap-2 overflow-x-auto text-xs font-bold text-slate-700 scrollbar-none py-1.5">
@@ -400,7 +621,7 @@ export function ClientHeader() {
       {isMobileMenuOpen && (
         <div className="md:hidden bg-white border-t border-slate-200 px-4 pt-4 pb-6 space-y-4 animate-in fade-in duration-200">
           
-          {/* User Account / Commerce Panel Mobile CTA */}
+          {/* User Account Mobile CTA */}
           {!currentUser ? (
             <Link
               href="/login"
@@ -431,6 +652,7 @@ export function ClientHeader() {
               </div>
             </Link>
           )}
+          
           <div className="space-y-2">
             <label className="block text-xs font-bold text-slate-600">Provincia</label>
             <div className="flex gap-2">
@@ -466,10 +688,11 @@ export function ClientHeader() {
             </select>
           </div>
 
+          {/* Mobile Search Form */}
           <form onSubmit={handleSearchSubmit} className="relative">
             <input
               type="text"
-              placeholder="Buscá productos, servicios..."
+              placeholder="Buscá productos, comercios, ofertas..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full bg-slate-100 border border-slate-200 rounded-xl pl-4 pr-10 py-2 text-xs"
@@ -497,4 +720,3 @@ export function ClientHeader() {
     </header>
   );
 }
-
