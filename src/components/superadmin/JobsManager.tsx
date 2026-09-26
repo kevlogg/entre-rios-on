@@ -73,10 +73,11 @@ export function JobsManager() {
 
     setIsSubmitting(true);
     try {
+      const isRemoto = modality === 'Remoto' || modality.includes('Remoto');
       const res = await createJobAction({
         title,
         company,
-        cityName: city,
+        cityName: isRemoto ? 'Remoto' : city,
         workModality: modality,
         jobType: type,
         salary: salary || 'A convenir',
@@ -219,22 +220,32 @@ export function JobsManager() {
               </select>
             </div>
 
-            <div className="space-y-1">
-              <label className="block text-xs font-bold text-slate-700">Ciudad de Trabajo</label>
-              <select
-                value={city}
-                onChange={(e) => setCity(e.target.value)}
-                className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs text-slate-800 font-bold"
-              >
-                <option value="Paraná">Paraná</option>
-                <option value="Concordia">Concordia</option>
-                <option value="Colón">Colón</option>
-                <option value="Gualeguaychú">Gualeguaychú</option>
-                <option value="Federación">Federación</option>
-                <option value="Santa Fe Capital">Santa Fe Capital</option>
-                <option value="Rosario">Rosario</option>
-              </select>
-            </div>
+            {modality !== 'Remoto' ? (
+              <div className="space-y-1">
+                <label className="block text-xs font-bold text-slate-700">Ciudad de Trabajo</label>
+                <select
+                  value={city}
+                  onChange={(e) => setCity(e.target.value)}
+                  className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs text-slate-800 font-bold"
+                >
+                  <option value="Paraná">Paraná</option>
+                  <option value="Concordia">Concordia</option>
+                  <option value="Colón">Colón</option>
+                  <option value="Gualeguaychú">Gualeguaychú</option>
+                  <option value="Federación">Federación</option>
+                  <option value="Santa Fe Capital">Santa Fe Capital</option>
+                  <option value="Rosario">Rosario</option>
+                </select>
+              </div>
+            ) : (
+              <div className="space-y-1">
+                <label className="block text-xs font-bold text-slate-400">Ciudad de Trabajo</label>
+                <div className="w-full bg-slate-100 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-500 font-bold flex items-center gap-1.5 opacity-80">
+                  <Laptop className="w-3.5 h-3.5 text-cyan-600 shrink-0" />
+                  <span>No requiere ciudad (100% Remoto)</span>
+                </div>
+              </div>
+            )}
 
             <div className="space-y-1">
               <label className="block text-xs font-bold text-slate-700">Remuneración Ofrecida</label>
