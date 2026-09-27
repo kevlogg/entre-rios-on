@@ -418,11 +418,20 @@ export function KevDevPlanManager() {
               </table>
             </div>
 
-            <div className="bg-slate-50 rounded-2xl p-4 border border-slate-100 flex items-start gap-3 mt-4">
-              <Sparkles className="w-5 h-5 text-[#0047BA] shrink-0 mt-0.5" />
-              <p className="text-xs text-slate-600 leading-relaxed font-medium">
-                <strong className="text-slate-800 font-bold">Lógica Financiera:</strong> Cada upgrade de capacidad representa menos del <strong className="text-[#0047BA]">10% de un solo mes</strong> de facturación del titular. La modalidad de pago único garantiza propiedad total del software de por vida sin comisiones ocultas.
-              </p>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+              <div className="bg-slate-50 rounded-2xl p-4 border border-slate-100 flex items-start gap-3">
+                <Sparkles className="w-5 h-5 text-[#0047BA] shrink-0 mt-0.5" />
+                <p className="text-xs text-slate-600 leading-relaxed font-medium">
+                  <strong className="text-slate-800 font-bold">Lógica Financiera:</strong> Cada upgrade de capacidad representa menos del <strong className="text-[#0047BA]">10% de un solo mes</strong> de facturación del titular. La modalidad de pago único garantiza propiedad total del software de por vida sin comisiones ocultas.
+                </p>
+              </div>
+
+              <div className="bg-amber-50/80 rounded-2xl p-4 border border-amber-200 flex items-start gap-3">
+                <RefreshCw className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
+                <p className="text-xs text-amber-900 leading-relaxed font-medium">
+                  <strong className="text-amber-950 font-bold">Ajuste de Valores (IPC):</strong> Todos los valores acordados (abonos mensuales, upgrades de tramo y renovaciones) se ajustan semestralmente según la variación oficial del <strong className="text-amber-950 font-black">Índice de Precios al Consumidor (IPC) de servicios</strong>.
+                </p>
+              </div>
             </div>
           </div>
         </div>
