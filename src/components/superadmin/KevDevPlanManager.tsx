@@ -518,18 +518,6 @@ export function KevDevPlanManager() {
                 </tbody>
               </table>
             </div>
-
-            <div className="bg-slate-900 text-slate-300 rounded-2xl p-4 flex items-center justify-between gap-4">
-              <div className="flex items-center gap-3">
-                <Code2 className="w-5 h-5 text-cyan-400 shrink-0" />
-                <p className="text-xs font-medium">
-                  <strong className="text-white font-bold">Conexión Firebase KevDev:</strong> Los pagos registrados en el panel personal de KevDev se reflejan automáticamente en esta vista compartiendo la misma arquitectura que Dulce Hogar, Calvos Compresores y Pájaros en la cabeza.
-                </p>
-              </div>
-              <span className="text-[10px] bg-white/10 text-cyan-300 font-bold px-3 py-1 rounded-full shrink-0">
-                Sincronizado
-              </span>
-            </div>
           </div>
         </div>
       )}
