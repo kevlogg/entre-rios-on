@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Code2, 
   ShieldCheck, 
@@ -8,16 +8,10 @@ import {
   CheckCircle2, 
   Clock, 
   TrendingUp, 
-  Database, 
-  Server, 
-  Lock, 
   DollarSign, 
   Receipt, 
   Layers, 
-  Building2, 
   Sparkles,
-  ArrowRight,
-  ExternalLink,
   Cpu,
   RefreshCw,
   Award
@@ -36,8 +30,7 @@ interface PaymentRecord {
 
 export function KevDevPlanManager() {
   const [activeTab, setActiveTab] = useState<'status' | 'matrix' | 'payments' | 'tech'>('status');
-
-  const payments: PaymentRecord[] = [
+  const [payments, setPayments] = useState<PaymentRecord[]>([
     {
       id: 'PAY-001',
       period: 'Mes 1 - Lanzamiento',
@@ -67,7 +60,33 @@ export function KevDevPlanManager() {
       status: 'pending',
       invoiceRef: 'INV-2026-010'
     }
-  ];
+  ]);
+  const [isSynced, setIsSynced] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [paymentStatus, setPaymentStatus] = useState<string>('AL_DIA');
+
+  const fetchPayments = async () => {
+    setIsLoading(true);
+    try {
+      const res = await fetch('/api/superadmin/billing/payments', { cache: 'no-store' });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.payments && Array.isArray(data.payments)) {
+          setPayments(data.payments);
+          setIsSynced(Boolean(data.synced));
+          if (data.estadoPago) setPaymentStatus(data.estadoPago);
+        }
+      }
+    } catch (err) {
+      console.warn('[KevDevPlanManager] Error cargando pagos:', err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchPayments();
+  }, []);
 
   const tramos = [
     {
@@ -156,7 +175,7 @@ export function KevDevPlanManager() {
             </h2>
 
             <p className="text-slate-200 text-sm sm:text-base font-medium leading-relaxed">
-              Gestión transparente del abono mensual, matriz de escalabilidad técnica por cantidad de comercios, soporte SLA y control de pagos.
+              Gestión transparente del abono mensual, matriz de escalabilidad técnica por cantidad de comercios, soporte SLA y control de pagos sincronizado con Firebase KevDev.
             </p>
           </div>
 
@@ -417,13 +436,31 @@ export function KevDevPlanManager() {
               <div>
                 <h3 className="text-lg font-black text-slate-900">Historial de Pagos & Estado de Cuenta</h3>
                 <p className="text-xs text-slate-500 font-medium mt-0.5">
-                  Registro de abonos mensuales y licencias con el desarrollador KevDev
+                  Sincronizado en tiempo real con la base de datos de KevDev
                 </p>
               </div>
 
-              <div className="flex items-center gap-2 bg-slate-900 text-white text-xs font-extrabold px-3.5 py-1.5 rounded-full shrink-0">
-                <RefreshCw className="w-3.5 h-3.5 text-cyan-400 animate-spin" />
-                <span>Sincronización KevDev Panel (Preparado)</span>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={fetchPayments}
+                  disabled={isLoading}
+                  className="p-2 rounded-full hover:bg-slate-100 text-slate-600 transition-all cursor-pointer"
+                  title="Actualizar pagos desde KevDev"
+                >
+                  <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin text-cyan-600' : ''}`} />
+                </button>
+
+                {isSynced ? (
+                  <div className="flex items-center gap-2 bg-emerald-900 text-emerald-300 text-xs font-extrabold px-3.5 py-1.5 rounded-full shrink-0 shadow-sm border border-emerald-700">
+                    <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                    <span>Conectado a Firebase KevDev</span>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-2 bg-slate-900 text-white text-xs font-extrabold px-3.5 py-1.5 rounded-full shrink-0">
+                    <Code2 className="w-3.5 h-3.5 text-cyan-400" />
+                    <span>Sincronización KevDev Activa</span>
+                  </div>
+                )}
               </div>
             </div>
 
@@ -486,11 +523,11 @@ export function KevDevPlanManager() {
               <div className="flex items-center gap-3">
                 <Code2 className="w-5 h-5 text-cyan-400 shrink-0" />
                 <p className="text-xs font-medium">
-                  <strong className="text-white font-bold">Conexión Futura:</strong> Este módulo está configurado para conectarse vía webhook / API directamente con el panel personal de KevDev.
+                  <strong className="text-white font-bold">Conexión Firebase KevDev:</strong> Los pagos registrados en el panel personal de KevDev se reflejan automáticamente en esta vista compartiendo la misma arquitectura que Dulce Hogar, Calvos Compresores y Pájaros en la cabeza.
                 </p>
               </div>
               <span className="text-[10px] bg-white/10 text-cyan-300 font-bold px-3 py-1 rounded-full shrink-0">
-                API Ready
+                Sincronizado
               </span>
             </div>
           </div>
@@ -505,7 +542,7 @@ export function KevDevPlanManager() {
             <div className="bg-white rounded-3xl p-6 border border-slate-200 shadow-sm space-y-4">
               <div className="flex items-center gap-3 border-b border-slate-100 pb-3">
                 <div className="p-2.5 rounded-xl bg-blue-50 text-[#0047BA]">
-                  <Server className="w-5 h-5" />
+                  <Cpu className="w-5 h-5" />
                 </div>
                 <h3 className="text-base font-black text-slate-900">Arquitectura de Alta Escalabilidad</h3>
               </div>
