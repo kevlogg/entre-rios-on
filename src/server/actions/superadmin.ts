@@ -1043,29 +1043,59 @@ export async function getWebRequestsAction(): Promise<{
       return { success: false, data: [] };
     }
 
-    const { data, error } = await adminSupabase
+    const { data: webReqs, error: webErr } = await adminSupabase
       .from('web_requests')
       .select('*')
       .order('created_at', { ascending: false });
 
-    if (error) {
-      console.warn('Error fetching web requests:', error.message);
-      return { success: false, data: [] };
+    if (webErr) {
+      console.warn('Error fetching web requests:', webErr.message);
     }
+
+    let launchSubs: any[] = [];
+    try {
+      const { data: subs, error: subErr } = await adminSupabase
+        .from('launch_subscribers')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (!subErr && subs) {
+        launchSubs = subs;
+      }
+    } catch (e) {
+      console.warn('launch_subscribers fetch note:', e);
+    }
+
+    const formattedWeb = (webReqs || []).map((r: any) => ({
+      id: r.id,
+      businessName: r.business_name || 'Comercio',
+      contactName: r.contact_name || 'Contacto',
+      phoneWhatsApp: r.phone_whatsapp || '',
+      email: r.email || '',
+      desiredDomain: r.desired_domain || '',
+      notes: r.notes || '',
+      status: r.status || 'PENDING',
+      createdAt: r.created_at,
+    }));
+
+    const formattedLaunch = launchSubs.map((s: any) => ({
+      id: s.id || `sub_${s.email}`,
+      businessName: 'Suscriptor Lanzamiento ON MÁS',
+      contactName: s.email ? s.email.split('@')[0] : 'Suscriptor',
+      phoneWhatsApp: '',
+      email: s.email || '',
+      desiredDomain: 'onmasportal.com.ar',
+      notes: 'Suscrito desde la pantalla de Próximamente',
+      status: 'LAUNCH_SUBSCRIBER',
+      createdAt: s.created_at || s.subscribed_at,
+    }));
+
+    const existingEmails = new Set(formattedWeb.map((w) => w.email.toLowerCase()).filter(Boolean));
+    const uniqueLaunch = formattedLaunch.filter((l) => !existingEmails.has(l.email.toLowerCase()));
 
     return {
       success: true,
-      data: (data || []).map((r: any) => ({
-        id: r.id,
-        businessName: r.business_name || 'Comercio',
-        contactName: r.contact_name || 'Contacto',
-        phoneWhatsApp: r.phone_whatsapp || '',
-        email: r.email || '',
-        desiredDomain: r.desired_domain || '',
-        notes: r.notes || '',
-        status: r.status || 'PENDING',
-        createdAt: r.created_at,
-      })),
+      data: [...formattedWeb, ...uniqueLaunch],
     };
   } catch (err) {
     return { success: false, data: [] };

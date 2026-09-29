@@ -29,6 +29,12 @@ const isContactedWebStatus = (s?: string): boolean => {
   return str === 'CONTACTED' || str === 'CONTACTADO';
 };
 
+const isLaunchSubscriberStatus = (s?: string): boolean => {
+  if (!s) return false;
+  const str = s.trim().toUpperCase();
+  return str === 'LAUNCH_SUBSCRIBER' || str.includes('LAUNCH') || str.includes('SUBSCRIBER');
+};
+
 export function WebRequestsManager() {
   const [requests, setRequests] = useState<WebRequest[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -75,7 +81,7 @@ export function WebRequestsManager() {
     );
   };
 
-  const pendingCount = requests.filter((r) => isPendingWebStatus(r.status)).length;
+  const pendingCount = requests.filter((r) => isPendingWebStatus(r.status) || isLaunchSubscriberStatus(r.status)).length;
 
   return (
     <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-sm space-y-6">
@@ -83,13 +89,13 @@ export function WebRequestsManager() {
         <div>
           <span className="text-xs font-black uppercase tracking-widest text-[#0047BA] flex items-center gap-1.5">
             <Globe className="w-4 h-4 text-[#00ADB5]" />
-            Soluciones Web B2B
+            Soluciones Web & Mails de Lanzamiento
           </span>
           <h2 className="text-xl font-black text-slate-900 mt-1">
-            Solicitudes "Mi Sitio Web Propio"
+            Solicitudes Web & Suscriptores Próximamente
           </h2>
           <p className="text-xs text-slate-500">
-            Comercios que solicitaron el desarrollo de su propia página web corporativa o tienda online.
+            Correos registrados desde la página de Próximamente y solicitudes de Sitio Web Propio.
           </p>
         </div>
 
@@ -104,7 +110,7 @@ export function WebRequestsManager() {
 
           <div className="flex items-center gap-2 bg-cyan-50 border border-cyan-200 px-3.5 py-2 rounded-2xl text-xs font-bold text-[#0047BA]">
             <Globe className="w-4 h-4 text-[#00ADB5]" />
-            <span>{pendingCount} solicitud{pendingCount === 1 ? '' : 'es'} pendiente{pendingCount === 1 ? '' : 's'}</span>
+            <span>{requests.length} registro{requests.length === 1 ? '' : 's'} en total</span>
           </div>
         </div>
       </div>
@@ -112,13 +118,14 @@ export function WebRequestsManager() {
       {requests.length === 0 ? (
         <div className="text-center py-8 text-slate-400 text-xs font-bold space-y-2">
           <Globe className="w-8 h-8 mx-auto text-slate-300" />
-          <p>No hay solicitudes registradas de Sitio Web Propio por el momento.</p>
+          <p>No hay solicitudes ni suscriptores registrados por el momento.</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {requests.map((req) => {
             const isPending = isPendingWebStatus(req.status);
             const isContacted = isContactedWebStatus(req.status);
+            const isLaunch = isLaunchSubscriberStatus(req.status);
 
             return (
               <div key={req.id} className="border border-slate-200 rounded-2xl p-5 bg-slate-50/60 space-y-4 hover:border-[#00ADB5] transition-all">
@@ -128,10 +135,11 @@ export function WebRequestsManager() {
                     <p className="text-xs text-slate-500 font-medium">{req.contactName} {req.date ? `• ${req.date}` : ''}</p>
                   </div>
                   <span className={`text-[10px] font-black px-2.5 py-1 rounded-full ${
+                    isLaunch ? 'bg-purple-100 text-purple-900 border border-purple-300' :
                     isPending ? 'bg-amber-100 text-amber-800 border border-amber-300' :
                     isContacted ? 'bg-cyan-100 text-[#0047BA] border border-cyan-300' : 'bg-emerald-100 text-emerald-800'
                   }`}>
-                    {isPending ? 'Pendiente' : isContacted ? 'Contactado' : 'En Desarrollo'}
+                    {isLaunch ? 'Suscriptor Próximamente' : isPending ? 'Pendiente' : isContacted ? 'Contactado' : 'En Desarrollo'}
                   </span>
                 </div>
 
