@@ -92,7 +92,7 @@ export default function LinkLandingPage() {
 
           {/* 2. WhatsApp Directo */}
           <a
-            href="https://wa.me/5493434567890?text=Hola%20ON%20M%C3%81S!%20Quisiera%20recibir%20informaci%C3%B3n%20sobre%20el%20portal."
+            href="https://wa.me/5493426514889?text=Hola%20ON%20M%C3%81S!%20Quisiera%20recibir%20informaci%C3%B3n%20sobre%20el%20portal."
             target="_blank"
             rel="noopener noreferrer"
             className="group relative w-full bg-white/95 hover:bg-white text-slate-900 rounded-2xl p-4 shadow-xl border border-white/60 flex items-center justify-between gap-4 transition-all duration-300 hover:shadow-2xl hover:-translate-y-0.5 cursor-pointer overflow-hidden"

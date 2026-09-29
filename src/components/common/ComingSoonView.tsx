@@ -129,7 +129,7 @@ export function ComingSoonView() {
           
           {/* WhatsApp Directo */}
           <a
-            href="https://wa.me/5493434567890?text=Hola%20ON%20M%C3%81S!%20Quisiera%20sumar%20mi%20comercio%20antes%20del%20lanzamiento."
+            href="https://wa.me/5493426514889?text=Hola%20ON%20M%C3%81S!%20Quisiera%20sumar%20mi%20comercio%20antes%20del%20lanzamiento."
             target="_blank"
             rel="noopener noreferrer"
             className="w-full sm:w-auto bg-[#25D366] hover:bg-[#20ba5a] text-white px-5 py-3 rounded-2xl text-xs font-extrabold shadow-lg transition-transform active:scale-95 flex items-center justify-center gap-2"

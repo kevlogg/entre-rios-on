@@ -9,7 +9,7 @@ interface FloatingWhatsAppButtonProps {
 }
 
 export function FloatingWhatsAppButton({
-  phoneNumber = '5493434567890',
+  phoneNumber = '5493426514889',
   message = 'Hola ON MÁS! Quisiera consultar sobre el portal.',
 }: FloatingWhatsAppButtonProps) {
   const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
