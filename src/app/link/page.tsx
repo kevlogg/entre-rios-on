@@ -42,30 +42,20 @@ export default function LinkLandingPage() {
       <main className="w-full max-w-md mx-auto relative z-10 space-y-6 my-auto pt-6 pb-8">
         
         {/* Profile Card Header */}
-        <div className="text-center space-y-4">
-          <div className="relative w-24 h-24 mx-auto rounded-3xl bg-white p-2.5 shadow-2xl border-2 border-white/50 transform hover:scale-105 transition-transform duration-300">
+        <div className="text-center space-y-3">
+          <div className="relative w-56 h-16 sm:w-64 sm:h-20 mx-auto transform hover:scale-105 transition-transform duration-300 drop-shadow-[0_10px_25px_rgba(0,0,0,0.35)]">
             <Image
               src="/logo.png"
               alt="ON MÁS Portal"
               fill
               priority
-              className="object-contain p-1.5"
+              className="object-contain filter drop-shadow-lg brightness-110"
             />
           </div>
 
-          <div className="space-y-1.5">
-            <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-md px-3.5 py-1 rounded-full border border-white/20 text-[#00E5E8] font-black text-xs">
-              <MapPin className="w-3.5 h-3.5 text-[#00E5E8]" />
-              <span>Portal Regional Multisectorial</span>
-            </div>
-
-            <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white drop-shadow-md">
-              ON MÁS
-            </h1>
-            <p className="text-xs sm:text-sm text-slate-200 font-medium max-w-xs mx-auto leading-relaxed">
-              Directorio Comercial B2B, Catálogo directo a WhatsApp, Turismo y Medios de la Región.
-            </p>
-          </div>
+          <p className="text-xs sm:text-sm text-slate-200 font-medium max-w-xs mx-auto leading-relaxed pt-1">
+            Directorio Comercial B2B, Catálogo directo a WhatsApp, Turismo y Medios de la Región.
+          </p>
         </div>
 
         {/* Link Buttons Stack */}
