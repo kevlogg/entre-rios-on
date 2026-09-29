@@ -99,6 +99,12 @@ export function Footer() {
             </Link>
           </div>
           <div className="flex items-center gap-4">
+            <Link href="/quienes-somos" className="hover:text-[#00E5E8] transition-colors font-bold">
+              ¿Quiénes somos?
+            </Link>
+            <Link href="/link" className="hover:text-[#00E5E8] transition-colors font-bold text-[#00E5E8]">
+              Linktree / Landing
+            </Link>
             <p className="flex items-center gap-1 font-medium text-slate-400">
               <span>Desarrollado para potenciar la región con</span>
               <Heart className="w-3.5 h-3.5 text-cyan-400 fill-current" />

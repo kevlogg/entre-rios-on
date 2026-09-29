@@ -60,15 +60,13 @@ export function ClientFooter() {
 
             {/* Links */}
             <div className="flex flex-wrap items-center justify-center gap-2 text-[11px] font-semibold text-slate-500">
-              <Link href="#sobre" className="hover:text-[#00ADB5]">Sobre ON MÁS</Link>
+              <Link href="/quienes-somos" className="hover:text-[#00ADB5] font-bold text-slate-700">¿Quiénes somos?</Link>
               <span>|</span>
-              <Link href="#ayuda" className="hover:text-[#00ADB5]">Ayuda</Link>
+              <Link href="/link" className="hover:text-[#00ADB5] font-bold text-[#0047BA]">Acceso / Linktree</Link>
               <span>|</span>
               <Link href="/terminos" className="hover:text-[#00ADB5]">Términos y condiciones</Link>
               <span>|</span>
               <Link href="/privacidad" className="hover:text-[#00ADB5]">Privacidad</Link>
-              <span>|</span>
-              <Link href="#contacto" className="hover:text-[#00ADB5]">Contacto</Link>
               <span>|</span>
               <Link href="/superadmin" className="hover:text-amber-500 text-slate-400 font-bold flex items-center gap-1 transition-colors" title="Acceso Panel SuperAdmin">
                 <span>SuperAdmin</span>
