@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { Inter, Caveat } from 'next/font/google';
 import './globals.css';
 import { DesignSwitcherBar } from '@/components/layout/DesignSwitcherBar';
+import { FloatingWhatsAppButton } from '@/components/common/FloatingWhatsAppButton';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -104,6 +105,7 @@ export default function RootLayout({
         <main className="flex-1">
           {children}
         </main>
+        <FloatingWhatsAppButton />
       </body>
     </html>
   );
