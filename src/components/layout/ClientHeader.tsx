@@ -298,7 +298,7 @@ export function ClientHeader() {
           <Link href="/" className="flex items-center gap-3 shrink-0">
             <div className="relative w-40 h-12 sm:w-48 sm:h-14">
               <Image
-                src="/images/logo.png"
+                src="/logo.png"
                 alt="ON MÁS - Portal Comercial & Regional"
                 fill
                 priority

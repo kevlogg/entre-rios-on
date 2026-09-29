@@ -15,6 +15,7 @@ interface CashPaymentRequest {
   city: string;
   date?: string;
   status: string;
+  notes?: string;
 }
 
 const isPendingStatus = (status?: string): boolean => {
@@ -43,12 +44,13 @@ export function CashPaymentsManager() {
             amount: p.amount,
             city: p.cityName,
             status: p.status || 'PENDING',
+            notes: p.notes,
             date: p.createdAt ? new Date(p.createdAt).toLocaleString('es-AR') : undefined,
           }))
         );
       }
     } catch (e) {
-      console.warn('Error cargando pagos en efectivo:', e);
+      console.warn('Error cargando pagos:', e);
     } finally {
       setLoading(false);
     }
@@ -69,7 +71,7 @@ export function CashPaymentsManager() {
       prev.map((r) => (r.id === reqId ? { ...r, status: 'APPROVED' } : r))
     );
 
-    setNotification(`¡Pago en efectivo del plan "${planName}" aprobado para "${commerceName}"! El comercio fue activado exitosamente.`);
+    setNotification(`¡Cuota mensual del plan "${planName}" aprobada para "${commerceName}"! El comercio fue renovado e ingresado en el historial.`);
     setTimeout(() => setNotification(null), 5000);
   };
 
@@ -81,13 +83,13 @@ export function CashPaymentsManager() {
         <div>
           <span className="text-xs font-black uppercase tracking-widest text-[#0047BA] flex items-center gap-1.5">
             <CreditCard className="w-4 h-4 text-[#00ADB5]" />
-            Aprobación B2B
+            Aprobación de Cuotas & Pagos B2B
           </span>
           <h2 className="text-xl font-black text-slate-900 mt-1">
-            Gestión de Pagos en Efectivo
+            Gestión de Avisos de Pago y Renovaciones
           </h2>
           <p className="text-xs text-slate-500">
-            Aprobá las solicitudes de comercios que pagaron en efectivo para activar sus planes y otorgar badges de verificación.
+            Validá los pagos de cuotas mensuales en efectivo y transferencia para mantener activos los comercios en el portal.
           </p>
         </div>
 
@@ -102,7 +104,7 @@ export function CashPaymentsManager() {
 
           <div className="flex items-center gap-2 bg-amber-50 border border-amber-200 px-3.5 py-2 rounded-2xl text-xs font-bold text-amber-800">
             <Clock className="w-4 h-4 text-amber-600" />
-            <span>{pendingCount} pago{pendingCount === 1 ? '' : 's'} pendiente{pendingCount === 1 ? '' : 's'}</span>
+            <span>{pendingCount} cuota{pendingCount === 1 ? '' : 's'} pendiente{pendingCount === 1 ? '' : 's'}</span>
           </div>
         </div>
       </div>
@@ -119,17 +121,17 @@ export function CashPaymentsManager() {
         {requests.length === 0 ? (
           <div className="text-center py-8 text-slate-400 text-xs font-bold space-y-2">
             <CreditCard className="w-8 h-8 mx-auto text-slate-300" />
-            <p>No hay registros de avisos de pago en efectivo recibidos por el momento.</p>
+            <p>No hay avisos de pago recibidos por el momento.</p>
           </div>
         ) : (
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="border-b border-slate-200 text-[11px] font-black uppercase tracking-wider text-slate-400 bg-slate-50">
                 <th className="py-3 px-4 rounded-l-xl">Comercio</th>
-                <th className="py-3 px-4">Plan Solicitado</th>
+                <th className="py-3 px-4">Plan / Cuota</th>
                 <th className="py-3 px-4">Monto</th>
-                <th className="py-3 px-4">Ciudad</th>
-                <th className="py-3 px-4">Fecha Solicitud</th>
+                <th className="py-3 px-4">Comprobante / Detalle</th>
+                <th className="py-3 px-4">Fecha</th>
                 <th className="py-3 px-4">Estado</th>
                 <th className="py-3 px-4 text-right rounded-r-xl">Acción SuperAdmin</th>
               </tr>
@@ -141,7 +143,7 @@ export function CashPaymentsManager() {
                   <tr key={req.id} className="hover:bg-slate-50 transition-colors">
                     <td className="py-3.5 px-4">
                       <div className="font-extrabold text-slate-900">{req.commerceName}</div>
-                      <div className="text-[11px] text-slate-400">{req.ownerName} {req.phone ? `• ${req.phone}` : ''}</div>
+                      <div className="text-[11px] text-slate-400">{req.ownerName} {req.phone ? `• ${req.phone}` : ''} • {req.city}</div>
                     </td>
                     <td className="py-3.5 px-4">
                       <span className={`px-2.5 py-1 rounded-full text-[11px] font-black ${
@@ -154,7 +156,9 @@ export function CashPaymentsManager() {
                     <td className="py-3.5 px-4 font-black text-emerald-700">
                       ${req.amount ? req.amount.toLocaleString('es-AR') : '0'}
                     </td>
-                    <td className="py-3.5 px-4">{req.city}</td>
+                    <td className="py-3.5 px-4 max-w-xs text-slate-600 truncate">
+                      {req.notes || 'Pago en efectivo / transferencia'}
+                    </td>
                     <td className="py-3.5 px-4 text-slate-400 text-[11px]">{req.date || 'Reciente'}</td>
                     <td className="py-3.5 px-4">
                       {pending ? (
@@ -163,7 +167,7 @@ export function CashPaymentsManager() {
                         </span>
                       ) : (
                         <span className="inline-flex items-center gap-1 text-[10px] font-black bg-emerald-100 text-emerald-800 px-2.5 py-0.5 rounded-full">
-                          <CheckCircle2 className="w-3 h-3" /> Aprobado & Activo
+                          <CheckCircle2 className="w-3 h-3" /> Aprobado
                         </span>
                       )}
                     </td>
@@ -173,17 +177,17 @@ export function CashPaymentsManager() {
                           onClick={() => handleApprove(req.id, req.commerceName, req.planName)}
                           className="bg-emerald-600 hover:bg-emerald-700 text-white px-3.5 py-1.5 rounded-xl font-extrabold text-xs shadow-xs transition-transform active:scale-95 cursor-pointer"
                         >
-                          Aprobar Pago en Efectivo
+                          Validar y Renovar Cuota
                         </button>
                       ) : (
                         <a
-                          href={`https://wa.me/549${req.phone || '3434001122'}?text=${encodeURIComponent(`Hola ${req.ownerName}, confirmamos la aprobación de tu pago en efectivo para el ${req.planName} en ON MÁS.`)}`}
+                          href={`https://wa.me/549${req.phone || '3434001122'}?text=${encodeURIComponent(`Hola ${req.ownerName}, confirmamos la aprobación de tu pago de cuota mensual para el ${req.planName} en ON MÁS.`)}`}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="inline-flex items-center gap-1 bg-[#25D366] text-white px-3 py-1.5 rounded-xl text-xs font-bold"
                         >
                           <MessageCircle className="w-3.5 h-3.5 fill-current" />
-                          <span>Notificar por WhatsApp</span>
+                          <span>Notificar WhatsApp</span>
                         </a>
                       )}
                     </td>

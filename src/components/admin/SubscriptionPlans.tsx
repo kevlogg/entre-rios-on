@@ -1,12 +1,13 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { ShieldCheck, Check, Sparkles, Star, ArrowRight, Building2, Zap, DollarSign, Award, XCircle, X } from 'lucide-react';
+import { ShieldCheck, Check, Sparkles, Star, ArrowRight, Building2, Zap, DollarSign, Award, XCircle, X, Clock, Send, CheckCircle2, History } from 'lucide-react';
 import { createSubscriptionPreferenceAction } from '@/server/actions/subscription';
 import { 
   createCashPaymentAction, 
   getPendingCashPaymentForCommerceAction, 
-  cancelCashPaymentAction 
+  cancelCashPaymentAction,
+  getCommercePaymentHistoryAction
 } from '@/server/actions/superadmin';
 
 export type UserType = 'comercio' | 'turismo' | 'particular' | string;
@@ -65,9 +66,16 @@ export function SubscriptionPlans({
 }: SubscriptionPlansProps) {
   const [loadingTier, setLoadingTier] = useState<string | null>(null);
   const [activatedSuccess, setActivatedSuccess] = useState<string | null>(null);
-  const [pendingPayment, setPendingPayment] = useState<{ id: string; planName: string; amount: number } | null>(null);
+  const [pendingPayment, setPendingPayment] = useState<{ id: string; planName: string; amount: number; notes?: string } | null>(null);
+  const [history, setHistory] = useState<Array<{ id: string; planName: string; amount: number; status: string; createdAt: string; notes?: string }>>([]);
 
-  const checkPendingPayment = async () => {
+  // State for "Ya pagué" report modal
+  const [isReportModalOpen, setIsReportModalOpen] = useState(false);
+  const [selectedPlanForReport, setSelectedPlanForReport] = useState<{ name: string; amount: number }>({ name: 'Bronce', amount: 29000 });
+  const [reportPaymentMethod, setReportPaymentMethod] = useState<'TRANSFERENCIA' | 'EFECTIVO'>('TRANSFERENCIA');
+  const [reportReference, setReportReference] = useState('');
+
+  const checkPendingPaymentAndHistory = async () => {
     try {
       const res = await getPendingCashPaymentForCommerceAction(commerceId, commerceName);
       if (res.hasPending && res.pendingPayment) {
@@ -75,14 +83,56 @@ export function SubscriptionPlans({
       } else {
         setPendingPayment(null);
       }
+
+      const histRes = await getCommercePaymentHistoryAction(commerceName);
+      if (histRes.success && Array.isArray(histRes.data)) {
+        setHistory(histRes.data);
+      }
     } catch (e) {
-      console.warn('Error verificando pago pendiente:', e);
+      console.warn('Error verificando pago pendiente e historial:', e);
     }
   };
 
   useEffect(() => {
-    checkPendingPayment();
+    checkPendingPaymentAndHistory();
   }, [commerceId, commerceName]);
+
+  const openReportModal = (planName: string, amount: number) => {
+    setSelectedPlanForReport({ name: planName, amount });
+    setIsReportModalOpen(true);
+  };
+
+  const handleSendPaymentReport = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoadingTier('send_report');
+
+    try {
+      const noteFull = `Método: ${reportPaymentMethod} • Ref/Comprobante: ${reportReference || 'Sin especificar'}`;
+      const res = await createCashPaymentAction({
+        commerceName: commerceName || 'Comercio Adherido',
+        ownerName: 'Titular',
+        phoneWhatsApp: phoneWhatsApp || '5493434001122',
+        planName: selectedPlanForReport.name,
+        amount: selectedPlanForReport.amount,
+        cityName: cityName || 'Entre Ríos / Santa Fe',
+        commerceId,
+        paymentType: 'MONTHLY_RENEWAL',
+        paymentMethod: reportPaymentMethod,
+        referenceNote: noteFull,
+      });
+
+      if (res.success) {
+        setActivatedSuccess(`¡Aviso de pago para la cuota del Plan "${selectedPlanForReport.name}" enviado exitosamente! Notificamos al SuperAdmin para verificar.`);
+        setIsReportModalOpen(false);
+        setReportReference('');
+        await checkPendingPaymentAndHistory();
+      }
+    } catch (err) {
+      console.warn('Error enviando reporte de pago:', err);
+    } finally {
+      setLoadingTier(null);
+    }
+  };
 
   const handleCashPaymentRequest = async (planName: string, amount: number) => {
     setLoadingTier(`cash_${planName}`);
@@ -99,7 +149,7 @@ export function SubscriptionPlans({
 
       if (res.success) {
         setActivatedSuccess(`¡Solicitud de Pago en Efectivo Enviada! Notificamos al equipo SuperAdmin para verificar tu pago del plan "${planName}" y activar tu cuenta.`);
-        await checkPendingPayment();
+        await checkPendingPaymentAndHistory();
       }
     } catch (err) {
       console.warn('Error al solicitar verificación de pago en efectivo:', err);
@@ -285,23 +335,19 @@ export function SubscriptionPlans({
               disabled={Boolean(pendingPayment) || loadingTier === 'BRONCE'}
               className="w-full bg-[#0047BA] hover:bg-[#002878] text-white py-3.5 rounded-2xl font-black text-xs transition-transform active:scale-95 cursor-pointer shadow-md flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              <span>{loadingTier === 'BRONCE' ? 'Procesando...' : 'Contratar Plan Bronce ($29.000)'}</span>
+              <span>{loadingTier === 'BRONCE' ? 'Procesando...' : 'Pagar con MercadoPago ($29.000)'}</span>
               <ArrowRight className="w-4 h-4" />
             </button>
 
             <button
               type="button"
-              onClick={() => handleCashPaymentRequest('Bronce', 29000)}
-              disabled={Boolean(pendingPayment) || loadingTier === 'cash_Bronce'}
-              className="w-full bg-white border border-slate-200 hover:bg-slate-100 text-slate-800 py-2.5 rounded-xl font-extrabold text-xs transition-colors flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+              onClick={() => openReportModal('Bronce', 29000)}
+              disabled={Boolean(pendingPayment)}
+              className="w-full bg-white border border-slate-300 hover:bg-slate-100 text-slate-900 py-2.5 rounded-xl font-black text-xs transition-colors flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed shadow-2xs"
             >
-              <DollarSign className="w-3.5 h-3.5 text-emerald-600" />
+              <DollarSign className="w-4 h-4 text-emerald-600 font-black" />
               <span>
-                {pendingPayment
-                  ? 'Pago en revisión...'
-                  : loadingTier === 'cash_Bronce'
-                  ? 'Enviando aviso...'
-                  : 'Ya pagué en efectivo (Notificar SuperAdmin)'}
+                {pendingPayment ? 'Pago en revisión...' : 'Ya pagué esta cuota (Efectivo / Transf.)'}
               </span>
             </button>
           </div>
@@ -344,23 +390,19 @@ export function SubscriptionPlans({
               disabled={Boolean(pendingPayment) || loadingTier === 'PLATA'}
               className="w-full bg-gradient-to-r from-[#00ADB5] to-[#0047BA] hover:from-[#00969d] hover:to-[#002878] text-white py-3.5 rounded-2xl font-black text-xs shadow-lg transition-transform active:scale-95 cursor-pointer flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              <span>{loadingTier === 'PLATA' ? 'Procesando...' : 'Contratar Plan Plata ($49.000)'}</span>
+              <span>{loadingTier === 'PLATA' ? 'Procesando...' : 'Pagar con MercadoPago ($49.000)'}</span>
               <ArrowRight className="w-4 h-4" />
             </button>
 
             <button
               type="button"
-              onClick={() => handleCashPaymentRequest('Plata', 49000)}
-              disabled={Boolean(pendingPayment) || loadingTier === 'cash_Plata'}
-              className="w-full bg-slate-100 hover:bg-slate-200 text-slate-800 py-2.5 rounded-xl font-extrabold text-xs transition-colors flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+              onClick={() => openReportModal('Plata', 49000)}
+              disabled={Boolean(pendingPayment)}
+              className="w-full bg-slate-100 hover:bg-slate-200 text-slate-900 py-2.5 rounded-xl font-black text-xs transition-colors flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed shadow-2xs"
             >
-              <DollarSign className="w-3.5 h-3.5 text-emerald-600" />
+              <DollarSign className="w-4 h-4 text-emerald-600 font-black" />
               <span>
-                {pendingPayment
-                  ? 'Pago en revisión...'
-                  : loadingTier === 'cash_Plata'
-                  ? 'Enviando aviso...'
-                  : 'Ya pagué en efectivo (Notificar SuperAdmin)'}
+                {pendingPayment ? 'Pago en revisión...' : 'Ya pagué esta cuota (Efectivo / Transf.)'}
               </span>
             </button>
           </div>
@@ -403,23 +445,19 @@ export function SubscriptionPlans({
               disabled={Boolean(pendingPayment) || loadingTier === 'ORO'}
               className="w-full bg-gradient-to-r from-amber-400 via-amber-500 to-amber-600 hover:from-amber-300 hover:to-amber-500 text-slate-950 py-3.5 rounded-2xl font-black text-xs shadow-xl transition-transform active:scale-95 cursor-pointer flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              <span>{loadingTier === 'ORO' ? 'Procesando...' : 'Contratar Plan Oro ($99.000)'}</span>
+              <span>{loadingTier === 'ORO' ? 'Procesando...' : 'Pagar con MercadoPago ($99.000)'}</span>
               <ArrowRight className="w-4 h-4" />
             </button>
 
             <button
               type="button"
-              onClick={() => handleCashPaymentRequest('Oro', 99000)}
-              disabled={Boolean(pendingPayment) || loadingTier === 'cash_Oro'}
+              onClick={() => openReportModal('Oro', 99000)}
+              disabled={Boolean(pendingPayment)}
               className="w-full bg-white/10 hover:bg-white/20 text-white py-2.5 rounded-xl font-extrabold text-xs transition-colors flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed border border-white/20"
             >
-              <DollarSign className="w-3.5 h-3.5 text-amber-400" />
+              <DollarSign className="w-3.5 h-3.5 text-amber-400 font-black" />
               <span>
-                {pendingPayment
-                  ? 'Pago en revisión...'
-                  : loadingTier === 'cash_Oro'
-                  ? 'Enviando aviso...'
-                  : 'Ya pagué en efectivo (Notificar SuperAdmin)'}
+                {pendingPayment ? 'Pago en revisión...' : 'Ya pagué esta cuota (Efectivo / Transf.)'}
               </span>
             </button>
           </div>
@@ -427,7 +465,179 @@ export function SubscriptionPlans({
 
       </div>
 
+      {/* ==================== SECCIÓN DE HISTORIAL DE PAGOS Y CUOTAS ==================== */}
+      <div className="pt-8 border-t border-slate-200 space-y-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2 text-slate-900 font-black text-base">
+            <History className="w-5 h-5 text-[#0047BA]" />
+            <span>Historial de Cuotas Mensuales y Pagos</span>
+          </div>
+          <span className="text-xs text-slate-400 font-medium">Registros guardados en sistema</span>
+        </div>
+
+        {history.length === 0 ? (
+          <div className="bg-slate-50 border border-slate-200 rounded-2xl p-6 text-center text-xs text-slate-500 font-medium">
+            Aún no registrás cuotas mensuales abonadas o en proceso en el historial.
+          </div>
+        ) : (
+          <div className="overflow-x-auto border border-slate-200 rounded-2xl">
+            <table className="w-full text-left border-collapse text-xs">
+              <thead>
+                <tr className="bg-slate-100 border-b border-slate-200 text-[10px] font-black uppercase text-slate-500 tracking-wider">
+                  <th className="py-3 px-4">Fecha</th>
+                  <th className="py-3 px-4">Plan / Concepto</th>
+                  <th className="py-3 px-4">Monto</th>
+                  <th className="py-3 px-4">Detalle / Comprobante</th>
+                  <th className="py-3 px-4 text-right">Estado</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100 font-medium text-slate-700">
+                {history.map((h) => (
+                  <tr key={h.id} className="hover:bg-slate-50">
+                    <td className="py-3 px-4 text-slate-500">
+                      {h.createdAt ? new Date(h.createdAt).toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit', year: 'numeric' }) : 'Reciente'}
+                    </td>
+                    <td className="py-3 px-4 font-bold text-slate-900">
+                      Plan {h.planName}
+                    </td>
+                    <td className="py-3 px-4 font-black text-emerald-700">
+                      ${h.amount.toLocaleString('es-AR')}
+                    </td>
+                    <td className="py-3 px-4 text-slate-600 max-w-xs truncate">
+                      {h.notes || 'Pago de cuota mensual'}
+                    </td>
+                    <td className="py-3 px-4 text-right">
+                      {h.status === 'APPROVED' ? (
+                        <span className="inline-flex items-center gap-1 text-[10px] font-black bg-emerald-100 text-emerald-800 px-2.5 py-0.5 rounded-full">
+                          <CheckCircle2 className="w-3 h-3" /> Aprobado & Activo
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1 text-[10px] font-black bg-amber-100 text-amber-800 px-2.5 py-0.5 rounded-full">
+                          <Clock className="w-3 h-3" /> En Validación SuperAdmin
+                        </span>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+
+      {/* ==================== MODAL DE REPORTE "YA PAGUÉ MI CUOTA" ==================== */}
+      {isReportModalOpen && (
+        <div className="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in duration-150">
+          <div className="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl border border-slate-200 space-y-6 relative">
+            <button
+              onClick={() => setIsReportModalOpen(false)}
+              className="absolute top-5 right-5 p-2 rounded-xl text-slate-400 hover:bg-slate-100 transition-colors"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            <div className="space-y-1">
+              <span className="text-[10px] font-black uppercase tracking-widest text-[#00ADB5]">
+                Notificar Pago al SuperAdmin
+              </span>
+              <h3 className="text-xl font-black text-slate-900">
+                Notificar Pago de Nueva Cuota Mensual
+              </h3>
+              <p className="text-xs text-slate-500 font-medium">
+                Registrá tu pago de la cuota del Plan <strong className="text-slate-900">{selectedPlanForReport.name} (${selectedPlanForReport.amount.toLocaleString('es-AR')})</strong>.
+              </p>
+            </div>
+
+            {/* Datos Bancarios Oficiales de Transferencia */}
+            <div className="bg-blue-50/70 border border-blue-200 rounded-2xl p-4 space-y-2 text-xs text-slate-800">
+              <div className="font-extrabold text-[#0047BA] flex items-center gap-1.5">
+                <Building2 className="w-4 h-4 text-[#00ADB5]" />
+                <span>Datos Oficiales para Transferencia / Depósito</span>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px] font-mono bg-white p-3 rounded-xl border border-blue-100">
+                <div>
+                  <span className="text-slate-400 block font-sans">Banco:</span>
+                  <strong>Banco Entre Ríos / Santa Fe</strong>
+                </div>
+                <div>
+                  <span className="text-slate-400 block font-sans">Titular:</span>
+                  <strong>ON MÁS Medios Digitales</strong>
+                </div>
+                <div>
+                  <span className="text-slate-400 block font-sans">Alias MP / CBU:</span>
+                  <strong className="text-[#0047BA]">ONMAS.OFICIAL.MP</strong>
+                </div>
+                <div>
+                  <span className="text-slate-400 block font-sans">CVU / CBU:</span>
+                  <strong>0000003100084592019482</strong>
+                </div>
+              </div>
+            </div>
+
+            <form onSubmit={handleSendPaymentReport} className="space-y-4">
+              <div className="space-y-1.5">
+                <label className="block text-xs font-extrabold text-slate-700">Forma de Pago Realizada</label>
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setReportPaymentMethod('TRANSFERENCIA')}
+                    className={`py-2.5 px-3 rounded-xl border text-xs font-bold text-center transition-all ${
+                      reportPaymentMethod === 'TRANSFERENCIA'
+                        ? 'border-[#0047BA] bg-cyan-50 text-[#0047BA]'
+                        : 'border-slate-200 text-slate-600 hover:bg-slate-50'
+                    }`}
+                  >
+                    Transferencia Bancaria
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setReportPaymentMethod('EFECTIVO')}
+                    className={`py-2.5 px-3 rounded-xl border text-xs font-bold text-center transition-all ${
+                      reportPaymentMethod === 'EFECTIVO'
+                        ? 'border-[#0047BA] bg-cyan-50 text-[#0047BA]'
+                        : 'border-slate-200 text-slate-600 hover:bg-slate-50'
+                    }`}
+                  >
+                    Efectivo en Sucursal
+                  </button>
+                </div>
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="block text-xs font-extrabold text-slate-700">Nº de Comprobante / Referencia / Banco Emisor</label>
+                <input
+                  type="text"
+                  placeholder="Ej: Transf. N° 984123 desde Banco Galicia"
+                  value={reportReference}
+                  onChange={(e) => setReportReference(e.target.value)}
+                  className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 placeholder-slate-400 focus:ring-2 focus:ring-[#00ADB5] focus:outline-hidden"
+                />
+              </div>
+
+              <div className="pt-2 flex items-center justify-end gap-3 border-t border-slate-100">
+                <button
+                  type="button"
+                  onClick={() => setIsReportModalOpen(false)}
+                  className="px-4 py-2.5 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-100 transition-colors"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  disabled={loadingTier === 'send_report'}
+                  className="bg-gradient-to-r from-[#00ADB5] to-[#0047BA] hover:from-[#007C8A] hover:to-[#002878] text-white px-5 py-2.5 rounded-xl text-xs font-black shadow-md flex items-center gap-2 transition-transform active:scale-95 cursor-pointer disabled:opacity-50"
+                >
+                  <Send className="w-4 h-4" />
+                  <span>{loadingTier === 'send_report' ? 'Enviando aviso...' : 'Enviar Aviso de Pago'}</span>
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }
+
 

@@ -709,6 +709,9 @@ export async function createCashPaymentAction(paymentData: {
   amount: number;
   cityName: string;
   commerceId?: string;
+  paymentType?: 'INITIAL' | 'MONTHLY_RENEWAL';
+  paymentMethod?: 'EFECTIVO' | 'TRANSFERENCIA' | 'MERCADOPAGO';
+  referenceNote?: string;
 }): Promise<{ success: boolean; message: string }> {
   try {
     const adminSupabase = getAdminClient();
@@ -738,7 +741,7 @@ export async function createCashPaymentAction(paymentData: {
     const rawPlan = (paymentData.planName || '').toLowerCase();
     const cleanPlanName = rawPlan.includes('oro') ? 'Oro' : rawPlan.includes('plata') ? 'Plata' : 'Bronce';
 
-    const { error } = await adminSupabase.from('cash_payments').insert({
+    const insertPayload: Record<string, any> = {
       commerce_name: resolvedName,
       owner_name: resolvedOwner,
       phone_whatsapp: resolvedPhone,
@@ -746,7 +749,14 @@ export async function createCashPaymentAction(paymentData: {
       amount: paymentData.amount || 29000,
       city_name: resolvedCity,
       status: 'PENDING',
-    });
+    };
+
+    // Agregar campos extendidos si la tabla los soporta o como notas
+    if (paymentData.referenceNote) {
+      insertPayload.notes = paymentData.referenceNote;
+    }
+
+    const { error } = await adminSupabase.from('cash_payments').insert(insertPayload);
 
     if (error) {
       console.warn('Error insertando pago en efectivo:', error.message);
@@ -755,7 +765,7 @@ export async function createCashPaymentAction(paymentData: {
 
     revalidatePath('/superadmin');
     revalidatePath('/admin');
-    return { success: true, message: 'Solicitud de pago en efectivo registrada en Supabase.' };
+    return { success: true, message: 'Aviso de pago de cuota mensual registrado exitosamente.' };
   } catch (err) {
     return { success: false, message: `Error: ${(err as Error).message}` };
   }
@@ -771,6 +781,7 @@ export async function getPendingCashPaymentForCommerceAction(
     planName: string;
     amount: number;
     createdAt?: string;
+    notes?: string;
   };
 }> {
   try {
@@ -797,6 +808,7 @@ export async function getPendingCashPaymentForCommerceAction(
         planName: pending.plan_name || 'Bronce',
         amount: Number(pending.amount || 0),
         createdAt: pending.created_at,
+        notes: pending.notes || '',
       },
     };
   } catch (err) {
@@ -824,7 +836,7 @@ export async function cancelCashPaymentAction(
 
     revalidatePath('/superadmin');
     revalidatePath('/admin');
-    return { success: true, message: 'Solicitud de pago en efectivo cancelada correctamente.' };
+    return { success: true, message: 'Solicitud de pago cancelada correctamente.' };
   } catch (err) {
     return { success: false, message: `Error: ${(err as Error).message}` };
   }
@@ -850,22 +862,32 @@ export async function approveCashPaymentAction(
       return { success: false, message: `Error al aprobar pago: ${payErr.message}` };
     }
 
+    const nextExpiration = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString();
+
     if (commerceId) {
       await adminSupabase
         .from('commerces')
-        .update({ is_subscription_active: true, is_verified: true })
+        .update({ 
+          is_subscription_active: true, 
+          is_verified: true,
+          updated_at: new Date().toISOString()
+        })
         .eq('id', commerceId);
     } else if (commerceName) {
       await adminSupabase
         .from('commerces')
-        .update({ is_subscription_active: true, is_verified: true })
+        .update({ 
+          is_subscription_active: true, 
+          is_verified: true,
+          updated_at: new Date().toISOString()
+        })
         .ilike('name', `%${commerceName}%`);
     }
 
     revalidatePath('/superadmin');
     revalidatePath('/admin');
     revalidatePath('/comercios');
-    return { success: true, message: 'Pago en efectivo aprobado y comercio activado exitosamente.' };
+    return { success: true, message: 'Pago de cuota mensual aprobado exitosamente. El comercio ha sido renovado en el portal.' };
   } catch (err) {
     return { success: false, message: `Error: ${(err as Error).message}` };
   }
@@ -883,6 +905,7 @@ export async function getCashPaymentsAction(): Promise<{
     cityName: string;
     status: string;
     createdAt?: string;
+    notes?: string;
   }>;
 }> {
   try {
@@ -913,6 +936,49 @@ export async function getCashPaymentsAction(): Promise<{
         cityName: p.city_name || 'Entre Ríos',
         status: p.status || 'PENDING',
         createdAt: p.created_at,
+        notes: p.notes || '',
+      })),
+    };
+  } catch (err) {
+    return { success: false, data: [] };
+  }
+}
+
+export async function getCommercePaymentHistoryAction(
+  commerceName?: string
+): Promise<{
+  success: boolean;
+  data: Array<{
+    id: string;
+    planName: string;
+    amount: number;
+    status: string;
+    createdAt: string;
+    notes?: string;
+  }>;
+}> {
+  try {
+    const adminSupabase = getAdminClient();
+    if (!adminSupabase) return { success: false, data: [] };
+
+    let query = adminSupabase.from('cash_payments').select('*');
+    if (commerceName) {
+      query = query.ilike('commerce_name', `%${commerceName}%`);
+    }
+
+    const { data, error } = await query.order('created_at', { ascending: false });
+
+    if (error || !data) return { success: false, data: [] };
+
+    return {
+      success: true,
+      data: data.map((p: any) => ({
+        id: p.id,
+        planName: p.plan_name || 'Bronce',
+        amount: Number(p.amount || 0),
+        status: p.status || 'PENDING',
+        createdAt: p.created_at,
+        notes: p.notes || '',
       })),
     };
   } catch (err) {
