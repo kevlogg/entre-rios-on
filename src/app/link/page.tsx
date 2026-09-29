@@ -42,18 +42,20 @@ export default function LinkLandingPage() {
       <main className="w-full max-w-md mx-auto relative z-10 space-y-6 my-auto pt-6 pb-8">
         
         {/* Profile Card Header */}
-        <div className="text-center space-y-3">
-          <div className="relative w-56 h-16 sm:w-64 sm:h-20 mx-auto transform hover:scale-105 transition-transform duration-300 drop-shadow-[0_10px_25px_rgba(0,0,0,0.35)]">
-            <Image
-              src="/logo.png"
-              alt="ON MÁS Portal"
-              fill
-              priority
-              className="object-contain filter drop-shadow-lg brightness-110"
-            />
+        <div className="text-center space-y-4">
+          <div className="inline-block bg-white/95 backdrop-blur-md px-6 py-3.5 rounded-2xl shadow-2xl border border-white/60 transform hover:scale-105 transition-transform duration-300">
+            <div className="relative w-48 h-12 sm:w-56 sm:h-14 mx-auto">
+              <Image
+                src="/logo.png"
+                alt="ON MÁS Portal"
+                fill
+                priority
+                className="object-contain p-0.5"
+              />
+            </div>
           </div>
 
-          <p className="text-xs sm:text-sm text-slate-200 font-medium max-w-xs mx-auto leading-relaxed pt-1">
+          <p className="text-xs sm:text-sm text-slate-200 font-medium max-w-xs mx-auto leading-relaxed">
             Directorio Comercial B2B, Catálogo directo a WhatsApp, Turismo y Medios de la Región.
           </p>
         </div>
