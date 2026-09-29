@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { City } from '@/types';
-import { MapPin, Sparkles, Building2 } from 'lucide-react';
+import { MapPin, Sparkles, Building2, Clock } from 'lucide-react';
 import { trackCitySelect } from '@/lib/analytics/events';
 import { PROVINCES } from '@/lib/constants/locations';
 
@@ -21,7 +21,7 @@ export function CityFilterBar({
   selectedProvince = 'santa-fe',
   onSelectProvince
 }: CityFilterBarProps) {
-  const [activeProv, setActiveProv] = useState<string>(selectedProvince);
+  const [activeProv, setActiveProv] = useState<string>('santa-fe');
 
   const handleProvClick = (provId: string) => {
     setActiveProv(provId);
@@ -36,9 +36,7 @@ export function CityFilterBar({
     trackCitySelect(cityId, cityName);
   };
 
-  const filteredCities = activeProv === 'all'
-    ? cities
-    : cities.filter((c) => c.provinceId === activeProv || (!c.provinceId && activeProv === 'entre-rios'));
+  const filteredCities = cities.filter((c) => c.provinceId === 'santa-fe');
 
   return (
     <div className="bg-white rounded-2xl p-4 shadow-xs border border-slate-200 space-y-4">
@@ -50,20 +48,18 @@ export function CityFilterBar({
         </h2>
 
         {/* Province Selector Tabs */}
-        <div className="flex items-center gap-1.5 bg-slate-100 p-1 rounded-xl">
-          {PROVINCES.map((prov) => (
-            <button
-              key={prov.id}
-              onClick={() => handleProvClick(prov.id)}
-              className={`px-3 py-1 rounded-lg text-xs font-bold transition-all ${
-                activeProv === prov.id
-                  ? 'bg-gradient-to-r from-[#00ADB5] to-[#0047BA] text-white shadow-xs'
-                  : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/60'
-              }`}
-            >
-              {prov.name}
-            </button>
-          ))}
+        <div className="flex items-center gap-2 bg-slate-100 p-1.5 rounded-xl">
+          <button
+            type="button"
+            onClick={() => handleProvClick('santa-fe')}
+            className="px-3 py-1 rounded-lg text-xs font-black bg-gradient-to-r from-[#00ADB5] to-[#0047BA] text-white shadow-xs cursor-pointer"
+          >
+            Santa Fe
+          </button>
+          <span className="px-2.5 py-1 text-[11px] font-extrabold text-amber-700 bg-amber-50 rounded-lg border border-amber-200/60 flex items-center gap-1 shadow-2xs">
+            <Clock className="w-3 h-3 text-amber-500 shrink-0" />
+            <span>Próximamente más provincias</span>
+          </span>
         </div>
       </div>
 

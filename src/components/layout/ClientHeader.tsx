@@ -21,7 +21,8 @@ import {
   Newspaper,
   Globe,
   Tag,
-  ArrowRight
+  ArrowRight,
+  Clock
 } from 'lucide-react';
 import { trackSearchQuery, trackCitySelect } from '@/lib/analytics/events';
 import { PROVINCES, getCitiesByProvince, getProvinceBySlug, getCityBySlug } from '@/lib/constants/locations';
@@ -317,25 +318,24 @@ export function ClientHeader() {
                 className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold text-slate-700 hover:bg-white transition-all cursor-pointer"
               >
                 <MapPin className="w-3.5 h-3.5 text-[#00ADB5]" />
-                <span className="truncate max-w-[100px]">{currentProvinceObj.name}</span>
+                <span className="truncate max-w-[100px]">Santa Fe</span>
                 <ChevronDown className="w-3 h-3 text-slate-400" />
               </button>
 
               {isProvinceDropdownOpen && (
-                <div className="absolute top-full left-0 mt-1.5 w-44 bg-white border border-slate-200 rounded-2xl shadow-xl py-1.5 z-50 animate-in fade-in duration-100">
-                  {PROVINCES.map((prov) => (
-                    <button
-                      key={prov.id}
-                      type="button"
-                      onClick={() => handleProvinceSelect(prov.id)}
-                      className={`w-full text-left px-3.5 py-2 text-xs flex items-center justify-between hover:bg-slate-50 transition-colors ${
-                        selectedProvince === prov.id ? 'font-bold text-[#0047BA] bg-cyan-50/50' : 'text-slate-700'
-                      }`}
-                    >
-                      <span>{prov.name}</span>
-                      {selectedProvince === prov.id && <span className="w-1.5 h-1.5 rounded-full bg-[#00ADB5]" />}
-                    </button>
-                  ))}
+                <div className="absolute top-full left-0 mt-1.5 w-52 bg-white border border-slate-200 rounded-2xl shadow-xl py-2 z-50 animate-in fade-in duration-100 space-y-1">
+                  <button
+                    type="button"
+                    onClick={() => handleProvinceSelect('santa-fe')}
+                    className="w-full text-left px-3.5 py-1.5 text-xs font-bold text-[#0047BA] bg-cyan-50/50 flex items-center justify-between"
+                  >
+                    <span>Santa Fe</span>
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#00ADB5]" />
+                  </button>
+                  <div className="px-3 py-1.5 mx-1.5 rounded-xl bg-amber-50 border border-amber-200/60 text-[10px] font-extrabold text-amber-700 flex items-center gap-1.5">
+                    <Clock className="w-3 h-3 text-amber-500 shrink-0" />
+                    <span>Próximamente más provincias</span>
+                  </div>
                 </div>
               )}
             </div>
@@ -655,20 +655,18 @@ export function ClientHeader() {
           
           <div className="space-y-2">
             <label className="block text-xs font-bold text-slate-600">Provincia</label>
-            <div className="flex gap-2">
-              {PROVINCES.map((prov) => (
-                <button
-                  key={prov.id}
-                  onClick={() => handleProvinceSelect(prov.id)}
-                  className={`flex-1 text-xs py-2 px-3 rounded-xl border text-center font-bold ${
-                    selectedProvince === prov.id
-                      ? 'border-[#0047BA] bg-cyan-50 text-[#0047BA]'
-                      : 'border-slate-200 text-slate-600'
-                  }`}
-                >
-                  {prov.name}
-                </button>
-              ))}
+            <div className="flex flex-col gap-1.5">
+              <button
+                onClick={() => handleProvinceSelect('santa-fe')}
+                className="w-full text-xs py-2 px-3 rounded-xl border text-center font-bold border-[#0047BA] bg-cyan-50 text-[#0047BA] flex items-center justify-between"
+              >
+                <span>Santa Fe (Activa)</span>
+                <span className="w-2 h-2 rounded-full bg-[#00ADB5]" />
+              </button>
+              <div className="w-full text-[10px] font-extrabold text-amber-700 bg-amber-50 p-2 rounded-xl border border-amber-200/60 flex items-center justify-center gap-1.5 shadow-2xs">
+                <Clock className="w-3.5 h-3.5 text-amber-500 shrink-0" />
+                <span>Próximamente más provincias</span>
+              </div>
             </div>
           </div>
 

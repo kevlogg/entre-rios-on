@@ -63,19 +63,11 @@ export function ComingSoonView() {
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-[#0047BA]/20 rounded-full blur-3xl pointer-events-none" />
 
       {/* Top Header Badge */}
-      <header className="w-full max-w-4xl mx-auto flex items-center justify-between relative z-10 pt-2">
+      <header className="w-full max-w-4xl mx-auto flex items-center justify-center relative z-10 pt-2">
         <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-md px-3.5 py-1.5 rounded-full border border-white/20 text-[#00E5E8] font-extrabold text-xs">
           <MapPin className="w-3.5 h-3.5 text-[#00E5E8]" />
           <span>onmasportal.com.ar</span>
         </div>
-
-        <Link
-          href="/link"
-          className="text-xs font-extrabold text-white/80 hover:text-white bg-white/10 hover:bg-white/20 border border-white/20 px-3.5 py-1.5 rounded-full transition-all flex items-center gap-1.5"
-        >
-          <Globe className="w-3.5 h-3.5 text-[#00E5E8]" />
-          <span>Ver Linktree</span>
-        </Link>
       </header>
 
       {/* Center Main Card */}
@@ -108,7 +100,7 @@ export function ComingSoonView() {
             Estamos preparando algo grande para la región
           </h1>
           <p className="text-sm sm:text-base text-slate-200 font-medium max-w-lg mx-auto leading-relaxed">
-            Muy pronto vas a poder explorar el portal multisectorial que conecta comercios, catálogos directos a WhatsApp, turismo y oportunidades de empleo en Entre Ríos y Santa Fe.
+            Muy pronto vas a poder explorar el portal multisectorial que conecta comercios, catálogos directos a WhatsApp, turismo y oportunidades de empleo en Santa Fe.
           </p>
         </div>
 
@@ -189,11 +181,6 @@ export function ComingSoonView() {
 
         <div className="flex items-center gap-3 text-[11px] text-slate-400">
           <span>© {new Date().getFullYear()} ON MÁS Portal</span>
-          <span>•</span>
-          <Link href="/superadmin/login" className="hover:text-amber-300 flex items-center gap-1">
-            <Lock className="w-3 h-3" />
-            <span>Acceso Admin</span>
-          </Link>
         </div>
       </footer>
 
