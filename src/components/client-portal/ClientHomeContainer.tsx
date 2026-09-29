@@ -8,6 +8,7 @@ import { BentoRowOne } from '@/components/client-portal/BentoRowOne';
 import { FeaturedOffersGrid } from '@/components/client-portal/FeaturedOffersGrid';
 import { CityExploreBar } from '@/components/client-portal/CityExploreBar';
 import { BentoRowTwo } from '@/components/client-portal/BentoRowTwo';
+import { AboutUsHomeSection } from '@/components/home/AboutUsHomeSection';
 import { getProvinceBySlug } from '@/lib/constants/locations';
 import { Product } from '@/types';
 
@@ -67,6 +68,9 @@ export function ClientHomeContainer({ provinceId, initialProducts = [] }: Client
 
       {/* Segundo Bento: Industria, Turismo, Clasificados, Publicá tu Negocio */}
       <BentoRowTwo />
+
+      {/* Sección resumen de ¿Quiénes Somos? con acceso directo a la página */}
+      <AboutUsHomeSection />
     </>
   );
 }
