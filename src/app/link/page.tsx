@@ -120,7 +120,7 @@ export default function LinkLandingPage() {
 
           {/* 3. Instagram Oficial */}
           <a
-            href="https://instagram.com/onmas.oficial"
+            href="https://instagram.com/onmasportal"
             target="_blank"
             rel="noopener noreferrer"
             className="group relative w-full bg-white/95 hover:bg-white text-slate-900 rounded-2xl p-4 shadow-xl border border-white/60 flex items-center justify-between gap-4 transition-all duration-300 hover:shadow-2xl hover:-translate-y-0.5 cursor-pointer overflow-hidden"
@@ -133,7 +133,7 @@ export default function LinkLandingPage() {
               </div>
               <div className="text-left">
                 <h2 className="text-sm font-black text-slate-900 group-hover:text-purple-600 transition-colors">
-                  Instagram @onmas.oficial
+                  Instagram @onmasportal
                 </h2>
                 <p className="text-[11px] text-slate-500 font-medium">
                   Sorteos, novedades y eventos de la región

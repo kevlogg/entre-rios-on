@@ -84,7 +84,7 @@ export default function RootLayout({
     logo: 'https://entreriosonmas.gob.ar/logo.png',
     sameAs: [
       'https://facebook.com',
-      'https://instagram.com',
+      'https://instagram.com/onmasportal',
     ],
   };
 
