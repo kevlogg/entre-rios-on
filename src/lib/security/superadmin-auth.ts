@@ -32,6 +32,24 @@ export function isSuperAdminAuthenticated(): boolean {
   return getSuperAdminSession() !== null;
 }
 
+export function grantSuperAdminAccess(email: string): SuperAdminUser | null {
+  const cleanEmail = email.trim().toLowerCase();
+  if (!ALLOWED_SUPERADMIN_EMAILS.includes(cleanEmail)) {
+    return null;
+  }
+  const user: SuperAdminUser = {
+    email: cleanEmail,
+    name: cleanEmail.split('@')[0].toUpperCase(),
+    role: 'superadmin',
+    loggedInAt: new Date().toISOString()
+  };
+  if (typeof window !== 'undefined') {
+    localStorage.setItem(SUPERADMIN_SESSION_KEY, JSON.stringify(user));
+    document.cookie = 'onmas_superadmin_session=true; path=/; max-age=86400';
+  }
+  return user;
+}
+
 export function loginSuperAdmin(email: string, password: string): { success: boolean; message: string; user?: SuperAdminUser } {
   const cleanEmail = email.trim().toLowerCase();
 

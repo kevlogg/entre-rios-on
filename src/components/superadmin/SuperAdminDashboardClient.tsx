@@ -3,7 +3,8 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Commerce, CommunityEvent, City } from '@/types';
-import { isSuperAdminAuthenticated } from '@/lib/security/superadmin-auth';
+import { isSuperAdminAuthenticated, grantSuperAdminAccess, ALLOWED_SUPERADMIN_EMAILS } from '@/lib/security/superadmin-auth';
+import { createClient } from '@/lib/supabase/client';
 import { CommerceApprovalTable } from '@/components/superadmin/CommerceApprovalTable';
 import { NewsManager } from '@/components/superadmin/NewsManager';
 import { RafflesManager } from '@/components/superadmin/RafflesManager';
@@ -46,11 +47,28 @@ export function SuperAdminDashboardClient({
   const [isAuthChecked, setIsAuthChecked] = useState(false);
 
   useEffect(() => {
-    if (!isSuperAdminAuthenticated()) {
+    async function verifySuperAdminAuth() {
+      if (isSuperAdminAuthenticated()) {
+        setIsAuthChecked(true);
+        return;
+      }
+
+      try {
+        const supabase = createClient();
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user?.email && ALLOWED_SUPERADMIN_EMAILS.includes(user.email.trim().toLowerCase())) {
+          grantSuperAdminAccess(user.email.trim().toLowerCase());
+          setIsAuthChecked(true);
+          return;
+        }
+      } catch (e) {
+        console.warn('SuperAdmin dashboard auth check error:', e);
+      }
+
       router.push('/superadmin/login');
-    } else {
-      setIsAuthChecked(true);
     }
+
+    verifySuperAdminAuth();
   }, [router]);
 
   if (!isAuthChecked) {
