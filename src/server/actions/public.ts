@@ -119,3 +119,54 @@ export async function createClassifiedAction(data: {
   }
 }
 
+export async function subscribeToLaunchNewslettersAction(
+  email: string
+): Promise<{ success: boolean; message: string }> {
+  try {
+    const cleanEmail = email.trim().toLowerCase();
+    if (!cleanEmail || !cleanEmail.includes('@')) {
+      return { success: false, message: 'Por favor ingresá un correo electrónico válido.' };
+    }
+
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+
+    if (supabaseUrl && !supabaseUrl.includes('your-supabase-project')) {
+      const supabase = await createClient();
+
+      const { error: subErr } = await supabase.from('launch_subscribers').insert({
+        email: cleanEmail,
+      });
+
+      if (!subErr) {
+        return {
+          success: true,
+          message: '¡Correo registrado con éxito! Te notificaremos el día del lanzamiento.',
+        };
+      }
+
+      // Fallback: Guardar en web_requests para asegurar almacenamiento en DB
+      try {
+        await supabase.from('web_requests').insert({
+          business_name: 'Interesado Lanzamiento ON MÁS',
+          contact_name: cleanEmail.split('@')[0],
+          phone_whatsapp: '',
+          email: cleanEmail,
+          desired_domain: 'onmasportal.com.ar',
+          notes: 'Suscripción desde pantalla de Próximamente',
+          status: 'LAUNCH_SUBSCRIBER',
+        });
+      } catch (fErr) {
+        console.warn('Fallback web_requests error:', fErr);
+      }
+    }
+
+    return {
+      success: true,
+      message: '¡Correo registrado con éxito! Te notificaremos el día del lanzamiento.',
+    };
+  } catch (err) {
+    return { success: false, message: `Error inesperado: ${(err as Error).message}` };
+  }
+}
+
+

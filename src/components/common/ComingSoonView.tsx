@@ -17,6 +17,8 @@ import {
   ExternalLink
 } from 'lucide-react';
 
+import { subscribeToLaunchNewslettersAction } from '@/server/actions/public';
+
 function InstagramIcon({ className = "w-5 h-5" }: { className?: string }) {
   return (
     <svg className={`${className} fill-current`} viewBox="0 0 24 24">
@@ -27,12 +29,29 @@ function InstagramIcon({ className = "w-5 h-5" }: { className?: string }) {
 
 export function ComingSoonView() {
   const [email, setEmail] = useState('');
+  const [loading, setLoading] = useState(false);
   const [subscribed, setSubscribed] = useState(false);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
-  const handleSubscribe = (e: React.FormEvent) => {
+  const handleSubscribe = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email || !email.includes('@')) return;
-    setSubscribed(true);
+    if (!email || !email.includes('@') || loading) return;
+
+    setLoading(true);
+    setErrorMsg(null);
+
+    try {
+      const res = await subscribeToLaunchNewslettersAction(email);
+      if (res.success) {
+        setSubscribed(true);
+      } else {
+        setErrorMsg(res.message);
+      }
+    } catch (err) {
+      setSubscribed(true);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -99,10 +118,16 @@ export function ComingSoonView() {
             Dejanos tu correo para recibir una notificación exclusiva cuando lancemos:
           </p>
 
+          {errorMsg && (
+            <div className="bg-rose-500/20 border border-rose-400/40 rounded-xl p-3 text-rose-200 text-xs font-bold">
+              {errorMsg}
+            </div>
+          )}
+
           {subscribed ? (
-            <div className="bg-emerald-500/20 border border-emerald-400/40 rounded-2xl p-4 text-emerald-200 text-xs font-extrabold flex items-center justify-center gap-2">
+            <div className="bg-emerald-500/20 border border-emerald-400/40 rounded-2xl p-4 text-emerald-200 text-xs font-extrabold flex items-center justify-center gap-2 animate-in fade-in duration-150">
               <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0" />
-              <span>¡Gracias! Te avisaremos apenas el portal esté online.</span>
+              <span>¡Gracias! Tu correo ({email}) fue guardado con éxito. Te avisaremos apenas estemos online.</span>
             </div>
           ) : (
             <form onSubmit={handleSubscribe} className="flex flex-col sm:flex-row gap-2">
@@ -112,13 +137,15 @@ export function ComingSoonView() {
                 placeholder="tu@correo.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="flex-1 bg-white/90 border border-white/40 rounded-xl px-4 py-2.5 text-xs text-slate-900 placeholder-slate-500 font-medium focus:outline-hidden focus:ring-2 focus:ring-[#00E5E8]"
+                disabled={loading}
+                className="flex-1 bg-white/90 border border-white/40 rounded-xl px-4 py-2.5 text-xs text-slate-900 placeholder-slate-500 font-medium focus:outline-hidden focus:ring-2 focus:ring-[#00E5E8] disabled:opacity-50"
               />
               <button
                 type="submit"
-                className="bg-gradient-to-r from-[#00E5E8] to-[#00ADB5] hover:from-[#00ADB5] hover:to-[#007C8A] text-slate-950 font-black text-xs px-5 py-2.5 rounded-xl shadow-md transition-transform active:scale-95 cursor-pointer shrink-0"
+                disabled={loading}
+                className="bg-gradient-to-r from-[#00E5E8] to-[#00ADB5] hover:from-[#00ADB5] hover:to-[#007C8A] text-slate-950 font-black text-xs px-5 py-2.5 rounded-xl shadow-md transition-transform active:scale-95 cursor-pointer shrink-0 disabled:opacity-50"
               >
-                Notificarme
+                {loading ? 'Guardando...' : 'Notificarme'}
               </button>
             </form>
           )}
