@@ -60,6 +60,39 @@ export async function toggleCommerceSubscriptionAction(
   }
 }
 
+export async function deleteCommerceAction(
+  commerceId: string
+): Promise<{ success: boolean; message: string }> {
+  try {
+    const adminSupabase = getAdminClient();
+    const client = adminSupabase || (await createClient());
+
+    try {
+      await client.from('products').delete().eq('commerce_id', commerceId);
+    } catch (pErr) {
+      console.warn('Nota eliminando productos:', pErr);
+    }
+
+    const { error } = await client
+      .from('commerces')
+      .delete()
+      .eq('id', commerceId);
+
+    if (error) {
+      return { success: false, message: `Error eliminando comercio: ${error.message}` };
+    }
+
+    revalidatePath('/comercios');
+    revalidatePath('/catalogo');
+    revalidatePath('/turismo');
+    revalidatePath('/superadmin');
+
+    return { success: true, message: 'Comercio eliminado exitosamente.' };
+  } catch (err) {
+    return { success: false, message: `Error inesperado: ${(err as Error).message}` };
+  }
+}
+
 export async function createJobAction(jobData: {
   title: string;
   company: string;

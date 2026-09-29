@@ -19,11 +19,14 @@ import {
   History, 
   Building2, 
   Award,
-  DollarSign
+  DollarSign,
+  Trash2,
+  AlertTriangle
 } from 'lucide-react';
 import { 
   toggleCommerceVerificationAction, 
-  getCommercePaymentHistoryAction 
+  getCommercePaymentHistoryAction,
+  deleteCommerceAction
 } from '@/server/actions/superadmin';
 
 interface CommerceApprovalTableProps {
@@ -40,6 +43,10 @@ export function CommerceApprovalTable({ commerces: initialCommerces }: CommerceA
   const [selectedCommerce, setSelectedCommerce] = useState<Commerce | null>(null);
   const [commerceHistory, setCommerceHistory] = useState<Array<{ id: string; planName: string; amount: number; status: string; createdAt: string; notes?: string }>>([]);
   const [loadingHistory, setLoadingHistory] = useState(false);
+
+  // Delete Modal State
+  const [commerceToDelete, setCommerceToDelete] = useState<Commerce | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   React.useEffect(() => {
     setCommerces(initialCommerces);
@@ -75,6 +82,29 @@ export function CommerceApprovalTable({ commerces: initialCommerces }: CommerceA
       setCommerceHistory([]);
     } finally {
       setLoadingHistory(false);
+    }
+  };
+
+  const handleDeleteCommerce = async () => {
+    if (!commerceToDelete || isDeleting) return;
+    setIsDeleting(true);
+
+    try {
+      const res = await deleteCommerceAction(commerceToDelete.id);
+      if (res.success) {
+        setCommerces((prev) => prev.filter((c) => c.id !== commerceToDelete.id));
+        if (selectedCommerce?.id === commerceToDelete.id) {
+          setSelectedCommerce(null);
+        }
+        setCommerceToDelete(null);
+      } else {
+        alert(`Error al eliminar el comercio: ${res.message}`);
+      }
+    } catch (err) {
+      console.warn('Error eliminando comercio:', err);
+      alert('Ocurrió un error inesperado al intentar eliminar el comercio.');
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -186,7 +216,7 @@ export function CommerceApprovalTable({ commerces: initialCommerces }: CommerceA
               <th className="pb-3 px-3">Categoría & Plan</th>
               <th className="pb-3 px-3 text-center">Insignia Verificado</th>
               <th className="pb-3 px-3 text-center">Estado del Plan (Lectura)</th>
-              <th className="pb-3 px-3 text-right">Ficha & Historial</th>
+              <th className="pb-3 px-3 text-right">Acciones</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100 font-medium text-slate-700">
@@ -263,8 +293,18 @@ export function CommerceApprovalTable({ commerces: initialCommerces }: CommerceA
                         className="inline-flex items-center gap-1 bg-slate-100 hover:bg-cyan-50 text-[#0047BA] hover:text-[#00ADB5] border border-slate-200 hover:border-[#00ADB5] px-3 py-1.5 rounded-xl font-extrabold text-[11px] transition-all cursor-pointer shadow-2xs"
                       >
                         <Eye className="w-3.5 h-3.5" />
-                        <span>Ver Ficha e Historial</span>
+                        <span>Ficha e Historial</span>
                       </button>
+
+                      <button
+                        onClick={() => setCommerceToDelete(comm)}
+                        className="inline-flex items-center gap-1 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 hover:border-rose-300 px-2.5 py-1.5 rounded-xl font-extrabold text-[11px] transition-all cursor-pointer shadow-2xs"
+                        title="Eliminar Comercio"
+                      >
+                        <Trash2 className="w-3.5 h-3.5 text-rose-600" />
+                        <span>Eliminar</span>
+                      </button>
+
                       <a
                         href={`https://wa.me/${comm.phoneWhatsApp}?text=${encodeURIComponent(`Hola ${comm.name}, nos comunicamos del equipo SuperAdmin de Entre Ríos ON MÁS sobre la gestión de tu cuenta.`)}`}
                         target="_blank"
@@ -407,16 +447,26 @@ export function CommerceApprovalTable({ commerces: initialCommerces }: CommerceA
             </div>
 
             {/* Footer Modal Actions */}
-            <div className="pt-3 border-t border-slate-100 flex items-center justify-between">
-              <a
-                href={`https://wa.me/${selectedCommerce.phoneWhatsApp}?text=${encodeURIComponent(`Hola ${selectedCommerce.name}, nos comunicamos desde la administración de ON MÁS.`)}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 bg-[#25D366] text-white px-4 py-2.5 rounded-xl text-xs font-bold shadow-xs hover:bg-[#20ba5a]"
-              >
-                <MessageCircle className="w-4 h-4 fill-current" />
-                <span>Contactar por WhatsApp</span>
-              </a>
+            <div className="pt-3 border-t border-slate-100 flex items-center justify-between gap-3">
+              <div className="flex items-center gap-2">
+                <a
+                  href={`https://wa.me/${selectedCommerce.phoneWhatsApp}?text=${encodeURIComponent(`Hola ${selectedCommerce.name}, nos comunicamos desde la administración de ON MÁS.`)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 bg-[#25D366] text-white px-4 py-2.5 rounded-xl text-xs font-bold shadow-xs hover:bg-[#20ba5a]"
+                >
+                  <MessageCircle className="w-4 h-4 fill-current" />
+                  <span>Contactar por WhatsApp</span>
+                </a>
+
+                <button
+                  onClick={() => setCommerceToDelete(selectedCommerce)}
+                  className="inline-flex items-center gap-1.5 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 px-4 py-2.5 rounded-xl text-xs font-bold cursor-pointer"
+                >
+                  <Trash2 className="w-4 h-4 text-rose-600" />
+                  <span>Eliminar Comercio</span>
+                </button>
+              </div>
 
               <button
                 onClick={() => setSelectedCommerce(null)}
@@ -430,6 +480,47 @@ export function CommerceApprovalTable({ commerces: initialCommerces }: CommerceA
         </div>
       )}
 
+      {/* ==================== MODAL CONFIRMACIÓN DE ELIMINACIÓN ==================== */}
+      {commerceToDelete && (
+        <div className="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in duration-150">
+          <div className="bg-white rounded-3xl max-w-md w-full p-6 sm:p-8 shadow-2xl border border-slate-200 space-y-5 text-center relative">
+            <div className="w-14 h-14 rounded-2xl bg-rose-100 text-rose-600 flex items-center justify-center mx-auto shadow-xs">
+              <AlertTriangle className="w-7 h-7" />
+            </div>
+
+            <div className="space-y-2">
+              <h3 className="text-lg font-black text-slate-900">
+                ¿Eliminar el comercio &quot;{commerceToDelete.name}&quot;?
+              </h3>
+              <p className="text-xs text-slate-600 font-medium leading-relaxed">
+                Esta acción es <strong className="text-rose-600">permanente e irreversible</strong>. Se eliminará la cuenta, su ficha en <strong>{commerceToDelete.cityName}</strong> y todos sus productos o catálogo asociado en ON MÁS.
+              </p>
+            </div>
+
+            <div className="pt-3 flex flex-col sm:flex-row gap-2.5">
+              <button
+                type="button"
+                disabled={isDeleting}
+                onClick={() => setCommerceToDelete(null)}
+                className="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-extrabold text-xs py-3 rounded-xl cursor-pointer disabled:opacity-50"
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                disabled={isDeleting}
+                onClick={handleDeleteCommerce}
+                className="flex-1 bg-rose-600 hover:bg-rose-700 text-white font-black text-xs py-3 rounded-xl shadow-md cursor-pointer flex items-center justify-center gap-1.5 disabled:opacity-50"
+              >
+                <Trash2 className="w-4 h-4" />
+                <span>{isDeleting ? 'Eliminando...' : 'Sí, Eliminar Comercio'}</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }
+
