@@ -945,7 +945,8 @@ export async function getCashPaymentsAction(): Promise<{
 }
 
 export async function getCommercePaymentHistoryAction(
-  commerceName?: string
+  commerceName?: string,
+  commerceId?: string
 ): Promise<{
   success: boolean;
   data: Array<{
@@ -955,6 +956,7 @@ export async function getCommercePaymentHistoryAction(
     status: string;
     createdAt: string;
     notes?: string;
+    commerceName?: string;
   }>;
 }> {
   try {
@@ -962,6 +964,7 @@ export async function getCommercePaymentHistoryAction(
     if (!adminSupabase) return { success: false, data: [] };
 
     let query = adminSupabase.from('cash_payments').select('*');
+
     if (commerceName) {
       query = query.ilike('commerce_name', `%${commerceName}%`);
     }
@@ -979,6 +982,7 @@ export async function getCommercePaymentHistoryAction(
         status: p.status || 'PENDING',
         createdAt: p.created_at,
         notes: p.notes || '',
+        commerceName: p.commerce_name || '',
       })),
     };
   } catch (err) {
