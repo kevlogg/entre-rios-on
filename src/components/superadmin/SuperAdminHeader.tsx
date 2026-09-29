@@ -84,7 +84,7 @@ export function SuperAdminHeader() {
                 <div className="hidden lg:block text-left text-xs">
                   <p className="font-black leading-none text-slate-900">{userSession?.name || 'SuperAdmin'}</p>
                   <p className="text-[10px] text-[#0047BA] font-bold truncate max-w-[140px] mt-0.5">
-                    {userSession?.email || 'superadmin@onmas.gob.ar'}
+                    {userSession?.email || 'loggia.1996@gmail.com'}
                   </p>
                 </div>
               </div>

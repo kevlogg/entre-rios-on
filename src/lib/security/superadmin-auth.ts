@@ -1,8 +1,7 @@
 export const ALLOWED_SUPERADMIN_EMAILS = [
-  'superadmin@onmas.gob.ar',
-  'admin@onmas.gob.ar',
-  'director@onmas.gob.ar',
-  'socio@onmas.gob.ar'
+  'loggia.1996@gmail.com',
+  'arielcariati@gmail.com',
+  'gestioncobranzasbv@gmail.com'
 ];
 
 const SUPERADMIN_SESSION_KEY = 'onmas_superadmin_session';
@@ -20,7 +19,7 @@ export function getSuperAdminSession(): SuperAdminUser | null {
     const raw = localStorage.getItem(SUPERADMIN_SESSION_KEY);
     if (!raw) return null;
     const data: SuperAdminUser = JSON.parse(raw);
-    if (data && ALLOWED_SUPERADMIN_EMAILS.includes(data.email.toLowerCase())) {
+    if (data && data.email && ALLOWED_SUPERADMIN_EMAILS.includes(data.email.trim().toLowerCase())) {
       return data;
     }
     return null;
@@ -47,7 +46,7 @@ export function loginSuperAdmin(email: string, password: string): { success: boo
     };
   }
 
-  // Demo password validation: minimum 6 chars
+  // Mínimo 6 caracteres para la contraseña
   if (password.length < 6) {
     return { success: false, message: 'La contraseña debe tener al menos 6 caracteres.' };
   }
@@ -73,3 +72,4 @@ export function logoutSuperAdmin(): void {
     document.cookie = 'onmas_superadmin_session=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
   }
 }
+
