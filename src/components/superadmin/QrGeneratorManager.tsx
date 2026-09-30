@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { QRCodeCanvas, QRCodeSVG } from 'qrcode.react';
 import { Commerce } from '@/types';
-import { QrCode, Download, Copy, Check, Sparkles, Printer, Store, Maximize2, Image as ImageIcon, Bookmark, Trash2, AlertCircle, PlusCircle, ExternalLink } from 'lucide-react';
+import { QrCode, Download, Copy, Check, Sparkles, Printer, Store, Maximize2, Image as ImageIcon, Bookmark, Trash2, ExternalLink } from 'lucide-react';
 
 interface QrGeneratorManagerProps {
   commerces?: Commerce[];
@@ -17,7 +17,6 @@ export interface SavedQr {
   targetUrl: string;
   logoOption: 'icon' | 'logo';
   logoScale: LogoScale;
-  fgColor: string;
   resolution: number;
   createdAt: string;
 }
@@ -29,9 +28,9 @@ export function QrGeneratorManager({ commerces = [] }: QrGeneratorManagerProps) 
   const [targetUrl, setTargetUrl] = useState<string>('https://onmasportal.com.ar');
   const [title, setTitle] = useState<string>('QR Oficial ON MÁS');
   
-  // Customization State
-  const [fgColor, setFgColor] = useState<string>('#0047BA');
-  const [bgColor, setBgColor] = useState<string>('#FFFFFF');
+  // Customization State - Fixed Black color (#000000) for maximum print contrast
+  const fgColor = '#000000';
+  const bgColor = '#FFFFFF';
   const [logoOption, setLogoOption] = useState<'icon' | 'logo'>('icon');
   const [logoScale, setLogoScale] = useState<LogoScale>('large');
   const [resolution, setResolution] = useState<number>(1024);
@@ -166,7 +165,6 @@ export function QrGeneratorManager({ commerces = [] }: QrGeneratorManagerProps) 
       targetUrl: targetUrl.trim(),
       logoOption,
       logoScale,
-      fgColor,
       resolution,
       createdAt: new Date().toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit', year: 'numeric' }),
     };
@@ -182,7 +180,6 @@ export function QrGeneratorManager({ commerces = [] }: QrGeneratorManagerProps) 
     setTargetUrl(qr.targetUrl);
     setLogoOption(qr.logoOption);
     setLogoScale(qr.logoScale);
-    setFgColor(qr.fgColor);
     setResolution(qr.resolution);
   };
 
@@ -309,7 +306,7 @@ export function QrGeneratorManager({ commerces = [] }: QrGeneratorManagerProps) 
               />
             </div>
 
-            {/* Opciones visuales: Variante de Logo & Tamaño & Color */}
+            {/* Opciones visuales: Variante de Logo & Tamaño */}
             <div className="grid grid-cols-2 gap-3 pt-1">
               
               <div className="space-y-1.5">
@@ -366,54 +363,32 @@ export function QrGeneratorManager({ commerces = [] }: QrGeneratorManagerProps) 
 
             </div>
 
-            {/* Color del QR & Resolución */}
-            <div className="grid grid-cols-2 gap-3">
-              <div className="space-y-1.5">
-                <label className="block text-[11px] font-extrabold text-slate-700">Color QR</label>
-                <div className="flex items-center gap-1.5">
-                  <button
-                    type="button"
-                    onClick={() => setFgColor('#0047BA')}
-                    className={`px-2.5 py-1.5 text-[11px] font-extrabold rounded-xl transition-all cursor-pointer flex-1 text-center ${
-                      fgColor === '#0047BA' ? 'bg-[#0047BA] text-white' : 'bg-slate-100 text-[#0047BA]'
-                    }`}
-                  >
-                    Cobalto
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setFgColor('#000000')}
-                    className={`px-2.5 py-1.5 text-[11px] font-extrabold rounded-xl transition-all cursor-pointer flex-1 text-center ${
-                      fgColor === '#000000' ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-800'
-                    }`}
-                  >
-                    Negro
-                  </button>
-                </div>
-              </div>
-
-              <div className="space-y-1.5">
-                <label className="block text-[11px] font-extrabold text-slate-700">Calidad PNG</label>
-                <div className="flex items-center gap-1.5">
-                  <button
-                    type="button"
-                    onClick={() => setResolution(1024)}
-                    className={`px-2.5 py-1.5 text-[11px] font-extrabold rounded-xl transition-all cursor-pointer flex-1 text-center ${
-                      resolution === 1024 ? 'bg-cyan-500 text-white' : 'bg-slate-100 text-slate-700'
-                    }`}
-                  >
-                    1024px HD
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setResolution(2048)}
-                    className={`px-2.5 py-1.5 text-[11px] font-extrabold rounded-xl transition-all cursor-pointer flex-1 text-center ${
-                      resolution === 2048 ? 'bg-cyan-500 text-white' : 'bg-slate-100 text-slate-700'
-                    }`}
-                  >
-                    2048px Ultra
-                  </button>
-                </div>
+            {/* Resolución PNG de Imprenta */}
+            <div className="space-y-1.5 pt-1">
+              <label className="block text-[11px] font-extrabold text-slate-700">Calidad PNG Imprenta</label>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setResolution(1024)}
+                  className={`px-3 py-2 text-xs font-extrabold rounded-xl transition-all cursor-pointer flex-1 text-center border ${
+                    resolution === 1024
+                      ? 'bg-cyan-500 text-white border-cyan-600'
+                      : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
+                  }`}
+                >
+                  1024 x 1024 px (HD ★)
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setResolution(2048)}
+                  className={`px-3 py-2 text-xs font-extrabold rounded-xl transition-all cursor-pointer flex-1 text-center border ${
+                    resolution === 2048
+                      ? 'bg-cyan-500 text-white border-cyan-600'
+                      : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
+                  }`}
+                >
+                  2048 x 2048 px (Ultra HD)
+                </button>
               </div>
             </div>
 
@@ -427,7 +402,7 @@ export function QrGeneratorManager({ commerces = [] }: QrGeneratorManagerProps) 
             <div className="border-b border-slate-100 pb-3 flex items-center justify-between">
               <h3 className="text-sm font-black text-slate-900 flex items-center gap-2">
                 <Sparkles className="w-4 h-4 text-amber-500" />
-                <span>Vista Previa & Descarga</span>
+                <span>Vista Previa (Fijo Negro Imprenta)</span>
               </h3>
               <span className="text-[11px] font-mono text-slate-400">{resolution}x{resolution}px</span>
             </div>
