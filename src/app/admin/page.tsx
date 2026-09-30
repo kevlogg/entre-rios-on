@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Product, Commerce } from '@/types';
 import { AdminHeader } from '@/components/admin/AdminHeader';
+import { ClientFooter } from '@/components/layout/ClientFooter';
 import { AdminSidebar, AdminTab } from '@/components/admin/AdminSidebar';
 import { KpiCardsRow } from '@/components/admin/KpiCardsRow';
 import { CatalogManager } from '@/components/admin/CatalogManager';
@@ -387,6 +388,7 @@ export default function AdminPage() {
 
         </div>
       </main>
+      <ClientFooter />
     </div>
   );
 }

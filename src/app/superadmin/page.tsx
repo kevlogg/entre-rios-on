@@ -2,6 +2,7 @@ import React from 'react';
 import { getAllCommerces, getUpcomingEvents, getCities } from '@/lib/dal/portal';
 import { SuperAdminHeader } from '@/components/superadmin/SuperAdminHeader';
 import { SuperAdminDashboardClient } from '@/components/superadmin/SuperAdminDashboardClient';
+import { ClientFooter } from '@/components/layout/ClientFooter';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -25,6 +26,7 @@ export default async function SuperAdminPage() {
           initialCities={cities}
         />
       </main>
+      <ClientFooter />
     </div>
   );
 }

@@ -14,6 +14,7 @@ import { JobsManager } from '@/components/superadmin/JobsManager';
 import { TourismManager } from '@/components/superadmin/TourismManager';
 import { WebRequestsManager } from '@/components/superadmin/WebRequestsManager';
 import { KevDevPlanManager } from '@/components/superadmin/KevDevPlanManager';
+import { QrGeneratorManager } from '@/components/superadmin/QrGeneratorManager';
 import { 
   Store, 
   MapPin, 
@@ -26,7 +27,8 @@ import {
   CreditCard,
   Sparkles,
   ShieldCheck,
-  Code2
+  Code2,
+  QrCode
 } from 'lucide-react';
 
 interface SuperAdminDashboardClientProps {
@@ -42,7 +44,7 @@ export function SuperAdminDashboardClient({
 }: SuperAdminDashboardClientProps) {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<
-    'commerces' | 'cash-payments' | 'geo-customizer' | 'raffles' | 'jobs' | 'news' | 'tourism' | 'web-requests' | 'plan-kevdev'
+    'commerces' | 'cash-payments' | 'geo-customizer' | 'raffles' | 'jobs' | 'news' | 'tourism' | 'web-requests' | 'plan-kevdev' | 'qr-generator'
   >('commerces');
   const [isAuthChecked, setIsAuthChecked] = useState(false);
 
@@ -81,7 +83,7 @@ export function SuperAdminDashboardClient({
   }
 
   interface TabDef {
-    id: 'commerces' | 'cash-payments' | 'geo-customizer' | 'raffles' | 'jobs' | 'news' | 'tourism' | 'web-requests' | 'plan-kevdev';
+    id: 'commerces' | 'cash-payments' | 'geo-customizer' | 'raffles' | 'jobs' | 'news' | 'tourism' | 'web-requests' | 'plan-kevdev' | 'qr-generator';
     label: string;
     icon: React.ElementType;
     badge?: string;
@@ -90,6 +92,7 @@ export function SuperAdminDashboardClient({
   const tabs: TabDef[] = [
     { id: 'commerces', label: 'Comercios B2B', icon: Store, badge: `${initialCommerces.length}` },
     { id: 'cash-payments', label: 'Pagos en Efectivo', icon: CreditCard, badge: 'Nuevos' },
+    { id: 'qr-generator', label: 'Generador QR Imprenta', icon: QrCode, badge: 'HD' },
     { id: 'geo-customizer', label: 'Banners', icon: MapPin },
     { id: 'raffles', label: 'Sorteos ON MÁS', icon: Gift },
     { id: 'jobs', label: 'Empleos & Trabajo', icon: Briefcase },
@@ -182,6 +185,10 @@ export function SuperAdminDashboardClient({
 
           {activeTab === 'cash-payments' && (
             <CashPaymentsManager />
+          )}
+
+          {activeTab === 'qr-generator' && (
+            <QrGeneratorManager commerces={initialCommerces} />
           )}
 
           {activeTab === 'geo-customizer' && (
