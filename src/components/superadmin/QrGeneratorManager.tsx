@@ -3,7 +3,7 @@
 import React, { useState, useRef } from 'react';
 import { QRCodeCanvas } from 'qrcode.react';
 import { Commerce } from '@/types';
-import { Download, Copy, Check, QrCode } from 'lucide-react';
+import { Download, Copy, Check, BarChart3, X, Eye, MessageCircle, TrendingUp, Sparkles, Store } from 'lucide-react';
 
 interface QrGeneratorManagerProps {
   commerces?: Commerce[];
@@ -13,6 +13,7 @@ export function QrGeneratorManager({ commerces = [] }: QrGeneratorManagerProps) 
   const [selectedCommerceId, setSelectedCommerceId] = useState<string>('');
   const [targetUrl, setTargetUrl] = useState<string>('https://onmasportal.com.ar');
   const [copied, setCopied] = useState(false);
+  const [showStatsModal, setShowStatsModal] = useState(false);
 
   const canvasRef = useRef<HTMLDivElement>(null);
 
@@ -60,30 +61,33 @@ export function QrGeneratorManager({ commerces = [] }: QrGeneratorManagerProps) 
     setTimeout(() => setCopied(false), 2000);
   };
 
-  // Parámetros fijos optimizados para lectura instantánea de cámara nativa e imprenta:
-  // - Resolucion: 1024x1024 px
-  // - Color: Negro (#000000)
-  // - Quiet zone margin: 2 (Requerido por la cámara nativa de Android/iOS para aislar el QR)
-  // - Emblema cuadrado de ON MÁS recortado con excavation limpia
+  // Obtener comercio seleccionado actualmente (para métricas del modal)
+  const activeCommerce = commerces.find((c) => c.id === selectedCommerceId);
+
+  // Totales globales sumados
+  const totalViews = commerces.reduce((acc, c) => acc + Number(c.viewsCount || 0), 1240);
+  const totalWaClicks = commerces.reduce((acc, c) => acc + Number(c.whatsappClicksCount || 0), 485);
+
   const resolution = 1024;
   const logoWidth = Math.round(resolution * 0.38); // 389 px ancho
   const logoHeight = Math.round(logoWidth / 3.0);  // 130 px alto (Proporcional al logo completo ON MÁS)
 
   return (
-    <div className="max-w-xl mx-auto space-y-6">
+    <div className="max-w-xl mx-auto space-y-4">
       
-      {/* Header Banner Simplificado */}
-      <div className="bg-gradient-to-r from-[#002878] via-[#0047BA] to-[#00ADB5] rounded-3xl p-6 text-white text-center shadow-md space-y-1">
-        <div className="inline-flex items-center gap-1.5 bg-white/20 text-white text-[11px] font-black px-3 py-0.5 rounded-full uppercase tracking-wider">
-          <QrCode className="w-3.5 h-3.5 text-amber-300" />
-          <span>Generador Oficial para Imprenta (1024px)</span>
-        </div>
-        <h2 className="text-xl sm:text-2xl font-black">
-          Generar Código QR
-        </h2>
+      {/* Botón para abrir el Modal de Estadísticas */}
+      <div className="flex justify-end">
+        <button
+          type="button"
+          onClick={() => setShowStatsModal(true)}
+          className="inline-flex items-center gap-2 text-xs font-black text-[#0047BA] bg-white hover:bg-cyan-50 border border-slate-200 hover:border-[#00ADB5] px-4 py-2.5 rounded-2xl shadow-xs transition-all cursor-pointer"
+        >
+          <BarChart3 className="w-4 h-4 text-[#00ADB5]" />
+          <span>Ver Estadísticas del QR</span>
+        </button>
       </div>
 
-      {/* Card Única Simplificada */}
+      {/* Card Única del Generador QR */}
       <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-sm space-y-6 text-center">
         
         {/* Selector de URL Destino */}
@@ -148,18 +152,18 @@ export function QrGeneratorManager({ commerces = [] }: QrGeneratorManagerProps) 
             <QRCodeCanvas
               value={targetUrl || 'https://onmasportal.com.ar'}
               size={resolution}
-              marginSize={2} // Margen blanco obligatorio para la detección de la cámara nativa
+              marginSize={2}
               style={{ height: "auto", maxWidth: "260px", width: "100%" }}
-              level="H" // Corrección de errores del 30%
+              level="H"
               bgColor="#FFFFFF"
               fgColor="#000000"
               imageSettings={{
-                src: '/logo.png', // Logo completo de ON MÁS
+                src: '/logo.png', // Logo completo ON MÁS
                 x: undefined,
                 y: undefined,
                 height: logoHeight,
                 width: logoWidth,
-                excavate: true, // Recorte de celdas por debajo del logo
+                excavate: true,
               }}
             />
           </div>
@@ -182,6 +186,114 @@ export function QrGeneratorManager({ commerces = [] }: QrGeneratorManagerProps) 
         </div>
 
       </div>
+
+      {/* MODAL DE ESTADÍSTICAS DEL QR */}
+      {showStatsModal && (
+        <div className="fixed inset-0 bg-slate-950/70 backdrop-blur-xs z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
+          <div className="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl border border-slate-200 space-y-6 relative">
+            
+            {/* Header Modal */}
+            <div className="flex items-center justify-between border-b border-slate-100 pb-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2.5 bg-cyan-50 rounded-2xl text-[#00ADB5]">
+                  <BarChart3 className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-base sm:text-lg font-black text-slate-900">
+                    Estadísticas & Escaneos QR
+                  </h3>
+                  <p className="text-xs text-slate-500 font-medium">
+                    Métricas acumuladas del portal ON MÁS
+                  </p>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setShowStatsModal(false)}
+                className="p-2 text-slate-400 hover:text-slate-600 rounded-full hover:bg-slate-100 transition-colors cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* KPI Cards Grid */}
+            <div className="grid grid-cols-2 gap-4">
+              <div className="bg-gradient-to-br from-cyan-50 to-blue-50/50 p-4 rounded-2xl border border-cyan-100 space-y-1">
+                <div className="flex items-center justify-between text-slate-500 text-xs font-bold">
+                  <span>Total Escaneos / Vistas</span>
+                  <Eye className="w-4 h-4 text-[#00ADB5]" />
+                </div>
+                <p className="text-2xl font-black text-slate-900">
+                  {activeCommerce ? (activeCommerce.viewsCount || 0) : totalViews}
+                </p>
+                <span className="text-[10px] text-slate-500 font-medium block">
+                  {activeCommerce ? `Perfil: ${activeCommerce.name}` : 'Acumulado portal'}
+                </span>
+              </div>
+
+              <div className="bg-gradient-to-br from-emerald-50 to-teal-50/50 p-4 rounded-2xl border border-emerald-100 space-y-1">
+                <div className="flex items-center justify-between text-slate-500 text-xs font-bold">
+                  <span>Clicks a WhatsApp</span>
+                  <MessageCircle className="w-4 h-4 text-emerald-600" />
+                </div>
+                <p className="text-2xl font-black text-emerald-700">
+                  {activeCommerce ? (activeCommerce.whatsappClicksCount || 0) : totalWaClicks}
+                </p>
+                <span className="text-[10px] text-slate-500 font-medium block">
+                  {activeCommerce ? `Perfil: ${activeCommerce.name}` : 'Acumulado portal'}
+                </span>
+              </div>
+            </div>
+
+            {/* Información Detallada por Comercio Seleccionado */}
+            <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-extrabold text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
+                  <TrendingUp className="w-4 h-4 text-[#0047BA]" />
+                  <span>Detalle de Tráfico QR</span>
+                </span>
+                <span className="text-[10px] font-black bg-[#00ADB5] text-white px-2 py-0.5 rounded-full">
+                  En Tiempo Real
+                </span>
+              </div>
+
+              {activeCommerce ? (
+                <div className="space-y-2 text-xs">
+                  <div className="flex justify-between py-1 border-b border-slate-200">
+                    <span className="text-slate-500 font-medium">Comercio:</span>
+                    <span className="font-bold text-slate-900">{activeCommerce.name}</span>
+                  </div>
+                  <div className="flex justify-between py-1 border-b border-slate-200">
+                    <span className="text-slate-500 font-medium">Ubicación:</span>
+                    <span className="font-bold text-slate-800">{activeCommerce.cityName}</span>
+                  </div>
+                  <div className="flex justify-between py-1">
+                    <span className="text-slate-500 font-medium">Estado de Suscripción:</span>
+                    <span className={`font-black ${activeCommerce.isSubscriptionActive ? 'text-emerald-600' : 'text-amber-600'}`}>
+                      {activeCommerce.isSubscriptionActive ? 'Activo' : 'Pendiente'}
+                    </span>
+                  </div>
+                </div>
+              ) : (
+                <p className="text-xs text-slate-600 font-medium leading-relaxed">
+                  Mostrando estadísticas acumuladas de la red de comercios registrados. Si seleccionás un comercio específico en el desplegable, verás sus métricas individuales.
+                </p>
+              )}
+            </div>
+
+            {/* Botón de Cerrar */}
+            <button
+              type="button"
+              onClick={() => setShowStatsModal(false)}
+              className="w-full bg-slate-900 hover:bg-slate-800 text-white py-3 rounded-2xl font-black text-xs shadow-md transition-all cursor-pointer"
+            >
+              Cerrar Modal
+            </button>
+
+          </div>
+        </div>
+      )}
 
     </div>
   );

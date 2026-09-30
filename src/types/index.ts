@@ -40,6 +40,8 @@ export interface Commerce {
   isDigitalOnly?: boolean;
   website?: string;
   plan?: 'Bronce' | 'Plata' | 'Oro';
+  viewsCount?: number;
+  whatsappClicksCount?: number;
 }
 
 export interface Product {
