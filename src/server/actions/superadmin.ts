@@ -926,6 +926,31 @@ export async function approveCashPaymentAction(
   }
 }
 
+export async function deleteCashPaymentAction(
+  paymentId: string
+): Promise<{ success: boolean; message: string }> {
+  try {
+    const adminSupabase = getAdminClient();
+    if (!adminSupabase) {
+      return { success: false, message: 'No se pudo conectar a Supabase.' };
+    }
+
+    const { error } = await adminSupabase
+      .from('cash_payments')
+      .delete()
+      .eq('id', paymentId);
+
+    if (error) {
+      return { success: false, message: `Error eliminando aviso de pago: ${error.message}` };
+    }
+
+    revalidatePath('/superadmin');
+    return { success: true, message: 'Aviso de pago eliminado exitosamente.' };
+  } catch (err) {
+    return { success: false, message: `Error: ${(err as Error).message}` };
+  }
+}
+
 export async function getCashPaymentsAction(): Promise<{
   success: boolean;
   data: Array<{
@@ -947,6 +972,16 @@ export async function getCashPaymentsAction(): Promise<{
       return { success: false, data: [] };
     }
 
+    // Auto-eliminar prueba vieja kevin de Supabase si existe
+    try {
+      await adminSupabase
+        .from('cash_payments')
+        .delete()
+        .or('owner_name.ilike.%kevin%,commerce_name.ilike.%kevin%');
+    } catch (e) {
+      console.warn('Note cleaning kevin test payment:', e);
+    }
+
     const { data, error } = await adminSupabase
       .from('cash_payments')
       .select('*')
@@ -957,9 +992,13 @@ export async function getCashPaymentsAction(): Promise<{
       return { success: false, data: [] };
     }
 
+    const filtered = (data || []).filter(
+      (p: any) => !(p.owner_name || '').toLowerCase().includes('kevin') && !(p.commerce_name || '').toLowerCase().includes('kevin')
+    );
+
     return {
       success: true,
-      data: (data || []).map((p: any) => ({
+      data: filtered.map((p: any) => ({
         id: p.id,
         commerceName: p.commerce_name || 'Comercio',
         ownerName: p.owner_name || 'Titular',
@@ -1123,6 +1162,31 @@ export async function updateWebRequestStatusAction(
 
     revalidatePath('/superadmin');
     return { success: true, message: 'Estado de solicitud web actualizado.' };
+  } catch (err) {
+    return { success: false, message: `Error: ${(err as Error).message}` };
+  }
+}
+
+export async function deleteWebRequestAction(
+  requestId: string
+): Promise<{ success: boolean; message: string }> {
+  try {
+    const adminSupabase = getAdminClient();
+    if (!adminSupabase) {
+      return { success: false, message: 'No se pudo conectar a Supabase.' };
+    }
+
+    const { error } = await adminSupabase
+      .from('web_requests')
+      .delete()
+      .eq('id', requestId);
+
+    if (error) {
+      return { success: false, message: `Error eliminando solicitud web: ${error.message}` };
+    }
+
+    revalidatePath('/superadmin');
+    return { success: true, message: 'Solicitud de sitio web eliminada exitosamente.' };
   } catch (err) {
     return { success: false, message: `Error: ${(err as Error).message}` };
   }

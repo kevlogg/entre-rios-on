@@ -44,15 +44,55 @@ export default function SorteosPage() {
     loadRaffle();
   }, []);
 
-  const raffleTitle = activeRaffle?.title || 'Sorteo Mensual Gran Litoral • Octubre 2026';
-  const mainPrize = activeRaffle?.prize || 'Estancia Termal 3D/2N en Federación para 2 Personas + Pases + Cena';
-  const ticketPrice = activeRaffle?.ticketPrice || '$2.500 ARS';
-  const drawDate = activeRaffle?.drawDate ? new Date(activeRaffle.drawDate).toLocaleDateString('es-AR', { day: 'numeric', month: 'long', year: 'numeric' }) : '31 de Octubre, 2026';
-  const prizesList = activeRaffle?.prizesList || [
-    '1º Premio: Estancia Termal 3D/2N en Federación para 2 personas + Pases Termales + Cena Litoraleña',
-    '2º Premio: Canasta de Productos Regionales & Caja de Vinos Tannat Reserva',
-    '3º Premio: Voucher por $50.000 ARS para compras en comercios del portal',
-  ];
+  if (!activeRaffle) {
+    return (
+      <DynamicLayoutWrapper>
+        <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16 text-center space-y-6 w-full">
+          {/* Breadcrumb */}
+          <div className="flex items-center justify-center gap-2 text-xs font-bold text-slate-500 mb-6">
+            <Link href="/" className="hover:text-[#00ADB5] flex items-center gap-1">
+              <ArrowLeft className="w-3.5 h-3.5" />
+              <span>Inicio</span>
+            </Link>
+            <span>/</span>
+            <span className="text-[#0047BA]">Sorteos Mensuales ON MÁS</span>
+          </div>
+
+          <div className="w-20 h-20 bg-gradient-to-tr from-[#0047BA] to-[#00ADB5] rounded-3xl mx-auto flex items-center justify-center text-white shadow-xl animate-pulse">
+            <Gift className="w-10 h-10 text-amber-300" />
+          </div>
+          
+          <div className="space-y-3">
+            <span className="text-xs font-black uppercase tracking-widest text-[#0047BA] bg-cyan-50 border border-cyan-200 px-4 py-1.5 rounded-full inline-block">
+              Sorteos Mensuales ON MÁS
+            </span>
+            <h1 className="text-3xl sm:text-4xl font-black text-slate-900">
+              ¡Próximamente Novedades en Sorteos!
+            </h1>
+            <p className="text-sm sm:text-base text-slate-600 max-w-lg mx-auto leading-relaxed font-medium">
+              Estamos preparando grandiosos premios y experiencias exclusivas. Tan pronto como publiquemos un nuevo sorteo desde el panel de control, podrás participar aquí.
+            </p>
+          </div>
+
+          <div className="pt-4 flex items-center justify-center gap-3">
+            <Link
+              href="/"
+              className="bg-gradient-to-r from-[#00ADB5] to-[#0047BA] hover:from-[#00E5E8] hover:to-[#00ADB5] text-white px-6 py-3 rounded-2xl font-extrabold text-xs shadow-md transition-all active:scale-95 flex items-center gap-2"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              <span>Volver al Inicio</span>
+            </Link>
+          </div>
+        </main>
+      </DynamicLayoutWrapper>
+    );
+  }
+
+  const raffleTitle = activeRaffle.title;
+  const mainPrize = activeRaffle.prize;
+  const ticketPrice = activeRaffle.ticketPrice || '$2.500 ARS';
+  const drawDate = activeRaffle.drawDate ? new Date(activeRaffle.drawDate).toLocaleDateString('es-AR', { day: 'numeric', month: 'long', year: 'numeric' }) : 'Próximamente';
+  const prizesList = activeRaffle.prizesList && activeRaffle.prizesList.length > 0 ? activeRaffle.prizesList : [activeRaffle.prize];
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

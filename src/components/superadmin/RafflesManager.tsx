@@ -42,28 +42,7 @@ interface PastWinner {
   ticketType: 'Comercio Plan Activo' | 'Ticket Comprado';
 }
 
-const PAST_WINNERS_HISTORY: PastWinner[] = [
-  {
-    id: 'pw-1',
-    raffleTitle: 'Sorteo Mensual Gran Litoral • Septiembre 2026',
-    drawDate: '30 de Septiembre, 2026',
-    winnerName: 'Comedor Costanera El Dorado',
-    winnerCity: 'Paraná',
-    winnerPhone: '5493434229876',
-    prize: 'Estancia Termal 3D/2N en Federación',
-    ticketType: 'Comercio Plan Activo',
-  },
-  {
-    id: 'pw-2',
-    raffleTitle: 'Sorteo Mensual Gran Litoral • Agosto 2026',
-    drawDate: '31 de Agosto, 2026',
-    winnerName: 'Martín Benítez',
-    winnerCity: 'Concordia',
-    winnerPhone: '5493454998877',
-    prize: 'Caja Canasta de Sabores Litoraleños',
-    ticketType: 'Ticket Comprado',
-  },
-];
+const PAST_WINNERS_HISTORY: PastWinner[] = [];
 
 export function RafflesManager() {
   const [raffles, setRaffles] = useState<ActiveRaffleItem[]>([]);
@@ -464,47 +443,54 @@ export function RafflesManager() {
           Sorteos Mensuales Activos en la Web ({raffles.length})
         </h3>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {raffles.map((r) => (
-            <div key={r.id} className="border border-slate-200 rounded-2xl overflow-hidden bg-white shadow-xs flex flex-col justify-between">
-              <div className="relative h-44 w-full bg-slate-100">
-                <img src={r.imageUrl} alt={r.title} className="w-full h-full object-cover" />
-                <div className="absolute top-3 left-3 bg-amber-400 text-slate-950 font-black text-[10px] px-2.5 py-1 rounded-full uppercase shadow-xs">
-                  Ticket: {r.ticketPrice}
-                </div>
-                <div className="absolute top-3 right-3 bg-slate-900/80 backdrop-blur-xs text-white text-[10px] font-black px-2.5 py-1 rounded-full">
-                  Cierre: {r.drawDate}
-                </div>
-              </div>
-
-              <div className="p-4 space-y-3 flex-1 flex flex-col justify-between">
-                <div className="space-y-1.5">
-                  <h4 className="font-extrabold text-slate-900 text-base leading-snug">{r.title}</h4>
-                  <p className="text-xs text-[#0047BA] font-extrabold">🏆 1º Premio: {r.prize}</p>
-
-                  <div className="pt-2 space-y-1 border-t border-slate-100">
-                    <span className="text-[11px] font-bold text-slate-500 block">Premios del Sorteo:</span>
-                    {r.prizesList.map((p, idx) => (
-                      <p key={idx} className="text-[11px] font-medium text-slate-700 flex items-center gap-1">
-                        <Sparkles className="w-3 h-3 text-amber-500 shrink-0" />
-                        <span>{p}</span>
-                      </p>
-                    ))}
+        {raffles.length === 0 ? (
+          <div className="text-center py-8 text-slate-400 text-xs font-bold space-y-2 border border-slate-200/60 rounded-2xl bg-slate-50/50">
+            <Ticket className="w-8 h-8 mx-auto text-slate-300" />
+            <p>No hay sorteos activos publicados actualmente. Creá uno desde el formulario superior para habilitarlo en la web.</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {raffles.map((r) => (
+              <div key={r.id} className="border border-slate-200 rounded-2xl overflow-hidden bg-white shadow-xs flex flex-col justify-between">
+                <div className="relative h-44 w-full bg-slate-100">
+                  <img src={r.imageUrl} alt={r.title} className="w-full h-full object-cover" />
+                  <div className="absolute top-3 left-3 bg-amber-400 text-slate-950 font-black text-[10px] px-2.5 py-1 rounded-full uppercase shadow-xs">
+                    Ticket: {r.ticketPrice}
+                  </div>
+                  <div className="absolute top-3 right-3 bg-slate-900/80 backdrop-blur-xs text-white text-[10px] font-black px-2.5 py-1 rounded-full">
+                    Cierre: {r.drawDate}
                   </div>
                 </div>
 
-                <div className="pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
-                  <span className="text-[11px] font-extrabold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-md border border-emerald-200">
-                    ✓ Comercios Activos: Participan $0
-                  </span>
-                  <span className="text-[11px] font-bold text-slate-500">
-                    Ticket Vecino: {r.ticketPrice}
-                  </span>
+                <div className="p-4 space-y-3 flex-1 flex flex-col justify-between">
+                  <div className="space-y-1.5">
+                    <h4 className="font-extrabold text-slate-900 text-base leading-snug">{r.title}</h4>
+                    <p className="text-xs text-[#0047BA] font-extrabold">🏆 1º Premio: {r.prize}</p>
+
+                    <div className="pt-2 space-y-1 border-t border-slate-100">
+                      <span className="text-[11px] font-bold text-slate-500 block">Premios del Sorteo:</span>
+                      {r.prizesList.map((p, idx) => (
+                        <p key={idx} className="text-[11px] font-medium text-slate-700 flex items-center gap-1">
+                          <Sparkles className="w-3 h-3 text-amber-500 shrink-0" />
+                          <span>{p}</span>
+                        </p>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
+                    <span className="text-[11px] font-extrabold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-md border border-emerald-200">
+                      ✓ Comercios Activos: Participan $0
+                    </span>
+                    <span className="text-[11px] font-bold text-slate-500">
+                      Ticket Vecino: {r.ticketPrice}
+                    </span>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Historial de Ganadores */}
@@ -517,53 +503,60 @@ export function RafflesManager() {
           <span className="text-xs font-bold text-slate-500">Registro Histórico</span>
         </div>
 
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
-            <thead>
-              <tr className="border-b border-slate-200 text-[11px] font-black uppercase text-slate-400">
-                <th className="py-3 px-4">Sorteo Mensual</th>
-                <th className="py-3 px-4">Premio Entregado</th>
-                <th className="py-3 px-4">Fecha Sorteo</th>
-                <th className="py-3 px-4">Ganador</th>
-                <th className="py-3 px-4">Modalidad Ticket</th>
-                <th className="py-3 px-4 text-right">Contacto</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100 text-xs font-medium text-slate-700">
-              {pastWinners.map((pw) => (
-                <tr key={pw.id} className="hover:bg-slate-50 transition-colors">
-                  <td className="py-3 px-4 font-bold text-slate-900">{pw.raffleTitle}</td>
-                  <td className="py-3 px-4 text-[#0047BA] font-extrabold">{pw.prize}</td>
-                  <td className="py-3 px-4 text-slate-500">{pw.drawDate}</td>
-                  <td className="py-3 px-4 font-black text-slate-900">
-                    <span className="flex items-center gap-1">
-                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
-                      {pw.winnerName} ({pw.winnerCity})
-                    </span>
-                  </td>
-                  <td className="py-3 px-4">
-                    <span className={`text-[10px] font-extrabold px-2.5 py-0.5 rounded-full ${
-                      pw.ticketType === 'Comercio Plan Activo' ? 'bg-cyan-100 text-[#0047BA]' : 'bg-amber-100 text-amber-900'
-                    }`}>
-                      {pw.ticketType}
-                    </span>
-                  </td>
-                  <td className="py-3 px-4 text-right">
-                    <a
-                      href={`https://wa.me/${pw.winnerPhone.replace(/[^\d]/g, '')}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-lg hover:bg-emerald-100"
-                    >
-                      <Phone className="w-3 h-3" />
-                      <span>{pw.winnerPhone}</span>
-                    </a>
-                  </td>
+        {pastWinners.length === 0 ? (
+          <div className="text-center py-8 text-slate-400 text-xs font-bold space-y-2 border border-slate-200/60 rounded-2xl bg-slate-50/50">
+            <Trophy className="w-8 h-8 mx-auto text-slate-300" />
+            <p>Aún no se han registrado sorteos ni ganadores anteriores.</p>
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="border-b border-slate-200 text-[11px] font-black uppercase text-slate-400">
+                  <th className="py-3 px-4">Sorteo Mensual</th>
+                  <th className="py-3 px-4">Premio Entregado</th>
+                  <th className="py-3 px-4">Fecha Sorteo</th>
+                  <th className="py-3 px-4">Ganador</th>
+                  <th className="py-3 px-4">Modalidad Ticket</th>
+                  <th className="py-3 px-4 text-right">Contacto</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody className="divide-y divide-slate-100 text-xs font-medium text-slate-700">
+                {pastWinners.map((pw) => (
+                  <tr key={pw.id} className="hover:bg-slate-50 transition-colors">
+                    <td className="py-3 px-4 font-bold text-slate-900">{pw.raffleTitle}</td>
+                    <td className="py-3 px-4 text-[#0047BA] font-extrabold">{pw.prize}</td>
+                    <td className="py-3 px-4 text-slate-500">{pw.drawDate}</td>
+                    <td className="py-3 px-4 font-black text-slate-900">
+                      <span className="flex items-center gap-1">
+                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                        {pw.winnerName} ({pw.winnerCity})
+                      </span>
+                    </td>
+                    <td className="py-3 px-4">
+                      <span className={`text-[10px] font-extrabold px-2.5 py-0.5 rounded-full ${
+                        pw.ticketType === 'Comercio Plan Activo' ? 'bg-cyan-100 text-[#0047BA]' : 'bg-amber-100 text-amber-900'
+                      }`}>
+                        {pw.ticketType}
+                      </span>
+                    </td>
+                    <td className="py-3 px-4 text-right">
+                      <a
+                        href={`https://wa.me/${pw.winnerPhone.replace(/[^\d]/g, '')}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-lg hover:bg-emerald-100"
+                      >
+                        <Phone className="w-3 h-3" />
+                        <span>{pw.winnerPhone}</span>
+                      </a>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
     </div>
   );

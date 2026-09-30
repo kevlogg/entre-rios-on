@@ -13,9 +13,10 @@ import {
   RefreshCw,
   Sparkles,
   ArrowUpRight,
-  UserCheck
+  UserCheck,
+  Trash2
 } from 'lucide-react';
-import { approveCashPaymentAction, getCashPaymentsAction } from '@/server/actions/superadmin';
+import { approveCashPaymentAction, getCashPaymentsAction, deleteCashPaymentAction } from '@/server/actions/superadmin';
 
 interface CashPaymentRequest {
   id: string;
@@ -48,8 +49,12 @@ export function CashPaymentsManager() {
     try {
       const res = await getCashPaymentsAction();
       if (res.success && Array.isArray(res.data)) {
+        const filtered = res.data.filter(
+          (p) => !(p.ownerName || '').toLowerCase().includes('kevin') && !(p.commerceName || '').toLowerCase().includes('kevin')
+        );
+
         setRequests(
-          res.data.map((p) => {
+          filtered.map((p) => {
             const notesLower = (p.notes || '').toLowerCase();
             const isRenewal = notesLower.includes('monthly_renewal') || notesLower.includes('cuota') || notesLower.includes('renovación') || notesLower.includes('nueva cuota');
             return {
@@ -78,6 +83,17 @@ export function CashPaymentsManager() {
   useEffect(() => {
     loadCashPayments();
   }, []);
+
+  const handleDelete = async (reqId: string, commerceName: string) => {
+    try {
+      await deleteCashPaymentAction(reqId);
+      setRequests((prev) => prev.filter((r) => r.id !== reqId));
+      setNotification(`Aviso de pago de "${commerceName}" eliminado.`);
+      setTimeout(() => setNotification(null), 3000);
+    } catch (err) {
+      console.warn('Error eliminando pago:', err);
+    }
+  };
 
   const handleApprove = async (reqId: string, commerceName: string, planName: string, paymentType?: string) => {
     try {
@@ -256,24 +272,34 @@ export function CashPaymentsManager() {
                     </td>
 
                     <td className="py-3.5 px-4 text-right">
-                      {pending ? (
+                      <div className="flex items-center justify-end gap-2">
+                        {pending ? (
+                          <button
+                            onClick={() => handleApprove(req.id, req.commerceName, req.planName, req.paymentType)}
+                            className="bg-emerald-600 hover:bg-emerald-700 text-white px-3.5 py-1.5 rounded-xl font-extrabold text-xs shadow-xs transition-transform active:scale-95 cursor-pointer"
+                          >
+                            {isRenewal ? 'Validar y Renovar Cuota' : 'Aprobar Alta de Comercio'}
+                          </button>
+                        ) : (
+                          <a
+                            href={`https://wa.me/549${req.phone || '3434001122'}?text=${encodeURIComponent(`Hola ${req.ownerName}, confirmamos la aprobación de tu pago para el ${req.planName} en ON MÁS.`)}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1 bg-[#25D366] text-white px-3 py-1.5 rounded-xl text-xs font-bold"
+                          >
+                            <MessageCircle className="w-3.5 h-3.5 fill-current" />
+                            <span>Notificar WhatsApp</span>
+                          </a>
+                        )}
                         <button
-                          onClick={() => handleApprove(req.id, req.commerceName, req.planName, req.paymentType)}
-                          className="bg-emerald-600 hover:bg-emerald-700 text-white px-3.5 py-1.5 rounded-xl font-extrabold text-xs shadow-xs transition-transform active:scale-95 cursor-pointer"
+                          type="button"
+                          onClick={() => handleDelete(req.id, req.commerceName)}
+                          className="p-1.5 text-rose-500 hover:bg-rose-50 rounded-xl transition-colors cursor-pointer"
+                          title="Eliminar registro"
                         >
-                          {isRenewal ? 'Validar y Renovar Cuota' : 'Aprobar Alta de Comercio'}
+                          <Trash2 className="w-4 h-4" />
                         </button>
-                      ) : (
-                        <a
-                          href={`https://wa.me/549${req.phone || '3434001122'}?text=${encodeURIComponent(`Hola ${req.ownerName}, confirmamos la aprobación de tu pago para el ${req.planName} en ON MÁS.`)}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-flex items-center gap-1 bg-[#25D366] text-white px-3 py-1.5 rounded-xl text-xs font-bold"
-                        >
-                          <MessageCircle className="w-3.5 h-3.5 fill-current" />
-                          <span>Notificar WhatsApp</span>
-                        </a>
-                      )}
+                      </div>
                     </td>
                   </tr>
                 );

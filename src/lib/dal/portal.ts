@@ -1423,30 +1423,7 @@ export async function getWebRequests(): Promise<WebRequest[]> {
   }
 
   await simulateNetworkDelay();
-  return [
-    {
-      id: 'wr-1',
-      businessName: 'Bodega La Candelaria',
-      contactName: 'Carlos Gómez',
-      phoneWhatsApp: '5493446584321',
-      email: 'contacto@lacandelaria.com',
-      desiredDomain: 'bodegalacandelaria.com.ar',
-      notes: 'Solicitud de sitio e-commerce para catálogo de vinos y reservas enológicas.',
-      status: 'PENDING',
-      createdAt: new Date().toISOString(),
-    },
-    {
-      id: 'wr-2',
-      businessName: 'Alfarería & Cerámica Delta',
-      contactName: 'Mariana Benítez',
-      phoneWhatsApp: '5493447451234',
-      email: 'ventas@alfareriadelta.com.ar',
-      desiredDomain: 'alfareriadelta.com.ar',
-      notes: 'Sitio institucional con muestra de obras de barro litoraleño.',
-      status: 'CONTACTED',
-      createdAt: new Date().toISOString(),
-    }
-  ];
+  return [];
 }
 
 export async function getCashPayments(): Promise<CashPayment[]> {
@@ -1507,25 +1484,7 @@ export async function getRaffles(): Promise<Raffle[]> {
   }
 
   await simulateNetworkDelay();
-  return [
-    {
-      id: 'raf-1',
-      title: 'Sorteo Mensual Gran Litoral • Octubre 2026',
-      prize: 'Estancia Termal 3D/2N en Federación para 2 personas + Pases Termales + Cena Litoraleña',
-      prizesList: [
-        '1º Premio: Estancia Termal 3D/2N en Federación para 2 personas + Pases Termales + Cena Litoraleña',
-        '2º Premio: Canasta de Productos Regionales & Caja de Vinos Tannat Reserva',
-        '3º Premio: Voucher por $50.000 ARS para compras en comercios del portal',
-      ],
-      prizesCount: 3,
-      ticketPrice: '$2.500 ARS',
-      sponsorName: 'ON MÁS & Termas Federación',
-      imageUrl: '/images/city-federacion.jpg',
-      drawDate: '2026-10-31',
-      status: 'ACTIVE',
-      autoActiveCommerces: true,
-    },
-  ];
+  return [];
 }
 
 
