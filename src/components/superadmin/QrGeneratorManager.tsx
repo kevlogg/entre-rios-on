@@ -66,7 +66,8 @@ export function QrGeneratorManager({ commerces = [] }: QrGeneratorManagerProps) 
   // - Quiet zone margin: 2 (Requerido por la cámara nativa de Android/iOS para aislar el QR)
   // - Emblema cuadrado de ON MÁS recortado con excavation limpia
   const resolution = 1024;
-  const logoDimension = Math.round(resolution * 0.22); // 225x225 px en el centro exacto
+  const logoWidth = Math.round(resolution * 0.38); // 389 px ancho
+  const logoHeight = Math.round(logoWidth / 3.0);  // 130 px alto (Proporcional al logo completo ON MÁS)
 
   return (
     <div className="max-w-xl mx-auto space-y-6">
@@ -153,11 +154,11 @@ export function QrGeneratorManager({ commerces = [] }: QrGeneratorManagerProps) 
               bgColor="#FFFFFF"
               fgColor="#000000"
               imageSettings={{
-                src: '/icon.png',
+                src: '/logo.png', // Logo completo de ON MÁS
                 x: undefined,
                 y: undefined,
-                height: logoDimension,
-                width: logoDimension,
+                height: logoHeight,
+                width: logoWidth,
                 excavate: true, // Recorte de celdas por debajo del logo
               }}
             />
