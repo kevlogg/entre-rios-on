@@ -3,8 +3,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { QRCodeCanvas } from 'qrcode.react';
 import { Commerce } from '@/types';
-import { createClient } from '@/lib/supabase/client';
-import { Download, Copy, Check, BarChart3, X, Eye, MessageCircle, TrendingUp, QrCode, RefreshCw } from 'lucide-react';
+import { Download, Copy, Check, BarChart3, X, QrCode, RefreshCw, Smartphone, Monitor, Clock, ExternalLink } from 'lucide-react';
 
 interface QrGeneratorManagerProps {
   commerces?: Commerce[];
@@ -16,78 +15,42 @@ export function QrGeneratorManager({ commerces = [] }: QrGeneratorManagerProps) 
   const [copied, setCopied] = useState(false);
   const [showStatsModal, setShowStatsModal] = useState(false);
 
-  // Real Database Metrics State
+  // Exact QR Physical Scan Stats State
   const [loadingStats, setLoadingStats] = useState(false);
-  const [realViews, setRealViews] = useState<number>(0);
-  const [realWaClicks, setRealWaClicks] = useState<number>(0);
-  const [qrScansEstimate, setQrScansEstimate] = useState<number>(0);
+  const [totalScans, setTotalScans] = useState<number>(0);
+  const [lastScannedAt, setLastScannedAt] = useState<string | null>(null);
+  const [deviceStats, setDeviceStats] = useState<{ android: number; ios: number }>({ android: 0, ios: 0 });
 
   const canvasRef = useRef<HTMLDivElement>(null);
 
-  // Load real metrics from Supabase when modal opens or selected commerce changes
-  useEffect(() => {
-    if (!showStatsModal) return;
+  // URL con endpoint de seguimiento del escaneo
+  const qrTrackingValue = typeof window !== 'undefined'
+    ? `${window.location.origin}/api/qr/scan?url=${encodeURIComponent(targetUrl)}`
+    : `https://onmasportal.com.ar/api/qr/scan?url=${encodeURIComponent(targetUrl)}`;
 
-    async function fetchRealMetrics() {
-      setLoadingStats(true);
-      try {
-        const supabase = createClient();
-
-        if (selectedCommerceId && selectedCommerceId !== 'portal-home' && selectedCommerceId !== 'catalog') {
-          // 1. Obtener comercio específico
-          const { data: commData } = await supabase
-            .from('commerces')
-            .select('id, views_count, whatsapp_clicks_count')
-            .eq('id', selectedCommerceId)
-            .maybeSingle();
-
-          // 2. Contar eventos reales de vistas en profile_views
-          const { count: viewEvents } = await supabase
-            .from('profile_views')
-            .select('*', { count: 'exact', head: true })
-            .eq('commerce_id', selectedCommerceId);
-
-          // 3. Contar eventos de WhatsApp en whatsapp_clicks
-          const { count: waEvents } = await supabase
-            .from('whatsapp_clicks')
-            .select('*', { count: 'exact', head: true })
-            .eq('commerce_id', selectedCommerceId);
-
-          const views = Math.max(viewEvents || 0, Number(commData?.views_count || 0));
-          const clicks = Math.max(waEvents || 0, Number(commData?.whatsapp_clicks_count || 0));
-
-          setRealViews(views);
-          setRealWaClicks(clicks);
-          setQrScansEstimate(Math.round(views * 0.45)); // Estimación proporcional de escaneos
-        } else {
-          // Métricas globales acumuladas de la base de datos
-          const { count: totalViewEvents } = await supabase
-            .from('profile_views')
-            .select('*', { count: 'exact', head: true });
-
-          const { count: totalWaEvents } = await supabase
-            .from('whatsapp_clicks')
-            .select('*', { count: 'exact', head: true });
-
-          const viewsSum = commerces.reduce((acc, c) => acc + Number(c.viewsCount || 0), 0);
-          const clicksSum = commerces.reduce((acc, c) => acc + Number(c.whatsappClicksCount || 0), 0);
-
-          const views = Math.max(totalViewEvents || 0, viewsSum);
-          const clicks = Math.max(totalWaEvents || 0, clicksSum);
-
-          setRealViews(views);
-          setRealWaClicks(clicks);
-          setQrScansEstimate(Math.round(views * 0.4));
-        }
-      } catch (err) {
-        console.warn('Error obteniendo métricas reales de Supabase:', err);
-      } finally {
-        setLoadingStats(false);
+  // Consultar conteo exacto de escaneos de ESTE QR al abrir el modal o cambiar URL
+  const fetchQrStats = async () => {
+    setLoadingStats(true);
+    try {
+      const res = await fetch(`/api/qr/scan?action=stats&url=${encodeURIComponent(targetUrl)}`);
+      if (res.ok) {
+        const data = await res.json();
+        setTotalScans(data.totalScans || 0);
+        setLastScannedAt(data.lastScannedAt ? new Date(data.lastScannedAt).toLocaleString('es-AR') : null);
+        setDeviceStats(data.devices || { android: 0, ios: 0 });
       }
+    } catch (err) {
+      console.warn('Error consultando estadísticas del QR:', err);
+    } finally {
+      setLoadingStats(false);
     }
+  };
 
-    fetchRealMetrics();
-  }, [showStatsModal, selectedCommerceId, commerces]);
+  useEffect(() => {
+    if (showStatsModal) {
+      fetchQrStats();
+    }
+  }, [showStatsModal, targetUrl]);
 
   // Seleccionar enlace desde el menú desplegable
   const handleSelectCommerce = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -133,9 +96,6 @@ export function QrGeneratorManager({ commerces = [] }: QrGeneratorManagerProps) 
     setTimeout(() => setCopied(false), 2000);
   };
 
-  // Comercio seleccionado actualmente
-  const activeCommerce = commerces.find((c) => c.id === selectedCommerceId);
-
   const resolution = 1024;
   const logoWidth = Math.round(resolution * 0.38); // 389 px ancho
   const logoHeight = Math.round(logoWidth / 3.0);  // 130 px alto (Proporcional al logo completo ON MÁS)
@@ -143,7 +103,7 @@ export function QrGeneratorManager({ commerces = [] }: QrGeneratorManagerProps) 
   return (
     <div className="max-w-xl mx-auto space-y-4">
       
-      {/* Botón para abrir el Modal de Estadísticas */}
+      {/* Botón para abrir el Modal de Estadísticas del QR */}
       <div className="flex justify-end">
         <button
           type="button"
@@ -218,7 +178,7 @@ export function QrGeneratorManager({ commerces = [] }: QrGeneratorManagerProps) 
             className="p-4 bg-white rounded-2xl shadow-md border border-slate-200 inline-block"
           >
             <QRCodeCanvas
-              value={targetUrl || 'https://onmasportal.com.ar'}
+              value={qrTrackingValue}
               size={resolution}
               marginSize={2}
               style={{ height: "auto", maxWidth: "260px", width: "100%" }}
@@ -255,7 +215,7 @@ export function QrGeneratorManager({ commerces = [] }: QrGeneratorManagerProps) 
 
       </div>
 
-      {/* MODAL DE ESTADÍSTICAS REALES EN SUPABASE */}
+      {/* MODAL DE ESTADÍSTICAS EXCLUSIVAS DEL QR IMPRESO */}
       {showStatsModal && (
         <div className="fixed inset-0 bg-slate-950/70 backdrop-blur-xs z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
           <div className="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl border border-slate-200 space-y-6 relative">
@@ -264,95 +224,89 @@ export function QrGeneratorManager({ commerces = [] }: QrGeneratorManagerProps) 
             <div className="flex items-center justify-between border-b border-slate-100 pb-4">
               <div className="flex items-center gap-3">
                 <div className="p-2.5 bg-cyan-50 rounded-2xl text-[#00ADB5]">
-                  <BarChart3 className="w-5 h-5" />
+                  <QrCode className="w-5 h-5" />
                 </div>
                 <div>
                   <h3 className="text-base sm:text-lg font-black text-slate-900">
-                    Métricas Reales (Base de Datos)
+                    Estadísticas del QR Impreso
                   </h3>
                   <p className="text-xs text-slate-500 font-medium">
-                    Datos obtenidos directamente desde Supabase
+                    Conteo de escaneos del código QR actual
                   </p>
                 </div>
               </div>
 
-              <button
-                type="button"
-                onClick={() => setShowStatsModal(false)}
-                className="p-2 text-slate-400 hover:text-slate-600 rounded-full hover:bg-slate-100 transition-colors cursor-pointer"
-              >
-                <X className="w-5 h-5" />
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={fetchQrStats}
+                  className="p-2 text-slate-400 hover:text-[#00ADB5] rounded-full hover:bg-slate-100 transition-colors cursor-pointer"
+                  title="Actualizar métricas"
+                >
+                  <RefreshCw className={`w-4 h-4 ${loadingStats ? 'animate-spin' : ''}`} />
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setShowStatsModal(false)}
+                  className="p-2 text-slate-400 hover:text-slate-600 rounded-full hover:bg-slate-100 transition-colors cursor-pointer"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
             </div>
 
             {loadingStats ? (
               <div className="py-12 flex flex-col items-center justify-center space-y-3">
                 <div className="w-8 h-8 rounded-full border-3 border-[#00ADB5] border-t-transparent animate-spin" />
-                <p className="text-xs font-bold text-slate-500">Consultando Supabase...</p>
+                <p className="text-xs font-bold text-slate-500">Contando escaneos del QR...</p>
               </div>
             ) : (
               <>
-                {/* KPI Cards Grid */}
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="bg-gradient-to-br from-cyan-50 to-blue-50/50 p-4 rounded-2xl border border-cyan-100 space-y-1">
-                    <div className="flex items-center justify-between text-slate-500 text-xs font-bold">
-                      <span>Vistas / Escaneos</span>
-                      <Eye className="w-4 h-4 text-[#00ADB5]" />
+                {/* Conteo Principal de Escaneos */}
+                <div className="bg-gradient-to-r from-[#002878] via-[#0047BA] to-[#00ADB5] text-white p-6 rounded-3xl text-center shadow-lg space-y-2">
+                  <span className="text-[11px] font-black uppercase tracking-wider text-amber-300">
+                    Escaneos Físicos Totales de este QR
+                  </span>
+                  <p className="text-4xl sm:text-5xl font-black">
+                    {totalScans}
+                  </p>
+                  <p className="text-xs text-slate-100 font-medium">
+                    Veces que clientes leyeron este código QR desde celulares
+                  </p>
+                </div>
+
+                {/* Desglose de Información */}
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="bg-slate-50 border border-slate-200 p-3.5 rounded-2xl space-y-1">
+                    <div className="flex items-center gap-1.5 text-xs font-bold text-slate-600">
+                      <Clock className="w-4 h-4 text-[#00ADB5]" />
+                      <span>Último Escaneo</span>
                     </div>
-                    <p className="text-3xl font-black text-slate-900">
-                      {realViews}
+                    <p className="text-xs font-black text-slate-900">
+                      {lastScannedAt || 'Sin escaneos aún'}
                     </p>
-                    <span className="text-[10px] text-slate-500 font-medium block">
-                      {activeCommerce ? `Comercio: ${activeCommerce.name}` : 'Todas las vistas registradas'}
-                    </span>
                   </div>
 
-                  <div className="bg-gradient-to-br from-emerald-50 to-teal-50/50 p-4 rounded-2xl border border-emerald-100 space-y-1">
-                    <div className="flex items-center justify-between text-slate-500 text-xs font-bold">
-                      <span>Clicks a WhatsApp</span>
-                      <MessageCircle className="w-4 h-4 text-emerald-600" />
+                  <div className="bg-slate-50 border border-slate-200 p-3.5 rounded-2xl space-y-1">
+                    <div className="flex items-center gap-1.5 text-xs font-bold text-slate-600">
+                      <Smartphone className="w-4 h-4 text-[#0047BA]" />
+                      <span>Sistemas Operativos</span>
                     </div>
-                    <p className="text-3xl font-black text-emerald-700">
-                      {realWaClicks}
+                    <p className="text-xs font-extrabold text-slate-800">
+                      Android: {deviceStats.android || 0} | iOS: {deviceStats.ios || 0}
                     </p>
-                    <span className="text-[10px] text-slate-500 font-medium block">
-                      {activeCommerce ? `Comercio: ${activeCommerce.name}` : 'Todos los clics registrados'}
-                    </span>
                   </div>
                 </div>
 
-                {/* Información Detallada por Comercio Seleccionado */}
-                <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-3">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-extrabold text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
-                      <TrendingUp className="w-4 h-4 text-[#0047BA]" />
-                      <span>Origen de Datos</span>
-                    </span>
-                    <span className="text-[10px] font-black bg-emerald-100 text-emerald-800 border border-emerald-300 px-2 py-0.5 rounded-full">
-                      Supabase Real
-                    </span>
-                  </div>
-
-                  {activeCommerce ? (
-                    <div className="space-y-2 text-xs">
-                      <div className="flex justify-between py-1 border-b border-slate-200">
-                        <span className="text-slate-500 font-medium">Comercio Filtro:</span>
-                        <span className="font-bold text-slate-900">{activeCommerce.name}</span>
-                      </div>
-                      <div className="flex justify-between py-1 border-b border-slate-200">
-                        <span className="text-slate-500 font-medium">Ciudad:</span>
-                        <span className="font-bold text-slate-800">{activeCommerce.cityName}</span>
-                      </div>
-                      <div className="flex justify-between py-1">
-                        <span className="text-slate-500 font-medium">Categoría:</span>
-                        <span className="font-bold text-slate-800">{activeCommerce.category}</span>
-                      </div>
-                    </div>
-                  ) : (
-                    <p className="text-xs text-slate-600 font-medium leading-relaxed">
-                      El sistema consulta en tiempo real las tablas <code className="bg-slate-200 text-slate-800 px-1 py-0.5 rounded font-mono text-[11px]">profile_views</code> y <code className="bg-slate-200 text-slate-800 px-1 py-0.5 rounded font-mono text-[11px]">whatsapp_clicks</code> de Supabase. Al seleccionar un comercio específico en la lista, el modal filtra sus métricas individuales automáticamente.
-                    </p>
-                  )}
+                {/* Detalle URL */}
+                <div className="bg-cyan-50/60 border border-cyan-200 p-4 rounded-2xl text-xs space-y-1.5 text-left">
+                  <span className="font-extrabold text-[#0047BA] uppercase tracking-wider block text-[10px]">
+                    Destino Configurado:
+                  </span>
+                  <p className="font-mono text-slate-800 font-medium break-all">
+                    {targetUrl}
+                  </p>
                 </div>
               </>
             )}
