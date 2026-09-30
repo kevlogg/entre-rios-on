@@ -2,31 +2,100 @@
 
 import React, { useState, useEffect } from 'react';
 import { City } from '@/types';
-import { PROVINCES } from '@/lib/constants/locations';
-import { Image as ImageIcon, Plus, Trash2, CheckCircle, Upload, Monitor, Smartphone, RefreshCw, ExternalLink } from 'lucide-react';
+import { Image as ImageIcon, Plus, Trash2, CheckCircle, Upload, Monitor, Smartphone, RefreshCw, ExternalLink, MapPin, ToggleLeft, ToggleRight, Eye, EyeOff, Sparkles } from 'lucide-react';
 import { getBannersByProvince, saveBannersByProvince, BannerItem } from '@/lib/services/banner-store';
+import { getProvincesConfig, saveProvincesConfig, ProvinceItem } from '@/lib/services/province-store';
 
 interface GeoCustomizerManagerProps {
   initialCities?: City[];
 }
 
 export function GeoCustomizerManager({ initialCities }: GeoCustomizerManagerProps) {
-  const [selectedProvinceId, setSelectedProvinceId] = useState('entre-rios');
+  const [provinces, setProvinces] = useState<ProvinceItem[]>([]);
+  const [selectedProvinceId, setSelectedProvinceId] = useState('santa-fe');
   const [banners, setBanners] = useState<BannerItem[]>([]);
 
-  // Form para nuevo banner (dispositivo + imagen)
+  // Form para crear nueva provincia
+  const [newProvinceName, setNewProvinceName] = useState('');
+  const [newProvinceBadge, setNewProvinceBadge] = useState('Próximamente');
+  const [newProvinceIsActive, setNewProvinceIsActive] = useState(false);
+  const [showAddProvinceForm, setShowAddProvinceForm] = useState(false);
+
+  // Form para nuevo banner
   const [newBannerDevice, setNewBannerDevice] = useState<'desktop' | 'mobile' | 'all'>('all');
   const [newBannerImage, setNewBannerImage] = useState<string | null>(null);
 
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
 
-  const currentProv = PROVINCES.find((p) => p.id === selectedProvinceId) || PROVINCES[0];
-
-  // Cargar banners desde el banner store al cambiar la provincia seleccionada
+  // Cargar lista de provincias al montar
   useEffect(() => {
-    const loaded = getBannersByProvince(selectedProvinceId);
-    setBanners(loaded);
+    const loadedProvinces = getProvincesConfig();
+    setProvinces(loadedProvinces);
+    if (loadedProvinces.length > 0 && !loadedProvinces.some((p) => p.id === selectedProvinceId)) {
+      setSelectedProvinceId(loadedProvinces[0].id);
+    }
+  }, []);
+
+  // Cargar banners al cambiar la provincia seleccionada
+  useEffect(() => {
+    if (selectedProvinceId) {
+      const loadedBanners = getBannersByProvince(selectedProvinceId);
+      setBanners(loadedBanners);
+    }
   }, [selectedProvinceId]);
+
+  const currentProv = provinces.find((p) => p.id === selectedProvinceId) || {
+    id: selectedProvinceId,
+    name: selectedProvinceId,
+    slug: selectedProvinceId,
+    isActive: true,
+  };
+
+  // Toggle Activa / Inactiva para una provincia
+  const handleToggleProvinceActive = (provId: string) => {
+    const updated = provinces.map((p) => (p.id === provId ? { ...p, isActive: !p.isActive } : p));
+    setProvinces(updated);
+    saveProvincesConfig(updated);
+
+    const prov = updated.find((p) => p.id === provId);
+    setSuccessMsg(`Provincia "${prov?.name}" ahora está ${prov?.isActive ? 'ACTIVA en la web principal' : 'INACTIVA (Próximamente)'}.`);
+    setTimeout(() => setSuccessMsg(null), 3500);
+  };
+
+  // Crear nueva provincia
+  const handleCreateProvince = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newProvinceName.trim()) return;
+
+    const slug = newProvinceName.trim().toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+    const id = slug;
+
+    if (provinces.some((p) => p.id === id)) {
+      alert('Ya existe una provincia con ese nombre o slug.');
+      return;
+    }
+
+    const newProv: ProvinceItem = {
+      id,
+      name: newProvinceName.trim(),
+      slug,
+      isActive: newProvinceIsActive,
+      badge: newProvinceBadge.trim() || 'Próximamente',
+    };
+
+    const updated = [...provinces, newProv];
+    setProvinces(updated);
+    saveProvincesConfig(updated);
+
+    setSelectedProvinceId(id);
+    setNewProvinceName('');
+    setNewProvinceBadge('Próximamente');
+    setNewProvinceIsActive(false);
+    setShowAddProvinceForm(false);
+
+    setSuccessMsg(`Provincia "${newProv.name}" creada exitosamente. Podés agregar sus banners ahora.`);
+    setTimeout(() => setSuccessMsg(null), 4000);
+  };
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>, callback: (base64: string) => void) => {
     const file = e.target.files?.[0];
@@ -62,7 +131,7 @@ export function GeoCustomizerManager({ initialCities }: GeoCustomizerManagerProp
     saveBannersByProvince(selectedProvinceId, updated);
 
     setNewBannerImage(null);
-    setSuccessMsg(`¡Nuevo banner publicado para la página principal de ${currentProv.name}!`);
+    setSuccessMsg(`¡Nuevo banner publicado para ${currentProv.name}!`);
     setTimeout(() => setSuccessMsg(null), 3500);
   };
 
@@ -88,68 +157,178 @@ export function GeoCustomizerManager({ initialCities }: GeoCustomizerManagerProp
 
   return (
     <div className="space-y-8">
-      {/* Selector de Provincia */}
-      <div className="bg-white rounded-3xl p-6 border border-slate-200 shadow-sm space-y-4">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div>
-            <span className="text-xs font-black uppercase tracking-widest text-[#0047BA] flex items-center gap-1.5">
-              <ImageIcon className="w-4 h-4 text-[#00ADB5]" />
-              Gestión de Banners Publicitarios de Inicio
-            </span>
-            <h2 className="text-xl font-black text-slate-900 mt-1">
-              Provincia: <span className="text-[#0047BA]">{currentProv.name}</span>
-            </h2>
-          </div>
-
-          {/* Botones de selección de provincia */}
-          <div className="flex gap-2">
-            {PROVINCES.map((prov) => (
-              <button
-                key={prov.id}
-                onClick={() => setSelectedProvinceId(prov.id)}
-                className={`px-4 py-2.5 rounded-xl text-xs font-extrabold transition-all cursor-pointer ${
-                  selectedProvinceId === prov.id
-                    ? 'bg-[#0047BA] text-white shadow-md scale-102'
-                    : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
-                }`}
-              >
-                {prov.name}
-              </button>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {/* Alerta de Éxito */}
+      
+      {/* Alerta de Mensajes */}
       {successMsg && (
-        <div className="bg-emerald-50 border border-emerald-300 rounded-2xl p-4 flex items-center gap-3 text-emerald-800 text-xs font-bold animate-in fade-in duration-150">
+        <div className="bg-emerald-50 border border-emerald-300 rounded-2xl p-4 flex items-center gap-3 text-emerald-800 text-xs font-bold animate-in fade-in duration-150 shadow-xs">
           <CheckCircle className="w-5 h-5 text-emerald-600 shrink-0" />
           <span>{successMsg}</span>
         </div>
       )}
 
-      {/* Subir Nuevo Banner para la Provincia Seleccionada */}
-      <div className="bg-white rounded-3xl p-6 border border-slate-200 shadow-sm space-y-4">
+      {/* BLOQUE 1: Gestión de Provincias (Activas / Próximas / Crear) */}
+      <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-sm space-y-6">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-4">
+          <div>
+            <span className="text-xs font-black uppercase tracking-widest text-[#0047BA] flex items-center gap-1.5">
+              <MapPin className="w-4 h-4 text-[#00ADB5]" />
+              Gestión de Provincias
+            </span>
+            <h2 className="text-xl font-black text-slate-900 mt-1">
+              Provincias del Portal Regional ({provinces.length})
+            </h2>
+            <p className="text-xs text-slate-500 font-medium">
+              Elegí qué provincias están activas en la web principal y prepará las provincias en desarrollo.
+            </p>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => setShowAddProvinceForm(!showAddProvinceForm)}
+            className="inline-flex items-center gap-2 bg-gradient-to-r from-[#0047BA] to-[#00ADB5] hover:from-[#0B66FF] hover:to-[#0047BA] text-white px-4 py-2.5 rounded-2xl text-xs font-black shadow-md transition-all active:scale-95 cursor-pointer shrink-0"
+          >
+            <Plus className="w-4 h-4" />
+            <span>{showAddProvinceForm ? 'Cancelar' : 'Crear Nueva Provincia'}</span>
+          </button>
+        </div>
+
+        {/* Formulario para Crear Provincia */}
+        {showAddProvinceForm && (
+          <form onSubmit={handleCreateProvince} className="bg-cyan-50/60 border border-cyan-200 p-5 rounded-2xl space-y-4 animate-in fade-in duration-150">
+            <h3 className="text-xs font-black uppercase tracking-wider text-[#0047BA] flex items-center gap-1.5">
+              <Sparkles className="w-4 h-4 text-[#00ADB5]" />
+              Nueva Provincia en Plataforma
+            </h3>
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1">Nombre de la Provincia *</label>
+                <input
+                  type="text"
+                  required
+                  placeholder="Ej. Córdoba, Corrientes..."
+                  value={newProvinceName}
+                  onChange={(e) => setNewProvinceName(e.target.value)}
+                  className="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs font-bold text-slate-800 focus:ring-2 focus:ring-[#00ADB5]"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1">Etiqueta / Insignia</label>
+                <input
+                  type="text"
+                  placeholder="Ej. Próximamente / Lanzamiento"
+                  value={newProvinceBadge}
+                  onChange={(e) => setNewProvinceBadge(e.target.value)}
+                  className="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs font-bold text-slate-800 focus:ring-2 focus:ring-[#00ADB5]"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1">Visibilidad Inicial</label>
+                <select
+                  value={newProvinceIsActive ? 'active' : 'inactive'}
+                  onChange={(e) => setNewProvinceIsActive(e.target.value === 'active')}
+                  className="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs font-bold text-slate-800 focus:ring-2 focus:ring-[#00ADB5]"
+                >
+                  <option value="inactive">🔒 Inactiva (Próximamente / No visible en portada)</option>
+                  <option value="active">✅ Activa en Web Principal</option>
+                </select>
+              </div>
+            </div>
+
+            <button
+              type="submit"
+              className="bg-[#0047BA] hover:bg-[#002878] text-white px-5 py-2.5 rounded-xl font-extrabold text-xs shadow-sm transition-all cursor-pointer inline-flex items-center gap-1.5"
+            >
+              <Plus className="w-4 h-4" />
+              <span>Guardar Provincia</span>
+            </button>
+          </form>
+        )}
+
+        {/* Listado de Provincias con Toggle Activo/Inactivo */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+          {provinces.map((prov) => {
+            const isSelected = selectedProvinceId === prov.id;
+            return (
+              <div
+                key={prov.id}
+                className={`p-4 rounded-2xl border transition-all space-y-3 flex flex-col justify-between ${
+                  isSelected
+                    ? 'bg-cyan-50/70 border-[#00ADB5] ring-2 ring-[#00ADB5]/30 shadow-sm'
+                    : 'bg-slate-50 border-slate-200 hover:bg-slate-100'
+                }`}
+              >
+                <div className="flex items-start justify-between gap-2">
+                  <div>
+                    <h3 className="text-sm font-black text-slate-900">{prov.name}</h3>
+                    <span
+                      className={`inline-block text-[10px] font-extrabold px-2.5 py-0.5 rounded-full mt-1 ${
+                        prov.isActive
+                          ? 'bg-emerald-100 text-emerald-800 border border-emerald-300'
+                          : 'bg-amber-100 text-amber-900 border border-amber-300'
+                      }`}
+                    >
+                      {prov.isActive ? '✅ Activa en Portada' : '🔒 Próximamente (Inactiva)'}
+                    </span>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => handleToggleProvinceActive(prov.id)}
+                    className="text-slate-600 hover:text-[#0047BA] transition-colors p-1"
+                    title={prov.isActive ? 'Desactivar visibilidad en portada' : 'Activar visibilidad en portada'}
+                  >
+                    {prov.isActive ? (
+                      <ToggleRight className="w-7 h-7 text-emerald-600" />
+                    ) : (
+                      <ToggleLeft className="w-7 h-7 text-slate-400" />
+                    )}
+                  </button>
+                </div>
+
+                <div className="pt-2 border-t border-slate-200 flex items-center justify-between">
+                  <button
+                    type="button"
+                    onClick={() => setSelectedProvinceId(prov.id)}
+                    className={`text-xs font-extrabold px-3 py-1.5 rounded-xl transition-all cursor-pointer ${
+                      isSelected
+                        ? 'bg-[#0047BA] text-white shadow-xs'
+                        : 'bg-slate-200 hover:bg-slate-300 text-slate-700'
+                    }`}
+                  >
+                    {isSelected ? 'Gestionando Banners ★' : 'Gestionar Banners'}
+                  </button>
+
+                  <a
+                    href={`/${prov.slug}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-slate-400 hover:text-[#0047BA] text-xs font-bold flex items-center gap-1"
+                  >
+                    <span>Ver</span>
+                    <ExternalLink className="w-3.5 h-3.5" />
+                  </a>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* BLOQUE 2: Banners Hero de la Provincia Seleccionada */}
+      <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-sm space-y-6">
         <div className="border-b border-slate-100 pb-3 flex items-center justify-between">
           <div>
             <h3 className="text-base font-black text-slate-900 flex items-center gap-2">
               <Upload className="w-5 h-5 text-[#00ADB5]" />
-              Cargar Nuevo Banner para {currentProv.name}
+              Banners para Provincia: <span className="text-[#0047BA]">{currentProv.name}</span>
             </h3>
             <p className="text-xs text-slate-500">
-              Suba las imágenes que se mostrarán en el carrusel de inicio de {currentProv.name}.
+              Subí las imágenes que se mostrarán en el carrusel hero de {currentProv.name}.
             </p>
           </div>
-
-          <a
-            href={`/${selectedProvinceId}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="hidden sm:inline-flex items-center gap-1.5 text-xs font-extrabold text-[#0047BA] hover:underline"
-          >
-            <span>Ver Inicio {currentProv.name}</span>
-            <ExternalLink className="w-3.5 h-3.5" />
-          </a>
         </div>
 
         <form onSubmit={handleAddBanner} className="space-y-4">
@@ -182,10 +361,9 @@ export function GeoCustomizerManager({ initialCities }: GeoCustomizerManagerProp
             </div>
           </div>
 
-          {/* Preview del banner a subir */}
           {newBannerImage && (
             <div className="relative h-44 w-full rounded-2xl overflow-hidden border-2 border-emerald-400 shadow-sm">
-              <img src={newBannerImage} alt="Previsualización de Banner" className="w-full h-full object-cover" />
+              <img src={newBannerImage} alt="Previsualización" className="w-full h-full object-cover" />
               <div className="absolute top-2 left-2 bg-emerald-600 text-white text-[10px] font-black px-2.5 py-1 rounded-full uppercase">
                 Vista Previa de Carga
               </div>
@@ -203,25 +381,22 @@ export function GeoCustomizerManager({ initialCities }: GeoCustomizerManagerProp
         </form>
       </div>
 
-      {/* Galería de Banners Reales Actuales en la Provincia */}
-      <div className="bg-white rounded-3xl p-6 border border-slate-200 shadow-sm space-y-6">
+      {/* BLOQUE 3: Galería de Banners Reales */}
+      <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-sm space-y-6">
         <div className="border-b border-slate-100 pb-3 flex items-center justify-between">
           <div>
             <h3 className="text-base font-black text-slate-900 flex items-center gap-2">
               <ImageIcon className="w-5 h-5 text-[#0047BA]" />
-              Banners Activos en el Inicio de {currentProv.name} ({banners.length})
+              Banners Activos de {currentProv.name} ({banners.length})
             </h3>
-            <p className="text-xs text-slate-500">
-              Estas son las imágenes que ven los visitantes al ingresar al portal de {currentProv.name}.
-            </p>
           </div>
         </div>
 
         {banners.length === 0 ? (
           <div className="p-12 text-center border-2 border-dashed border-slate-200 rounded-2xl space-y-2">
             <ImageIcon className="w-10 h-10 text-slate-300 mx-auto" />
-            <p className="text-xs font-bold text-slate-500">No hay banners activos para {currentProv.name}.</p>
-            <p className="text-[11px] text-slate-400">Cargue una nueva imagen arriba para mostrar banners en la portada.</p>
+            <p className="text-xs font-bold text-slate-500">No hay banners configurados para {currentProv.name}.</p>
+            <p className="text-[11px] text-slate-400">Podés agregar imágenes arriba para tener la provincia lista para su lanzamiento.</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -253,21 +428,14 @@ export function GeoCustomizerManager({ initialCities }: GeoCustomizerManagerProp
                   </div>
                 </div>
 
-                {/* Previsualización del Banner Real */}
                 <div className="relative h-48 w-full rounded-xl overflow-hidden border border-slate-300 shadow-xs bg-slate-900 group">
                   <img
                     src={banner.imageUrl}
                     alt={`Banner ${index + 1}`}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                   />
-                  <div className="absolute inset-0 bg-black/25 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                    <span className="text-white text-xs font-extrabold bg-black/70 px-3.5 py-1.5 rounded-full backdrop-blur-xs">
-                      Imagen Real del Hero
-                    </span>
-                  </div>
                 </div>
 
-                {/* Acciones: Cambiar imagen o Eliminar */}
                 <div className="flex items-center gap-2 pt-1">
                   <label className="flex-1 bg-[#00ADB5] hover:bg-[#007C8A] text-white py-2 px-3 rounded-xl text-xs font-extrabold flex items-center justify-center gap-1.5 cursor-pointer transition-colors shadow-xs">
                     <RefreshCw className="w-3.5 h-3.5" />
@@ -294,6 +462,7 @@ export function GeoCustomizerManager({ initialCities }: GeoCustomizerManagerProp
           </div>
         )}
       </div>
+
     </div>
   );
 }

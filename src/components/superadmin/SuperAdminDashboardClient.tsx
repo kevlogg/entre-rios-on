@@ -44,8 +44,8 @@ export function SuperAdminDashboardClient({
 }: SuperAdminDashboardClientProps) {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<
-    'commerces' | 'cash-payments' | 'geo-customizer' | 'raffles' | 'jobs' | 'news' | 'tourism' | 'web-requests' | 'plan-kevdev' | 'qr-generator'
-  >('commerces');
+    'geo-customizer' | 'commerces' | 'tourism' | 'cash-payments' | 'raffles' | 'jobs' | 'news' | 'web-requests' | 'qr-generator' | 'plan-kevdev'
+  >('geo-customizer');
   const [isAuthChecked, setIsAuthChecked] = useState(false);
 
   useEffect(() => {
@@ -83,22 +83,22 @@ export function SuperAdminDashboardClient({
   }
 
   interface TabDef {
-    id: 'commerces' | 'cash-payments' | 'geo-customizer' | 'raffles' | 'jobs' | 'news' | 'tourism' | 'web-requests' | 'plan-kevdev' | 'qr-generator';
+    id: 'geo-customizer' | 'commerces' | 'tourism' | 'cash-payments' | 'raffles' | 'jobs' | 'news' | 'web-requests' | 'qr-generator' | 'plan-kevdev';
     label: string;
     icon: React.ElementType;
     badge?: string;
   }
 
   const tabs: TabDef[] = [
-    { id: 'commerces', label: 'Comercios B2B', icon: Store, badge: `${initialCommerces.length}` },
-    { id: 'cash-payments', label: 'Pagos en Efectivo', icon: CreditCard, badge: 'Nuevos' },
-    { id: 'qr-generator', label: 'Generador QR Imprenta', icon: QrCode, badge: 'HD' },
-    { id: 'geo-customizer', label: 'Banners', icon: MapPin },
-    { id: 'raffles', label: 'Sorteos ON MÁS', icon: Gift },
-    { id: 'jobs', label: 'Empleos & Trabajo', icon: Briefcase },
+    { id: 'geo-customizer', label: 'Provincias y banners', icon: MapPin },
+    { id: 'commerces', label: 'Comercios', icon: Store, badge: `${initialCommerces.length}` },
+    { id: 'tourism', label: 'Turismo', icon: Compass },
+    { id: 'cash-payments', label: 'Pagos en efectivo', icon: CreditCard, badge: 'Nuevos' },
+    { id: 'raffles', label: 'Sorteos', icon: Gift },
+    { id: 'jobs', label: 'Empleos', icon: Briefcase },
     { id: 'news', label: 'Comunidad', icon: Newspaper },
-    { id: 'tourism', label: 'Servicios de Turismo', icon: Compass },
-    { id: 'web-requests', label: 'Solicitudes "Mi Sitio Web"', icon: Globe, badge: 'Nuevos' },
+    { id: 'web-requests', label: 'Mi sitio web', icon: Globe, badge: 'Nuevos' },
+    { id: 'qr-generator', label: 'Generador QR', icon: QrCode, badge: 'HD' },
     { id: 'plan-kevdev', label: 'Plan KevDev', icon: Code2, badge: 'Tramo 1' },
   ];
 
@@ -140,7 +140,7 @@ export function SuperAdminDashboardClient({
               Menú Principal
             </span>
             <span className="text-[10px] bg-cyan-100 text-[#0047BA] font-extrabold px-2 py-0.5 rounded-full">
-              9 Módulos
+              10 Módulos
             </span>
           </div>
 
