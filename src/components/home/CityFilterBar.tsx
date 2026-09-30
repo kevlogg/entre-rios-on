@@ -1,10 +1,11 @@
 'use client';
 
-import React, { useState } from 'react';
+import React from 'react';
+import { useRouter } from 'next/navigation';
 import { City } from '@/types';
-import { MapPin, Sparkles, Building2, Clock } from 'lucide-react';
+import { MapPin, Sparkles, Building2 } from 'lucide-react';
 import { trackCitySelect } from '@/lib/analytics/events';
-import { PROVINCES } from '@/lib/constants/locations';
+import { useActiveProvinces } from '@/lib/services/province-store';
 
 interface CityFilterBarProps {
   cities: City[];
@@ -21,14 +22,15 @@ export function CityFilterBar({
   selectedProvince = 'santa-fe',
   onSelectProvince
 }: CityFilterBarProps) {
-  const [activeProv, setActiveProv] = useState<string>('santa-fe');
+  const router = useRouter();
+  const activeProvinces = useActiveProvinces();
 
-  const handleProvClick = (provId: string) => {
-    setActiveProv(provId);
+  const handleProvClick = (provSlug: string, provId: string) => {
     if (onSelectProvince) {
       onSelectProvince(provId);
     }
     onSelectCity('all');
+    router.push(`/${provSlug}`);
   };
 
   const handleSelect = (cityId: string, cityName: string) => {
@@ -36,7 +38,11 @@ export function CityFilterBar({
     trackCitySelect(cityId, cityName);
   };
 
-  const filteredCities = cities.filter((c) => c.provinceId === 'santa-fe');
+  const currentProvObj = activeProvinces.find(
+    (p) => p.id === selectedProvince || p.slug === selectedProvince
+  ) || activeProvinces[0] || { id: 'santa-fe', name: 'Santa Fe', slug: 'santa-fe' };
+
+  const filteredCities = cities.filter((c) => c.provinceId === currentProvObj.id || c.provinceId === selectedProvince);
 
   return (
     <div className="bg-white rounded-2xl p-4 shadow-xs border border-slate-200 space-y-4">
@@ -47,19 +53,25 @@ export function CityFilterBar({
           <span>Filtrar por Provincia y Ciudad</span>
         </h2>
 
-        {/* Province Selector Tabs */}
-        <div className="flex items-center gap-2 bg-slate-100 p-1.5 rounded-xl">
-          <button
-            type="button"
-            onClick={() => handleProvClick('santa-fe')}
-            className="px-3 py-1 rounded-lg text-xs font-black bg-gradient-to-r from-[#00ADB5] to-[#0047BA] text-white shadow-xs cursor-pointer"
-          >
-            Santa Fe
-          </button>
-          <span className="px-2.5 py-1 text-[11px] font-extrabold text-amber-700 bg-amber-50 rounded-lg border border-amber-200/60 flex items-center gap-1 shadow-2xs">
-            <Clock className="w-3 h-3 text-amber-500 shrink-0" />
-            <span>Próximamente más provincias</span>
-          </span>
+        {/* Dynamic Province Selector Tabs */}
+        <div className="flex items-center gap-1.5 bg-slate-100 p-1.5 rounded-xl flex-wrap">
+          {activeProvinces.map((prov) => {
+            const isSelected = selectedProvince === prov.id || selectedProvince === prov.slug;
+            return (
+              <button
+                key={prov.id}
+                type="button"
+                onClick={() => handleProvClick(prov.slug || prov.id, prov.id)}
+                className={`px-3 py-1.5 rounded-lg text-xs font-black transition-all cursor-pointer ${
+                  isSelected
+                    ? 'bg-gradient-to-r from-[#00ADB5] to-[#0047BA] text-white shadow-xs'
+                    : 'bg-white text-slate-700 hover:bg-slate-200 border border-slate-200 font-bold'
+                }`}
+              >
+                {prov.name}
+              </button>
+            );
+          })}
         </div>
       </div>
 
@@ -101,4 +113,5 @@ export function CityFilterBar({
     </div>
   );
 }
+
 

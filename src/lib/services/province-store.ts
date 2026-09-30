@@ -1,5 +1,7 @@
 'use client';
 
+import { useState, useEffect } from 'react';
+
 export interface ProvinceItem {
   id: string;
   name: string;
@@ -31,6 +33,12 @@ export function getProvincesConfig(): ProvinceItem[] {
   return DEFAULT_PROVINCES_CONFIG;
 }
 
+export function getActiveProvinces(): ProvinceItem[] {
+  const all = getProvincesConfig();
+  const active = all.filter((p) => p.isActive);
+  return active.length > 0 ? active : [DEFAULT_PROVINCES_CONFIG[0]];
+}
+
 export function saveProvincesConfig(provinces: ProvinceItem[]): void {
   if (typeof window === 'undefined') return;
   try {
@@ -40,3 +48,28 @@ export function saveProvincesConfig(provinces: ProvinceItem[]): void {
     console.error('Error al guardar configuración de provincias:', e);
   }
 }
+
+export function useActiveProvinces(): ProvinceItem[] {
+  const [activeProvinces, setActiveProvinces] = useState<ProvinceItem[]>(() => {
+    if (typeof window === 'undefined') return [DEFAULT_PROVINCES_CONFIG[0]];
+    return getActiveProvinces();
+  });
+
+  useEffect(() => {
+    const syncProvinces = () => {
+      setActiveProvinces(getActiveProvinces());
+    };
+
+    syncProvinces();
+
+    window.addEventListener('onmas_provinces_updated', syncProvinces);
+    window.addEventListener('storage', syncProvinces);
+    return () => {
+      window.removeEventListener('onmas_provinces_updated', syncProvinces);
+      window.removeEventListener('storage', syncProvinces);
+    };
+  }, []);
+
+  return activeProvinces;
+}
+

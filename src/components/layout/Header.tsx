@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import { trackCitySelect, trackSearchQuery } from '@/lib/analytics/events';
 import { PROVINCES, getCitiesByProvince, getProvinceBySlug, getCityBySlug } from '@/lib/constants/locations';
+import { useActiveProvinces } from '@/lib/services/province-store';
 
 interface HeaderProps {
   selectedCityId?: string;
@@ -33,6 +34,8 @@ export function Header({ selectedCityId = 'all' }: HeaderProps) {
   const [isProvinceDropdownOpen, setIsProvinceDropdownOpen] = useState(false);
   const [isCityDropdownOpen, setIsCityDropdownOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  const activeProvinces = useActiveProvinces();
 
   // User & Commerce Auth State
   const [currentUser, setCurrentUser] = useState<any>(null);
@@ -122,7 +125,7 @@ export function Header({ selectedCityId = 'all' }: HeaderProps) {
   }, [pathname]);
 
   const availableCities = getCitiesByProvince(selectedProvince);
-  const currentProvinceObj = PROVINCES.find((p) => p.id === selectedProvince) || PROVINCES[0];
+  const currentProvinceObj = activeProvinces.find((p) => p.id === selectedProvince || p.slug === selectedProvince) || activeProvinces[0] || { id: 'santa-fe', name: 'Santa Fe', slug: 'santa-fe' };
   const selectedCityObj = availableCities.find((c) => c.id === currentCity) || { id: 'all', name: 'Todas las ciudades', slug: '' };
 
   // Helper to build geo-targeted URL for a section
@@ -147,8 +150,8 @@ export function Header({ selectedCityId = 'all' }: HeaderProps) {
     setCurrentCity('all');
     setIsProvinceDropdownOpen(false);
 
-    const targetProv = PROVINCES.find((p) => p.id === provId);
-    if (targetProv && targetProv.id !== 'all') {
+    const targetProv = activeProvinces.find((p) => p.id === provId || p.slug === provId);
+    if (targetProv && targetProv.slug) {
       router.push(`/${targetProv.slug}`);
     } else {
       router.push('/');
@@ -235,19 +238,19 @@ export function Header({ selectedCityId = 'all' }: HeaderProps) {
               {isProvinceDropdownOpen && (
                 <div className="absolute left-0 mt-2 w-48 bg-white rounded-2xl shadow-xl border border-slate-200 py-1.5 z-50 animate-in fade-in slide-in-from-top-2 duration-150">
                   <div className="px-3 py-1 text-[10px] font-black text-slate-400 uppercase tracking-wider border-b border-slate-100">
-                    Provincia
+                    Provincias Activas
                   </div>
-                  {PROVINCES.map((prov) => (
+                  {activeProvinces.map((prov) => (
                     <button
                       key={prov.id}
                       type="button"
                       onClick={() => handleProvinceSelect(prov.id)}
                       className={`w-full text-left px-3 py-1.5 text-xs flex items-center justify-between hover:bg-slate-50 transition-colors ${
-                        selectedProvince === prov.id ? 'font-bold text-[#0047BA] bg-cyan-50/50' : 'text-slate-700'
+                        selectedProvince === prov.id || selectedProvince === prov.slug ? 'font-bold text-[#0047BA] bg-cyan-50/50' : 'text-slate-700'
                       }`}
                     >
                       <span>{prov.name}</span>
-                      {selectedProvince === prov.id && <span className="w-1.5 h-1.5 rounded-full bg-[#00ADB5]" />}
+                      {(selectedProvince === prov.id || selectedProvince === prov.slug) && <span className="w-1.5 h-1.5 rounded-full bg-[#00ADB5]" />}
                     </button>
                   ))}
                 </div>
@@ -403,13 +406,13 @@ export function Header({ selectedCityId = 'all' }: HeaderProps) {
         <div className="md:hidden bg-white border-b border-slate-200 px-4 pt-3 pb-6 space-y-4 animate-in fade-in duration-200">
           <div className="space-y-2">
             <label className="block text-xs font-bold text-slate-600">Provincia</label>
-            <div className="flex gap-2">
-              {PROVINCES.map((prov) => (
+            <div className="flex gap-2 flex-wrap">
+              {activeProvinces.map((prov) => (
                 <button
                   key={prov.id}
                   onClick={() => handleProvinceSelect(prov.id)}
                   className={`flex-1 text-xs py-2 px-3 rounded-xl border text-center font-bold ${
-                    selectedProvince === prov.id
+                    selectedProvince === prov.id || selectedProvince === prov.slug
                       ? 'border-[#0047BA] bg-cyan-50 text-[#0047BA]'
                       : 'border-slate-200 text-slate-600'
                   }`}
@@ -465,4 +468,5 @@ export function Header({ selectedCityId = 'all' }: HeaderProps) {
     </header>
   );
 }
+
 
