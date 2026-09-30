@@ -225,18 +225,6 @@ export function KevDevPlanManager() {
             <Receipt className="w-4 h-4" />
             <span>Historial de Pagos</span>
           </button>
-
-          <button
-            onClick={() => setActiveTab('tech')}
-            className={`px-4 py-2.5 rounded-xl text-xs font-extrabold transition-all flex items-center gap-2 ${
-              activeTab === 'tech'
-                ? 'bg-white text-[#002878] shadow-lg scale-105'
-                : 'bg-white/10 text-white hover:bg-white/20'
-            }`}
-          >
-            <ShieldCheck className="w-4 h-4" />
-            <span>Garantías & Infraestructura</span>
-          </button>
         </div>
       </div>
 
@@ -304,41 +292,6 @@ export function KevDevPlanManager() {
               <div className="mt-4 pt-4 border-t border-slate-100 flex items-center justify-between text-xs font-extrabold">
                 <span className="text-slate-500">Recaudación Estimada:</span>
                 <span className="text-slate-800">$800.000 ARS / mes</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Key Summary Terms */}
-          <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-sm space-y-6">
-            <div className="flex items-center gap-3">
-              <div className="p-2.5 rounded-xl bg-slate-900 text-amber-300">
-                <Award className="w-5 h-5" />
-              </div>
-              <div>
-                <h3 className="text-lg font-black text-slate-900">Resumen Ejecutivo de la Suscripción</h3>
-                <p className="text-xs text-slate-500 font-medium">Condiciones clave acordadas con KevDev para la fase actual</p>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="p-4 rounded-2xl bg-slate-50 border border-slate-100 space-y-2">
-                <div className="flex items-center gap-2 text-xs font-black text-slate-800">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-500" />
-                  <span>Inicio Ágil sin Compromiso Inicial</span>
-                </div>
-                <p className="text-xs text-slate-600 leading-relaxed font-medium">
-                  Ideal para validar el producto sin comprometer capital de inicio. El setup incluye soporte de configuración, mantenimiento continuo y despliegue del portal.
-                </p>
-              </div>
-
-              <div className="p-4 rounded-2xl bg-slate-50 border border-slate-100 space-y-2">
-                <div className="flex items-center gap-2 text-xs font-black text-slate-800">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-500" />
-                  <span>Migración Automática a Licencia Perpetua</span>
-                </div>
-                <p className="text-xs text-slate-600 leading-relaxed font-medium">
-                  Al alcanzar los 80 comercios (Tramo 3), la plataforma migra a la modalidad de Licencia Perpetua, garantizando propiedad total del código sin cuotas mensuales.
-                </p>
               </div>
             </div>
           </div>
@@ -488,7 +441,7 @@ export function KevDevPlanManager() {
                 <tbody className="divide-y divide-slate-100 text-xs">
                   {payments.map((pay) => (
                     <tr key={pay.id} className="hover:bg-slate-50">
-                      <td className="p-3.5 font-bold text-slate-900">
+                      <td className="p-3.5 font-bold text-[#0047BA]">
                         <span>{pay.period}</span>
                         <span className="text-[10px] text-slate-400 block font-normal">{pay.invoiceRef}</span>
                       </td>
@@ -526,77 +479,6 @@ export function KevDevPlanManager() {
                   ))}
                 </tbody>
               </table>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* TAB 4: TECHNICAL SLA & ARCHITECTURE */}
-      {activeTab === 'tech' && (
-        <div className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Tech Specs */}
-            <div className="bg-white rounded-3xl p-6 border border-slate-200 shadow-sm space-y-4">
-              <div className="flex items-center gap-3 border-b border-slate-100 pb-3">
-                <div className="p-2.5 rounded-xl bg-blue-50 text-[#0047BA]">
-                  <Cpu className="w-5 h-5" />
-                </div>
-                <h3 className="text-base font-black text-slate-900">Arquitectura de Alta Escalabilidad</h3>
-              </div>
-
-              <ul className="space-y-3 text-xs">
-                <li className="flex items-start gap-2.5 text-slate-700 font-medium">
-                  <CheckCircle2 className="w-4 h-4 text-[#00ADB5] shrink-0 mt-0.5" />
-                  <span><strong>Next.js App Router + ISR:</strong> 95% de las visitas consumen páginas cacheadas estáticamente en la CDN global sin sobrecargar la BD.</span>
-                </li>
-
-                <li className="flex items-start gap-2.5 text-slate-700 font-medium">
-                  <CheckCircle2 className="w-4 h-4 text-[#00ADB5] shrink-0 mt-0.5" />
-                  <span><strong>PostgreSQL Supabase Enterprise:</strong> Base de datos indexada con índices B-Tree para búsquedas e instantáneas por provincia y categoría.</span>
-                </li>
-
-                <li className="flex items-start gap-2.5 text-slate-700 font-medium">
-                  <CheckCircle2 className="w-4 h-4 text-[#00ADB5] shrink-0 mt-0.5" />
-                  <span><strong>Storage WebP (S3 / R2):</strong> Compresión automática de imágenes a WebP optimizado al subir catálogos y banners.</span>
-                </li>
-
-                <li className="flex items-start gap-2.5 text-slate-700 font-medium">
-                  <CheckCircle2 className="w-4 h-4 text-[#00ADB5] shrink-0 mt-0.5" />
-                  <span><strong>Tiempo de Respuesta:</strong> Optimizado para &lt; 100ms mediante CDN regional de alta velocidad.</span>
-                </li>
-              </ul>
-            </div>
-
-            {/* SLA & Warranties */}
-            <div className="bg-white rounded-3xl p-6 border border-slate-200 shadow-sm space-y-4">
-              <div className="flex items-center gap-3 border-b border-slate-100 pb-3">
-                <div className="p-2.5 rounded-xl bg-emerald-50 text-emerald-600">
-                  <ShieldCheck className="w-5 h-5" />
-                </div>
-                <h3 className="text-base font-black text-slate-900">Garantías & Servicios Incluidos</h3>
-              </div>
-
-              <ul className="space-y-3 text-xs">
-                <li className="flex items-start gap-2.5 text-slate-700 font-medium">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
-                  <span><strong>Despliegue de Alta Disponibilidad:</strong> SLA 99.9% uptime continuo en infraestructura cloud.</span>
-                </li>
-
-                <li className="flex items-start gap-2.5 text-slate-700 font-medium">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
-                  <span><strong>Seguridad HTTPS & SSL:</strong> Certificados SSL activos con cabeceras de seguridad estrictas (CSP, HSTS).</span>
-                </li>
-
-                <li className="flex items-start gap-2.5 text-slate-700 font-medium">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
-                  <span><strong>Backups Automatizados:</strong> Copias de seguridad diarias de base de datos e imágenes con retención periódica.</span>
-                </li>
-
-                <li className="flex items-start gap-2.5 text-slate-700 font-medium">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
-                  <span><strong>Propiedad 100% de Datos:</strong> Todos los comercios, datos, catálogos y miembros pertenecen 100% al titular del proyecto.</span>
-                </li>
-              </ul>
             </div>
           </div>
         </div>

@@ -15,6 +15,7 @@ import { TourismManager } from '@/components/superadmin/TourismManager';
 import { WebRequestsManager } from '@/components/superadmin/WebRequestsManager';
 import { KevDevPlanManager } from '@/components/superadmin/KevDevPlanManager';
 import { QrGeneratorManager } from '@/components/superadmin/QrGeneratorManager';
+import { PlansManager } from '@/components/superadmin/PlansManager';
 import { 
   Store, 
   MapPin, 
@@ -28,7 +29,8 @@ import {
   Sparkles,
   ShieldCheck,
   Code2,
-  QrCode
+  QrCode,
+  DollarSign
 } from 'lucide-react';
 
 interface SuperAdminDashboardClientProps {
@@ -44,7 +46,7 @@ export function SuperAdminDashboardClient({
 }: SuperAdminDashboardClientProps) {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<
-    'geo-customizer' | 'commerces' | 'tourism' | 'cash-payments' | 'raffles' | 'jobs' | 'news' | 'web-requests' | 'qr-generator' | 'plan-kevdev'
+    'geo-customizer' | 'commerces' | 'tourism' | 'cash-payments' | 'subscription-plans' | 'raffles' | 'jobs' | 'news' | 'web-requests' | 'qr-generator' | 'plan-kevdev'
   >('geo-customizer');
   const [isAuthChecked, setIsAuthChecked] = useState(false);
 
@@ -83,7 +85,7 @@ export function SuperAdminDashboardClient({
   }
 
   interface TabDef {
-    id: 'geo-customizer' | 'commerces' | 'tourism' | 'cash-payments' | 'raffles' | 'jobs' | 'news' | 'web-requests' | 'qr-generator' | 'plan-kevdev';
+    id: 'geo-customizer' | 'commerces' | 'tourism' | 'cash-payments' | 'subscription-plans' | 'raffles' | 'jobs' | 'news' | 'web-requests' | 'qr-generator' | 'plan-kevdev';
     label: string;
     icon: React.ElementType;
     badge?: string;
@@ -94,6 +96,7 @@ export function SuperAdminDashboardClient({
     { id: 'commerces', label: 'Comercios', icon: Store, badge: `${initialCommerces.length}` },
     { id: 'tourism', label: 'Turismo', icon: Compass },
     { id: 'cash-payments', label: 'Pagos en efectivo', icon: CreditCard, badge: 'Nuevos' },
+    { id: 'subscription-plans', label: 'Planes', icon: DollarSign, badge: 'Valores' },
     { id: 'raffles', label: 'Sorteos', icon: Gift },
     { id: 'jobs', label: 'Empleos', icon: Briefcase },
     { id: 'news', label: 'Comunidad', icon: Newspaper },
@@ -117,7 +120,7 @@ export function SuperAdminDashboardClient({
           </h1>
 
           <p className="text-sm sm:text-base text-slate-100 font-medium leading-relaxed">
-            Gestioná comercios reales, pagos en efectivo, imágenes por provincia, banners publicitarios, sorteos, ofertas laborales, noticias y sitios web solicitados.
+            Gestioná comercios reales, pagos en efectivo, valores de planes, imágenes por provincia, banners publicitarios, sorteos, ofertas laborales, noticias y sitios web solicitados.
           </p>
         </div>
 
@@ -140,7 +143,7 @@ export function SuperAdminDashboardClient({
               Menú Principal
             </span>
             <span className="text-[10px] bg-cyan-100 text-[#0047BA] font-extrabold px-2 py-0.5 rounded-full">
-              10 Módulos
+              11 Módulos
             </span>
           </div>
 
@@ -185,6 +188,10 @@ export function SuperAdminDashboardClient({
 
           {activeTab === 'cash-payments' && (
             <CashPaymentsManager />
+          )}
+
+          {activeTab === 'subscription-plans' && (
+            <PlansManager />
           )}
 
           {activeTab === 'qr-generator' && (

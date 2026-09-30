@@ -7,7 +7,8 @@ import {
   createCashPaymentAction, 
   getPendingCashPaymentForCommerceAction, 
   cancelCashPaymentAction,
-  getCommercePaymentHistoryAction
+  getCommercePaymentHistoryAction,
+  getSubscriptionPlansAction
 } from '@/server/actions/superadmin';
 
 export type UserType = 'comercio' | 'turismo' | 'particular' | string;
@@ -69,11 +70,38 @@ export function SubscriptionPlans({
   const [pendingPayment, setPendingPayment] = useState<{ id: string; planName: string; amount: number; notes?: string } | null>(null);
   const [history, setHistory] = useState<Array<{ id: string; planName: string; amount: number; status: string; createdAt: string; notes?: string }>>([]);
 
+  // State for dynamic plan pricing
+  const [planPrices, setPlanPrices] = useState<{ bronce: number; plata: number; oro: number }>({
+    bronce: 29000,
+    plata: 49000,
+    oro: 99000,
+  });
+
   // State for "Ya pagué" report modal
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
   const [selectedPlanForReport, setSelectedPlanForReport] = useState<{ name: string; amount: number }>({ name: 'Bronce', amount: 29000 });
   const [reportPaymentMethod, setReportPaymentMethod] = useState<'TRANSFERENCIA' | 'EFECTIVO'>('TRANSFERENCIA');
   const [reportReference, setReportReference] = useState('');
+
+  useEffect(() => {
+    async function loadDynamicPrices() {
+      try {
+        const res = await getSubscriptionPlansAction();
+        if (res.success && res.plans) {
+          const prices = { bronce: 29000, plata: 49000, oro: 99000 };
+          res.plans.forEach((p) => {
+            if (p.id === 'bronce') prices.bronce = p.price;
+            if (p.id === 'plata') prices.plata = p.price;
+            if (p.id === 'oro') prices.oro = p.price;
+          });
+          setPlanPrices(prices);
+        }
+      } catch (e) {
+        console.warn('Error cargando precios de planes:', e);
+      }
+    }
+    loadDynamicPrices();
+  }, []);
 
   const checkPendingPaymentAndHistory = async () => {
     try {
@@ -321,7 +349,7 @@ export function SubscriptionPlans({
             </div>
 
             <div className="py-3 border-y border-slate-200">
-              <span className="text-4xl font-black text-slate-900">$29.000</span>
+              <span className="text-4xl font-black text-slate-900">${planPrices.bronce.toLocaleString('es-AR')}</span>
               <span className="text-xs font-bold text-slate-400"> / mes</span>
             </div>
 
@@ -331,17 +359,17 @@ export function SubscriptionPlans({
 
           <div className="space-y-2 pt-4 border-t border-slate-200">
             <button
-              onClick={() => handleSelectPlan('BRONCE', 'Plan Bronce ($29.000)')}
+              onClick={() => handleSelectPlan('BRONCE', `Plan Bronce ($${planPrices.bronce.toLocaleString('es-AR')})`)}
               disabled={Boolean(pendingPayment) || loadingTier === 'BRONCE'}
               className="w-full bg-[#0047BA] hover:bg-[#002878] text-white py-3.5 rounded-2xl font-black text-xs transition-transform active:scale-95 cursor-pointer shadow-md flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              <span>{loadingTier === 'BRONCE' ? 'Procesando...' : 'Pagar con MercadoPago ($29.000)'}</span>
+              <span>{loadingTier === 'BRONCE' ? 'Procesando...' : `Pagar con MercadoPago ($${planPrices.bronce.toLocaleString('es-AR')})`}</span>
               <ArrowRight className="w-4 h-4" />
             </button>
 
             <button
               type="button"
-              onClick={() => openReportModal('Bronce', 29000)}
+              onClick={() => openReportModal('Bronce', planPrices.bronce)}
               disabled={Boolean(pendingPayment)}
               className="w-full bg-white border border-slate-300 hover:bg-slate-100 text-slate-900 py-2.5 rounded-xl font-black text-xs transition-colors flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed shadow-2xs"
             >
@@ -376,7 +404,7 @@ export function SubscriptionPlans({
             </div>
 
             <div className="py-3 border-y border-slate-200">
-              <span className="text-4xl font-black text-[#0047BA]">$49.000</span>
+              <span className="text-4xl font-black text-[#0047BA]">${planPrices.plata.toLocaleString('es-AR')}</span>
               <span className="text-xs font-bold text-slate-400"> / mes</span>
             </div>
 
@@ -386,17 +414,17 @@ export function SubscriptionPlans({
 
           <div className="space-y-2 pt-4 border-t border-slate-200">
             <button
-              onClick={() => handleSelectPlan('PLATA', 'Plan Plata ($49.000)')}
+              onClick={() => handleSelectPlan('PLATA', `Plan Plata ($${planPrices.plata.toLocaleString('es-AR')})`)}
               disabled={Boolean(pendingPayment) || loadingTier === 'PLATA'}
               className="w-full bg-gradient-to-r from-[#00ADB5] to-[#0047BA] hover:from-[#00969d] hover:to-[#002878] text-white py-3.5 rounded-2xl font-black text-xs shadow-lg transition-transform active:scale-95 cursor-pointer flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              <span>{loadingTier === 'PLATA' ? 'Procesando...' : 'Pagar con MercadoPago ($49.000)'}</span>
+              <span>{loadingTier === 'PLATA' ? 'Procesando...' : `Pagar con MercadoPago ($${planPrices.plata.toLocaleString('es-AR')})`}</span>
               <ArrowRight className="w-4 h-4" />
             </button>
 
             <button
               type="button"
-              onClick={() => openReportModal('Plata', 49000)}
+              onClick={() => openReportModal('Plata', planPrices.plata)}
               disabled={Boolean(pendingPayment)}
               className="w-full bg-slate-100 hover:bg-slate-200 text-slate-900 py-2.5 rounded-xl font-black text-xs transition-colors flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed shadow-2xs"
             >
@@ -431,7 +459,7 @@ export function SubscriptionPlans({
             </div>
 
             <div className="py-3 border-y border-purple-800/80">
-              <span className="text-4xl font-black text-amber-300">$99.000</span>
+              <span className="text-4xl font-black text-amber-300">${planPrices.oro.toLocaleString('es-AR')}</span>
               <span className="text-xs font-bold text-purple-300"> / mes</span>
             </div>
 
@@ -441,17 +469,17 @@ export function SubscriptionPlans({
 
           <div className="space-y-2 pt-4 border-t border-purple-800/80">
             <button
-              onClick={() => handleSelectPlan('ORO', 'Plan Oro ($99.000)')}
+              onClick={() => handleSelectPlan('ORO', `Plan Oro ($${planPrices.oro.toLocaleString('es-AR')})`)}
               disabled={Boolean(pendingPayment) || loadingTier === 'ORO'}
               className="w-full bg-gradient-to-r from-amber-400 via-amber-500 to-amber-600 hover:from-amber-300 hover:to-amber-500 text-slate-950 py-3.5 rounded-2xl font-black text-xs shadow-xl transition-transform active:scale-95 cursor-pointer flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              <span>{loadingTier === 'ORO' ? 'Procesando...' : 'Pagar con MercadoPago ($99.000)'}</span>
+              <span>{loadingTier === 'ORO' ? 'Procesando...' : `Pagar con MercadoPago ($${planPrices.oro.toLocaleString('es-AR')})`}</span>
               <ArrowRight className="w-4 h-4" />
             </button>
 
             <button
               type="button"
-              onClick={() => openReportModal('Oro', 99000)}
+              onClick={() => openReportModal('Oro', planPrices.oro)}
               disabled={Boolean(pendingPayment)}
               className="w-full bg-white/10 hover:bg-white/20 text-white py-2.5 rounded-xl font-extrabold text-xs transition-colors flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed border border-white/20"
             >
