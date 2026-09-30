@@ -3,11 +3,13 @@
 import React, { useState, useRef } from 'react';
 import { QRCodeCanvas, QRCodeSVG } from 'qrcode.react';
 import { Commerce } from '@/types';
-import { QrCode, Download, Copy, Check, Sparkles, Printer, Store, ExternalLink, RefreshCw } from 'lucide-react';
+import { QrCode, Download, Copy, Check, Sparkles, Printer, Store, Maximize2, Image as ImageIcon } from 'lucide-react';
 
 interface QrGeneratorManagerProps {
   commerces?: Commerce[];
 }
+
+export type LogoScale = 'small' | 'medium' | 'large' | 'xlarge';
 
 export function QrGeneratorManager({ commerces = [] }: QrGeneratorManagerProps) {
   const [selectedCommerceId, setSelectedCommerceId] = useState<string>('');
@@ -18,6 +20,7 @@ export function QrGeneratorManager({ commerces = [] }: QrGeneratorManagerProps) 
   const [fgColor, setFgColor] = useState<string>('#0047BA');
   const [bgColor, setBgColor] = useState<string>('#FFFFFF');
   const [logoOption, setLogoOption] = useState<'icon' | 'logo'>('icon');
+  const [logoScale, setLogoScale] = useState<LogoScale>('large');
   const [resolution, setResolution] = useState<number>(1024); // Default 1024px for high quality print
   
   const [copied, setCopied] = useState(false);
@@ -48,6 +51,27 @@ export function QrGeneratorManager({ commerces = [] }: QrGeneratorManagerProps) 
       }
     }
   };
+
+  // Proportional sizing based on QR resolution canvas
+  const scaleMultiplier = {
+    small: 0.18,
+    medium: 0.24,
+    large: 0.28,
+    xlarge: 0.32,
+  }[logoScale];
+
+  let logoWidth: number;
+  let logoHeight: number;
+
+  if (logoOption === 'icon') {
+    // Emblema (+) 1:1 Aspect Ratio
+    logoWidth = Math.round(resolution * scaleMultiplier);
+    logoHeight = Math.round(resolution * scaleMultiplier);
+  } else {
+    // Logo Completo ON MÁS (aprox 3.2:1 Aspect Ratio)
+    logoWidth = Math.round(resolution * (scaleMultiplier * 1.35));
+    logoHeight = Math.round(logoWidth / 3.2);
+  }
 
   // Download Canvas as high resolution PNG
   const handleDownloadPNG = () => {
@@ -124,7 +148,7 @@ export function QrGeneratorManager({ commerces = [] }: QrGeneratorManagerProps) 
             Generador de QR con Logo ON MÁS
           </h2>
           <p className="text-xs sm:text-sm text-slate-100 font-medium max-w-2xl leading-relaxed">
-            Creá códigos QR dinámicos en alta resolución (PNG hasta 2048px y SVG vectorial) con el logo de ON MÁS en el centro, listos para imprimir en folletos, afiches, tarjetas y carteles de mostrador.
+            Creá códigos QR dinámicos en alta resolución (PNG hasta 2048px y SVG vectorial) con el logo de ON MÁS bien visible y de máxima calidad en el centro.
           </p>
         </div>
 
@@ -214,62 +238,27 @@ export function QrGeneratorManager({ commerces = [] }: QrGeneratorManagerProps) 
             />
           </div>
 
-          <div className="border-t border-slate-100 pt-6 space-y-4">
+          <div className="border-t border-slate-100 pt-6 space-y-5">
             <h3 className="text-base font-black text-slate-900 flex items-center gap-2">
               <Sparkles className="w-5 h-5 text-[#0047BA]" />
-              <span>2. Personalizar Diseño & Calidad para Imprenta</span>
+              <span>2. Personalizar Diseño & Visibilidad del Logo</span>
             </h3>
 
-            {/* Colors Grid */}
+            {/* Logo Variant & Logo Size Controls */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              
               <div className="space-y-2">
-                <label className="block text-xs font-extrabold text-slate-700">
-                  Color de Módulos (QR)
-                </label>
-                <div className="flex items-center gap-2">
-                  <input
-                    type="color"
-                    value={fgColor}
-                    onChange={(e) => setFgColor(e.target.value)}
-                    className="w-10 h-10 rounded-xl border border-slate-300 cursor-pointer shrink-0"
-                  />
-                  <div className="flex flex-wrap gap-1.5">
-                    <button
-                      type="button"
-                      onClick={() => setFgColor('#0047BA')}
-                      className="px-2.5 py-1 text-[11px] font-black bg-[#0047BA] text-white rounded-lg cursor-pointer"
-                    >
-                      Cobalto
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setFgColor('#00ADB5')}
-                      className="px-2.5 py-1 text-[11px] font-black bg-[#00ADB5] text-white rounded-lg cursor-pointer"
-                    >
-                      Turquesa
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setFgColor('#000000')}
-                      className="px-2.5 py-1 text-[11px] font-black bg-slate-900 text-white rounded-lg cursor-pointer"
-                    >
-                      Negro
-                    </button>
-                  </div>
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <label className="block text-xs font-extrabold text-slate-700">
-                  Variante de Logo Central
+                <label className="block text-xs font-extrabold text-slate-700 flex items-center gap-1.5">
+                  <ImageIcon className="w-4 h-4 text-[#00ADB5]" />
+                  <span>Variante de Logo Central</span>
                 </label>
                 <div className="grid grid-cols-2 gap-2">
                   <button
                     type="button"
                     onClick={() => setLogoOption('icon')}
-                    className={`px-3 py-2 rounded-xl text-xs font-extrabold border transition-all cursor-pointer flex items-center justify-center gap-2 ${
+                    className={`px-3 py-2.5 rounded-2xl text-xs font-extrabold border transition-all cursor-pointer flex items-center justify-center gap-2 ${
                       logoOption === 'icon'
-                        ? 'bg-[#0047BA] text-white border-[#0047BA]'
+                        ? 'bg-[#0047BA] text-white border-[#0047BA] shadow-sm'
                         : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
                     }`}
                   >
@@ -278,13 +267,81 @@ export function QrGeneratorManager({ commerces = [] }: QrGeneratorManagerProps) 
                   <button
                     type="button"
                     onClick={() => setLogoOption('logo')}
-                    className={`px-3 py-2 rounded-xl text-xs font-extrabold border transition-all cursor-pointer flex items-center justify-center gap-2 ${
+                    className={`px-3 py-2.5 rounded-2xl text-xs font-extrabold border transition-all cursor-pointer flex items-center justify-center gap-2 ${
                       logoOption === 'logo'
-                        ? 'bg-[#0047BA] text-white border-[#0047BA]'
+                        ? 'bg-[#0047BA] text-white border-[#0047BA] shadow-sm'
                         : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
                     }`}
                   >
                     <span>Logo Completo</span>
+                  </button>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <label className="block text-xs font-extrabold text-slate-700 flex items-center gap-1.5">
+                  <Maximize2 className="w-4 h-4 text-[#0047BA]" />
+                  <span>Tamaño del Logo en el QR</span>
+                </label>
+                <div className="grid grid-cols-3 gap-1.5">
+                  {(['medium', 'large', 'xlarge'] as LogoScale[]).map((scale) => (
+                    <button
+                      key={scale}
+                      type="button"
+                      onClick={() => setLogoScale(scale)}
+                      className={`px-2 py-2 rounded-xl text-xs font-extrabold border transition-all cursor-pointer capitalize text-center ${
+                        logoScale === scale
+                          ? 'bg-cyan-500 text-white border-cyan-600 shadow-xs'
+                          : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
+                      }`}
+                    >
+                      {scale === 'medium' ? 'Normal' : scale === 'large' ? 'Grande ★' : 'Gigante'}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+            </div>
+
+            {/* Colors Grid */}
+            <div className="space-y-2">
+              <label className="block text-xs font-extrabold text-slate-700">
+                Color de los Módulos QR
+              </label>
+              <div className="flex items-center gap-3">
+                <input
+                  type="color"
+                  value={fgColor}
+                  onChange={(e) => setFgColor(e.target.value)}
+                  className="w-10 h-10 rounded-xl border border-slate-300 cursor-pointer shrink-0"
+                />
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setFgColor('#0047BA')}
+                    className={`px-3 py-1.5 text-xs font-extrabold rounded-xl transition-all cursor-pointer ${
+                      fgColor === '#0047BA' ? 'bg-[#0047BA] text-white ring-2 ring-blue-300' : 'bg-slate-100 text-[#0047BA]'
+                    }`}
+                  >
+                    Azul Cobalto
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setFgColor('#00ADB5')}
+                    className={`px-3 py-1.5 text-xs font-extrabold rounded-xl transition-all cursor-pointer ${
+                      fgColor === '#00ADB5' ? 'bg-[#00ADB5] text-white ring-2 ring-cyan-300' : 'bg-slate-100 text-[#00ADB5]'
+                    }`}
+                  >
+                    Turquesa ON MÁS
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setFgColor('#000000')}
+                    className={`px-3 py-1.5 text-xs font-extrabold rounded-xl transition-all cursor-pointer ${
+                      fgColor === '#000000' ? 'bg-slate-900 text-white ring-2 ring-slate-400' : 'bg-slate-100 text-slate-800'
+                    }`}
+                  >
+                    Negro Imprenta
                   </button>
                 </div>
               </div>
@@ -367,7 +424,7 @@ export function QrGeneratorManager({ commerces = [] }: QrGeneratorManagerProps) 
               <QRCodeCanvas
                 value={targetUrl || 'https://onmasportal.com.ar'}
                 size={resolution}
-                style={{ height: "auto", maxWidth: "260px", width: "100%" }}
+                style={{ height: "auto", maxWidth: "280px", width: "100%" }}
                 level="H" // High error correction level (30%) so logo centers without error
                 bgColor={bgColor}
                 fgColor={fgColor}
@@ -375,8 +432,8 @@ export function QrGeneratorManager({ commerces = [] }: QrGeneratorManagerProps) 
                   src: logoSrc,
                   x: undefined,
                   y: undefined,
-                  height: logoOption === 'icon' ? 52 : 36,
-                  width: logoOption === 'icon' ? 52 : 110,
+                  height: logoHeight,
+                  width: logoWidth,
                   excavate: true, // Clears QR matrix behind the logo for crystal clear visibility
                 }}
               />
@@ -394,8 +451,8 @@ export function QrGeneratorManager({ commerces = [] }: QrGeneratorManagerProps) 
                   src: logoSrc,
                   x: undefined,
                   y: undefined,
-                  height: logoOption === 'icon' ? 52 : 36,
-                  width: logoOption === 'icon' ? 52 : 110,
+                  height: logoHeight,
+                  width: logoWidth,
                   excavate: true,
                 }}
               />
@@ -403,7 +460,7 @@ export function QrGeneratorManager({ commerces = [] }: QrGeneratorManagerProps) 
 
             <div className="flex items-center gap-1.5 text-[11px] font-bold text-slate-600 bg-white/80 backdrop-blur-xs px-3 py-1 rounded-full border border-slate-200">
               <Sparkles className="w-3.5 h-3.5 text-amber-500" />
-              <span>Logo de ON MÁS incrustado con nivel de corrección H (30%)</span>
+              <span>Logo escalado a {logoWidth}x{logoHeight}px en lienzo de {resolution}px (Nivel H 30%)</span>
             </div>
           </div>
 
@@ -430,7 +487,7 @@ export function QrGeneratorManager({ commerces = [] }: QrGeneratorManagerProps) 
           </div>
 
           <div className="text-[11px] text-slate-400 font-medium">
-            💡 Sugerencia de imprenta: El archivo PNG ({resolution}px) es óptimo para imprimir en tamaños desde 3x3 cm hasta afiches de 1 metro.
+            💡 El logo recortará exactamente las celdas necesarias para mantenerse nítido sin distorsión.
           </div>
 
         </div>
