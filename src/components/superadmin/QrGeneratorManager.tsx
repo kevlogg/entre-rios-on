@@ -10,10 +10,17 @@ interface QrGeneratorManagerProps {
 }
 
 export function QrGeneratorManager({ commerces = [] }: QrGeneratorManagerProps) {
-  const [selectedCommerceId, setSelectedCommerceId] = useState<string>('');
-  const [targetUrl, setTargetUrl] = useState<string>('https://onmasportal.com.ar');
+  const [selectedCommerceId, setSelectedCommerceId] = useState<string>('link');
+  const [targetUrl, setTargetUrl] = useState<string>('https://onmasportal.com.ar/link');
   const [copied, setCopied] = useState(false);
   const [showStatsModal, setShowStatsModal] = useState(false);
+
+  // Set origin on client mount if available
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      setTargetUrl(`${window.location.origin}/link`);
+    }
+  }, []);
 
   // Exact QR Physical Scan Stats State
   const [loadingStats, setLoadingStats] = useState(false);
@@ -57,17 +64,18 @@ export function QrGeneratorManager({ commerces = [] }: QrGeneratorManagerProps) 
     const commId = e.target.value;
     setSelectedCommerceId(commId);
 
-    if (commId === 'portal-home') {
-      setTargetUrl('https://onmasportal.com.ar');
+    const origin = typeof window !== 'undefined' ? window.location.origin : 'https://onmasportal.com.ar';
+
+    if (commId === 'link') {
+      setTargetUrl(`${origin}/link`);
+    } else if (commId === 'portal-home') {
+      setTargetUrl(origin);
     } else if (commId === 'catalog') {
-      setTargetUrl('https://onmasportal.com.ar/catalogo');
+      setTargetUrl(`${origin}/catalogo`);
     } else {
       const comm = commerces.find((c) => c.id === commId);
       if (comm) {
-        const fullUrl = typeof window !== 'undefined'
-          ? `${window.location.origin}/comercio/${comm.slug}`
-          : `https://onmasportal.com.ar/comercio/${comm.slug}`;
-        setTargetUrl(fullUrl);
+        setTargetUrl(`${origin}/comercio/${comm.slug}`);
       }
     }
   };
@@ -129,9 +137,10 @@ export function QrGeneratorManager({ commerces = [] }: QrGeneratorManagerProps) 
             onChange={handleSelectCommerce}
             className="w-full bg-slate-50 border border-slate-300 rounded-2xl px-4 py-3 text-xs font-bold text-slate-800 focus:ring-2 focus:ring-[#00ADB5] focus:bg-white transition-all cursor-pointer"
           >
-            <option value="">-- Ingresar URL Personalizada --</option>
+            <option value="link">🔗 Página Bio / Linktree (/link)</option>
             <option value="portal-home">🌐 Portal General (https://onmasportal.com.ar)</option>
             <option value="catalog">🛍️ Catálogo General (https://onmasportal.com.ar/catalogo)</option>
+            <option value="">-- Ingresar URL Personalizada --</option>
             {commerces.length > 0 && (
               <optgroup label="Comercios Registrados">
                 {commerces.map((c) => {
