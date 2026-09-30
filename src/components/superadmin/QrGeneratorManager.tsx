@@ -1,9 +1,10 @@
 'use client';
 
-import React, { useState, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { QRCodeCanvas } from 'qrcode.react';
 import { Commerce } from '@/types';
-import { Download, Copy, Check, BarChart3, X, Eye, MessageCircle, TrendingUp, Sparkles, Store } from 'lucide-react';
+import { createClient } from '@/lib/supabase/client';
+import { Download, Copy, Check, BarChart3, X, Eye, MessageCircle, TrendingUp, QrCode, RefreshCw } from 'lucide-react';
 
 interface QrGeneratorManagerProps {
   commerces?: Commerce[];
@@ -15,7 +16,78 @@ export function QrGeneratorManager({ commerces = [] }: QrGeneratorManagerProps) 
   const [copied, setCopied] = useState(false);
   const [showStatsModal, setShowStatsModal] = useState(false);
 
+  // Real Database Metrics State
+  const [loadingStats, setLoadingStats] = useState(false);
+  const [realViews, setRealViews] = useState<number>(0);
+  const [realWaClicks, setRealWaClicks] = useState<number>(0);
+  const [qrScansEstimate, setQrScansEstimate] = useState<number>(0);
+
   const canvasRef = useRef<HTMLDivElement>(null);
+
+  // Load real metrics from Supabase when modal opens or selected commerce changes
+  useEffect(() => {
+    if (!showStatsModal) return;
+
+    async function fetchRealMetrics() {
+      setLoadingStats(true);
+      try {
+        const supabase = createClient();
+
+        if (selectedCommerceId && selectedCommerceId !== 'portal-home' && selectedCommerceId !== 'catalog') {
+          // 1. Obtener comercio específico
+          const { data: commData } = await supabase
+            .from('commerces')
+            .select('id, views_count, whatsapp_clicks_count')
+            .eq('id', selectedCommerceId)
+            .maybeSingle();
+
+          // 2. Contar eventos reales de vistas en profile_views
+          const { count: viewEvents } = await supabase
+            .from('profile_views')
+            .select('*', { count: 'exact', head: true })
+            .eq('commerce_id', selectedCommerceId);
+
+          // 3. Contar eventos de WhatsApp en whatsapp_clicks
+          const { count: waEvents } = await supabase
+            .from('whatsapp_clicks')
+            .select('*', { count: 'exact', head: true })
+            .eq('commerce_id', selectedCommerceId);
+
+          const views = Math.max(viewEvents || 0, Number(commData?.views_count || 0));
+          const clicks = Math.max(waEvents || 0, Number(commData?.whatsapp_clicks_count || 0));
+
+          setRealViews(views);
+          setRealWaClicks(clicks);
+          setQrScansEstimate(Math.round(views * 0.45)); // Estimación proporcional de escaneos
+        } else {
+          // Métricas globales acumuladas de la base de datos
+          const { count: totalViewEvents } = await supabase
+            .from('profile_views')
+            .select('*', { count: 'exact', head: true });
+
+          const { count: totalWaEvents } = await supabase
+            .from('whatsapp_clicks')
+            .select('*', { count: 'exact', head: true });
+
+          const viewsSum = commerces.reduce((acc, c) => acc + Number(c.viewsCount || 0), 0);
+          const clicksSum = commerces.reduce((acc, c) => acc + Number(c.whatsappClicksCount || 0), 0);
+
+          const views = Math.max(totalViewEvents || 0, viewsSum);
+          const clicks = Math.max(totalWaEvents || 0, clicksSum);
+
+          setRealViews(views);
+          setRealWaClicks(clicks);
+          setQrScansEstimate(Math.round(views * 0.4));
+        }
+      } catch (err) {
+        console.warn('Error obteniendo métricas reales de Supabase:', err);
+      } finally {
+        setLoadingStats(false);
+      }
+    }
+
+    fetchRealMetrics();
+  }, [showStatsModal, selectedCommerceId, commerces]);
 
   // Seleccionar enlace desde el menú desplegable
   const handleSelectCommerce = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -61,12 +133,8 @@ export function QrGeneratorManager({ commerces = [] }: QrGeneratorManagerProps) 
     setTimeout(() => setCopied(false), 2000);
   };
 
-  // Obtener comercio seleccionado actualmente (para métricas del modal)
+  // Comercio seleccionado actualmente
   const activeCommerce = commerces.find((c) => c.id === selectedCommerceId);
-
-  // Totales globales sumados
-  const totalViews = commerces.reduce((acc, c) => acc + Number(c.viewsCount || 0), 1240);
-  const totalWaClicks = commerces.reduce((acc, c) => acc + Number(c.whatsappClicksCount || 0), 485);
 
   const resolution = 1024;
   const logoWidth = Math.round(resolution * 0.38); // 389 px ancho
@@ -187,7 +255,7 @@ export function QrGeneratorManager({ commerces = [] }: QrGeneratorManagerProps) 
 
       </div>
 
-      {/* MODAL DE ESTADÍSTICAS DEL QR */}
+      {/* MODAL DE ESTADÍSTICAS REALES EN SUPABASE */}
       {showStatsModal && (
         <div className="fixed inset-0 bg-slate-950/70 backdrop-blur-xs z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
           <div className="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl border border-slate-200 space-y-6 relative">
@@ -200,10 +268,10 @@ export function QrGeneratorManager({ commerces = [] }: QrGeneratorManagerProps) 
                 </div>
                 <div>
                   <h3 className="text-base sm:text-lg font-black text-slate-900">
-                    Estadísticas & Escaneos QR
+                    Métricas Reales (Base de Datos)
                   </h3>
                   <p className="text-xs text-slate-500 font-medium">
-                    Métricas acumuladas del portal ON MÁS
+                    Datos obtenidos directamente desde Supabase
                   </p>
                 </div>
               </div>
@@ -217,70 +285,77 @@ export function QrGeneratorManager({ commerces = [] }: QrGeneratorManagerProps) 
               </button>
             </div>
 
-            {/* KPI Cards Grid */}
-            <div className="grid grid-cols-2 gap-4">
-              <div className="bg-gradient-to-br from-cyan-50 to-blue-50/50 p-4 rounded-2xl border border-cyan-100 space-y-1">
-                <div className="flex items-center justify-between text-slate-500 text-xs font-bold">
-                  <span>Total Escaneos / Vistas</span>
-                  <Eye className="w-4 h-4 text-[#00ADB5]" />
-                </div>
-                <p className="text-2xl font-black text-slate-900">
-                  {activeCommerce ? (activeCommerce.viewsCount || 0) : totalViews}
-                </p>
-                <span className="text-[10px] text-slate-500 font-medium block">
-                  {activeCommerce ? `Perfil: ${activeCommerce.name}` : 'Acumulado portal'}
-                </span>
+            {loadingStats ? (
+              <div className="py-12 flex flex-col items-center justify-center space-y-3">
+                <div className="w-8 h-8 rounded-full border-3 border-[#00ADB5] border-t-transparent animate-spin" />
+                <p className="text-xs font-bold text-slate-500">Consultando Supabase...</p>
               </div>
-
-              <div className="bg-gradient-to-br from-emerald-50 to-teal-50/50 p-4 rounded-2xl border border-emerald-100 space-y-1">
-                <div className="flex items-center justify-between text-slate-500 text-xs font-bold">
-                  <span>Clicks a WhatsApp</span>
-                  <MessageCircle className="w-4 h-4 text-emerald-600" />
-                </div>
-                <p className="text-2xl font-black text-emerald-700">
-                  {activeCommerce ? (activeCommerce.whatsappClicksCount || 0) : totalWaClicks}
-                </p>
-                <span className="text-[10px] text-slate-500 font-medium block">
-                  {activeCommerce ? `Perfil: ${activeCommerce.name}` : 'Acumulado portal'}
-                </span>
-              </div>
-            </div>
-
-            {/* Información Detallada por Comercio Seleccionado */}
-            <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-3">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-extrabold text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
-                  <TrendingUp className="w-4 h-4 text-[#0047BA]" />
-                  <span>Detalle de Tráfico QR</span>
-                </span>
-                <span className="text-[10px] font-black bg-[#00ADB5] text-white px-2 py-0.5 rounded-full">
-                  En Tiempo Real
-                </span>
-              </div>
-
-              {activeCommerce ? (
-                <div className="space-y-2 text-xs">
-                  <div className="flex justify-between py-1 border-b border-slate-200">
-                    <span className="text-slate-500 font-medium">Comercio:</span>
-                    <span className="font-bold text-slate-900">{activeCommerce.name}</span>
+            ) : (
+              <>
+                {/* KPI Cards Grid */}
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="bg-gradient-to-br from-cyan-50 to-blue-50/50 p-4 rounded-2xl border border-cyan-100 space-y-1">
+                    <div className="flex items-center justify-between text-slate-500 text-xs font-bold">
+                      <span>Vistas / Escaneos</span>
+                      <Eye className="w-4 h-4 text-[#00ADB5]" />
+                    </div>
+                    <p className="text-3xl font-black text-slate-900">
+                      {realViews}
+                    </p>
+                    <span className="text-[10px] text-slate-500 font-medium block">
+                      {activeCommerce ? `Comercio: ${activeCommerce.name}` : 'Todas las vistas registradas'}
+                    </span>
                   </div>
-                  <div className="flex justify-between py-1 border-b border-slate-200">
-                    <span className="text-slate-500 font-medium">Ubicación:</span>
-                    <span className="font-bold text-slate-800">{activeCommerce.cityName}</span>
-                  </div>
-                  <div className="flex justify-between py-1">
-                    <span className="text-slate-500 font-medium">Estado de Suscripción:</span>
-                    <span className={`font-black ${activeCommerce.isSubscriptionActive ? 'text-emerald-600' : 'text-amber-600'}`}>
-                      {activeCommerce.isSubscriptionActive ? 'Activo' : 'Pendiente'}
+
+                  <div className="bg-gradient-to-br from-emerald-50 to-teal-50/50 p-4 rounded-2xl border border-emerald-100 space-y-1">
+                    <div className="flex items-center justify-between text-slate-500 text-xs font-bold">
+                      <span>Clicks a WhatsApp</span>
+                      <MessageCircle className="w-4 h-4 text-emerald-600" />
+                    </div>
+                    <p className="text-3xl font-black text-emerald-700">
+                      {realWaClicks}
+                    </p>
+                    <span className="text-[10px] text-slate-500 font-medium block">
+                      {activeCommerce ? `Comercio: ${activeCommerce.name}` : 'Todos los clics registrados'}
                     </span>
                   </div>
                 </div>
-              ) : (
-                <p className="text-xs text-slate-600 font-medium leading-relaxed">
-                  Mostrando estadísticas acumuladas de la red de comercios registrados. Si seleccionás un comercio específico en el desplegable, verás sus métricas individuales.
-                </p>
-              )}
-            </div>
+
+                {/* Información Detallada por Comercio Seleccionado */}
+                <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-extrabold text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
+                      <TrendingUp className="w-4 h-4 text-[#0047BA]" />
+                      <span>Origen de Datos</span>
+                    </span>
+                    <span className="text-[10px] font-black bg-emerald-100 text-emerald-800 border border-emerald-300 px-2 py-0.5 rounded-full">
+                      Supabase Real
+                    </span>
+                  </div>
+
+                  {activeCommerce ? (
+                    <div className="space-y-2 text-xs">
+                      <div className="flex justify-between py-1 border-b border-slate-200">
+                        <span className="text-slate-500 font-medium">Comercio Filtro:</span>
+                        <span className="font-bold text-slate-900">{activeCommerce.name}</span>
+                      </div>
+                      <div className="flex justify-between py-1 border-b border-slate-200">
+                        <span className="text-slate-500 font-medium">Ciudad:</span>
+                        <span className="font-bold text-slate-800">{activeCommerce.cityName}</span>
+                      </div>
+                      <div className="flex justify-between py-1">
+                        <span className="text-slate-500 font-medium">Categoría:</span>
+                        <span className="font-bold text-slate-800">{activeCommerce.category}</span>
+                      </div>
+                    </div>
+                  ) : (
+                    <p className="text-xs text-slate-600 font-medium leading-relaxed">
+                      El sistema consulta en tiempo real las tablas <code className="bg-slate-200 text-slate-800 px-1 py-0.5 rounded font-mono text-[11px]">profile_views</code> y <code className="bg-slate-200 text-slate-800 px-1 py-0.5 rounded font-mono text-[11px]">whatsapp_clicks</code> de Supabase. Al seleccionar un comercio específico en la lista, el modal filtra sus métricas individuales automáticamente.
+                    </p>
+                  )}
+                </div>
+              </>
+            )}
 
             {/* Botón de Cerrar */}
             <button
