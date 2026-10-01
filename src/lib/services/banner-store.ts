@@ -119,23 +119,29 @@ export const DEFAULT_PROVINCE_BANNERS: Record<string, BannerItem[]> = {
 const STORAGE_KEY = 'onmas_province_banners_v2';
 
 export function getBannersByProvince(provinceId: string): BannerItem[] {
+  const fallback = DEFAULT_PROVINCE_BANNERS[provinceId] || DEFAULT_PROVINCE_BANNERS['santa-fe'] || [];
+
   if (typeof window === 'undefined') {
-    return DEFAULT_PROVINCE_BANNERS[provinceId] || DEFAULT_PROVINCE_BANNERS['santa-fe'] || [];
+    return fallback;
   }
 
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (raw) {
       const parsed: Record<string, BannerItem[]> = JSON.parse(raw);
-      if (parsed[provinceId] && parsed[provinceId].length > 0) {
-        return parsed[provinceId];
+      const targetList = parsed[provinceId] || (provinceId !== 'santa-fe' ? parsed['santa-fe'] : undefined);
+      if (targetList && Array.isArray(targetList)) {
+        const valid = targetList.filter((b) => b && typeof b.imageUrl === 'string' && b.imageUrl.trim().length > 0);
+        if (valid.length > 0) {
+          return valid;
+        }
       }
     }
   } catch (e) {
     console.error('Error reading province banners from localStorage:', e);
   }
 
-  return DEFAULT_PROVINCE_BANNERS[provinceId] || DEFAULT_PROVINCE_BANNERS['santa-fe'] || [];
+  return fallback;
 }
 
 export function saveBannersByProvince(provinceId: string, banners: BannerItem[]): void {

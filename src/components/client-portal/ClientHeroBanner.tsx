@@ -72,25 +72,27 @@ export function ClientHeroBanner({ provinceId = 'santa-fe' }: ClientHeroBannerPr
     >
       <div className="relative w-full h-[240px] sm:h-[340px] md:h-[420px] rounded-3xl overflow-hidden shadow-2xl border border-white/20 group bg-slate-900/40 backdrop-blur-xs">
         {/* Background Images with Fade Transition (Pure image, no text overlay) */}
-        {effectiveBanners.map((slide, idx) => (
-          <Link
-            key={slide.id || idx}
-            href={slide.ctaHref || '#'}
-            className={`absolute inset-0 block w-full h-full transition-opacity duration-700 ease-in-out ${
-              idx === currentIndex ? 'opacity-100 z-10' : 'opacity-0 z-0 pointer-events-none'
-            }`}
-          >
-            <Image
-              src={slide.imageUrl}
-              alt={slide.titleLine1 || 'Banner Publicitario'}
-              fill
-              priority={idx === 0}
-              unoptimized
-              sizes="(max-width: 1280px) 100vw, 1280px"
-              className="object-cover object-center w-full h-full"
-            />
-          </Link>
-        ))}
+        {effectiveBanners.map((slide: BannerItem, idx: number) => {
+          const imgSrc = slide.imageUrl && slide.imageUrl.trim() !== '' 
+            ? slide.imageUrl 
+            : '/images/hero-rosario.jpg';
+
+          return (
+            <Link
+              key={slide.id || idx}
+              href={slide.ctaHref || '#'}
+              className={`absolute inset-0 block w-full h-full transition-opacity duration-700 ease-in-out ${
+                idx === currentIndex ? 'opacity-100 z-10' : 'opacity-0 z-0 pointer-events-none'
+              }`}
+            >
+              <img
+                src={imgSrc}
+                alt={slide.titleLine1 || 'Banner Publicitario'}
+                className="w-full h-full object-cover object-center"
+              />
+            </Link>
+          );
+        })}
 
         {/* Minimal controls at bottom right */}
         {effectiveBanners.length > 1 && (
