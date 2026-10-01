@@ -23,14 +23,14 @@ export function CityExploreBar({ provinceId = 'santa-fe' }: CityExploreBarProps)
 
   return (
     <section id="ciudades" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
-      <div className="flex items-center justify-between border-b border-slate-200 pb-3">
-        <h2 className="text-2xl font-extrabold text-slate-800 flex items-center gap-2">
+      <div className="flex items-center justify-between border-b border-white/20 pb-3">
+        <h2 className="text-2xl font-extrabold text-white flex items-center gap-2">
           <span>Explorá por ciudad</span>
-          <span className="text-[#00ADB5] font-black">• {currentProvince.name}</span>
+          <span className="text-[#00E5FF] font-black">• {currentProvince.name}</span>
         </h2>
         <Link 
           href={`/${currentProvince.slug}`} 
-          className="text-xs font-bold text-[#0047BA] hover:text-[#00ADB5] flex items-center gap-1"
+          className="text-xs font-bold text-[#00E5FF] hover:text-white flex items-center gap-1"
         >
           <span>Ver todas las ciudades de {currentProvince.name}</span>
           <ArrowRight className="w-3.5 h-3.5" />

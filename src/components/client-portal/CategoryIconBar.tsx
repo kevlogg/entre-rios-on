@@ -56,23 +56,23 @@ export function CategoryIconBar({
   };
 
   return (
-    <section className="bg-white border-b border-slate-200 py-6">
+    <section className="bg-white/10 backdrop-blur-md border-b border-white/10 py-6">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-4">
         {/* Header Row with Arrows */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <h2 className="text-base sm:text-xl font-black text-slate-900 uppercase tracking-wider flex items-center gap-2">
-              <span className="w-2.5 h-2.5 rounded-full bg-[#00ADB5]"></span>
+            <h2 className="text-base sm:text-xl font-black text-white uppercase tracking-wider flex items-center gap-2">
+              <span className="w-2.5 h-2.5 rounded-full bg-[#00E5FF]"></span>
               <span>Categorías</span>
             </h2>
-            <span className="text-xs font-bold text-slate-400 hidden md:inline">
+            <span className="text-xs font-bold text-white/60 hidden md:inline">
               (Página {currentPage + 1} de {totalPages} • 8 categorías por vista)
             </span>
           </div>
 
           <div className="flex items-center gap-3">
             {/* Arrow Carousel Navigation */}
-            <div className="flex items-center gap-1.5 bg-slate-100 p-1 rounded-2xl border border-slate-200">
+            <div className="flex items-center gap-1.5 bg-white/10 p-1 rounded-2xl border border-white/20">
               <button
                 onClick={handlePrevPage}
                 aria-label="Ver 8 categorías anteriores"
@@ -82,7 +82,7 @@ export function CategoryIconBar({
                 <ChevronLeft className="w-4 h-4 stroke-[2.5]" />
               </button>
 
-              <span className="text-xs font-black text-slate-700 px-2">
+              <span className="text-xs font-black text-white px-2">
                 {currentPage + 1} / {totalPages}
               </span>
 
@@ -172,7 +172,7 @@ export function CategoryIconBar({
               key={idx}
               onClick={() => setCurrentPage(idx)}
               className={`h-2 rounded-full transition-all cursor-pointer ${
-                currentPage === idx ? 'w-8 bg-[#0047BA]' : 'w-2 bg-slate-300 hover:bg-slate-400'
+                currentPage === idx ? 'w-8 bg-[#00E5FF]' : 'w-2 bg-white/30 hover:bg-white/60'
               }`}
               aria-label={`Ir a la página ${idx + 1}`}
             />
