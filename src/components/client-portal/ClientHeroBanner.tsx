@@ -47,14 +47,24 @@ export function ClientHeroBanner({ provinceId = 'santa-fe' }: ClientHeroBannerPr
     ? banners 
     : (DEFAULT_PROVINCE_BANNERS[provinceId] || DEFAULT_PROVINCE_BANNERS['santa-fe'] || []);
 
+  const safeCurrentIndex = (typeof currentIndex === 'number' && !isNaN(currentIndex) && currentIndex >= 0 && currentIndex < effectiveBanners.length)
+    ? currentIndex 
+    : 0;
+
   const nextSlide = useCallback(() => {
-    if (effectiveBanners.length === 0) return;
-    setCurrentIndex((prev) => (prev + 1) % effectiveBanners.length);
+    if (effectiveBanners.length <= 1) return;
+    setCurrentIndex((prev) => {
+      const validPrev = (typeof prev === 'number' && !isNaN(prev) && prev >= 0) ? prev : 0;
+      return (validPrev + 1) % effectiveBanners.length;
+    });
   }, [effectiveBanners.length]);
 
   const prevSlide = useCallback(() => {
-    if (effectiveBanners.length === 0) return;
-    setCurrentIndex((prev) => (prev - 1 + effectiveBanners.length) % effectiveBanners.length);
+    if (effectiveBanners.length <= 1) return;
+    setCurrentIndex((prev) => {
+      const validPrev = (typeof prev === 'number' && !isNaN(prev) && prev >= 0) ? prev : 0;
+      return (validPrev - 1 + effectiveBanners.length) % effectiveBanners.length;
+    });
   }, [effectiveBanners.length]);
 
   useEffect(() => {
@@ -80,7 +90,7 @@ export function ClientHeroBanner({ provinceId = 'santa-fe' }: ClientHeroBannerPr
             ? slide.imageUrl 
             : '/images/hero-rosario.jpg';
 
-          const isCurrent = idx === currentIndex;
+          const isCurrent = idx === safeCurrentIndex;
 
           return (
             <Link
@@ -134,7 +144,7 @@ export function ClientHeroBanner({ provinceId = 'santa-fe' }: ClientHeroBannerPr
                   key={idx}
                   onClick={() => setCurrentIndex(idx)}
                   className={`h-2 rounded-full transition-all duration-300 cursor-pointer ${
-                    idx === currentIndex ? 'w-6 bg-cyan-400' : 'w-2 bg-white/50 hover:bg-white/80'
+                    idx === safeCurrentIndex ? 'w-6 bg-cyan-400' : 'w-2 bg-white/50 hover:bg-white/80'
                   }`}
                   aria-label={`Ir a slide ${idx + 1}`}
                 />

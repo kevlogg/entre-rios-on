@@ -28,16 +28,28 @@ export function HeroSlider({ slides, featuredCommerce, weekendEvent }: HeroSlide
   const [isPlaying, setIsPlaying] = useState(true);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
+  const safeCurrentIndex = (typeof currentIndex === 'number' && !isNaN(currentIndex) && currentIndex >= 0 && currentIndex < slides.length)
+    ? currentIndex 
+    : 0;
+
   const nextSlide = useCallback(() => {
-    setCurrentIndex((prevIndex) => (prevIndex + 1) % slides.length);
+    if (slides.length <= 1) return;
+    setCurrentIndex((prevIndex) => {
+      const validPrev = (typeof prevIndex === 'number' && !isNaN(prevIndex) && prevIndex >= 0) ? prevIndex : 0;
+      return (validPrev + 1) % slides.length;
+    });
   }, [slides.length]);
 
   const prevSlide = useCallback(() => {
-    setCurrentIndex((prevIndex) => (prevIndex - 1 + slides.length) % slides.length);
+    if (slides.length <= 1) return;
+    setCurrentIndex((prevIndex) => {
+      const validPrev = (typeof prevIndex === 'number' && !isNaN(prevIndex) && prevIndex >= 0) ? prevIndex : 0;
+      return (validPrev - 1 + slides.length) % slides.length;
+    });
   }, [slides.length]);
 
   useEffect(() => {
-    if (isPlaying) {
+    if (isPlaying && slides.length > 1) {
       timerRef.current = setInterval(() => {
         nextSlide();
       }, 5000);
@@ -45,7 +57,7 @@ export function HeroSlider({ slides, featuredCommerce, weekendEvent }: HeroSlide
     return () => {
       if (timerRef.current) clearInterval(timerRef.current);
     };
-  }, [isPlaying, nextSlide]);
+  }, [isPlaying, nextSlide, slides.length]);
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'ArrowLeft') {
@@ -58,7 +70,7 @@ export function HeroSlider({ slides, featuredCommerce, weekendEvent }: HeroSlide
     }
   };
 
-  const activeSlide = slides[currentIndex] || slides[0];
+  const activeSlide = slides[safeCurrentIndex] || slides[0];
 
   return (
     <section 
@@ -81,7 +93,7 @@ export function HeroSlider({ slides, featuredCommerce, weekendEvent }: HeroSlide
         >
           {/* Background Images with Fade (Pure image view, no text overlay) */}
           {slides.map((slide, idx) => {
-            const isCurrent = idx === currentIndex;
+            const isCurrent = idx === safeCurrentIndex;
             const imgSrc = slide.imageUrl || '/images/hero-rosario.jpg';
 
             return (
@@ -137,7 +149,7 @@ export function HeroSlider({ slides, featuredCommerce, weekendEvent }: HeroSlide
                     key={idx}
                     onClick={() => setCurrentIndex(idx)}
                     className={`h-2 rounded-full transition-all duration-300 cursor-pointer ${
-                      idx === currentIndex ? 'w-6 bg-cyan-400' : 'w-2 bg-white/50 hover:bg-white/80'
+                      idx === safeCurrentIndex ? 'w-6 bg-cyan-400' : 'w-2 bg-white/50 hover:bg-white/80'
                     }`}
                     aria-label={`Ir a la diapositiva ${idx + 1}`}
                   />
