@@ -298,9 +298,9 @@ export function ClientHeader() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
         <div className="flex items-center justify-between gap-4">
           
-          {/* Logo Oficial en Card de Fondo Claro Frosted Glass */}
+          {/* Logo Oficial en Card de Fondo Blanco Brillante */}
           <Link href="/" className="flex items-center shrink-0">
-            <div className="flex flex-col items-center bg-white/15 hover:bg-white/25 backdrop-blur-md border border-white/30 px-4 py-1.5 rounded-2xl shadow-lg transition-all group">
+            <div className="flex flex-col items-center bg-white/95 hover:bg-white backdrop-blur-md border border-white/50 px-4 py-1.5 rounded-2xl shadow-xl transition-all group">
               <div className="relative w-36 h-9 sm:w-44 sm:h-10">
                 <Image
                   src="/logo.png"
@@ -310,7 +310,7 @@ export function ClientHeader() {
                   className="object-contain"
                 />
               </div>
-              <span className="text-[9px] font-black uppercase tracking-[0.3em] text-cyan-200 group-hover:text-white transition-colors -mt-0.5 drop-shadow-xs">
+              <span className="text-[9px] font-black uppercase tracking-[0.3em] text-[#0047BA] group-hover:text-[#00ADB5] transition-colors -mt-0.5">
                 PORTAL
               </span>
             </div>

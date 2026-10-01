@@ -12,19 +12,21 @@ export function ClientFooter() {
           
           {/* Left Column: Brand Logo Card & Handwritten Slogan */}
           <div className="md:col-span-4 space-y-3">
-            <div className="inline-flex flex-col items-start gap-1">
-              <div className="relative w-48 h-14 bg-white/15 hover:bg-white/25 backdrop-blur-md border border-white/30 p-2.5 rounded-2xl shadow-lg transition-all">
-                <Image
-                  src="/logo.png"
-                  alt="ON MÁS Portal"
-                  fill
-                  className="object-contain p-1"
-                />
+            <Link href="/" className="inline-block">
+              <div className="flex flex-col items-center justify-center bg-white/95 hover:bg-white backdrop-blur-md border border-white/50 px-5 py-2 rounded-2xl shadow-xl transition-all group">
+                <div className="relative w-44 h-11 sm:w-48 sm:h-12">
+                  <Image
+                    src="/logo.png"
+                    alt="ON MÁS Portal"
+                    fill
+                    className="object-contain"
+                  />
+                </div>
+                <span className="text-[9px] font-black uppercase tracking-[0.3em] text-[#0047BA] group-hover:text-[#00ADB5] transition-colors -mt-0.5">
+                  PORTAL
+                </span>
               </div>
-              <span className="text-[10px] font-black uppercase tracking-[0.3em] text-cyan-200 pl-2 drop-shadow-xs">
-                PORTAL
-              </span>
-            </div>
+            </Link>
             <p className="font-handwritten text-2xl text-cyan-200 font-bold drop-shadow-sm">
               Lo nuestro también conecta
             </p>
