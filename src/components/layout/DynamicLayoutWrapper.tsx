@@ -11,7 +11,7 @@ interface DynamicLayoutWrapperProps {
 
 function DynamicLayoutContent({ children }: DynamicLayoutWrapperProps) {
   return (
-    <div className="min-h-screen flex flex-col transition-colors bg-[#f8fafc]">
+    <div className="min-h-screen flex flex-col transition-colors bg-brand-page-gradient">
       <ClientHeader />
       <div className="flex-1 w-full">
         {children}
@@ -24,7 +24,7 @@ function DynamicLayoutContent({ children }: DynamicLayoutWrapperProps) {
 export function DynamicLayoutWrapper({ children, selectedCityId }: DynamicLayoutWrapperProps) {
   return (
     <Suspense fallback={
-      <div className="min-h-screen flex flex-col bg-[#f8fafc]">
+      <div className="min-h-screen flex flex-col bg-brand-page-gradient">
         <ClientHeader />
         <div className="flex-1">{children}</div>
         <ClientFooter />

@@ -90,7 +90,7 @@ export default async function CityHubPage({ params }: CityHubPageProps) {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#f8fafc]">
+    <div className="min-h-screen flex flex-col bg-brand-page-gradient">
       <ClientHeader />
       <ClientHomeContainer />
       <ClientFooter />

@@ -101,7 +101,7 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, '\\u003c') }}
         />
       </head>
-      <body className="min-h-screen flex flex-col bg-[#fbf9f5] text-slate-800 antialiased selection:bg-[#00ADB5] selection:text-white">
+      <body className="min-h-screen flex flex-col bg-brand-page-gradient text-slate-800 antialiased selection:bg-[#00ADB5] selection:text-white">
         <main className="flex-1">
           {children}
         </main>
