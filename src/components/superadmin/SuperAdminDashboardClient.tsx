@@ -51,6 +51,46 @@ export function SuperAdminDashboardClient({
   const [isAuthChecked, setIsAuthChecked] = useState(false);
 
   useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      const tabParam = params.get('tab');
+      if (tabParam) {
+        if (tabParam === 'planes' || tabParam === 'subscription-plans') {
+          setActiveTab('subscription-plans');
+        } else if (tabParam === 'provincias' || tabParam === 'banners') {
+          setActiveTab('geo-customizer');
+        } else if (tabParam === 'efectivo' || tabParam === 'pagos') {
+          setActiveTab('cash-payments');
+        } else if (
+          [
+            'geo-customizer',
+            'commerces',
+            'tourism',
+            'cash-payments',
+            'subscription-plans',
+            'raffles',
+            'jobs',
+            'news',
+            'web-requests',
+            'qr-generator',
+            'plan-kevdev',
+          ].includes(tabParam)
+        ) {
+          setActiveTab(tabParam as any);
+        }
+      }
+    }
+  }, []);
+
+  const handleTabChange = (tabId: any) => {
+    setActiveTab(tabId);
+    if (typeof window !== 'undefined') {
+      const urlTab = tabId === 'subscription-plans' ? 'planes' : tabId;
+      window.history.pushState({}, '', `/superadmin?tab=${urlTab}`);
+    }
+  };
+
+  useEffect(() => {
     async function verifySuperAdminAuth() {
       if (isSuperAdminAuthenticated()) {
         setIsAuthChecked(true);
@@ -154,7 +194,7 @@ export function SuperAdminDashboardClient({
               return (
                 <button
                   key={tab.id}
-                  onClick={() => setActiveTab(tab.id)}
+                  onClick={() => handleTabChange(tab.id)}
                   className={`w-full flex items-center justify-between px-4 py-3.5 rounded-2xl text-xs font-extrabold transition-all cursor-pointer text-left ${
                     isActive
                       ? 'bg-gradient-to-r from-[#0047BA] to-[#00ADB5] text-white shadow-md'
