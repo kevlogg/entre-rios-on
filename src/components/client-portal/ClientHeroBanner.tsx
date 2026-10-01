@@ -4,19 +4,28 @@ import React, { useState, useEffect, useCallback } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { getBannersByProvince, BannerItem } from '@/lib/services/banner-store';
+import { getBannersByProvince, DEFAULT_PROVINCE_BANNERS, BannerItem } from '@/lib/services/banner-store';
 
 interface ClientHeroBannerProps {
   provinceId?: string;
 }
 
 export function ClientHeroBanner({ provinceId = 'santa-fe' }: ClientHeroBannerProps) {
-  const [banners, setBanners] = useState<BannerItem[]>([]);
+  const [banners, setBanners] = useState<BannerItem[]>(() => {
+    const initial = getBannersByProvince(provinceId);
+    return initial && initial.length > 0 
+      ? initial 
+      : (DEFAULT_PROVINCE_BANNERS[provinceId] || DEFAULT_PROVINCE_BANNERS['santa-fe'] || []);
+  });
   const [currentIndex, setCurrentIndex] = useState(0);
 
   const loadBanners = useCallback(() => {
     const activeBanners = getBannersByProvince(provinceId);
-    setBanners(activeBanners);
+    if (activeBanners && activeBanners.length > 0) {
+      setBanners(activeBanners);
+    } else {
+      setBanners(DEFAULT_PROVINCE_BANNERS[provinceId] || DEFAULT_PROVINCE_BANNERS['santa-fe'] || []);
+    }
   }, [provinceId]);
 
   // Load banners on mount or province change, and listen for SuperAdmin live updates
@@ -34,36 +43,40 @@ export function ClientHeroBanner({ provinceId = 'santa-fe' }: ClientHeroBannerPr
     };
   }, [provinceId, loadBanners]);
 
+  const effectiveBanners = banners && banners.length > 0 
+    ? banners 
+    : (DEFAULT_PROVINCE_BANNERS[provinceId] || DEFAULT_PROVINCE_BANNERS['santa-fe'] || []);
+
   const nextSlide = useCallback(() => {
-    if (banners.length === 0) return;
-    setCurrentIndex((prev) => (prev + 1) % banners.length);
-  }, [banners.length]);
+    if (effectiveBanners.length === 0) return;
+    setCurrentIndex((prev) => (prev + 1) % effectiveBanners.length);
+  }, [effectiveBanners.length]);
 
   const prevSlide = useCallback(() => {
-    if (banners.length === 0) return;
-    setCurrentIndex((prev) => (prev - 1 + banners.length) % banners.length);
-  }, [banners.length]);
+    if (effectiveBanners.length === 0) return;
+    setCurrentIndex((prev) => (prev - 1 + effectiveBanners.length) % effectiveBanners.length);
+  }, [effectiveBanners.length]);
 
   useEffect(() => {
-    if (banners.length <= 1) return;
+    if (effectiveBanners.length <= 1) return;
     const interval = setInterval(nextSlide, 5000);
     return () => clearInterval(interval);
-  }, [nextSlide, banners.length]);
+  }, [nextSlide, effectiveBanners.length]);
 
-  if (banners.length === 0) return null;
+  if (effectiveBanners.length === 0) return null;
 
   return (
     <section 
       aria-label="Carrusel Destacado Regional"
       className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-3 pb-2"
     >
-      <div className="relative w-full h-[240px] sm:h-[340px] md:h-[420px] rounded-3xl overflow-hidden shadow-2xl border border-white/20 group">
+      <div className="relative w-full h-[240px] sm:h-[340px] md:h-[420px] rounded-3xl overflow-hidden shadow-2xl border border-white/20 group bg-slate-900/40 backdrop-blur-xs">
         {/* Background Images with Fade Transition (Pure image, no text overlay) */}
-        {banners.map((slide, idx) => (
+        {effectiveBanners.map((slide, idx) => (
           <Link
-            key={slide.id}
+            key={slide.id || idx}
             href={slide.ctaHref || '#'}
-            className={`absolute inset-0 transition-opacity duration-700 ease-in-out ${
+            className={`absolute inset-0 block w-full h-full transition-opacity duration-700 ease-in-out ${
               idx === currentIndex ? 'opacity-100 z-10' : 'opacity-0 z-0 pointer-events-none'
             }`}
           >
@@ -72,14 +85,15 @@ export function ClientHeroBanner({ provinceId = 'santa-fe' }: ClientHeroBannerPr
               alt={slide.titleLine1 || 'Banner Publicitario'}
               fill
               priority={idx === 0}
+              unoptimized
               sizes="(max-width: 1280px) 100vw, 1280px"
-              className="object-cover object-center"
+              className="object-cover object-center w-full h-full"
             />
           </Link>
         ))}
 
         {/* Minimal controls at bottom right */}
-        {banners.length > 1 && (
+        {effectiveBanners.length > 1 && (
           <div className="absolute bottom-4 right-4 z-20 flex items-center gap-2 bg-slate-900/60 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/20 shadow-xl">
             <button
               onClick={prevSlide}
@@ -90,7 +104,7 @@ export function ClientHeroBanner({ provinceId = 'santa-fe' }: ClientHeroBannerPr
             </button>
 
             <div className="flex items-center gap-1.5 px-1">
-              {banners.map((_, idx) => (
+              {effectiveBanners.map((_, idx) => (
                 <button
                   key={idx}
                   onClick={() => setCurrentIndex(idx)}

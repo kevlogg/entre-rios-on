@@ -83,7 +83,7 @@ export function HeroSlider({ slides, featuredCommerce, weekendEvent }: HeroSlide
             <Link
               key={slide.id}
               href={slide.ctaUrl || '#'}
-              className={`absolute inset-0 transition-opacity duration-700 ease-in-out ${
+              className={`absolute inset-0 block w-full h-full transition-opacity duration-700 ease-in-out ${
                 idx === currentIndex ? 'opacity-100 z-10' : 'opacity-0 z-0 pointer-events-none'
               }`}
               aria-hidden={idx !== currentIndex}
@@ -93,8 +93,9 @@ export function HeroSlider({ slides, featuredCommerce, weekendEvent }: HeroSlide
                 alt={slide.title || 'Banner Publicitario'}
                 fill
                 priority={idx === 0}
+                unoptimized
                 sizes="(max-width: 1024px) 100vw, 66vw"
-                className="object-cover object-center"
+                className="object-cover object-center w-full h-full"
               />
             </Link>
           ))}
