@@ -115,6 +115,13 @@ export function ClientHeroBanner({ provinceId = 'santa-fe' }: ClientHeroBannerPr
               <img
                 src={imgSrc}
                 alt={slide.titleLine1 || 'Banner Publicitario'}
+                onError={(e) => {
+                  // Fallback image if custom image fails to load or path is invalid
+                  const target = e.currentTarget;
+                  if (target.src !== '/images/hero-rosario.jpg') {
+                    target.src = '/images/hero-rosario.jpg';
+                  }
+                }}
                 style={{
                   width: '100%',
                   height: '100%',

@@ -118,11 +118,16 @@ export const DEFAULT_PROVINCE_BANNERS: Record<string, BannerItem[]> = {
 
 const STORAGE_KEY = 'onmas_province_banners_v2';
 
+// In-memory cache to ensure live updates across components without depending solely on localStorage quota
+const memoryStore: Record<string, BannerItem[]> = { ...DEFAULT_PROVINCE_BANNERS };
+
 export function getBannersByProvince(provinceId: string): BannerItem[] {
   const fallback = DEFAULT_PROVINCE_BANNERS[provinceId] || DEFAULT_PROVINCE_BANNERS['santa-fe'] || [];
 
   if (typeof window === 'undefined') {
-    return fallback;
+    return memoryStore[provinceId] && memoryStore[provinceId].length > 0
+      ? memoryStore[provinceId]
+      : fallback;
   }
 
   try {
@@ -133,6 +138,7 @@ export function getBannersByProvince(provinceId: string): BannerItem[] {
       if (targetList && Array.isArray(targetList)) {
         const valid = targetList.filter((b) => b && typeof b.imageUrl === 'string' && b.imageUrl.trim().length > 0);
         if (valid.length > 0) {
+          memoryStore[provinceId] = valid;
           return valid;
         }
       }
@@ -141,21 +147,27 @@ export function getBannersByProvince(provinceId: string): BannerItem[] {
     console.error('Error reading province banners from localStorage:', e);
   }
 
-  return fallback;
+  return memoryStore[provinceId] && memoryStore[provinceId].length > 0
+    ? memoryStore[provinceId]
+    : fallback;
 }
 
 export function saveBannersByProvince(provinceId: string, banners: BannerItem[]): void {
-  if (typeof window === 'undefined') return;
+  // Always update in-memory cache first
+  memoryStore[provinceId] = banners;
 
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    const store: Record<string, BannerItem[]> = raw ? JSON.parse(raw) : { ...DEFAULT_PROVINCE_BANNERS };
-    store[provinceId] = banners;
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(store));
+  if (typeof window !== 'undefined') {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      const store: Record<string, BannerItem[]> = raw ? JSON.parse(raw) : { ...DEFAULT_PROVINCE_BANNERS };
+      store[provinceId] = banners;
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(store));
+    } catch (e) {
+      console.warn('Warning saving province banners to localStorage (storage quota or access issue):', e);
+    }
 
-    // Dispatch event to notify open tabs or active components
+    // Always dispatch event to notify active UI components
     window.dispatchEvent(new Event('onmas_banners_updated'));
-  } catch (e) {
-    console.error('Error saving province banners to localStorage:', e);
   }
 }
+
