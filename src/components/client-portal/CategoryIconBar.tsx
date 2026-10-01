@@ -119,12 +119,12 @@ export function CategoryIconBar({
                   onClick={() => handleCategoryClick(cat.id)}
                   className={`group flex items-center rounded-2xl border transition-all text-left overflow-hidden h-20 sm:h-24 cursor-pointer ${
                     isSelected
-                      ? 'bg-gradient-to-r from-[#00ADB5] to-[#007C8A] text-white border-[#00ADB5] shadow-md ring-2 ring-[#00ADB5]'
-                      : 'bg-white text-slate-800 border-slate-200/90 hover:border-[#00ADB5] hover:shadow-md'
+                      ? 'bg-gradient-to-r from-cyan-300 to-cyan-400 text-slate-950 border-white shadow-xl scale-[1.02]'
+                      : 'bg-slate-900/70 hover:bg-slate-900/90 text-white border-white/20 hover:border-cyan-300 hover:shadow-xl'
                   }`}
                 >
                   {/* Left Box: Product Image Asset */}
-                  <div className="w-1/3 h-full bg-[#f4f4f5] border-r border-slate-200/60 shrink-0 relative overflow-hidden flex items-center justify-center p-1.5">
+                  <div className="w-1/3 h-full bg-slate-800 border-r border-white/10 shrink-0 relative overflow-hidden flex items-center justify-center p-1.5">
                     <img
                       src={cat.imageUrl}
                       alt={cat.label}
@@ -135,7 +135,7 @@ export function CategoryIconBar({
                   {/* Right Box: Bold Category Label */}
                   <div className="w-2/3 p-3 sm:p-3.5">
                     <span className={`font-extrabold text-xs sm:text-sm leading-snug line-clamp-2 block ${
-                      isSelected ? 'text-white' : 'text-slate-800 group-hover:text-[#0047BA]'
+                      isSelected ? 'text-slate-950 font-black' : 'text-white group-hover:text-cyan-300'
                     }`}>
                       {cat.label}
                     </span>
@@ -149,7 +149,7 @@ export function CategoryIconBar({
           <button
             onClick={handleNextPage}
             title="Pasar a las próximas 8 categorías"
-            className="absolute -right-3 top-1/2 -translate-y-1/2 z-20 w-10 h-10 rounded-full bg-white text-[#0047BA] border border-slate-300 shadow-xl flex items-center justify-center hover:bg-[#0047BA] hover:text-white hover:border-[#0047BA] transition-all cursor-pointer active:scale-95"
+            className="absolute -right-3 top-1/2 -translate-y-1/2 z-20 w-10 h-10 rounded-full bg-slate-900 text-cyan-300 border border-white/30 shadow-2xl flex items-center justify-center hover:bg-cyan-400 hover:text-slate-950 hover:border-cyan-300 transition-all cursor-pointer active:scale-95"
           >
             <ChevronRight className="w-5 h-5 stroke-[3]" />
           </button>
@@ -158,7 +158,7 @@ export function CategoryIconBar({
             <button
               onClick={handlePrevPage}
               title="Volver a las 8 categorías anteriores"
-              className="absolute -left-3 top-1/2 -translate-y-1/2 z-20 w-10 h-10 rounded-full bg-white text-[#0047BA] border border-slate-300 shadow-xl flex items-center justify-center hover:bg-[#0047BA] hover:text-white hover:border-[#0047BA] transition-all cursor-pointer active:scale-95"
+              className="absolute -left-3 top-1/2 -translate-y-1/2 z-20 w-10 h-10 rounded-full bg-slate-900 text-cyan-300 border border-white/30 shadow-2xl flex items-center justify-center hover:bg-cyan-400 hover:text-slate-950 hover:border-cyan-300 transition-all cursor-pointer active:scale-95"
             >
               <ChevronLeft className="w-5 h-5 stroke-[3]" />
             </button>

@@ -298,9 +298,9 @@ export function ClientHeader() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
         <div className="flex items-center justify-between gap-4">
           
-          {/* Logo Oficial en Card de Fondo Consistente */}
+          {/* Logo Oficial en Card de Fondo Claro Frosted Glass */}
           <Link href="/" className="flex items-center shrink-0">
-            <div className="flex flex-col items-center bg-slate-900/80 hover:bg-slate-900/95 backdrop-blur-md border border-white/25 px-4 py-1.5 rounded-2xl shadow-xl transition-all group">
+            <div className="flex flex-col items-center bg-white/15 hover:bg-white/25 backdrop-blur-md border border-white/30 px-4 py-1.5 rounded-2xl shadow-lg transition-all group">
               <div className="relative w-36 h-9 sm:w-44 sm:h-10">
                 <Image
                   src="/logo.png"
@@ -310,24 +310,24 @@ export function ClientHeader() {
                   className="object-contain"
                 />
               </div>
-              <span className="text-[9px] font-black uppercase tracking-[0.3em] text-cyan-300 group-hover:text-cyan-200 transition-colors -mt-0.5">
+              <span className="text-[9px] font-black uppercase tracking-[0.3em] text-cyan-200 group-hover:text-white transition-colors -mt-0.5 drop-shadow-xs">
                 PORTAL
               </span>
             </div>
           </Link>
 
           {/* Location Selectors */}
-          <div className="hidden lg:flex items-center gap-1.5 bg-slate-900/60 backdrop-blur-md border border-white/20 rounded-2xl p-1 shadow-lg">
+          <div className="hidden lg:flex items-center gap-1.5 bg-white/15 backdrop-blur-md border border-white/30 rounded-2xl p-1 shadow-md">
             
             {/* Selector de Provincia */}
             <div className="relative">
               <button
                 onClick={() => setIsProvinceDropdownOpen(!isProvinceDropdownOpen)}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold text-slate-100 hover:bg-white/10 transition-all cursor-pointer"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-extrabold text-white hover:bg-white/20 transition-all cursor-pointer"
               >
-                <MapPin className="w-3.5 h-3.5 text-cyan-300" />
+                <MapPin className="w-3.5 h-3.5 text-cyan-200" />
                 <span className="truncate max-w-[100px]">{currentProvinceObj.name}</span>
-                <ChevronDown className="w-3 h-3 text-slate-300" />
+                <ChevronDown className="w-3 h-3 text-cyan-100" />
               </button>
 
               {isProvinceDropdownOpen && (
@@ -356,17 +356,17 @@ export function ClientHeader() {
               )}
             </div>
 
-            <span className="text-white/30 font-light">|</span>
+            <span className="text-white/40 font-light">|</span>
 
             {/* Selector de Ciudad */}
             <div className="relative">
               <button
                 onClick={() => setIsCityDropdownOpen(!isCityDropdownOpen)}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold text-slate-100 hover:bg-white/10 transition-all cursor-pointer"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-extrabold text-white hover:bg-white/20 transition-all cursor-pointer"
               >
-                <Building2 className="w-3.5 h-3.5 text-cyan-300" />
+                <Building2 className="w-3.5 h-3.5 text-cyan-200" />
                 <span className="truncate max-w-[130px]">{currentCityObj.name}</span>
-                <ChevronDown className="w-3 h-3 text-slate-300" />
+                <ChevronDown className="w-3 h-3 text-cyan-100" />
               </button>
 
               {isCityDropdownOpen && (
@@ -411,11 +411,11 @@ export function ClientHeader() {
                   setSearchQuery(e.target.value);
                   setIsSearchFocused(true);
                 }}
-                className="w-full bg-slate-900/60 backdrop-blur-md border border-white/20 rounded-xl pl-4 pr-12 py-2 text-xs text-white placeholder-slate-300 focus:outline-hidden focus:ring-2 focus:ring-cyan-400 focus:bg-slate-900/90 transition-all shadow-inner"
+                className="w-full bg-white/15 backdrop-blur-md border border-white/30 rounded-xl pl-4 pr-12 py-2 text-xs text-white placeholder-white/70 focus:outline-hidden focus:ring-2 focus:ring-cyan-300 focus:bg-white/25 transition-all shadow-inner"
               />
               <button
                 type="submit"
-                className="absolute right-1 top-1 bottom-1 bg-gradient-to-r from-cyan-400 to-blue-600 hover:from-cyan-300 hover:to-blue-500 text-slate-950 font-black px-3 rounded-lg flex items-center justify-center transition-all shadow-md cursor-pointer"
+                className="absolute right-1 top-1 bottom-1 bg-gradient-to-r from-cyan-300 to-blue-500 hover:from-cyan-200 hover:to-blue-400 text-slate-950 font-black px-3 rounded-lg flex items-center justify-center transition-all shadow-md cursor-pointer"
                 aria-label="Buscar"
               >
                 <Search className="w-3.5 h-3.5" />
@@ -557,20 +557,20 @@ export function ClientHeader() {
             {!currentUser ? (
               <Link 
                 href="/login" 
-                className="flex items-center gap-2 bg-slate-900/70 hover:bg-slate-900/95 text-white hover:text-cyan-300 border border-white/25 hover:border-cyan-400 px-3.5 py-2 rounded-2xl text-xs font-extrabold transition-all shadow-lg cursor-pointer shrink-0 backdrop-blur-md"
+                className="flex items-center gap-2 bg-white/15 hover:bg-white/25 text-white hover:text-cyan-200 border border-white/30 px-3.5 py-2 rounded-2xl text-xs font-extrabold transition-all shadow-md cursor-pointer shrink-0 backdrop-blur-md"
                 title="Ingresar o Registrarse"
               >
-                <User className="w-4 h-4 text-cyan-300" />
+                <User className="w-4 h-4 text-cyan-200" />
                 <span>Ingresar / Crear cuenta</span>
               </Link>
             ) : (
               <Link 
                 href="/admin" 
-                className="flex items-center gap-2.5 bg-slate-900/70 hover:bg-slate-900/95 border border-white/25 hover:border-cyan-400 p-1 pr-3 rounded-2xl transition-all shadow-lg cursor-pointer group shrink-0 backdrop-blur-md"
+                className="flex items-center gap-2.5 bg-white/15 hover:bg-white/25 border border-white/30 p-1 pr-3 rounded-2xl transition-all shadow-md cursor-pointer group shrink-0 backdrop-blur-md"
                 title={`Panel de Administración: ${userCommerce?.name || 'Mi Negocio'}`}
               >
                 {userCommerce?.logoUrl ? (
-                  <div className="relative w-8 h-8 rounded-xl overflow-hidden border border-white/20 group-hover:border-cyan-400 bg-white shrink-0 shadow-2xs">
+                  <div className="relative w-8 h-8 rounded-xl overflow-hidden border border-white/30 group-hover:border-cyan-300 bg-white shrink-0 shadow-2xs">
                     <Image
                       src={userCommerce.logoUrl}
                       alt={userCommerce.name}
@@ -579,15 +579,15 @@ export function ClientHeader() {
                     />
                   </div>
                 ) : (
-                  <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-cyan-400 to-blue-600 text-slate-950 flex items-center justify-center font-black text-sm shadow-md shrink-0">
+                  <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-cyan-300 to-blue-500 text-slate-950 flex items-center justify-center font-black text-sm shadow-md shrink-0">
                     {userCommerce?.initial || 'M'}
                   </div>
                 )}
                 <div className="hidden sm:flex flex-col text-left">
-                  <span className="text-[11px] font-black text-white group-hover:text-cyan-300 leading-tight truncate max-w-[120px]">
+                  <span className="text-[11px] font-black text-white group-hover:text-cyan-200 leading-tight truncate max-w-[120px]">
                     {userCommerce?.name || 'Mi Comercio'}
                   </span>
-                  <span className="text-[9px] font-extrabold text-cyan-300 uppercase tracking-wider">
+                  <span className="text-[9px] font-extrabold text-cyan-200 uppercase tracking-wider">
                     Mi Negocio
                   </span>
                 </div>
@@ -597,7 +597,7 @@ export function ClientHeader() {
             {/* Mobile Hamburger Toggle */}
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="md:hidden p-2 text-white hover:text-cyan-300 focus:outline-hidden"
+              className="md:hidden p-2 text-white hover:text-cyan-200 focus:outline-hidden"
               aria-label="Toggle Navigation Menu"
             >
               {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
@@ -607,10 +607,10 @@ export function ClientHeader() {
         </div>
       </div>
 
-      {/* Secondary Horizontal Navigation Bar */}
-      <nav className="hidden md:block border-t border-white/10 bg-black/25 backdrop-blur-xl">
+      {/* Secondary Horizontal Navigation Bar - Floating Individual Badges */}
+      <nav className="hidden md:block py-2.5 bg-transparent">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <ul className="flex items-center justify-start gap-1 sm:gap-2 overflow-x-auto text-xs font-bold text-slate-200 scrollbar-none py-2">
+          <ul className="flex items-center justify-start gap-2 overflow-x-auto text-xs font-bold scrollbar-none py-0.5">
             {navLinks.map((link) => {
               const isActive = pathname === link.href || (link.slug !== '' && pathname?.includes(`/${link.slug}`));
               return (
@@ -619,11 +619,11 @@ export function ClientHeader() {
                     href={link.href}
                     className={`px-4 py-1.5 rounded-xl flex items-center gap-1.5 transition-all whitespace-nowrap ${
                       isActive
-                        ? 'bg-gradient-to-r from-cyan-400 to-blue-600 text-slate-950 font-black shadow-lg scale-[1.02]'
-                        : 'hover:bg-white/15 hover:text-cyan-300 text-slate-100 font-extrabold'
+                        ? 'bg-gradient-to-r from-cyan-300 to-cyan-400 text-slate-950 font-black shadow-lg border border-white/60 scale-[1.04]'
+                        : 'bg-white/15 hover:bg-white/30 border border-white/25 text-white font-extrabold backdrop-blur-md shadow-xs hover:scale-[1.02] hover:shadow-md'
                     }`}
                   >
-                    {link.name === 'Sorteos ON MÁS' && <Sparkles className="w-3.5 h-3.5 text-amber-300" />}
+                    {link.name === 'Sorteos ON MÁS' && <Sparkles className={`w-3.5 h-3.5 ${isActive ? 'text-amber-600' : 'text-amber-300'}`} />}
                     <span>{link.name}</span>
                   </Link>
                 </li>

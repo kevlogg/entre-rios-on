@@ -43,9 +43,9 @@ export function CityExploreBar({ provinceId = 'santa-fe' }: CityExploreBarProps)
             key={city.id}
             href={`/${currentProvince.slug}/${city.slug || city.id}`}
             onClick={() => handleSelect(city.id, city.name)}
-            className="group flex flex-col items-center rounded-2xl overflow-hidden border border-slate-200 bg-white hover:border-[#00ADB5] hover:shadow-md transition-all text-center shadow-2xs"
+            className="group flex flex-col items-center rounded-2xl overflow-hidden border border-white/20 bg-slate-900/70 hover:bg-slate-900/90 hover:border-cyan-300 hover:shadow-xl transition-all text-center shadow-lg"
           >
-            <div className="relative h-20 sm:h-24 w-full bg-slate-100 overflow-hidden">
+            <div className="relative h-20 sm:h-24 w-full bg-slate-800 overflow-hidden">
               <Image
                 src={city.imageUrl || '/images/city-parana.jpg'}
                 alt={city.name}
@@ -56,7 +56,7 @@ export function CityExploreBar({ provinceId = 'santa-fe' }: CityExploreBarProps)
             </div>
 
             <div className="p-2 w-full">
-              <span className="text-xs font-bold text-slate-800 line-clamp-1 group-hover:text-[#00ADB5] transition-colors">
+              <span className="text-xs font-extrabold text-white line-clamp-1 group-hover:text-cyan-300 transition-colors">
                 {city.name}
               </span>
             </div>
@@ -66,13 +66,13 @@ export function CityExploreBar({ provinceId = 'santa-fe' }: CityExploreBarProps)
         {/* Card final para Ver Todas */}
         <Link
           href={`/${currentProvince.slug}`}
-          className="group flex flex-col items-center rounded-2xl overflow-hidden border border-cyan-200 bg-cyan-50/50 hover:bg-cyan-100/60 hover:border-[#00ADB5] transition-all text-center shadow-2xs"
+          className="group flex flex-col items-center rounded-2xl overflow-hidden border border-white/30 bg-white/15 hover:bg-white/30 transition-all text-center shadow-lg backdrop-blur-md"
         >
-          <div className="h-20 sm:h-24 w-full flex items-center justify-center text-[#0047BA] group-hover:text-[#00ADB5] transition-colors">
-            <MapPin className="w-8 h-8 text-[#00ADB5]" />
+          <div className="h-20 sm:h-24 w-full flex items-center justify-center text-cyan-300 group-hover:scale-110 transition-transform">
+            <MapPin className="w-8 h-8 text-cyan-300" />
           </div>
           <div className="p-2 w-full">
-            <span className="text-xs font-extrabold text-[#0047BA] line-clamp-1">
+            <span className="text-xs font-black text-cyan-200 line-clamp-1">
               Todas las...
             </span>
           </div>

@@ -16,7 +16,7 @@ export function Footer() {
           {/* Brand Col (2 cols) */}
           <div className="lg:col-span-2 space-y-4">
             <div className="inline-flex flex-col items-start gap-1">
-              <div className="relative w-48 h-14 bg-slate-900/80 backdrop-blur-md border border-white/20 p-2.5 rounded-2xl shadow-xl">
+              <div className="relative w-48 h-14 bg-white/15 hover:bg-white/25 backdrop-blur-md border border-white/30 p-2.5 rounded-2xl shadow-lg transition-all">
                 <Image
                   src="/logo.png"
                   alt="ON MÁS Portal"
@@ -24,7 +24,7 @@ export function Footer() {
                   className="object-contain p-1"
                 />
               </div>
-              <span className="text-[10px] font-black uppercase tracking-[0.3em] text-cyan-300 pl-2">
+              <span className="text-[10px] font-black uppercase tracking-[0.3em] text-cyan-200 pl-2 drop-shadow-xs">
                 PORTAL
               </span>
             </div>
