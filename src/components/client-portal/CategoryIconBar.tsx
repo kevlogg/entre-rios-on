@@ -117,14 +117,14 @@ export function CategoryIconBar({
                 <button
                   key={cat.id}
                   onClick={() => handleCategoryClick(cat.id)}
-                  className={`group flex items-center rounded-2xl border transition-all text-left overflow-hidden h-20 sm:h-24 cursor-pointer ${
+                  className={`group flex items-center rounded-2xl border transition-all text-left overflow-hidden h-20 sm:h-24 cursor-pointer shadow-md ${
                     isSelected
-                      ? 'bg-gradient-to-r from-cyan-300 to-cyan-400 text-slate-950 border-white shadow-xl scale-[1.02]'
-                      : 'bg-slate-900/70 hover:bg-slate-900/90 text-white border-white/20 hover:border-cyan-300 hover:shadow-xl'
+                      ? 'bg-gradient-to-r from-cyan-300 to-cyan-400 text-slate-950 border-white shadow-xl scale-[1.02] ring-2 ring-white/50'
+                      : 'bg-white/95 hover:bg-white text-slate-900 border-white/80 hover:border-cyan-300 hover:shadow-xl backdrop-blur-md'
                   }`}
                 >
                   {/* Left Box: Product Image Asset */}
-                  <div className="w-1/3 h-full bg-slate-800 border-r border-white/10 shrink-0 relative overflow-hidden flex items-center justify-center p-1.5">
+                  <div className="w-1/3 h-full bg-slate-100 border-r border-slate-200/80 shrink-0 relative overflow-hidden flex items-center justify-center p-1.5">
                     <img
                       src={cat.imageUrl}
                       alt={cat.label}
@@ -135,7 +135,7 @@ export function CategoryIconBar({
                   {/* Right Box: Bold Category Label */}
                   <div className="w-2/3 p-3 sm:p-3.5">
                     <span className={`font-extrabold text-xs sm:text-sm leading-snug line-clamp-2 block ${
-                      isSelected ? 'text-slate-950 font-black' : 'text-white group-hover:text-cyan-300'
+                      isSelected ? 'text-slate-950 font-black' : 'text-slate-900 group-hover:text-[#0047BA]'
                     }`}>
                       {cat.label}
                     </span>

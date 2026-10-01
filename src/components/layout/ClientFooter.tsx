@@ -61,16 +61,16 @@ export function ClientFooter() {
             </div>
           </div>
 
-          {/* Right Column: Province Outline & Slogan */}
+          {/* Right Column: Portal Slogan */}
           <div className="md:col-span-4 flex items-center justify-end gap-3 text-right">
-            <div className="w-16 h-20 relative">
-              <svg viewBox="0 0 100 120" className="w-full h-full text-cyan-300 stroke-current fill-none stroke-[2.5]">
-                <path d="M 30,10 C 50,5 75,15 70,35 C 80,50 85,70 75,95 C 60,110 35,115 20,95 C 15,70 10,40 30,10 Z" />
+            <div className="w-11 h-11 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center text-cyan-300 shadow-md shrink-0">
+              <svg className="w-6 h-6 text-cyan-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m6 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
               </svg>
             </div>
             <div>
               <p className="font-handwritten text-2xl text-cyan-300 font-bold leading-tight drop-shadow-sm">
-                Entre Ríos,<br />más cerca tuyo.
+                ON MÁS,<br />más cerca tuyo.
               </p>
             </div>
           </div>
@@ -79,7 +79,7 @@ export function ClientFooter() {
       </div>
 
       {/* Bottom River Wave Gradient Banner */}
-      <div className="w-full h-3 bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-600" />
+      <div className="w-full h-3 bg-gradient-to-r from-cyan-400 via-blue-500 to-[#002878]" />
     </footer>
   );
 }

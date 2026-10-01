@@ -2,17 +2,14 @@
 
 @theme {
   /* Brand Official Palette: ON MÁS */
-  /* "ON" = Cian/Turquesa | "MÁS" = Azul Eléctrico | Extensión = Violeta */
+  /* "ON" = Cian/Turquesa | "MÁS" = Azul Eléctrico & Cobalto */
   --color-brand-cyan: #00E5FF;
   --color-brand-turquoise: #00C7B7;
   --color-brand-teal: #007C8A;
 
   --color-brand-electric: #0059FF;
   --color-brand-cobalt: #0052FF;
-  --color-brand-navy: #003CD6;
-
-  --color-brand-violet: #7928CA;
-  --color-brand-purple: #A825FF;
+  --color-brand-navy: #002878;
 
   /* Primary Accent Shortcuts */
   --color-brand-primary: #00C7B7;
@@ -25,9 +22,9 @@
 
   --color-brand-blue: #0052FF;
   --color-brand-blue-light: #0059FF;
-  --color-brand-blue-dark: #003CD6;
+  --color-brand-blue-dark: #002878;
 
-  --color-brand-dark: #003CD6;
+  --color-brand-dark: #002878;
   --color-brand-muted: #94a3b8;
 
   --color-warm-bg: #0052ff;
@@ -47,7 +44,7 @@ html {
 
 /* =============================================
    FONDO BASE — Identidad de Marca ON MÁS
-   Patrón: Cian("ON") | Azul("MÁS") | Violeta
+   Patrón: Cian ("ON") | Azul Eléctrico ("MÁS") | Azul Marino
    ============================================= */
 body {
   background-color: #0052ff;
@@ -72,10 +69,9 @@ body {
   background: linear-gradient(
     115deg,
     #00e5ff 0%,
-    #00c7b7 25%,
-    #0052ff 50%,
-    #7928ca 75%,
-    #a825ff 100%
+    #00c7b7 30%,
+    #0052ff 70%,
+    #002878 100%
   );
 }
 
@@ -109,15 +105,15 @@ body {
   animation: floatBlue 9s ease-in-out infinite alternate;
 }
 
-/* TERCIO DERECHO: Violeta Eléctrico */
-.glow-purple {
+/* TERCIO DERECHO: Azul Marino */
+.glow-navy {
   top: -15%;
   right: -15%;
   width: 75vw;
   height: 90vh;
-  background: radial-gradient(circle, #b026ff 30%, #7600e8 60%, transparent 80%);
+  background: radial-gradient(circle, #003cd6 30%, #001a52 60%, transparent 80%);
   opacity: 0.95;
-  animation: floatPurple 8.5s ease-in-out infinite alternate;
+  animation: floatNavy 8.5s ease-in-out infinite alternate;
 }
 
 @keyframes floatCyan {
@@ -132,7 +128,7 @@ body {
   100% { transform: translate3d(6vw, -6vh, 0) scale(0.95); }
 }
 
-@keyframes floatPurple {
+@keyframes floatNavy {
   0%   { transform: translate3d(0, 0, 0) scale(1); }
   50%  { transform: translate3d(-8vw, 10vh, 0) scale(1.12); }
   100% { transform: translate3d(-4vw, -8vh, 0) scale(0.96); }
@@ -146,11 +142,11 @@ body {
 }
 
 .bg-gradient-brand {
-  background: linear-gradient(115deg, #00C7B7 0%, #0052FF 50%, #7928CA 100%);
+  background: linear-gradient(115deg, #00C7B7 0%, #0052FF 60%, #002878 100%);
 }
 
 .bg-gradient-on-mas {
-  background: linear-gradient(115deg, #00E5FF 0%, #00C7B7 25%, #0052FF 50%, #7928CA 75%, #A825FF 100%);
+  background: linear-gradient(115deg, #00E5FF 0%, #00C7B7 35%, #0052FF 70%, #002878 100%);
 }
 
 /* Compatibilidad con clases existentes en layout/páginas */
@@ -159,7 +155,7 @@ body {
 }
 
 .text-gradient-brand {
-  background: linear-gradient(115deg, #00E5FF 0%, #0059FF 60%, #A825FF 100%);
+  background: linear-gradient(115deg, #00E5FF 0%, #0059FF 60%, #002878 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }

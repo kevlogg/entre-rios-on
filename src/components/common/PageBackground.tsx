@@ -10,7 +10,7 @@ export function PageBackground() {
     <div className="page-bg-canvas" aria-hidden="true">
       <div className="glow-layer glow-cyan" />
       <div className="glow-layer glow-blue" />
-      <div className="glow-layer glow-purple" />
+      <div className="glow-layer glow-navy" />
     </div>
   );
 }

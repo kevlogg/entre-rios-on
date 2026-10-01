@@ -48,10 +48,10 @@ export function ProductCard({ product }: ProductCardProps) {
     : 'citrus-dulces-del-uruguay';
 
   return (
-    <article className="group bg-slate-900/70 hover:bg-slate-900/95 backdrop-blur-md rounded-2xl overflow-hidden border border-white/20 hover:border-cyan-300 shadow-xl transition-all duration-300 flex flex-col justify-between hover:-translate-y-0.5 relative text-white">
+    <article className="group bg-white hover:bg-white backdrop-blur-md rounded-2xl overflow-hidden border border-slate-200/90 hover:border-cyan-400 shadow-lg hover:shadow-2xl transition-all duration-300 flex flex-col justify-between hover:-translate-y-0.5 relative text-slate-900">
       <div>
         {/* Product Image Container */}
-        <div className="relative h-40 sm:h-44 w-full overflow-hidden bg-slate-800">
+        <div className="relative h-40 sm:h-44 w-full overflow-hidden bg-slate-100">
           <Link href={`/producto/${product.slug}`} className="block w-full h-full">
             <Image
               src={product.imageUrl}
@@ -64,7 +64,7 @@ export function ProductCard({ product }: ProductCardProps) {
 
           {/* City & Category Badges */}
           <div className="absolute top-2 left-2 flex flex-wrap items-center gap-1 z-10">
-            <span className="bg-slate-950/80 backdrop-blur-md text-white text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-0.5 shadow-md border border-white/20">
+            <span className="bg-slate-900/85 backdrop-blur-md text-white text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-0.5 shadow-md border border-white/20">
               <MapPin className="w-2.5 h-2.5 text-cyan-300" />
               {product.cityName}
             </span>
@@ -84,25 +84,25 @@ export function ProductCard({ product }: ProductCardProps) {
         {/* Content Details */}
         <div className="p-3.5 space-y-2">
           {/* Commerce Header Info */}
-          <Link href={`/comercio/${commerceSlug}`} className="flex items-center gap-1 text-[11px] font-bold text-cyan-300 hover:text-cyan-200 hover:underline">
-            <Store className="w-3 h-3 text-cyan-300 shrink-0" />
+          <Link href={`/comercio/${commerceSlug}`} className="flex items-center gap-1 text-[11px] font-bold text-[#0047BA] hover:text-[#00ADB5] hover:underline">
+            <Store className="w-3 h-3 text-[#00ADB5] shrink-0" />
             <span className="truncate">{product.commerceName}</span>
             {product.commercePlan && product.commercePlan !== 'Bronce' && (
               <span title="Comercio Verificado (Plan Plata/Oro)">
-                <CheckCircle className="w-3 h-3 text-cyan-300 shrink-0" />
+                <CheckCircle className="w-3 h-3 text-[#00ADB5] shrink-0" />
               </span>
             )}
           </Link>
 
           {/* Title Link */}
           <Link href={`/producto/${product.slug}`} className="block">
-            <h3 className="text-xs sm:text-sm font-extrabold text-white line-clamp-2 leading-snug group-hover:text-cyan-300 transition-colors">
+            <h3 className="text-xs sm:text-sm font-extrabold text-slate-900 line-clamp-2 leading-snug group-hover:text-[#0047BA] transition-colors">
               {product.title}
             </h3>
           </Link>
 
           {/* Description */}
-          <p className="text-[11px] text-slate-200 line-clamp-2 leading-tight font-medium">
+          <p className="text-[11px] text-slate-600 line-clamp-2 leading-tight font-medium">
             {product.description}
           </p>
         </div>
@@ -110,9 +110,9 @@ export function ProductCard({ product }: ProductCardProps) {
 
       {/* Footer Price & WhatsApp CTA */}
       <div className="p-3.5 pt-0 space-y-2">
-        <div className="flex items-baseline justify-between pt-2 border-t border-white/10">
-          <span className="text-[10px] text-slate-300 font-bold uppercase tracking-wider">Precio</span>
-          <span className="text-sm font-black text-emerald-300">
+        <div className="flex items-baseline justify-between pt-2 border-t border-slate-100">
+          <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Precio</span>
+          <span className="text-sm font-black text-emerald-700">
             {formatPrice(product.price, product.currency)}
           </span>
         </div>
@@ -120,7 +120,7 @@ export function ProductCard({ product }: ProductCardProps) {
         {/* Key WhatsApp Direct CTA */}
         <button
           onClick={handleWhatsAppClick}
-          className="w-full bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 active:from-emerald-600 text-white py-2 px-3 rounded-xl font-black text-xs flex items-center justify-center gap-1.5 shadow-md transition-all transform active:scale-98 cursor-pointer"
+          className="w-full bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-500 hover:to-emerald-600 active:from-emerald-700 text-white py-2 px-3 rounded-xl font-black text-xs flex items-center justify-center gap-1.5 shadow-md transition-all transform active:scale-98 cursor-pointer"
           aria-label={`Pedir por WhatsApp ${product.title}`}
         >
           <MessageCircle className="w-3.5 h-3.5 fill-current" />

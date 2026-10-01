@@ -77,7 +77,7 @@ export function Footer() {
             <div className="space-y-2 text-xs text-slate-200 font-medium">
               <p className="flex items-center gap-2">
                 <MapPin className="w-4 h-4 text-[#00E5E8]" />
-                <span>Casa de Gobierno, Paraná, ER</span>
+                <span>Portal Regional ON MÁS</span>
               </p>
               <p className="flex items-center gap-2">
                 <Mail className="w-4 h-4 text-[#00E5E8]" />

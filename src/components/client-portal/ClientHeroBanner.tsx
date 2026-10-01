@@ -81,9 +81,16 @@ export function ClientHeroBanner({ provinceId = 'santa-fe' }: ClientHeroBannerPr
       className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-3 pb-2"
     >
       <div 
-        className="relative w-full rounded-3xl overflow-hidden shadow-2xl border border-white/20 group bg-slate-900/40 backdrop-blur-xs"
+        className="relative w-full rounded-3xl overflow-hidden shadow-2xl border border-white/30 group bg-slate-900"
         style={{ minHeight: '260px', height: '360px', maxHeight: '460px', position: 'relative' }}
       >
+        {/* Base Fallback Background Image (Guarantees zero empty space during load or transition) */}
+        <img
+          src="/images/hero-rosario.jpg"
+          alt="Hero Background"
+          className="absolute inset-0 w-full h-full object-cover opacity-90 z-0"
+        />
+
         {/* Background Images with Fade Transition (Pure image, no text overlay) */}
         {effectiveBanners.map((slide: BannerItem, idx: number) => {
           const imgSrc = normalizeImageUrl(slide.imageUrl);
