@@ -1,6 +1,6 @@
 import React from 'react';
 import { Metadata } from 'next';
-import { notFound } from 'next/navigation';
+import { notFound, redirect } from 'next/navigation';
 import { ClientHeader } from '@/components/layout/ClientHeader';
 import { ClientHomeContainer } from '@/components/client-portal/ClientHomeContainer';
 import { ClientFooter } from '@/components/layout/ClientFooter';
@@ -70,6 +70,19 @@ export async function generateMetadata({ params }: CityHubPageProps): Promise<Me
 
 export default async function CityHubPage({ params }: CityHubPageProps) {
   const { provincia, ciudad } = await params;
+
+  if (provincia === 'superadmin' || provincia === 'admin' || provincia === 'api') {
+    const tabMap: Record<string, string> = {
+      planes: 'planes',
+      provincias: 'provincias',
+      banners: 'provincias',
+      efectivo: 'efectivo',
+      pagos: 'efectivo',
+    };
+    const tab = tabMap[ciudad] || ciudad;
+    redirect(`/superadmin?tab=${tab}`);
+  }
+
   const city = getCityBySlug(ciudad);
 
   if (!city) {
