@@ -1327,6 +1327,32 @@ export async function updateSubscriptionPlansAction(
   }
 }
 
+export async function deleteRaffleAction(
+  raffleId: string
+): Promise<{ success: boolean; message: string }> {
+  try {
+    const adminSupabase = getAdminClient();
+    const client = adminSupabase || (await createClient());
+
+    const { error } = await client
+      .from('raffles')
+      .delete()
+      .eq('id', raffleId);
+
+    if (error) {
+      console.warn('Error eliminando sorteo de Supabase:', error.message);
+      return { success: false, message: `Error eliminando sorteo: ${error.message}` };
+    }
+
+    revalidatePath('/sorteos');
+    revalidatePath('/superadmin');
+    return { success: true, message: 'Sorteo eliminado exitosamente.' };
+  } catch (err) {
+    return { success: false, message: `Error: ${(err as Error).message}` };
+  }
+}
+
+
 
 
 

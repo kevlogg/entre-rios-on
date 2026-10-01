@@ -1461,7 +1461,24 @@ export async function getRaffles(): Promise<Raffle[]> {
       const supabase = createPublicClient();
       const { data, error } = await supabase.from('raffles').select('*').order('created_at', { ascending: false });
       if (!error && Array.isArray(data)) {
-        return data.map((r) => ({
+        // Filtrar sorteos de prueba antiguos guardados en la BD
+        const validRaffles = data.filter((r) => {
+          const titleLower = (r.title || '').toLowerCase();
+          const idStr = (r.id || '').toLowerCase();
+          if (
+            titleLower.includes('estancia termal') ||
+            titleLower.includes('gastronomía en rosario') ||
+            idStr === 'raf-1' ||
+            idStr === 'raf-2'
+          ) {
+            // Intentar borrar registro de prueba antiguo en segundo plano
+            supabase.from('raffles').delete().eq('id', r.id).then(() => {});
+            return false;
+          }
+          return true;
+        });
+
+        return validRaffles.map((r) => ({
           id: r.id,
           title: r.title,
           prize: r.prize,

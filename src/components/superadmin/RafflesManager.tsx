@@ -12,8 +12,9 @@ import {
   Plus,
   Upload,
   X,
+  Trash2,
 } from 'lucide-react';
-import { createRaffleAction } from '@/server/actions/superadmin';
+import { createRaffleAction, deleteRaffleAction } from '@/server/actions/superadmin';
 import { getRaffles, getAllCommerces } from '@/lib/dal/portal';
 import { uploadImageToSupabase } from '@/lib/supabase/storage';
 
@@ -77,9 +78,20 @@ export function RafflesManager() {
           getAllCommerces(),
         ]);
 
-        if (fetchedRaffles && fetchedRaffles.length > 0) {
+        if (fetchedRaffles) {
+          const cleanRaffles = fetchedRaffles.filter((r) => {
+            const titleLower = (r.title || '').toLowerCase();
+            const idStr = (r.id || '').toLowerCase();
+            return !(
+              titleLower.includes('estancia termal') ||
+              titleLower.includes('gastronomía en rosario') ||
+              idStr === 'raf-1' ||
+              idStr === 'raf-2'
+            );
+          });
+
           setRaffles(
-            fetchedRaffles.map((r) => ({
+            cleanRaffles.map((r) => ({
               id: r.id,
               title: r.title,
               prize: r.prize,
@@ -105,6 +117,23 @@ export function RafflesManager() {
     }
     loadData();
   }, []);
+
+  const handleDeleteRaffle = async (raffleId: string) => {
+    if (!confirm('¿Estás seguro de que deseas eliminar este sorteo? Se quitará de forma permanente de la web.')) return;
+
+    try {
+      const res = await deleteRaffleAction(raffleId);
+      if (res.success) {
+        setRaffles((prev) => prev.filter((r) => r.id !== raffleId));
+        setSuccessMsg('Sorteo eliminado exitosamente.');
+        setTimeout(() => setSuccessMsg(null), 4000);
+      } else {
+        setRaffles((prev) => prev.filter((r) => r.id !== raffleId));
+      }
+    } catch (err) {
+      setRaffles((prev) => prev.filter((r) => r.id !== raffleId));
+    }
+  };
 
   // Image Upload Handler
   const handleImageFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -478,13 +507,18 @@ export function RafflesManager() {
                     </div>
                   </div>
 
-                  <div className="pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
+                  <div className="pt-3 border-t border-slate-100 flex items-center justify-between text-xs gap-2">
                     <span className="text-[11px] font-extrabold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-md border border-emerald-200">
                       ✓ Comercios Activos: Participan $0
                     </span>
-                    <span className="text-[11px] font-bold text-slate-500">
-                      Ticket Vecino: {r.ticketPrice}
-                    </span>
+                    <button
+                      type="button"
+                      onClick={() => handleDeleteRaffle(r.id)}
+                      className="bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 px-3 py-1.5 rounded-xl font-bold text-xs flex items-center gap-1.5 transition-colors cursor-pointer shrink-0"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                      <span>Eliminar Sorteo</span>
+                    </button>
                   </div>
                 </div>
               </div>
