@@ -5,6 +5,7 @@ import { City } from '@/types';
 import { Image as ImageIcon, Plus, Trash2, CheckCircle, Upload, Monitor, Smartphone, RefreshCw, ExternalLink, MapPin, ToggleLeft, ToggleRight, Eye, EyeOff, Sparkles } from 'lucide-react';
 import { getBannersByProvince, saveBannersByProvince, BannerItem } from '@/lib/services/banner-store';
 import { getProvincesConfig, saveProvincesConfig, ProvinceItem } from '@/lib/services/province-store';
+import { saveBannerSlidesAction } from '@/server/actions/superadmin';
 
 interface GeoCustomizerManagerProps {
   initialCities?: City[];
@@ -143,6 +144,12 @@ export function GeoCustomizerManager({ initialCities }: GeoCustomizerManagerProp
     reader.readAsDataURL(file);
   };
 
+  const syncToSupabase = (provId: string, updatedBanners: BannerItem[]) => {
+    saveBannerSlidesAction(provId, updatedBanners).catch((e) => {
+      console.warn('Superadmin banner sync notice:', e);
+    });
+  };
+
   const handleAddBanner = (e: React.FormEvent) => {
     e.preventDefault();
     if (!newBannerImage) return;
@@ -163,6 +170,7 @@ export function GeoCustomizerManager({ initialCities }: GeoCustomizerManagerProp
     const updated = [newBanner, ...banners];
     setBanners(updated);
     saveBannersByProvince(selectedProvinceId, updated);
+    syncToSupabase(selectedProvinceId, updated);
 
     setNewBannerImage(null);
     setSuccessMsg(`¡Nuevo banner publicado para ${currentProv.name}!`);
@@ -174,6 +182,7 @@ export function GeoCustomizerManager({ initialCities }: GeoCustomizerManagerProp
       const updated = banners.map((b) => (b.id === id ? { ...b, imageUrl: base64 } : b));
       setBanners(updated);
       saveBannersByProvince(selectedProvinceId, updated);
+      syncToSupabase(selectedProvinceId, updated);
 
       setSuccessMsg('Imagen del banner actualizada exitosamente.');
       setTimeout(() => setSuccessMsg(null), 3000);
@@ -184,6 +193,7 @@ export function GeoCustomizerManager({ initialCities }: GeoCustomizerManagerProp
     const updated = banners.filter((b) => b.id !== id);
     setBanners(updated);
     saveBannersByProvince(selectedProvinceId, updated);
+    syncToSupabase(selectedProvinceId, updated);
 
     setSuccessMsg('Banner eliminado correctamente.');
     setTimeout(() => setSuccessMsg(null), 3000);

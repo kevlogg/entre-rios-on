@@ -367,6 +367,45 @@ export async function saveProvinceConfigAction(config: {
   }
 }
 
+export async function saveBannerSlidesAction(provinceId: string, banners: Array<{
+  id: string;
+  imageUrl: string;
+  device?: string;
+  ctaHref?: string;
+}>): Promise<{ success: boolean; message: string }> {
+  try {
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    if (supabaseUrl && !supabaseUrl.includes('your-supabase-project')) {
+      const supabase = await createClient();
+
+      // Clear existing records for target province
+      await supabase.from('banner_slides').delete().eq('province_id', provinceId);
+
+      if (banners.length > 0) {
+        const rows = banners.map((b) => ({
+          province_id: provinceId,
+          image_url: b.imageUrl,
+          cta_url: b.ctaHref || `/${provinceId}`,
+          created_at: new Date().toISOString(),
+        }));
+
+        const { error } = await supabase.from('banner_slides').insert(rows);
+        if (error) {
+          console.warn('Supabase banner_slides insert notice:', error.message);
+        }
+      }
+    }
+
+    revalidatePath('/');
+    revalidatePath('/inicio');
+    revalidatePath(`/${provinceId}`);
+    revalidatePath('/superadmin');
+    return { success: true, message: 'Banners sincronizados correctamente en la plataforma.' };
+  } catch (err) {
+    return { success: false, message: `Error: ${(err as Error).message}` };
+  }
+}
+
 export async function drawRaffleWinnerAction(
   raffleId: string
 ): Promise<{ success: boolean; winnerName?: string; winnerPhone?: string; message: string }> {
