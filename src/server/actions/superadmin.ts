@@ -2,6 +2,7 @@
 
 import { revalidatePath } from 'next/cache';
 import { createClient } from '@/lib/supabase/server';
+import { createClient as createSupabaseJSClient } from '@supabase/supabase-js';
 
 export async function toggleCommerceVerificationAction(
   commerceId: string,
@@ -720,7 +721,6 @@ export async function deleteTourismServiceAction(serviceId: string): Promise<{ s
   }
 }
 
-import { createClient as createSupabaseJSClient } from '@supabase/supabase-js';
 
 function getAdminClient() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
