@@ -295,7 +295,7 @@ export function ClientHeader() {
   return (
     <header className="bg-black/20 backdrop-blur-xl border-b border-white/10 sticky top-0 z-40 shadow-lg">
       {/* Top Header Main Row */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 relative z-30">
         <div className="flex items-center justify-between gap-4">
           
           {/* Logo Oficial en Card de Fondo Blanco Brillante */}
@@ -317,7 +317,7 @@ export function ClientHeader() {
           </Link>
 
           {/* Location Selectors */}
-          <div className="hidden lg:flex items-center gap-1.5 bg-white/15 backdrop-blur-md border border-white/30 rounded-2xl p-1 shadow-md">
+          <div className="hidden lg:flex items-center gap-1.5 bg-white/15 backdrop-blur-md border border-white/30 rounded-2xl p-1 shadow-md relative z-30">
             
             {/* Selector de Provincia */}
             <div className="relative">
@@ -400,7 +400,7 @@ export function ClientHeader() {
           </div>
 
           {/* Buscador Global Interactivo (Desktop) */}
-          <div ref={searchContainerRef} className="hidden md:block flex-1 max-w-md relative">
+          <div ref={searchContainerRef} className="hidden md:block flex-1 max-w-md relative z-30">
             <form onSubmit={handleSearchSubmit} className="relative flex items-center">
               <input
                 type="text"
@@ -553,7 +553,7 @@ export function ClientHeader() {
           </div>
 
           {/* User Actions */}
-          <div className="flex items-center gap-3 sm:gap-4">
+          <div className="flex items-center gap-3 sm:gap-4 relative z-30">
             {!currentUser ? (
               <Link 
                 href="/login" 
@@ -608,7 +608,7 @@ export function ClientHeader() {
       </div>
 
       {/* Secondary Horizontal Navigation Bar - Floating Individual Badges */}
-      <nav className="hidden md:block py-2.5 bg-transparent">
+      <nav className="hidden md:block py-2.5 bg-transparent relative z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <ul className="flex items-center justify-start gap-2 overflow-x-auto text-xs font-bold scrollbar-none py-0.5">
             {navLinks.map((link) => {
