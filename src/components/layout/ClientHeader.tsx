@@ -298,36 +298,41 @@ export function ClientHeader() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
         <div className="flex items-center justify-between gap-4">
           
-          {/* Logo Oficial */}
-          <Link href="/" className="flex items-center gap-3 shrink-0">
-            <div className="relative w-40 h-12 sm:w-48 sm:h-14">
-              <Image
-                src="/logo.png"
-                alt="ON MÁS - Portal Comercial & Regional"
-                fill
-                priority
-                className="object-contain object-left"
-              />
+          {/* Logo Oficial en Card de Fondo Consistente */}
+          <Link href="/" className="flex items-center shrink-0">
+            <div className="flex flex-col items-center bg-slate-900/80 hover:bg-slate-900/95 backdrop-blur-md border border-white/25 px-4 py-1.5 rounded-2xl shadow-xl transition-all group">
+              <div className="relative w-36 h-9 sm:w-44 sm:h-10">
+                <Image
+                  src="/logo.png"
+                  alt="ON MÁS - Portal Comercial & Regional"
+                  fill
+                  priority
+                  className="object-contain"
+                />
+              </div>
+              <span className="text-[9px] font-black uppercase tracking-[0.3em] text-cyan-300 group-hover:text-cyan-200 transition-colors -mt-0.5">
+                PORTAL
+              </span>
             </div>
           </Link>
 
           {/* Location Selectors */}
-          <div className="hidden lg:flex items-center gap-1.5 bg-slate-50 border border-slate-200 rounded-2xl p-1 shadow-2xs">
+          <div className="hidden lg:flex items-center gap-1.5 bg-slate-900/60 backdrop-blur-md border border-white/20 rounded-2xl p-1 shadow-lg">
             
             {/* Selector de Provincia */}
             <div className="relative">
               <button
                 onClick={() => setIsProvinceDropdownOpen(!isProvinceDropdownOpen)}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold text-slate-700 hover:bg-white transition-all cursor-pointer"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold text-slate-100 hover:bg-white/10 transition-all cursor-pointer"
               >
-                <MapPin className="w-3.5 h-3.5 text-[#00ADB5]" />
+                <MapPin className="w-3.5 h-3.5 text-cyan-300" />
                 <span className="truncate max-w-[100px]">{currentProvinceObj.name}</span>
-                <ChevronDown className="w-3 h-3 text-slate-400" />
+                <ChevronDown className="w-3 h-3 text-slate-300" />
               </button>
 
               {isProvinceDropdownOpen && (
-                <div className="absolute top-full left-0 mt-1.5 w-52 bg-white border border-slate-200 rounded-2xl shadow-xl py-2 z-50 animate-in fade-in duration-100 space-y-1">
-                  <div className="px-3.5 py-1 text-[10px] font-black text-slate-400 uppercase tracking-wider">
+                <div className="absolute top-full left-0 mt-1.5 w-52 bg-slate-900/95 backdrop-blur-xl border border-white/20 rounded-2xl shadow-2xl py-2 z-50 animate-in fade-in duration-100 space-y-1">
+                  <div className="px-3.5 py-1 text-[10px] font-black text-cyan-300 uppercase tracking-wider">
                     Provincias Activas
                   </div>
                   {activeProvinces.map((prov) => (
@@ -335,15 +340,15 @@ export function ClientHeader() {
                       key={prov.id}
                       type="button"
                       onClick={() => handleProvinceSelect(prov.id)}
-                      className={`w-full text-left px-3.5 py-1.5 text-xs font-bold flex items-center justify-between hover:bg-cyan-50/50 transition-colors ${
+                      className={`w-full text-left px-3.5 py-1.5 text-xs font-bold flex items-center justify-between hover:bg-white/10 transition-colors ${
                         selectedProvince === prov.id || selectedProvince === prov.slug
-                          ? 'text-[#0047BA] bg-cyan-50/50 font-extrabold'
-                          : 'text-slate-700'
+                          ? 'text-cyan-300 bg-white/10 font-extrabold'
+                          : 'text-slate-200'
                       }`}
                     >
                       <span>{prov.name}</span>
                       {(selectedProvince === prov.id || selectedProvince === prov.slug) && (
-                        <span className="w-1.5 h-1.5 rounded-full bg-[#00ADB5]" />
+                        <span className="w-1.5 h-1.5 rounded-full bg-cyan-400" />
                       )}
                     </button>
                   ))}
@@ -351,42 +356,42 @@ export function ClientHeader() {
               )}
             </div>
 
-            <span className="text-slate-300 font-light">|</span>
+            <span className="text-white/30 font-light">|</span>
 
             {/* Selector de Ciudad */}
             <div className="relative">
               <button
                 onClick={() => setIsCityDropdownOpen(!isCityDropdownOpen)}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold text-slate-700 hover:bg-white transition-all cursor-pointer"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold text-slate-100 hover:bg-white/10 transition-all cursor-pointer"
               >
-                <Building2 className="w-3.5 h-3.5 text-[#0047BA]" />
+                <Building2 className="w-3.5 h-3.5 text-cyan-300" />
                 <span className="truncate max-w-[130px]">{currentCityObj.name}</span>
-                <ChevronDown className="w-3 h-3 text-slate-400" />
+                <ChevronDown className="w-3 h-3 text-slate-300" />
               </button>
 
               {isCityDropdownOpen && (
-                <div className="absolute top-full left-0 mt-1.5 w-52 max-h-60 overflow-y-auto bg-white border border-slate-200 rounded-2xl shadow-xl py-1.5 z-50 animate-in fade-in duration-100 scrollbar-none">
+                <div className="absolute top-full left-0 mt-1.5 w-52 max-h-60 overflow-y-auto bg-slate-900/95 backdrop-blur-xl border border-white/20 rounded-2xl shadow-2xl py-1.5 z-50 animate-in fade-in duration-100 scrollbar-none">
                   <button
                     type="button"
                     onClick={() => handleCitySelect('all', 'Todas las ciudades')}
-                    className={`w-full text-left px-3 py-1.5 text-xs flex items-center justify-between hover:bg-slate-50 transition-colors ${
-                      selectedCity === 'all' ? 'font-bold text-[#0047BA] bg-cyan-50/50' : 'text-slate-700'
+                    className={`w-full text-left px-3 py-1.5 text-xs flex items-center justify-between hover:bg-white/10 transition-colors ${
+                      selectedCity === 'all' ? 'font-bold text-cyan-300 bg-white/10' : 'text-slate-200'
                     }`}
                   >
                     <span>Todas las ciudades</span>
-                    {selectedCity === 'all' && <span className="w-1.5 h-1.5 rounded-full bg-[#00ADB5]" />}
+                    {selectedCity === 'all' && <span className="w-1.5 h-1.5 rounded-full bg-cyan-400" />}
                   </button>
                   {availableCities.map((city) => (
                     <button
                       key={city.id}
                       type="button"
                       onClick={() => handleCitySelect(city.id, city.name)}
-                      className={`w-full text-left px-3 py-1.5 text-xs flex items-center justify-between hover:bg-slate-50 transition-colors ${
-                        selectedCity === city.id ? 'font-bold text-[#0047BA] bg-cyan-50/50' : 'text-slate-700'
+                      className={`w-full text-left px-3 py-1.5 text-xs flex items-center justify-between hover:bg-white/10 transition-colors ${
+                        selectedCity === city.id ? 'font-bold text-cyan-300 bg-white/10' : 'text-slate-200'
                       }`}
                     >
                       <span>{city.name}</span>
-                      {selectedCity === city.id && <span className="w-1.5 h-1.5 rounded-full bg-[#00ADB5]" />}
+                      {selectedCity === city.id && <span className="w-1.5 h-1.5 rounded-full bg-cyan-400" />}
                     </button>
                   ))}
                 </div>
@@ -406,11 +411,11 @@ export function ClientHeader() {
                   setSearchQuery(e.target.value);
                   setIsSearchFocused(true);
                 }}
-                className="w-full bg-slate-50 border border-slate-300 rounded-xl pl-4 pr-12 py-2 text-xs text-slate-800 placeholder-slate-400 focus:outline-hidden focus:ring-2 focus:ring-[#00ADB5] focus:bg-white transition-all"
+                className="w-full bg-slate-900/60 backdrop-blur-md border border-white/20 rounded-xl pl-4 pr-12 py-2 text-xs text-white placeholder-slate-300 focus:outline-hidden focus:ring-2 focus:ring-cyan-400 focus:bg-slate-900/90 transition-all shadow-inner"
               />
               <button
                 type="submit"
-                className="absolute right-1 top-1 bottom-1 bg-gradient-to-r from-[#00ADB5] to-[#0047BA] hover:from-[#007C8A] hover:to-[#002878] text-white px-3 rounded-lg flex items-center justify-center transition-all shadow-xs cursor-pointer"
+                className="absolute right-1 top-1 bottom-1 bg-gradient-to-r from-cyan-400 to-blue-600 hover:from-cyan-300 hover:to-blue-500 text-slate-950 font-black px-3 rounded-lg flex items-center justify-center transition-all shadow-md cursor-pointer"
                 aria-label="Buscar"
               >
                 <Search className="w-3.5 h-3.5" />
@@ -419,20 +424,20 @@ export function ClientHeader() {
 
             {/* Desplegable de Resultados de Búsqueda en Vivo */}
             {isSearchFocused && liveSearchResults && (
-              <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-slate-200 rounded-2xl shadow-2xl overflow-hidden z-50 max-h-[80vh] overflow-y-auto animate-in fade-in duration-150">
+              <div className="absolute top-full left-0 right-0 mt-2 bg-slate-900/95 backdrop-blur-2xl border border-white/20 rounded-2xl shadow-2xl overflow-hidden z-50 max-h-[80vh] overflow-y-auto animate-in fade-in duration-150 text-white">
                 {liveSearchResults.totalCount === 0 ? (
-                  <div className="p-6 text-center text-slate-500 space-y-2">
-                    <Search className="w-8 h-8 text-slate-300 mx-auto" />
-                    <p className="text-xs font-bold text-slate-700">No encontramos coincidencias exactas</p>
+                  <div className="p-6 text-center text-slate-300 space-y-2">
+                    <Search className="w-8 h-8 text-slate-400 mx-auto" />
+                    <p className="text-xs font-bold text-slate-100">No encontramos coincidencias exactas</p>
                     <p className="text-[11px] text-slate-400">Presioná Enter para buscar &ldquo;{searchQuery}&rdquo; en el catálogo general.</p>
                   </div>
                 ) : (
-                  <div className="divide-y divide-slate-100">
+                  <div className="divide-y divide-white/10">
                     
                     {/* Secciones / Páginas */}
                     {liveSearchResults.pages.length > 0 && (
-                      <div className="p-3 bg-slate-50/60">
-                        <span className="text-[10px] font-black uppercase tracking-wider text-[#0047BA] block mb-2">
+                      <div className="p-3 bg-white/5">
+                        <span className="text-[10px] font-black uppercase tracking-wider text-cyan-300 block mb-2">
                           Secciones del Sitio
                         </span>
                         <div className="space-y-1">
@@ -443,20 +448,20 @@ export function ClientHeader() {
                                 key={p.href}
                                 href={p.href}
                                 onClick={() => setIsSearchFocused(false)}
-                                className="flex items-center justify-between p-2 rounded-xl hover:bg-white transition-colors group cursor-pointer"
+                                className="flex items-center justify-between p-2 rounded-xl hover:bg-white/10 transition-colors group cursor-pointer"
                               >
                                 <div className="flex items-center gap-2.5">
-                                  <div className="w-7 h-7 rounded-lg bg-cyan-100 text-[#0047BA] flex items-center justify-center shrink-0">
+                                  <div className="w-7 h-7 rounded-lg bg-cyan-400/20 text-cyan-300 flex items-center justify-center shrink-0">
                                     <IconComponent className="w-4 h-4" />
                                   </div>
                                   <div>
-                                    <span className="text-xs font-extrabold text-slate-900 group-hover:text-[#0047BA] block">
+                                    <span className="text-xs font-extrabold text-white group-hover:text-cyan-300 block">
                                       {p.name}
                                     </span>
-                                    <span className="text-[10px] text-slate-500">{p.description}</span>
+                                    <span className="text-[10px] text-slate-300">{p.description}</span>
                                   </div>
                                 </div>
-                                <ArrowRight className="w-3.5 h-3.5 text-slate-400 group-hover:text-[#00ADB5] group-hover:translate-x-0.5 transition-all" />
+                                <ArrowRight className="w-3.5 h-3.5 text-slate-400 group-hover:text-cyan-300 group-hover:translate-x-0.5 transition-all" />
                               </Link>
                             );
                           })}
@@ -467,7 +472,7 @@ export function ClientHeader() {
                     {/* Comercios */}
                     {liveSearchResults.commerces.length > 0 && (
                       <div className="p-3">
-                        <span className="text-[10px] font-black uppercase tracking-wider text-[#00ADB5] block mb-2">
+                        <span className="text-[10px] font-black uppercase tracking-wider text-cyan-300 block mb-2">
                           Comercios & Locales ({liveSearchResults.commerces.length})
                         </span>
                         <div className="space-y-1">
@@ -476,20 +481,20 @@ export function ClientHeader() {
                               key={c.id}
                               href={`/comercio/${c.slug}`}
                               onClick={() => setIsSearchFocused(false)}
-                              className="flex items-center justify-between p-2 rounded-xl hover:bg-slate-50 transition-colors group cursor-pointer"
+                              className="flex items-center justify-between p-2 rounded-xl hover:bg-white/10 transition-colors group cursor-pointer"
                             >
                               <div className="flex items-center gap-2.5">
-                                <div className="relative w-8 h-8 rounded-lg overflow-hidden border border-slate-200 bg-slate-100 shrink-0">
+                                <div className="relative w-8 h-8 rounded-lg overflow-hidden border border-white/20 bg-white shrink-0">
                                   <img src={c.logoUrl} alt={c.name} className="w-full h-full object-cover" />
                                 </div>
                                 <div>
-                                  <span className="text-xs font-extrabold text-slate-900 group-hover:text-[#0047BA] block">
+                                  <span className="text-xs font-extrabold text-white group-hover:text-cyan-300 block">
                                     {c.name}
                                   </span>
-                                  <span className="text-[10px] text-slate-500">{c.category} • {c.cityName}</span>
+                                  <span className="text-[10px] text-slate-300">{c.category} • {c.cityName}</span>
                                 </div>
                               </div>
-                              <span className="text-[10px] font-bold text-[#0047BA] bg-cyan-50 px-2 py-0.5 rounded-md">
+                              <span className="text-[10px] font-bold text-cyan-300 bg-white/10 px-2 py-0.5 rounded-md">
                                 Ver Perfil
                               </span>
                             </Link>
@@ -501,7 +506,7 @@ export function ClientHeader() {
                     {/* Productos */}
                     {liveSearchResults.products.length > 0 && (
                       <div className="p-3">
-                        <span className="text-[10px] font-black uppercase tracking-wider text-emerald-700 block mb-2">
+                        <span className="text-[10px] font-black uppercase tracking-wider text-emerald-400 block mb-2">
                           Productos & Ofertas ({liveSearchResults.products.length})
                         </span>
                         <div className="space-y-1">
@@ -510,20 +515,20 @@ export function ClientHeader() {
                               key={p.id}
                               href={`/producto/${p.slug}`}
                               onClick={() => setIsSearchFocused(false)}
-                              className="flex items-center justify-between p-2 rounded-xl hover:bg-slate-50 transition-colors group cursor-pointer"
+                              className="flex items-center justify-between p-2 rounded-xl hover:bg-white/10 transition-colors group cursor-pointer"
                             >
                               <div className="flex items-center gap-2.5">
-                                <div className="relative w-8 h-8 rounded-lg overflow-hidden border border-slate-200 bg-slate-100 shrink-0">
+                                <div className="relative w-8 h-8 rounded-lg overflow-hidden border border-white/20 bg-white shrink-0">
                                   <img src={p.imageUrl} alt={p.title} className="w-full h-full object-cover" />
                                 </div>
                                 <div className="truncate max-w-[200px] sm:max-w-[260px]">
-                                  <span className="text-xs font-bold text-slate-900 group-hover:text-[#0047BA] block truncate">
+                                  <span className="text-xs font-bold text-white group-hover:text-cyan-300 block truncate">
                                     {p.title}
                                   </span>
-                                  <span className="text-[10px] text-slate-500">{p.commerceName}</span>
+                                  <span className="text-[10px] text-slate-300">{p.commerceName}</span>
                                 </div>
                               </div>
-                              <span className="text-xs font-black text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md shrink-0">
+                              <span className="text-xs font-black text-emerald-300 bg-emerald-950/60 px-2 py-0.5 rounded-md shrink-0 border border-emerald-500/30">
                                 {p.price ? `$${p.price.toLocaleString('es-AR')}` : 'Consultar'}
                               </span>
                             </Link>
@@ -536,7 +541,7 @@ export function ClientHeader() {
                     <Link
                       href={`/catalogo?q=${encodeURIComponent(searchQuery)}`}
                       onClick={() => setIsSearchFocused(false)}
-                      className="block p-3 text-center bg-cyan-50 hover:bg-cyan-100 text-[#0047BA] text-xs font-black transition-colors"
+                      className="block p-3 text-center bg-cyan-950/80 hover:bg-cyan-900/90 text-cyan-300 text-xs font-black transition-colors"
                     >
                       Ver todos los resultados para &ldquo;{searchQuery}&rdquo; en el Catálogo →
                     </Link>
@@ -552,20 +557,20 @@ export function ClientHeader() {
             {!currentUser ? (
               <Link 
                 href="/login" 
-                className="flex items-center gap-2 bg-slate-50 hover:bg-cyan-50/80 text-[#0047BA] hover:text-[#00ADB5] border border-slate-200 hover:border-[#00ADB5] px-3.5 py-2 rounded-2xl text-xs font-extrabold transition-all shadow-2xs cursor-pointer shrink-0"
+                className="flex items-center gap-2 bg-slate-900/70 hover:bg-slate-900/95 text-white hover:text-cyan-300 border border-white/25 hover:border-cyan-400 px-3.5 py-2 rounded-2xl text-xs font-extrabold transition-all shadow-lg cursor-pointer shrink-0 backdrop-blur-md"
                 title="Ingresar o Registrarse"
               >
-                <User className="w-4 h-4 text-[#00ADB5]" />
+                <User className="w-4 h-4 text-cyan-300" />
                 <span>Ingresar / Crear cuenta</span>
               </Link>
             ) : (
               <Link 
                 href="/admin" 
-                className="flex items-center gap-2.5 bg-slate-50 hover:bg-cyan-50/80 border border-slate-200 hover:border-[#00ADB5] p-1 pr-3 rounded-2xl transition-all shadow-2xs cursor-pointer group shrink-0"
+                className="flex items-center gap-2.5 bg-slate-900/70 hover:bg-slate-900/95 border border-white/25 hover:border-cyan-400 p-1 pr-3 rounded-2xl transition-all shadow-lg cursor-pointer group shrink-0 backdrop-blur-md"
                 title={`Panel de Administración: ${userCommerce?.name || 'Mi Negocio'}`}
               >
                 {userCommerce?.logoUrl ? (
-                  <div className="relative w-8 h-8 rounded-xl overflow-hidden border border-slate-300 group-hover:border-[#00ADB5] bg-white shrink-0 shadow-2xs">
+                  <div className="relative w-8 h-8 rounded-xl overflow-hidden border border-white/20 group-hover:border-cyan-400 bg-white shrink-0 shadow-2xs">
                     <Image
                       src={userCommerce.logoUrl}
                       alt={userCommerce.name}
@@ -574,15 +579,15 @@ export function ClientHeader() {
                     />
                   </div>
                 ) : (
-                  <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-[#0047BA] to-[#00ADB5] text-white flex items-center justify-center font-black text-sm shadow-2xs shrink-0">
+                  <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-cyan-400 to-blue-600 text-slate-950 flex items-center justify-center font-black text-sm shadow-md shrink-0">
                     {userCommerce?.initial || 'M'}
                   </div>
                 )}
                 <div className="hidden sm:flex flex-col text-left">
-                  <span className="text-[11px] font-black text-slate-900 group-hover:text-[#0047BA] leading-tight truncate max-w-[120px]">
+                  <span className="text-[11px] font-black text-white group-hover:text-cyan-300 leading-tight truncate max-w-[120px]">
                     {userCommerce?.name || 'Mi Comercio'}
                   </span>
-                  <span className="text-[9px] font-extrabold text-[#00ADB5] uppercase tracking-wider">
+                  <span className="text-[9px] font-extrabold text-cyan-300 uppercase tracking-wider">
                     Mi Negocio
                   </span>
                 </div>
@@ -592,7 +597,7 @@ export function ClientHeader() {
             {/* Mobile Hamburger Toggle */}
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="md:hidden p-2 text-slate-700 hover:text-[#00ADB5] focus:outline-hidden"
+              className="md:hidden p-2 text-white hover:text-cyan-300 focus:outline-hidden"
               aria-label="Toggle Navigation Menu"
             >
               {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
@@ -603,9 +608,9 @@ export function ClientHeader() {
       </div>
 
       {/* Secondary Horizontal Navigation Bar */}
-      <nav className="hidden md:block border-t border-slate-100 bg-white">
+      <nav className="hidden md:block border-t border-white/10 bg-black/25 backdrop-blur-xl">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <ul className="flex items-center justify-start gap-1 sm:gap-2 overflow-x-auto text-xs font-bold text-slate-700 scrollbar-none py-1.5">
+          <ul className="flex items-center justify-start gap-1 sm:gap-2 overflow-x-auto text-xs font-bold text-slate-200 scrollbar-none py-2">
             {navLinks.map((link) => {
               const isActive = pathname === link.href || (link.slug !== '' && pathname?.includes(`/${link.slug}`));
               return (
@@ -614,11 +619,11 @@ export function ClientHeader() {
                     href={link.href}
                     className={`px-4 py-1.5 rounded-xl flex items-center gap-1.5 transition-all whitespace-nowrap ${
                       isActive
-                        ? 'bg-gradient-to-r from-[#00ADB5] to-[#0047BA] text-white shadow-xs font-extrabold'
-                        : 'hover:bg-cyan-50/60 hover:text-[#00ADB5] text-slate-700 font-bold'
+                        ? 'bg-gradient-to-r from-cyan-400 to-blue-600 text-slate-950 font-black shadow-lg scale-[1.02]'
+                        : 'hover:bg-white/15 hover:text-cyan-300 text-slate-100 font-extrabold'
                     }`}
                   >
-                    {link.name === 'Sorteos ON MÁS' && <Sparkles className="w-3.5 h-3.5 text-amber-400" />}
+                    {link.name === 'Sorteos ON MÁS' && <Sparkles className="w-3.5 h-3.5 text-amber-300" />}
                     <span>{link.name}</span>
                   </Link>
                 </li>
@@ -630,42 +635,42 @@ export function ClientHeader() {
 
       {/* Mobile Drawer Menu */}
       {isMobileMenuOpen && (
-        <div className="md:hidden bg-white border-t border-slate-200 px-4 pt-4 pb-6 space-y-4 animate-in fade-in duration-200">
+        <div className="md:hidden bg-slate-900/95 backdrop-blur-2xl border-t border-white/10 px-4 pt-4 pb-6 space-y-4 animate-in fade-in duration-200 text-white">
           
           {/* User Account Mobile CTA */}
           {!currentUser ? (
             <Link
               href="/login"
               onClick={() => setIsMobileMenuOpen(false)}
-              className="flex items-center justify-center gap-2 py-3 px-4 rounded-2xl bg-cyan-50/80 border border-cyan-200 text-xs font-black text-[#0047BA] shadow-2xs"
+              className="flex items-center justify-center gap-2 py-3 px-4 rounded-2xl bg-white/10 border border-white/20 text-xs font-black text-cyan-300 shadow-md"
             >
-              <User className="w-4 h-4 text-[#00ADB5]" />
+              <User className="w-4 h-4 text-cyan-300" />
               <span>Ingresar / Crear cuenta</span>
             </Link>
           ) : (
             <Link
               href="/admin"
               onClick={() => setIsMobileMenuOpen(false)}
-              className="flex items-center gap-3 p-2.5 rounded-2xl bg-cyan-50/60 border border-cyan-200 text-xs font-black text-slate-900 shadow-2xs"
+              className="flex items-center gap-3 p-2.5 rounded-2xl bg-white/10 border border-white/20 text-xs font-black text-white shadow-md"
             >
               {userCommerce?.logoUrl ? (
-                <div className="relative w-9 h-9 rounded-xl overflow-hidden border border-slate-300 bg-white shrink-0">
+                <div className="relative w-9 h-9 rounded-xl overflow-hidden border border-white/20 bg-white shrink-0">
                   <Image src={userCommerce.logoUrl} alt={userCommerce.name} fill className="object-cover" />
                 </div>
               ) : (
-                <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-[#0047BA] to-[#00ADB5] text-white flex items-center justify-center font-black text-sm shrink-0">
+                <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-cyan-400 to-blue-600 text-slate-950 flex items-center justify-center font-black text-sm shrink-0">
                   {userCommerce?.initial || 'M'}
                 </div>
               )}
               <div className="flex flex-col text-left">
-                <span className="font-black text-slate-900 text-xs">{userCommerce?.name}</span>
-                <span className="text-[10px] text-[#00ADB5] font-bold">Ir a Mi Negocio (Panel)</span>
+                <span className="font-black text-white text-xs">{userCommerce?.name}</span>
+                <span className="text-[10px] text-cyan-300 font-bold">Ir a Mi Negocio (Panel)</span>
               </div>
             </Link>
           )}
           
           <div className="space-y-2">
-            <label className="block text-xs font-bold text-slate-600">Provincia</label>
+            <label className="block text-xs font-bold text-slate-300">Provincia</label>
             <div className="flex flex-col gap-1.5">
               {activeProvinces.map((prov) => {
                 const isSelected = selectedProvince === prov.id || selectedProvince === prov.slug;
@@ -675,12 +680,12 @@ export function ClientHeader() {
                     onClick={() => handleProvinceSelect(prov.id)}
                     className={`w-full text-xs py-2 px-3 rounded-xl border text-center font-bold flex items-center justify-between ${
                       isSelected
-                        ? 'border-[#0047BA] bg-cyan-50 text-[#0047BA]'
-                        : 'border-slate-200 text-slate-700'
+                        ? 'border-cyan-400 bg-white/15 text-cyan-300'
+                        : 'border-white/15 text-slate-200'
                     }`}
                   >
                     <span>{prov.name}</span>
-                    {isSelected && <span className="w-2 h-2 rounded-full bg-[#00ADB5]" />}
+                    {isSelected && <span className="w-2 h-2 rounded-full bg-cyan-400" />}
                   </button>
                 );
               })}
@@ -688,11 +693,11 @@ export function ClientHeader() {
           </div>
 
           <div className="space-y-2">
-            <label className="block text-xs font-bold text-slate-600">Ciudad</label>
+            <label className="block text-xs font-bold text-slate-300">Ciudad</label>
             <select
               value={selectedCity}
               onChange={(e) => setSelectedCity(e.target.value)}
-              className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-800 font-medium"
+              className="w-full bg-slate-800 border border-white/20 rounded-xl px-3 py-2 text-xs text-white font-medium"
             >
               <option value="all">Todas las ciudades ({currentProvinceObj.name})</option>
               {availableCities.map((city) => (
@@ -710,22 +715,22 @@ export function ClientHeader() {
               placeholder="Buscá productos, comercios, ofertas..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-slate-100 border border-slate-200 rounded-xl pl-4 pr-10 py-2 text-xs"
+              className="w-full bg-slate-800 border border-white/20 rounded-xl pl-4 pr-10 py-2 text-xs text-white placeholder-slate-400"
             />
-            <button type="submit" className="absolute right-2 top-2 bg-gradient-to-r from-[#00ADB5] to-[#007C8A] text-white p-1 rounded-lg">
+            <button type="submit" className="absolute right-2 top-2 bg-gradient-to-r from-cyan-400 to-blue-600 text-slate-950 p-1 rounded-lg">
               <Search className="w-3.5 h-3.5" />
             </button>
           </form>
 
-          <div className="flex flex-col gap-1 pt-2 border-t border-slate-100">
+          <div className="flex flex-col gap-1 pt-2 border-t border-white/10">
             {navLinks.map((link) => (
               <Link
                 key={link.name}
                 href={link.href}
                 onClick={() => setIsMobileMenuOpen(false)}
-                className="text-xs font-bold py-2 px-3 rounded-lg hover:bg-slate-100 text-slate-700 flex items-center gap-2"
+                className="text-xs font-bold py-2 px-3 rounded-lg hover:bg-white/10 text-slate-100 hover:text-cyan-300 flex items-center gap-2"
               >
-                {link.name === 'Sorteos ON MÁS' && <Sparkles className="w-3.5 h-3.5 text-amber-500" />}
+                {link.name === 'Sorteos ON MÁS' && <Sparkles className="w-3.5 h-3.5 text-amber-300" />}
                 <span>{link.name}</span>
               </Link>
             ))}
