@@ -69,7 +69,7 @@ export function HeroSlider({ slides, featuredCommerce, weekendEvent }: HeroSlide
         
         {/* Left/Center: Editorial Hero Banner Slider (8 Cols) */}
         <div 
-          className="lg:col-span-8 relative rounded-3xl overflow-hidden shadow-md border border-slate-200 min-h-[400px] sm:min-h-[460px] flex flex-col justify-between group focus:outline-hidden focus:ring-4 focus:ring-[#0047BA]"
+          className="lg:col-span-8 relative rounded-3xl overflow-hidden shadow-xl border border-white/20 min-h-[380px] sm:min-h-[440px] flex flex-col justify-between group focus:outline-hidden"
           onMouseEnter={() => setIsPlaying(false)}
           onMouseLeave={() => setIsPlaying(true)}
           onKeyDown={handleKeyDown}
@@ -78,10 +78,11 @@ export function HeroSlider({ slides, featuredCommerce, weekendEvent }: HeroSlide
           aria-roledescription="carousel"
           aria-label="Slider de Novedades Regionales"
         >
-          {/* Background Images with Fade */}
+          {/* Background Images with Fade (Pure image view, no text overlay) */}
           {slides.map((slide, idx) => (
-            <div
+            <Link
               key={slide.id}
+              href={slide.ctaUrl || '#'}
               className={`absolute inset-0 transition-opacity duration-700 ease-in-out ${
                 idx === currentIndex ? 'opacity-100 z-10' : 'opacity-0 z-0 pointer-events-none'
               }`}
@@ -89,84 +90,48 @@ export function HeroSlider({ slides, featuredCommerce, weekendEvent }: HeroSlide
             >
               <Image
                 src={slide.imageUrl}
-                alt={slide.title}
+                alt={slide.title || 'Banner Publicitario'}
                 fill
                 priority={idx === 0}
                 sizes="(max-width: 1024px) 100vw, 66vw"
-                className="object-cover object-center transform scale-102 group-hover:scale-100 transition-transform duration-1000"
+                className="object-cover object-center"
               />
-              {/* Clean Editorial Gradient with Deep Navy/Cobalt Overlay */}
-              <div className="absolute inset-0 bg-gradient-to-t from-[#002878]/95 via-[#0047BA]/50 to-transparent" />
-            </div>
+            </Link>
           ))}
 
-          {/* Top Floating Badge & Autoplay Control */}
-          <div className="relative z-20 p-6 flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <span className="inline-flex items-center gap-1.5 bg-gradient-to-r from-[#00ADB5] to-[#007C8A] text-white text-xs font-extrabold px-3.5 py-1.5 rounded-full shadow-md uppercase tracking-wider">
-                <Sparkles className="w-3.5 h-3.5 text-[#00E5E8]" />
-                {activeSlide.badgeText}
-              </span>
-              <span className="hidden sm:inline-flex items-center gap-1 bg-black/40 backdrop-blur-md text-white text-xs font-semibold px-3 py-1 rounded-full">
-                <MapPin className="w-3.5 h-3.5 text-[#00E5E8]" />
-                {activeSlide.cityTag}
-              </span>
-            </div>
-          </div>
-
-          {/* Bottom Editorial Content */}
-          <div className="relative z-20 p-6 sm:p-8 space-y-4">
-            <div className="space-y-2 max-w-2xl">
-              <h1 className="text-2xl sm:text-4xl font-extrabold text-white leading-tight drop-shadow-md">
-                {activeSlide.title}
-              </h1>
-              <p className="text-sm sm:text-base text-slate-100 line-clamp-2 drop-shadow-sm font-medium">
-                {activeSlide.subtitle}
-              </p>
-            </div>
-
-            <div className="flex flex-wrap items-center justify-between gap-4 pt-2">
-              <Link
-                href={activeSlide.ctaUrl}
-                className="inline-flex items-center gap-2 bg-gradient-to-r from-[#00ADB5] via-[#007C8A] to-[#0047BA] hover:from-[#00E5E8] hover:to-[#0B66FF] text-white px-6 py-3 rounded-2xl font-extrabold text-sm shadow-lg transition-all transform hover:scale-105 active:scale-95"
+          {/* Floating subtle navigation controls at bottom right */}
+          {slides.length > 1 && (
+            <div className="absolute bottom-4 right-4 z-20 flex items-center gap-3 bg-slate-900/60 backdrop-blur-md px-3.5 py-1.5 rounded-full border border-white/20 shadow-xl">
+              <button
+                onClick={prevSlide}
+                className="text-white/80 hover:text-white p-1 rounded-full hover:bg-white/20 transition-colors cursor-pointer"
+                aria-label="Diapositiva anterior"
               >
-                <span>{activeSlide.ctaText}</span>
-                <ArrowRight className="w-4 h-4" />
-              </Link>
+                <ChevronLeft className="w-5 h-5" />
+              </button>
 
-              {/* Navigation Controls */}
-              <div className="flex items-center gap-3 bg-black/40 backdrop-blur-md px-3 py-1.5 rounded-full">
-                <button
-                  onClick={prevSlide}
-                  className="text-white/80 hover:text-white p-1 rounded-full hover:bg-white/20 transition-colors"
-                  aria-label="Diapositiva anterior"
-                >
-                  <ChevronLeft className="w-5 h-5" />
-                </button>
-
-                <div className="flex items-center gap-1.5">
-                  {slides.map((_, idx) => (
-                    <button
-                      key={idx}
-                      onClick={() => setCurrentIndex(idx)}
-                      className={`h-2 rounded-full transition-all duration-300 ${
-                        idx === currentIndex ? 'w-6 bg-[#00E5E8]' : 'w-2 bg-white/50 hover:bg-white/80'
-                      }`}
-                      aria-label={`Ir a la diapositiva ${idx + 1}`}
-                    />
-                  ))}
-                </div>
-
-                <button
-                  onClick={nextSlide}
-                  className="text-white/80 hover:text-white p-1 rounded-full hover:bg-white/20 transition-colors"
-                  aria-label="Diapositiva siguiente"
-                >
-                  <ChevronRight className="w-5 h-5" />
-                </button>
+              <div className="flex items-center gap-1.5">
+                {slides.map((_, idx) => (
+                  <button
+                    key={idx}
+                    onClick={() => setCurrentIndex(idx)}
+                    className={`h-2 rounded-full transition-all duration-300 cursor-pointer ${
+                      idx === currentIndex ? 'w-6 bg-cyan-400' : 'w-2 bg-white/50 hover:bg-white/80'
+                    }`}
+                    aria-label={`Ir a la diapositiva ${idx + 1}`}
+                  />
+                ))}
               </div>
+
+              <button
+                onClick={nextSlide}
+                className="text-white/80 hover:text-white p-1 rounded-full hover:bg-white/20 transition-colors cursor-pointer"
+                aria-label="Diapositiva siguiente"
+              >
+                <ChevronRight className="w-5 h-5" />
+              </button>
             </div>
-          </div>
+          )}
         </div>
 
         {/* Right: Lateral Bento Grid (2 Clean White Cards - 4 Cols) */}
