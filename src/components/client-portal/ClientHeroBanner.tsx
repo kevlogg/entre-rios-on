@@ -4,7 +4,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { getBannersByProvince, DEFAULT_PROVINCE_BANNERS, BannerItem } from '@/lib/services/banner-store';
+import { getBannersByProvince, DEFAULT_PROVINCE_BANNERS, BannerItem, normalizeImageUrl } from '@/lib/services/banner-store';
 
 interface ClientHeroBannerProps {
   provinceId?: string;
@@ -86,10 +86,7 @@ export function ClientHeroBanner({ provinceId = 'santa-fe' }: ClientHeroBannerPr
       >
         {/* Background Images with Fade Transition (Pure image, no text overlay) */}
         {effectiveBanners.map((slide: BannerItem, idx: number) => {
-          const imgSrc = slide.imageUrl && slide.imageUrl.trim() !== '' 
-            ? slide.imageUrl 
-            : '/images/hero-rosario.jpg';
-
+          const imgSrc = normalizeImageUrl(slide.imageUrl);
           const isCurrent = idx === safeCurrentIndex;
 
           return (
@@ -116,9 +113,9 @@ export function ClientHeroBanner({ provinceId = 'santa-fe' }: ClientHeroBannerPr
                 src={imgSrc}
                 alt={slide.titleLine1 || 'Banner Publicitario'}
                 onError={(e) => {
-                  // Fallback image if custom image fails to load or path is invalid
                   const target = e.currentTarget;
-                  if (target.src !== '/images/hero-rosario.jpg') {
+                  if (!target.dataset.fallbackTried) {
+                    target.dataset.fallbackTried = 'true';
                     target.src = '/images/hero-rosario.jpg';
                   }
                 }}

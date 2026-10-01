@@ -13,6 +13,23 @@ export interface BannerItem {
   ctaHref?: string;
 }
 
+export function normalizeImageUrl(url?: string): string {
+  if (!url || typeof url !== 'string' || url.trim() === '') {
+    return '/images/hero-rosario.jpg';
+  }
+  const trimmed = url.trim();
+  if (trimmed.startsWith('data:') || trimmed.startsWith('http://') || trimmed.startsWith('https://')) {
+    return trimmed;
+  }
+  if (trimmed.startsWith('/')) {
+    return trimmed;
+  }
+  if (trimmed.startsWith('images/')) {
+    return '/' + trimmed;
+  }
+  return '/images/' + trimmed;
+}
+
 export const DEFAULT_PROVINCE_BANNERS: Record<string, BannerItem[]> = {
   'entre-rios': [
     {
