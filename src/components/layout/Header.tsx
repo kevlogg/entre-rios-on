@@ -194,7 +194,7 @@ export function Header({ selectedCityId = 'all' }: HeaderProps) {
   ];
 
   return (
-    <header className="sticky top-0 z-40 bg-white border-b border-slate-200 transition-all shadow-xs">
+    <header className="sticky top-0 z-40 bg-black/20 backdrop-blur-xl border-b border-white/10 shadow-lg transition-all">
       {/* Top Banner Ribbon */}
       <div className="bg-gradient-to-r from-[#002878] via-[#0047BA] to-[#00ADB5] text-white text-xs py-1.5 px-4 text-center font-semibold flex items-center justify-center gap-2">
         <Sparkles className="w-3.5 h-3.5 text-cyan-300 animate-pulse" />
@@ -383,7 +383,7 @@ export function Header({ selectedCityId = 'all' }: HeaderProps) {
       </div>
 
       {/* Secondary Horizontal Nav Bar (Top 5 items only, NO cities) */}
-      <nav className="hidden md:block border-t border-slate-100 bg-white">
+      <nav className="hidden md:block border-t border-white/10 bg-black/10 backdrop-blur-md">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <ul className="flex items-center justify-start gap-1 sm:gap-2 overflow-x-auto text-xs font-bold text-slate-700 scrollbar-none py-1.5">
             {navLinks.map((link) => (

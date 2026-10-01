@@ -6,7 +6,7 @@ import Link from 'next/link';
 
 export function ClientFooter() {
   return (
-    <footer className="bg-white border-t border-slate-200 pt-10 pb-0 overflow-hidden relative">
+    <footer className="bg-black/20 backdrop-blur-xl border-t border-white/10 pt-10 pb-0 overflow-hidden relative">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-10">
         <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-center justify-between">
           
