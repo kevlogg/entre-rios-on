@@ -43,11 +43,14 @@ export function PlansManager() {
     setLoading(true);
     try {
       const res = await getSubscriptionPlansAction();
-      if (res.success && res.plans && res.plans.length > 0) {
+      if (res && res.success && Array.isArray(res.plans) && res.plans.length > 0) {
         setPlans(res.plans);
+      } else {
+        setPlans(DEFAULT_SUBSCRIPTION_PLANS);
       }
     } catch (e) {
       console.warn('Error cargando planes:', e);
+      setPlans(DEFAULT_SUBSCRIPTION_PLANS);
     } finally {
       setLoading(false);
     }
@@ -155,7 +158,7 @@ export function PlansManager() {
       {/* Plans Form */}
       <form onSubmit={handleSave} className="space-y-6">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-stretch">
-          {plans.map((plan) => {
+          {(plans || []).map((plan) => {
             const isOro = plan.id === 'oro';
             const isPlata = plan.id === 'plata';
             const isBronce = plan.id === 'bronce';
@@ -260,7 +263,7 @@ export function PlansManager() {
                 {/* Card Footer Summary */}
                 <div className="pt-4 border-t border-slate-100 flex items-center justify-between text-xs font-extrabold text-slate-500">
                   <span>Beneficios incluidos:</span>
-                  <span className="text-[#0047BA]">{plan.features.length} Funciones</span>
+                  <span className="text-[#0047BA]">{(plan.features || []).length} Funciones</span>
                 </div>
               </div>
             );

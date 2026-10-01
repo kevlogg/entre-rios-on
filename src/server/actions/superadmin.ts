@@ -1271,19 +1271,32 @@ export async function getSubscriptionPlansAction(): Promise<{
     const adminSupabase = getAdminClient();
     if (adminSupabase) {
       const { data, error } = await adminSupabase.from('subscription_plans').select('*');
-      if (!error && data && data.length > 0) {
-        const mapped = data.map((p: any) => ({
-          id: p.id,
-          name: p.name || (p.id === 'oro' ? 'Plan Oro' : p.id === 'plata' ? 'Plan Plata' : 'Plan Bronce'),
-          price: Number(p.price) || (p.id === 'oro' ? 99000 : p.id === 'plata' ? 49000 : 29000),
-          period: p.period || 'mes',
-          badge: p.badge || (p.id === 'oro' ? 'MÁXIMO ALCANCE • VIP' : p.id === 'plata' ? 'Mayor Visibilidad' : 'Presencia Básica'),
-          catalogLimitText: p.catalog_limit_text || (p.id === 'oro' ? 'Catálogo ILIMITADO de productos y servicios' : p.id === 'plata' ? 'Catálogo de hasta 20 productos / servicios' : 'Catálogo de hasta 5 productos / servicios'),
-          description: p.description || '',
-          targetAudience: p.target_audience || 'Comercios y Turismo',
-          features: Array.isArray(p.features) ? p.features : [],
-        }));
-        // Garantizar que estén los 3 planes en orden
+      if (!error && Array.isArray(data) && data.length > 0) {
+        const mapped = data.map((p: any) => {
+          let feats: string[] = [];
+          if (Array.isArray(p.features)) {
+            feats = p.features;
+          } else if (typeof p.features === 'string') {
+            try {
+              feats = JSON.parse(p.features);
+            } catch (e) {
+              feats = [];
+            }
+          }
+
+          return {
+            id: String(p.id || ''),
+            name: String(p.name || (p.id === 'oro' ? 'Plan Oro' : p.id === 'plata' ? 'Plan Plata' : 'Plan Bronce')),
+            price: Number(p.price) || (p.id === 'oro' ? 99000 : p.id === 'plata' ? 49000 : 29000),
+            period: String(p.period || 'mes'),
+            badge: String(p.badge || (p.id === 'oro' ? 'MÁXIMO ALCANCE • VIP' : p.id === 'plata' ? 'Mayor Visibilidad' : 'Presencia Básica')),
+            catalogLimitText: String(p.catalog_limit_text || (p.id === 'oro' ? 'Catálogo ILIMITADO de productos y servicios' : p.id === 'plata' ? 'Catálogo de hasta 20 productos / servicios' : 'Catálogo de hasta 5 productos / servicios')),
+            description: String(p.description || ''),
+            targetAudience: String(p.target_audience || 'Comercios y Turismo'),
+            features: Array.isArray(feats) ? feats : [],
+          };
+        });
+
         const mapById = new Map(mapped.map((m) => [m.id, m]));
         const fullPlans = DEFAULT_SUBSCRIPTION_PLANS.map((d) => mapById.get(d.id) || d);
         return { success: true, plans: fullPlans };
@@ -1291,6 +1304,7 @@ export async function getSubscriptionPlansAction(): Promise<{
     }
     return { success: true, plans: DEFAULT_SUBSCRIPTION_PLANS };
   } catch (err) {
+    console.warn('Error en getSubscriptionPlansAction:', err);
     return { success: true, plans: DEFAULT_SUBSCRIPTION_PLANS };
   }
 }
