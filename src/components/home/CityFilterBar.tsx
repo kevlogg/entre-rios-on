@@ -103,9 +103,6 @@ export function CityFilterBar({
             >
               <Building2 className="w-3.5 h-3.5 opacity-70" />
               <span>{city.name}</span>
-              <span className={`text-[10px] px-1.5 py-0.2 rounded-full ${isSelected ? 'bg-white/20 text-white' : 'bg-slate-200 text-slate-600'}`}>
-                {city.commerceCount}
-              </span>
             </button>
           );
         })}

@@ -104,7 +104,7 @@ export default async function CityDetailPage({ params }: PageProps) {
               {city.description}
             </p>
             <div className="flex items-center gap-4 text-xs font-bold text-amber-300 pt-1">
-              <span>{city.commerceCount} Comercios & Servicios Registrados</span>
+              <span>{cityCommerces.length} Comercios & Servicios Registrados</span>
             </div>
           </div>
         </div>

@@ -36,52 +36,7 @@ interface JobItemUI {
   phone: string;
 }
 
-const INITIAL_JOBS: JobItemUI[] = [
-  {
-    id: 'j1',
-    title: 'Vendedor B2B & Atención de Showroom',
-    company: 'Citrus & Dulces del Uruguay',
-    city: 'Concordia',
-    workModality: 'Presencial',
-    type: 'Tiempo Completo',
-    salary: '$650.000 / mes',
-    description: 'Buscamos persona proactiva con experiencia en ventas comerciales, manejo de WhatsApp Business y atención al cliente.',
-    phone: '5493454891234'
-  },
-  {
-    id: 'j2',
-    title: 'Cocinero de Especialidad Pescados de Río',
-    company: 'Comedor El Dorado',
-    city: 'Paraná',
-    workModality: 'Presencial',
-    type: 'Tiempo Completo',
-    salary: '$720.000 / mes',
-    description: 'Restaurante de barranca solicita cocinero con experiencia comprobable en pescados a la parrilla y minutas.',
-    phone: '5493434123456'
-  },
-  {
-    id: 'j3',
-    title: 'Recepcionista para Complejo Termal',
-    company: 'Posada Sol de Federación',
-    city: 'Federación',
-    workModality: 'Híbrido',
-    type: 'Medio Tiempo',
-    salary: '$420.000 / mes',
-    description: 'Atención al huésped, gestión de reservas y asesoramiento turístico. Buena presencia e idioma inglés deseable.',
-    phone: '5493456112233'
-  },
-  {
-    id: 'j4',
-    title: 'Encargado de Logística & Reparto Regional',
-    company: 'Alfarería & Cerámica Delta',
-    city: 'Colón',
-    workModality: 'Presencial',
-    type: 'Tiempo Completo',
-    salary: '$580.000 / mes',
-    description: 'Despacho de encomiendas, embalaje de productos delicados y coordinación de fleteros en la provincia.',
-    phone: '5493447998877'
-  }
-];
+const INITIAL_JOBS: JobItemUI[] = [];
 
 interface CandidateProfile {
   id: string;
@@ -93,26 +48,7 @@ interface CandidateProfile {
   phone: string;
 }
 
-const INITIAL_CANDIDATES: CandidateProfile[] = [
-  {
-    id: 'c1',
-    name: 'Mariana Gomez',
-    title: 'Administrativa & Contable',
-    city: 'Paraná',
-    experience: '5 años en gestión comercial y software de facturación.',
-    skills: 'Excel avanzado, Tango Gestión, Atención telefónica',
-    phone: '5493434556677'
-  },
-  {
-    id: 'c2',
-    name: 'Lucas Peralta',
-    title: 'Chofer Repartidor de Carga Ligera (Licencia B2)',
-    city: 'Concordia',
-    experience: 'Experiencia en logística de alimentos y distribución en ruta.',
-    skills: 'Carnet profesional, conocimiento de rutas provinciales',
-    phone: '5493454112244'
-  }
-];
+const INITIAL_CANDIDATES: CandidateProfile[] = [];
 
 export default function EmpleosPage() {
   const [jobs, setJobs] = useState<JobItemUI[]>([]);
@@ -180,11 +116,11 @@ export default function EmpleosPage() {
           }));
           setJobs(mapped);
         } else {
-          setJobs(INITIAL_JOBS);
+          setJobs([]);
         }
       } catch (e) {
         console.warn('Error al cargar empleos:', e);
-        setJobs(INITIAL_JOBS);
+        setJobs([]);
       }
     }
     loadJobsFromSupabase();
@@ -416,113 +352,155 @@ export default function EmpleosPage() {
 
         {/* Content Grid based on activeTab */}
         {activeTab === 'offers' ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {filteredJobs.map((job) => (
-              <div
-                key={job.id}
-                className="bg-white rounded-3xl p-6 border border-slate-200 shadow-xs hover:shadow-md transition-all space-y-4 flex flex-col justify-between"
-              >
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between gap-2 flex-wrap">
-                    <div className="flex items-center gap-1.5">
-                      <span className="bg-cyan-100 text-[#0047BA] text-[10px] font-black px-3 py-1 rounded-full uppercase flex items-center gap-1">
-                        <Laptop className="w-3 h-3 text-[#00ADB5]" />
-                        <span>{job.workModality || 'Presencial'}</span>
-                      </span>
-                      <span className="bg-slate-100 text-slate-700 text-[10px] font-extrabold px-2.5 py-1 rounded-full">
-                        {job.type}
-                      </span>
-                    </div>
+          filteredJobs.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {filteredJobs.map((job) => (
+                <div
+                  key={job.id}
+                  className="bg-white rounded-3xl p-6 border border-slate-200 shadow-xs hover:shadow-md transition-all space-y-4 flex flex-col justify-between"
+                >
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between gap-2 flex-wrap">
+                      <div className="flex items-center gap-1.5">
+                        <span className="bg-cyan-100 text-[#0047BA] text-[10px] font-black px-3 py-1 rounded-full uppercase flex items-center gap-1">
+                          <Laptop className="w-3 h-3 text-[#00ADB5]" />
+                          <span>{job.workModality || 'Presencial'}</span>
+                        </span>
+                        <span className="bg-slate-100 text-slate-700 text-[10px] font-extrabold px-2.5 py-1 rounded-full">
+                          {job.type}
+                        </span>
+                      </div>
 
-                    <span className="text-xs font-black text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-200">
-                      {job.salary}
-                    </span>
-                  </div>
-
-                  <div>
-                    <h3 className="text-base font-extrabold text-slate-900 leading-snug">{job.title}</h3>
-                    <div className="flex items-center gap-2 text-xs text-slate-500 font-bold mt-1">
-                      <span className="flex items-center gap-1 text-[#0047BA]">
-                        <Building className="w-3.5 h-3.5" /> {job.company}
-                      </span>
-                      <span>•</span>
-                      <span className="flex items-center gap-1">
-                        <MapPin className="w-3.5 h-3.5 text-[#00ADB5]" /> {job.city}
+                      <span className="text-xs font-black text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-200">
+                        {job.salary}
                       </span>
                     </div>
-                  </div>
 
-                  <p className="text-xs text-slate-600 leading-relaxed font-medium">
-                    {job.description}
-                  </p>
-                </div>
+                    <div>
+                      <h3 className="text-base font-extrabold text-slate-900 leading-snug">{job.title}</h3>
+                      <div className="flex items-center gap-2 text-xs text-slate-500 font-bold mt-1">
+                        <span className="flex items-center gap-1 text-[#0047BA]">
+                          <Building className="w-3.5 h-3.5" /> {job.company}
+                        </span>
+                        <span>•</span>
+                        <span className="flex items-center gap-1">
+                          <MapPin className="w-3.5 h-3.5 text-[#00ADB5]" /> {job.city}
+                        </span>
+                      </div>
+                    </div>
 
-                <div className="pt-3 border-t border-slate-100 flex items-center justify-between gap-2">
-                  <span className="text-[11px] text-slate-400 font-bold flex items-center gap-1">
-                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
-                    <span>Verificado ON MÁS</span>
-                  </span>
-
-                  <a
-                    href={`https://wa.me/${job.phone}?text=${encodeURIComponent(`Hola! Me interesa postularme a la búsqueda de "${job.title}" publicada en Empleos ON MÁS.`)}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="bg-[#25D366] hover:bg-emerald-600 text-white px-4 py-2 rounded-xl text-xs font-extrabold flex items-center gap-1.5 shadow-sm transition-transform active:scale-95"
-                  >
-                    <MessageCircle className="w-4 h-4 fill-current" />
-                    <span>Postularme por WhatsApp</span>
-                  </a>
-                </div>
-              </div>
-            ))}
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {filteredCandidates.map((cand) => (
-              <div
-                key={cand.id}
-                className="bg-white rounded-3xl p-6 border border-slate-200 shadow-xs hover:shadow-md transition-all space-y-4 flex flex-col justify-between"
-              >
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between gap-2">
-                    <span className="bg-amber-100 text-amber-900 text-[10px] font-black px-3 py-1 rounded-full uppercase">
-                      Perfil Candidato Vecino
-                    </span>
-                    <span className="text-xs font-bold text-[#0047BA] flex items-center gap-1">
-                      <MapPin className="w-3.5 h-3.5 text-[#00ADB5]" /> {cand.city}
-                    </span>
-                  </div>
-
-                  <div>
-                    <h3 className="text-base font-extrabold text-slate-900 leading-snug">{cand.name}</h3>
-                    <p className="text-xs font-extrabold text-[#0047BA] mt-0.5">{cand.title}</p>
-                  </div>
-
-                  <div className="space-y-1 bg-slate-50 p-3 rounded-2xl border border-slate-100 text-xs">
-                    <span className="text-[10px] font-black uppercase text-slate-400 block">Experiencia & Habilidades</span>
-                    <p className="text-slate-700 font-medium">{cand.experience}</p>
-                    <p className="text-slate-500 font-medium text-[11px] pt-1 border-t border-slate-200">
-                      <strong>Conocimientos:</strong> {cand.skills}
+                    <p className="text-xs text-slate-600 leading-relaxed font-medium">
+                      {job.description}
                     </p>
                   </div>
-                </div>
 
-                <div className="pt-3 border-t border-slate-100 flex items-center justify-between gap-2">
-                  <span className="text-[11px] text-slate-400 font-bold">Disponible para Entrevista</span>
+                  <div className="pt-3 border-t border-slate-100 flex items-center justify-between gap-2">
+                    <span className="text-[11px] text-slate-400 font-bold flex items-center gap-1">
+                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                      <span>Verificado ON MÁS</span>
+                    </span>
 
-                  <a
-                    href={`https://wa.me/${cand.phone}?text=${encodeURIComponent(`Hola ${cand.name}! Te contactamos desde un comercio en ON MÁS porque nos interesó tu perfil de "${cand.title}".`)}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="bg-[#25D366] hover:bg-emerald-600 text-white px-4 py-2 rounded-xl text-xs font-extrabold flex items-center gap-1.5 shadow-sm transition-transform active:scale-95"
-                  >
-                    <MessageCircle className="w-4 h-4 fill-current" />
-                    <span>Contactar Candidato</span>
-                  </a>
+                    <a
+                      href={`https://wa.me/${job.phone}?text=${encodeURIComponent(`Hola! Me interesa postularme a la búsqueda de "${job.title}" publicada en Empleos ON MÁS.`)}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="bg-[#25D366] hover:bg-emerald-600 text-white px-4 py-2 rounded-xl text-xs font-extrabold flex items-center gap-1.5 shadow-sm transition-transform active:scale-95"
+                    >
+                      <MessageCircle className="w-4 h-4 fill-current" />
+                      <span>Postularme por WhatsApp</span>
+                    </a>
+                  </div>
                 </div>
+              ))}
+            </div>
+          ) : (
+            <div className="bg-white rounded-3xl p-10 border border-slate-200 shadow-xs text-center space-y-4 max-w-xl mx-auto my-6">
+              <div className="w-16 h-16 bg-cyan-50 rounded-2xl flex items-center justify-center mx-auto text-[#00ADB5]">
+                <Briefcase className="w-8 h-8" />
               </div>
-            ))}
-          </div>
+              <div className="space-y-1">
+                <h3 className="text-base font-extrabold text-slate-900">No hay ofertas de trabajo publicadas aún</h3>
+                <p className="text-xs text-slate-500 font-medium leading-relaxed">
+                  Las búsquedas laborales aprobadas por el equipo ON MÁS aparecerán en esta sección. Podés ser el primero en publicar una oferta para tu comercio o empresa.
+                </p>
+              </div>
+              <button
+                onClick={handleOpenOfferModal}
+                className="bg-[#0047BA] hover:bg-[#002878] text-white px-5 py-2.5 rounded-xl text-xs font-extrabold transition-all shadow-sm cursor-pointer inline-flex items-center gap-2"
+              >
+                <Plus className="w-4 h-4 text-[#00ADB5]" />
+                <span>Publicar Oferta de Empleo</span>
+              </button>
+            </div>
+          )
+        ) : (
+          filteredCandidates.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {filteredCandidates.map((cand) => (
+                <div
+                  key={cand.id}
+                  className="bg-white rounded-3xl p-6 border border-slate-200 shadow-xs hover:shadow-md transition-all space-y-4 flex flex-col justify-between"
+                >
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="bg-amber-100 text-amber-900 text-[10px] font-black px-3 py-1 rounded-full uppercase">
+                        Perfil Candidato Vecino
+                      </span>
+                      <span className="text-xs font-bold text-[#0047BA] flex items-center gap-1">
+                        <MapPin className="w-3.5 h-3.5 text-[#00ADB5]" /> {cand.city}
+                      </span>
+                    </div>
+
+                    <div>
+                      <h3 className="text-base font-extrabold text-slate-900 leading-snug">{cand.name}</h3>
+                      <p className="text-xs font-extrabold text-[#0047BA] mt-0.5">{cand.title}</p>
+                    </div>
+
+                    <div className="space-y-1 bg-slate-50 p-3 rounded-2xl border border-slate-100 text-xs">
+                      <span className="text-[10px] font-black uppercase text-slate-400 block">Experiencia & Habilidades</span>
+                      <p className="text-slate-700 font-medium">{cand.experience}</p>
+                      <p className="text-slate-500 font-medium text-[11px] pt-1 border-t border-slate-200">
+                        <strong>Conocimientos:</strong> {cand.skills}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="pt-3 border-t border-slate-100 flex items-center justify-between gap-2">
+                    <span className="text-[11px] text-slate-400 font-bold">Disponible para Entrevista</span>
+
+                    <a
+                      href={`https://wa.me/${cand.phone}?text=${encodeURIComponent(`Hola ${cand.name}! Te contactamos desde un comercio en ON MÁS porque nos interesó tu perfil de "${cand.title}".`)}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="bg-[#25D366] hover:bg-emerald-600 text-white px-4 py-2 rounded-xl text-xs font-extrabold flex items-center gap-1.5 shadow-sm transition-transform active:scale-95"
+                    >
+                      <MessageCircle className="w-4 h-4 fill-current" />
+                      <span>Contactar Candidato</span>
+                    </a>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="bg-white rounded-3xl p-10 border border-slate-200 shadow-xs text-center space-y-4 max-w-xl mx-auto my-6">
+              <div className="w-16 h-16 bg-amber-50 rounded-2xl flex items-center justify-center mx-auto text-amber-600">
+                <UserCheck className="w-8 h-8" />
+              </div>
+              <div className="space-y-1">
+                <h3 className="text-base font-extrabold text-slate-900">No hay perfiles de candidatos publicados aún</h3>
+                <p className="text-xs text-slate-500 font-medium leading-relaxed">
+                  Si estás buscando trabajo, postuláte o cargá tu perfil profesional para que comercios y empresas locales de la red te contacten.
+                </p>
+              </div>
+              <button
+                onClick={() => setShowCandidateModal(true)}
+                className="bg-gradient-to-r from-[#00E5E8] to-[#00ADB5] hover:from-[#00ADB5] hover:to-[#007C8A] text-slate-950 px-5 py-2.5 rounded-xl text-xs font-black transition-all shadow-sm cursor-pointer inline-flex items-center gap-2"
+              >
+                <UserCheck className="w-4 h-4" />
+                <span>Postularme / Cargar mi Perfil</span>
+              </button>
+            </div>
+          )
         )}
 
         {/* MODAL DE ALERTA DE REGISTRO REQUERIDO (SI NO ESTÁ AUTENTICADO) */}

@@ -12,7 +12,7 @@ export interface City {
   description: string;
   imageUrl: string;
   isFeatured: boolean;
-  commerceCount: number;
+  commerceCount?: number;
   provinceId?: string;
   provinceName?: string;
   bannerUrl?: string;

@@ -53,9 +53,6 @@ export function CityExploreBar({ provinceId = 'santa-fe' }: CityExploreBarProps)
                 sizes="150px"
                 className="object-cover group-hover:scale-105 transition-transform duration-500"
               />
-              <span className="absolute bottom-1 right-1 bg-black/60 backdrop-blur-xs text-white text-[9px] font-bold px-1.5 py-0.5 rounded-md">
-                {city.commerceCount} comercios
-              </span>
             </div>
 
             <div className="p-2 w-full">

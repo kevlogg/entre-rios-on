@@ -1209,52 +1209,7 @@ export async function getJobs(provinceId?: string, cityName?: string): Promise<J
   }
 
   await simulateNetworkDelay();
-  return [
-    {
-      id: 'j1',
-      title: 'Vendedor B2B & Atención de Showroom',
-      company: 'Citrus & Dulces del Uruguay',
-      cityName: 'Concordia',
-      provinceId: 'entre-rios',
-      jobType: 'Tiempo Completo',
-      salary: '$650.000 / mes',
-      description: 'Buscamos persona proactiva con experiencia en ventas comerciales, manejo de WhatsApp Business y atención al cliente.',
-      phoneWhatsApp: '5493454891234',
-    },
-    {
-      id: 'j2',
-      title: 'Cocinero de Especialidad Pescados de Río',
-      company: 'Comedor El Dorado',
-      cityName: 'Paraná',
-      provinceId: 'entre-rios',
-      jobType: 'Tiempo Completo',
-      salary: '$720.000 / mes',
-      description: 'Restaurante de barranca solicita cocinero con experiencia comprobable en pescados a la parrilla y minutas.',
-      phoneWhatsApp: '5493434123456',
-    },
-    {
-      id: 'j3',
-      title: 'Recepcionista para Complejo Termal',
-      company: 'Posada Sol de Federación',
-      cityName: 'Federación',
-      provinceId: 'entre-rios',
-      jobType: 'Medio Tiempo',
-      salary: '$420.000 / mes',
-      description: 'Atención al huésped, gestión de reservas y asesoramiento turístico. Buena presencia e idioma inglés deseable.',
-      phoneWhatsApp: '5493456112233',
-    },
-    {
-      id: 'j4',
-      title: 'Encargado de Logística & Reparto Regional',
-      company: 'Alfarería & Cerámica Delta',
-      cityName: 'Colón',
-      provinceId: 'entre-rios',
-      jobType: 'Tiempo Completo',
-      salary: '$580.000 / mes',
-      description: 'Despacho de encomiendas, embalaje de productos delicados y coordinación de fleteros en la provincia.',
-      phoneWhatsApp: '5493447998877',
-    },
-  ];
+  return [];
 }
 
 export async function getTourismServices(provinceId?: string, category?: string): Promise<TourismService[]> {
