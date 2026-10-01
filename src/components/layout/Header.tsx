@@ -186,11 +186,11 @@ export function Header({ selectedCityId = 'all' }: HeaderProps) {
     { name: 'Inicio', href: getGeoUrl('') },
     { name: 'Comercios Adheridos', href: getGeoUrl('comercios') },
     { name: 'Catálogo & Ofertas', href: getGeoUrl('catalogo') },
-    { name: 'Mi Sitio Web', href: '/mi-sitio-web' },
+    { name: 'Turismo', href: getGeoUrl('turismo') },
+    { name: 'Comunidad', href: getGeoUrl('comunidad') },
     { name: 'Sorteos ON MÁS', href: getGeoUrl('sorteos') },
     { name: 'Empleos', href: '/empleos' },
-    { name: 'Comunidad', href: getGeoUrl('comunidad') },
-    { name: 'Turismo', href: getGeoUrl('turismo') },
+    { name: 'Mi Sitio Web', href: '/mi-sitio-web' },
   ];
 
   return (

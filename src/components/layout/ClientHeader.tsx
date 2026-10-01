@@ -285,11 +285,11 @@ export function ClientHeader() {
     { name: 'Inicio', href: getGeoUrl(''), slug: '' },
     { name: 'Comercios Adheridos', href: getGeoUrl('comercios'), slug: 'comercios' },
     { name: 'Catálogo & Ofertas', href: getGeoUrl('catalogo'), slug: 'catalogo' },
-    { name: 'Mi Sitio Web', href: '/mi-sitio-web', slug: 'mi-sitio-web' },
+    { name: 'Turismo', href: getGeoUrl('turismo'), slug: 'turismo' },
+    { name: 'Comunidad', href: getGeoUrl('comunidad'), slug: 'comunidad' },
     { name: 'Sorteos ON MÁS', href: getGeoUrl('sorteos'), slug: 'sorteos' },
     { name: 'Empleos', href: '/empleos', slug: 'empleos' },
-    { name: 'Comunidad', href: getGeoUrl('comunidad'), slug: 'comunidad' },
-    { name: 'Turismo', href: getGeoUrl('turismo'), slug: 'turismo' },
+    { name: 'Mi Sitio Web', href: '/mi-sitio-web', slug: 'mi-sitio-web' },
   ];
 
   return (

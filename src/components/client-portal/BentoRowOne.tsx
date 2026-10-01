@@ -9,36 +9,41 @@ export function BentoRowOne() {
   const cards = [
     {
       id: 'comercio-digital',
-      title: 'COMERCIO DIGITAL',
-      subtitle: 'Miles de productos y servicios en Entre Ríos.',
-      cta: 'Comprar ahora',
+      title: 'COMERCIOS ADHERIDOS',
+      subtitle: 'Directorio unificado de locales, marcas y empresas.',
+      cta: 'Explorar comercios',
       href: '/comercios',
       image: '/images/bento-1.jpg',
-      badgeIcon: ShoppingBag,
+    },
+    {
+      id: 'catalogo-ofertas',
+      title: 'CATÁLOGO & OFERTAS',
+      subtitle: 'Miles de productos, servicios y promociones.',
+      cta: 'Ver ofertas',
+      href: '/catalogo',
+      image: '/images/offer-2.jpg',
+    },
+    {
+      id: 'turismo-experiencias',
+      title: 'TURISMO & EXPERIENCIAS',
+      subtitle: 'Descubrí paseos, termas y gastronomía regional.',
+      cta: 'Explorar turismo',
+      href: '/turismo',
+      image: '/images/bento-5.jpg',
     },
     {
       id: 'comunidad-on',
       title: 'COMUNIDAD ON MÁS',
       subtitle: 'Conectate, compartí y hacé crecer lo nuestro.',
       cta: 'Sumate',
-      href: '/comunidad/evt-1',
+      href: '/comunidad',
       image: '/images/bento-2.jpg',
-      badgeIcon: Users,
-    },
-    {
-      id: 'sorteos-on',
-      title: 'SORTEOS ON MÁS',
-      subtitle: 'Todos los meses, nuevos premios.',
-      cta: 'Quiero participar',
-      href: '/sorteos',
-      image: '/images/bento-3.jpg',
-      badgeIcon: Gift,
     },
   ];
 
   return (
     <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         {cards.map((card) => (
           <div
             key={card.id}
@@ -48,13 +53,13 @@ export function BentoRowOne() {
               src={card.image}
               alt={card.title}
               fill
-              sizes="(max-width: 768px) 100vw, 33vw"
+              sizes="(max-width: 1024px) 50vw, 25vw"
               className="object-cover object-center group-hover:scale-105 transition-transform duration-700 opacity-65"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/60 to-transparent" />
 
             <div className="relative z-10 space-y-2">
-              <h3 className="text-xl font-extrabold text-white tracking-tight flex items-center gap-1.5">
+              <h3 className="text-lg font-extrabold text-white tracking-tight flex items-center gap-1.5">
                 <span>{card.title}</span>
               </h3>
               <p className="text-xs text-slate-200 font-medium line-clamp-2">
@@ -64,7 +69,7 @@ export function BentoRowOne() {
               <div className="pt-2">
                 <Link
                   href={card.href}
-                  className="inline-flex items-center gap-1.5 bg-white/20 hover:bg-gradient-to-r hover:from-[#00ADB5] hover:to-[#007C8A] backdrop-blur-md text-white text-xs font-extrabold px-4 py-2 rounded-xl transition-all border border-white/30"
+                  className="inline-flex items-center gap-1.5 bg-white/20 hover:bg-gradient-to-r hover:from-[#00ADB5] hover:to-[#007C8A] backdrop-blur-md text-white text-xs font-extrabold px-3.5 py-1.5 rounded-xl transition-all border border-white/30"
                 >
                   <span>{card.cta}</span>
                   <ArrowRight className="w-3.5 h-3.5" />
