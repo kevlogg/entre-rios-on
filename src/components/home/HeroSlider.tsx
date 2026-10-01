@@ -69,7 +69,8 @@ export function HeroSlider({ slides, featuredCommerce, weekendEvent }: HeroSlide
         
         {/* Left/Center: Editorial Hero Banner Slider (8 Cols) */}
         <div 
-          className="lg:col-span-8 relative rounded-3xl overflow-hidden shadow-xl border border-white/20 min-h-[380px] sm:min-h-[440px] flex flex-col justify-between group focus:outline-hidden"
+          className="lg:col-span-8 relative rounded-3xl overflow-hidden shadow-xl border border-white/20 flex flex-col justify-between group focus:outline-hidden"
+          style={{ minHeight: '380px', height: '420px', position: 'relative' }}
           onMouseEnter={() => setIsPlaying(false)}
           onMouseLeave={() => setIsPlaying(true)}
           onKeyDown={handleKeyDown}
@@ -79,26 +80,45 @@ export function HeroSlider({ slides, featuredCommerce, weekendEvent }: HeroSlide
           aria-label="Slider de Novedades Regionales"
         >
           {/* Background Images with Fade (Pure image view, no text overlay) */}
-          {slides.map((slide, idx) => (
-            <Link
-              key={slide.id}
-              href={slide.ctaUrl || '#'}
-              className={`absolute inset-0 block w-full h-full transition-opacity duration-700 ease-in-out ${
-                idx === currentIndex ? 'opacity-100 z-10' : 'opacity-0 z-0 pointer-events-none'
-              }`}
-              aria-hidden={idx !== currentIndex}
-            >
-              <Image
-                src={slide.imageUrl}
-                alt={slide.title || 'Banner Publicitario'}
-                fill
-                priority={idx === 0}
-                unoptimized
-                sizes="(max-width: 1024px) 100vw, 66vw"
-                className="object-cover object-center w-full h-full"
-              />
-            </Link>
-          ))}
+          {slides.map((slide, idx) => {
+            const isCurrent = idx === currentIndex;
+            const imgSrc = slide.imageUrl || '/images/hero-rosario.jpg';
+
+            return (
+              <Link
+                key={slide.id}
+                href={slide.ctaUrl || '#'}
+                className="absolute inset-0 block w-full h-full"
+                aria-hidden={!isCurrent}
+                style={{
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  width: '100%',
+                  height: '100%',
+                  opacity: isCurrent ? 1 : 0,
+                  zIndex: isCurrent ? 10 : 0,
+                  pointerEvents: isCurrent ? 'auto' : 'none',
+                  transition: 'opacity 700ms ease-in-out',
+                  display: 'block',
+                }}
+              >
+                <img
+                  src={imgSrc}
+                  alt={slide.title || 'Banner Publicitario'}
+                  style={{
+                    width: '100%',
+                    height: '100%',
+                    objectFit: 'cover',
+                    objectPosition: 'center',
+                    display: 'block',
+                  }}
+                />
+              </Link>
+            );
+          })}
 
           {/* Floating subtle navigation controls at bottom right */}
           {slides.length > 1 && (

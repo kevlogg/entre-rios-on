@@ -70,25 +70,48 @@ export function ClientHeroBanner({ provinceId = 'santa-fe' }: ClientHeroBannerPr
       aria-label="Carrusel Destacado Regional"
       className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-3 pb-2"
     >
-      <div className="relative w-full h-[240px] sm:h-[340px] md:h-[420px] rounded-3xl overflow-hidden shadow-2xl border border-white/20 group bg-slate-900/40 backdrop-blur-xs">
+      <div 
+        className="relative w-full rounded-3xl overflow-hidden shadow-2xl border border-white/20 group bg-slate-900/40 backdrop-blur-xs"
+        style={{ minHeight: '260px', height: '360px', maxHeight: '460px', position: 'relative' }}
+      >
         {/* Background Images with Fade Transition (Pure image, no text overlay) */}
         {effectiveBanners.map((slide: BannerItem, idx: number) => {
           const imgSrc = slide.imageUrl && slide.imageUrl.trim() !== '' 
             ? slide.imageUrl 
             : '/images/hero-rosario.jpg';
 
+          const isCurrent = idx === currentIndex;
+
           return (
             <Link
               key={slide.id || idx}
               href={slide.ctaHref || '#'}
-              className={`absolute inset-0 block w-full h-full transition-opacity duration-700 ease-in-out ${
-                idx === currentIndex ? 'opacity-100 z-10' : 'opacity-0 z-0 pointer-events-none'
-              }`}
+              className="absolute inset-0 block w-full h-full"
+              style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                width: '100%',
+                height: '100%',
+                opacity: isCurrent ? 1 : 0,
+                zIndex: isCurrent ? 10 : 0,
+                pointerEvents: isCurrent ? 'auto' : 'none',
+                transition: 'opacity 700ms ease-in-out',
+                display: 'block',
+              }}
             >
               <img
                 src={imgSrc}
                 alt={slide.titleLine1 || 'Banner Publicitario'}
-                className="w-full h-full object-cover object-center"
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  objectFit: 'cover',
+                  objectPosition: 'center',
+                  display: 'block',
+                }}
               />
             </Link>
           );
