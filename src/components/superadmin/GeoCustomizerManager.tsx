@@ -3,9 +3,10 @@
 import React, { useState, useEffect } from 'react';
 import { City } from '@/types';
 import { Image as ImageIcon, Plus, Trash2, CheckCircle, Upload, Monitor, Smartphone, RefreshCw, ExternalLink, MapPin, ToggleLeft, ToggleRight, Eye, EyeOff, Sparkles } from 'lucide-react';
-import { getBannersByProvince, saveBannersByProvince, BannerItem } from '@/lib/services/banner-store';
+import { getBannersByProvince, saveBannersByProvince, BannerItem, normalizeImageUrl } from '@/lib/services/banner-store';
 import { getProvincesConfig, saveProvincesConfig, ProvinceItem } from '@/lib/services/province-store';
 import { saveBannerSlidesAction } from '@/server/actions/superadmin';
+import { uploadImageToSupabase } from '@/lib/supabase/storage';
 
 interface GeoCustomizerManagerProps {
   initialCities?: City[];
@@ -98,50 +99,24 @@ export function GeoCustomizerManager({ initialCities }: GeoCustomizerManagerProp
     setTimeout(() => setSuccessMsg(null), 4000);
   };
 
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>, callback: (base64: string) => void) => {
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>, callback: (url: string) => void) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      if (!event.target?.result) return;
-      const rawDataUrl = event.target.result as string;
-
-      const img = new Image();
-      img.onload = () => {
-        const MAX_WIDTH = 1920;
-        const MAX_HEIGHT = 1080;
-        let width = img.width;
-        let height = img.height;
-
-        if (width > MAX_WIDTH || height > MAX_HEIGHT) {
-          if (width / height > MAX_WIDTH / MAX_HEIGHT) {
-            height = Math.round((height * MAX_WIDTH) / width);
-            width = MAX_WIDTH;
-          } else {
-            width = Math.round((width * MAX_HEIGHT) / height);
-            height = MAX_HEIGHT;
-          }
-        }
-
-        const canvas = document.createElement('canvas');
-        canvas.width = width;
-        canvas.height = height;
-        const ctx = canvas.getContext('2d');
-        if (ctx) {
-          ctx.drawImage(img, 0, 0, width, height);
-          const compressed = canvas.toDataURL('image/jpeg', 0.85);
-          callback(compressed);
-        } else {
-          callback(rawDataUrl);
-        }
+    setIsUploading(true);
+    try {
+      const publicUrl = await uploadImageToSupabase(file, 'commerces');
+      callback(publicUrl);
+    } catch (err) {
+      console.warn('Error uploading banner file to storage:', err);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        if (reader.result) callback(reader.result as string);
       };
-      img.onerror = () => {
-        callback(rawDataUrl);
-      };
-      img.src = rawDataUrl;
-    };
-    reader.readAsDataURL(file);
+      reader.readAsDataURL(file);
+    } finally {
+      setIsUploading(false);
+    }
   };
 
   const [isUploading, setIsUploading] = useState(false);
@@ -499,7 +474,7 @@ export function GeoCustomizerManager({ initialCities }: GeoCustomizerManagerProp
 
                 <div className="relative h-48 w-full rounded-xl overflow-hidden border border-slate-300 shadow-xs bg-slate-900 group">
                   <img
-                    src={banner.imageUrl}
+                    src={normalizeImageUrl(banner.imageUrl)}
                     alt={`Banner ${index + 1}`}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                   />

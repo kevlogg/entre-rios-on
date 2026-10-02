@@ -159,23 +159,29 @@ export function ClientHeroBanner({ provinceId = 'santa-fe' }: ClientHeroBannerPr
               <ChevronLeft className="w-5 h-5" />
             </button>
 
-            <div className="flex items-center gap-2 px-1">
-              {effectiveBanners.map((_, idx) => (
-                <button
-                  key={idx}
-                  type="button"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    setCurrentIndex(idx);
-                  }}
-                  className={`h-2.5 rounded-full transition-all duration-300 cursor-pointer ${
-                    idx === safeCurrentIndex ? 'w-7 bg-cyan-400' : 'w-2.5 bg-white/50 hover:bg-white/90'
-                  }`}
-                  aria-label={`Ir a slide ${idx + 1}`}
-                />
-              ))}
-            </div>
+            {totalSlides > 6 ? (
+              <span className="text-white text-xs font-black px-2 select-none tracking-wider">
+                <span className="text-cyan-400">{safeCurrentIndex + 1}</span> / {totalSlides}
+              </span>
+            ) : (
+              <div className="flex items-center gap-2 px-1">
+                {effectiveBanners.map((_, idx) => (
+                  <button
+                    key={idx}
+                    type="button"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      setCurrentIndex(idx);
+                    }}
+                    className={`h-2.5 rounded-full transition-all duration-300 cursor-pointer ${
+                      idx === safeCurrentIndex ? 'w-7 bg-cyan-400' : 'w-2.5 bg-white/50 hover:bg-white/90'
+                    }`}
+                    aria-label={`Ir a slide ${idx + 1}`}
+                  />
+                ))}
+              </div>
+            )}
 
             <button
               type="button"
