@@ -26,38 +26,31 @@ interface HeroSliderProps {
 export function HeroSlider({ slides, featuredCommerce, weekendEvent }: HeroSliderProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(true);
-  const timerRef = useRef<NodeJS.Timeout | null>(null);
 
-  const safeCurrentIndex = (typeof currentIndex === 'number' && !isNaN(currentIndex) && currentIndex >= 0 && currentIndex < slides.length)
+  const totalSlides = slides ? slides.length : 0;
+
+  const safeCurrentIndex = (typeof currentIndex === 'number' && !isNaN(currentIndex) && currentIndex >= 0 && currentIndex < totalSlides)
     ? currentIndex 
     : 0;
 
   const nextSlide = useCallback(() => {
-    if (slides.length <= 1) return;
-    setCurrentIndex((prevIndex) => {
-      const validPrev = (typeof prevIndex === 'number' && !isNaN(prevIndex) && prevIndex >= 0) ? prevIndex : 0;
-      return (validPrev + 1) % slides.length;
-    });
-  }, [slides.length]);
+    if (totalSlides <= 1) return;
+    setCurrentIndex((prevIndex) => (prevIndex + 1) % totalSlides);
+  }, [totalSlides]);
 
   const prevSlide = useCallback(() => {
-    if (slides.length <= 1) return;
-    setCurrentIndex((prevIndex) => {
-      const validPrev = (typeof prevIndex === 'number' && !isNaN(prevIndex) && prevIndex >= 0) ? prevIndex : 0;
-      return (validPrev - 1 + slides.length) % slides.length;
-    });
-  }, [slides.length]);
+    if (totalSlides <= 1) return;
+    setCurrentIndex((prevIndex) => (prevIndex - 1 + totalSlides) % totalSlides);
+  }, [totalSlides]);
 
   useEffect(() => {
-    if (isPlaying && slides.length > 1) {
-      timerRef.current = setInterval(() => {
-        nextSlide();
-      }, 5000);
+    if (isPlaying && totalSlides > 1) {
+      const timer = setInterval(() => {
+        setCurrentIndex((prev) => (prev + 1) % totalSlides);
+      }, 4000);
+      return () => clearInterval(timer);
     }
-    return () => {
-      if (timerRef.current) clearInterval(timerRef.current);
-    };
-  }, [isPlaying, nextSlide, slides.length]);
+  }, [isPlaying, totalSlides]);
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'ArrowLeft') {
@@ -91,14 +84,14 @@ export function HeroSlider({ slides, featuredCommerce, weekendEvent }: HeroSlide
           aria-roledescription="carousel"
           aria-label="Slider de Novedades Regionales"
         >
-          {/* Background Images with Fade (Pure image view, no text overlay) */}
+          {/* Background Images with Fade (Pure image view, full edge-to-edge width) */}
           {slides.map((slide, idx) => {
             const isCurrent = idx === safeCurrentIndex;
             const imgSrc = slide.imageUrl || '/images/hero-rosario.jpg';
 
             return (
               <Link
-                key={slide.id}
+                key={slide.id || `hs-${idx}`}
                 href={slide.ctaUrl || '#'}
                 className="absolute inset-0 block w-full h-full"
                 aria-hidden={!isCurrent}
@@ -123,7 +116,7 @@ export function HeroSlider({ slides, featuredCommerce, weekendEvent }: HeroSlide
                   style={{
                     width: '100%',
                     height: '100%',
-                    objectFit: 'cover',
+                    objectFit: 'fill',
                     objectPosition: 'center',
                     display: 'block',
                   }}

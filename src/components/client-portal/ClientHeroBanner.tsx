@@ -18,6 +18,7 @@ export function ClientHeroBanner({ provinceId = 'santa-fe' }: ClientHeroBannerPr
       : (DEFAULT_PROVINCE_BANNERS[provinceId] || DEFAULT_PROVINCE_BANNERS['santa-fe'] || []);
   });
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [isPaused, setIsPaused] = useState(false);
 
   const loadBanners = useCallback(() => {
     const activeBanners = getBannersByProvince(provinceId);
@@ -54,33 +55,34 @@ export function ClientHeroBanner({ provinceId = 'santa-fe' }: ClientHeroBannerPr
     ? banners 
     : (DEFAULT_PROVINCE_BANNERS[provinceId] || DEFAULT_PROVINCE_BANNERS['santa-fe'] || []);
 
-  const safeCurrentIndex = (typeof currentIndex === 'number' && !isNaN(currentIndex) && currentIndex >= 0 && currentIndex < effectiveBanners.length)
+  const totalSlides = effectiveBanners.length;
+
+  const safeCurrentIndex = (typeof currentIndex === 'number' && !isNaN(currentIndex) && currentIndex >= 0 && currentIndex < totalSlides)
     ? currentIndex 
     : 0;
 
   const nextSlide = useCallback(() => {
-    if (effectiveBanners.length <= 1) return;
-    setCurrentIndex((prev) => {
-      const validPrev = (typeof prev === 'number' && !isNaN(prev) && prev >= 0) ? prev : 0;
-      return (validPrev + 1) % effectiveBanners.length;
-    });
-  }, [effectiveBanners.length]);
+    if (totalSlides <= 1) return;
+    setCurrentIndex((prev) => (prev + 1) % totalSlides);
+  }, [totalSlides]);
 
   const prevSlide = useCallback(() => {
-    if (effectiveBanners.length <= 1) return;
-    setCurrentIndex((prev) => {
-      const validPrev = (typeof prev === 'number' && !isNaN(prev) && prev >= 0) ? prev : 0;
-      return (validPrev - 1 + effectiveBanners.length) % effectiveBanners.length;
-    });
-  }, [effectiveBanners.length]);
+    if (totalSlides <= 1) return;
+    setCurrentIndex((prev) => (prev - 1 + totalSlides) % totalSlides);
+  }, [totalSlides]);
 
+  // Auto-play timer for smooth infinite rotation across slides
   useEffect(() => {
-    if (effectiveBanners.length <= 1) return;
-    const interval = setInterval(nextSlide, 5000);
-    return () => clearInterval(interval);
-  }, [nextSlide, effectiveBanners.length]);
+    if (totalSlides <= 1 || isPaused) return;
 
-  if (effectiveBanners.length === 0) return null;
+    const timer = setInterval(() => {
+      setCurrentIndex((prev) => (prev + 1) % totalSlides);
+    }, 4000);
+
+    return () => clearInterval(timer);
+  }, [totalSlides, isPaused]);
+
+  if (totalSlides === 0) return null;
 
   return (
     <section 
@@ -90,22 +92,24 @@ export function ClientHeroBanner({ provinceId = 'santa-fe' }: ClientHeroBannerPr
       <div 
         className="relative w-full rounded-3xl overflow-hidden shadow-2xl border border-white/30 group bg-slate-900"
         style={{ minHeight: '260px', height: '360px', maxHeight: '460px', position: 'relative' }}
+        onMouseEnter={() => setIsPaused(true)}
+        onMouseLeave={() => setIsPaused(false)}
       >
         {/* Base Fallback Background Image (Guarantees zero empty space during load or transition) */}
         <img
           src="/images/hero-rosario.jpg"
           alt="Hero Background"
-          className="absolute inset-0 w-full h-full object-cover opacity-90 z-0"
+          className="absolute inset-0 w-full h-full object-fill opacity-90 z-0"
         />
 
-        {/* Background Images with Fade Transition (Pure image, no text overlay) */}
+        {/* Background Images with Fade Transition (Pure image, full edge-to-edge width display) */}
         {effectiveBanners.map((slide: BannerItem, idx: number) => {
           const imgSrc = normalizeImageUrl(slide.imageUrl);
           const isCurrent = idx === safeCurrentIndex;
 
           return (
             <Link
-              key={slide.id || idx}
+              key={slide.id || `slide-${idx}`}
               href={slide.ctaHref || '#'}
               className="absolute inset-0 block w-full h-full"
               style={{
@@ -136,7 +140,7 @@ export function ClientHeroBanner({ provinceId = 'santa-fe' }: ClientHeroBannerPr
                 style={{
                   width: '100%',
                   height: '100%',
-                  objectFit: 'cover',
+                  objectFit: 'fill',
                   objectPosition: 'center',
                   display: 'block',
                 }}
@@ -146,7 +150,7 @@ export function ClientHeroBanner({ provinceId = 'santa-fe' }: ClientHeroBannerPr
         })}
 
         {/* Minimal controls at bottom right */}
-        {effectiveBanners.length > 1 && (
+        {totalSlides > 1 && (
           <div className="absolute bottom-4 right-4 z-20 flex items-center gap-2 bg-slate-900/60 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/20 shadow-xl">
             <button
               onClick={prevSlide}
