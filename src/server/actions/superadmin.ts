@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache';
 import { createClient } from '@/lib/supabase/server';
 import { createClient as createSupabaseJSClient } from '@supabase/supabase-js';
+import { uploadImageServerAction } from '@/server/actions/storage';
 
 export async function toggleCommerceVerificationAction(
   commerceId: string,
@@ -367,42 +368,85 @@ export async function saveProvinceConfigAction(config: {
   }
 }
 
-export async function saveBannerSlidesAction(provinceId: string, banners: Array<{
-  id: string;
-  imageUrl: string;
-  device?: string;
-  ctaHref?: string;
-}>): Promise<{ success: boolean; message: string }> {
+export async function saveBannerSlidesAction(
+  provinceId: string,
+  banners: Array<{
+    id?: string;
+    imageUrl?: string;
+    image_url?: string;
+    device?: string;
+    ctaHref?: string;
+    cta_url?: string;
+    titleLine1?: string;
+    title?: string;
+    location?: string;
+  }>
+): Promise<{ success: boolean; message: string; banners?: any[] }> {
   try {
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-    if (supabaseUrl && !supabaseUrl.includes('your-supabase-project')) {
-      const supabase = await createClient();
+    const adminSupabase = getAdminClient();
+    const supabase = adminSupabase || (await createClient());
 
-      // Clear existing records for target province
-      await supabase.from('banner_slides').delete().eq('province_id', provinceId);
+    // 1. Process each banner slide: upload base64 images to Supabase Storage if needed
+    const processedBanners = await Promise.all(
+      banners.map(async (banner, idx) => {
+        let imageUrl = banner.imageUrl || banner.image_url || '';
 
-      if (banners.length > 0) {
-        const rows = banners.map((b) => ({
-          province_id: provinceId,
-          image_url: b.imageUrl,
-          cta_url: b.ctaHref || `/${provinceId}`,
-          created_at: new Date().toISOString(),
-        }));
-
-        const { error } = await supabase.from('banner_slides').insert(rows);
-        if (error) {
-          console.warn('Supabase banner_slides insert notice:', error.message);
+        // If it's a base64 Data URL, upload it via uploadImageServerAction to Supabase Storage bucket 'commerces'
+        if (typeof imageUrl === 'string' && imageUrl.startsWith('data:image/')) {
+          const uploadRes = await uploadImageServerAction(imageUrl, `banner-${provinceId}-${Date.now()}-${idx}.jpg`, 'commerces');
+          if (uploadRes.success && uploadRes.url) {
+            imageUrl = uploadRes.url;
+          }
         }
+
+        return {
+          id: banner.id || `banner-${provinceId}-${Date.now()}-${idx}`,
+          province_id: provinceId,
+          image_url: imageUrl,
+          title: banner.titleLine1 || banner.title || '',
+          city_tag: banner.location || '',
+          cta_url: banner.ctaHref || banner.cta_url || `/${provinceId}`,
+          device: banner.device || 'all',
+          created_at: new Date().toISOString(),
+        };
+      })
+    );
+
+    // 2. Replace banner slides for this province in database
+    if (supabase) {
+      try {
+        await supabase.from('banner_slides').delete().eq('province_id', provinceId);
+        if (processedBanners.length > 0) {
+          const { error } = await supabase.from('banner_slides').insert(processedBanners);
+          if (error) {
+            console.warn('Notice saving banner_slides to Supabase:', error.message);
+          }
+        }
+      } catch (dbErr) {
+        console.warn('Notice saving banner_slides to Supabase:', dbErr);
       }
     }
+
+    // 3. Map back for frontend
+    const finalBanners = processedBanners.map((p) => ({
+      id: p.id,
+      provinceId: p.province_id,
+      imageUrl: p.image_url,
+      titleLine1: p.title,
+      location: p.city_tag,
+      ctaHref: p.cta_url,
+      device: p.device,
+    }));
 
     revalidatePath('/');
     revalidatePath('/inicio');
     revalidatePath(`/${provinceId}`);
     revalidatePath('/superadmin');
-    return { success: true, message: 'Banners sincronizados correctamente en la plataforma.' };
+
+    return { success: true, message: 'Banners guardados exitosamente en la plataforma.', banners: finalBanners };
   } catch (err) {
-    return { success: false, message: `Error: ${(err as Error).message}` };
+    console.error('Error en saveBannerSlidesAction:', err);
+    return { success: false, message: `Error guardando banners: ${(err as Error).message}` };
   }
 }
 
@@ -1404,6 +1448,7 @@ export async function deleteRaffleAction(
     return { success: false, message: `Error: ${(err as Error).message}` };
   }
 }
+
 
 
 

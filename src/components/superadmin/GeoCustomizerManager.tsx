@@ -144,15 +144,29 @@ export function GeoCustomizerManager({ initialCities }: GeoCustomizerManagerProp
     reader.readAsDataURL(file);
   };
 
-  const syncToSupabase = (provId: string, updatedBanners: BannerItem[]) => {
-    saveBannerSlidesAction(provId, updatedBanners).catch((e) => {
+  const [isUploading, setIsUploading] = useState(false);
+
+  const syncToSupabase = async (provId: string, updatedBanners: BannerItem[]) => {
+    setIsUploading(true);
+    try {
+      const res = await saveBannerSlidesAction(provId, updatedBanners);
+      if (res.success && res.banners && res.banners.length > 0) {
+        setBanners(res.banners);
+        saveBannersByProvince(provId, res.banners);
+      } else {
+        saveBannersByProvince(provId, updatedBanners);
+      }
+    } catch (e) {
       console.warn('Superadmin banner sync notice:', e);
-    });
+      saveBannersByProvince(provId, updatedBanners);
+    } finally {
+      setIsUploading(false);
+    }
   };
 
-  const handleAddBanner = (e: React.FormEvent) => {
+  const handleAddBanner = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newBannerImage) return;
+    if (!newBannerImage || isUploading) return;
 
     const newBanner: BannerItem = {
       id: `b-${Date.now()}`,
@@ -169,31 +183,29 @@ export function GeoCustomizerManager({ initialCities }: GeoCustomizerManagerProp
 
     const updated = [newBanner, ...banners];
     setBanners(updated);
-    saveBannersByProvince(selectedProvinceId, updated);
-    syncToSupabase(selectedProvinceId, updated);
-
     setNewBannerImage(null);
+
+    await syncToSupabase(selectedProvinceId, updated);
+
     setSuccessMsg(`¡Nuevo banner publicado para ${currentProv.name}!`);
     setTimeout(() => setSuccessMsg(null), 3500);
   };
 
   const handleChangeBannerImage = (id: string, e: React.ChangeEvent<HTMLInputElement>) => {
-    handleFileUpload(e, (base64) => {
+    handleFileUpload(e, async (base64) => {
       const updated = banners.map((b) => (b.id === id ? { ...b, imageUrl: base64 } : b));
       setBanners(updated);
-      saveBannersByProvince(selectedProvinceId, updated);
-      syncToSupabase(selectedProvinceId, updated);
+      await syncToSupabase(selectedProvinceId, updated);
 
       setSuccessMsg('Imagen del banner actualizada exitosamente.');
       setTimeout(() => setSuccessMsg(null), 3000);
     });
   };
 
-  const handleDeleteBanner = (id: string) => {
+  const handleDeleteBanner = async (id: string) => {
     const updated = banners.filter((b) => b.id !== id);
     setBanners(updated);
-    saveBannersByProvince(selectedProvinceId, updated);
-    syncToSupabase(selectedProvinceId, updated);
+    await syncToSupabase(selectedProvinceId, updated);
 
     setSuccessMsg('Banner eliminado correctamente.');
     setTimeout(() => setSuccessMsg(null), 3000);
@@ -420,11 +432,20 @@ export function GeoCustomizerManager({ initialCities }: GeoCustomizerManagerProp
 
           <button
             type="submit"
-            disabled={!newBannerImage}
+            disabled={!newBannerImage || isUploading}
             className="w-full sm:w-auto bg-[#0047BA] hover:bg-[#002878] disabled:opacity-50 text-white px-6 py-3 rounded-xl font-extrabold text-xs shadow-md transition-all cursor-pointer flex items-center justify-center gap-2"
           >
-            <Plus className="w-4 h-4" />
-            <span>Publicar Banner en {currentProv.name}</span>
+            {isUploading ? (
+              <>
+                <RefreshCw className="w-4 h-4 animate-spin" />
+                <span>Subiendo a Servidor...</span>
+              </>
+            ) : (
+              <>
+                <Plus className="w-4 h-4" />
+                <span>Publicar Banner en {currentProv.name}</span>
+              </>
+            )}
           </button>
         </form>
       </div>
