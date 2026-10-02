@@ -18,7 +18,6 @@ export function ClientHeroBanner({ provinceId = 'santa-fe' }: ClientHeroBannerPr
       : (DEFAULT_PROVINCE_BANNERS[provinceId] || DEFAULT_PROVINCE_BANNERS['santa-fe'] || []);
   });
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [isPaused, setIsPaused] = useState(false);
 
   const loadBanners = useCallback(() => {
     const activeBanners = getBannersByProvince(provinceId);
@@ -71,38 +70,33 @@ export function ClientHeroBanner({ provinceId = 'santa-fe' }: ClientHeroBannerPr
     setCurrentIndex((prev) => (prev - 1 + totalSlides) % totalSlides);
   }, [totalSlides]);
 
-  // Auto-play timer for smooth infinite rotation across slides
+  // Auto-play timer for smooth infinite rotation across slides every 4 seconds
   useEffect(() => {
-    if (totalSlides <= 1 || isPaused) return;
+    if (totalSlides <= 1) return;
 
     const timer = setInterval(() => {
       setCurrentIndex((prev) => (prev + 1) % totalSlides);
     }, 4000);
 
     return () => clearInterval(timer);
-  }, [totalSlides, isPaused]);
+  }, [totalSlides]);
 
   if (totalSlides === 0) return null;
 
   return (
     <section 
       aria-label="Carrusel Destacado Regional"
-      className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-3 pb-2"
+      className="w-full relative overflow-hidden bg-slate-950 shadow-lg"
     >
-      <div 
-        className="relative w-full rounded-3xl overflow-hidden shadow-2xl border border-white/30 group bg-slate-900"
-        style={{ minHeight: '260px', height: '360px', maxHeight: '460px', position: 'relative' }}
-        onMouseEnter={() => setIsPaused(true)}
-        onMouseLeave={() => setIsPaused(false)}
-      >
+      <div className="relative w-full h-[280px] sm:h-[380px] md:h-[440px] lg:h-[480px] overflow-hidden group">
         {/* Base Fallback Background Image (Guarantees zero empty space during load or transition) */}
         <img
           src="/images/hero-rosario.jpg"
           alt="Hero Background"
-          className="absolute inset-0 w-full h-full object-fill opacity-90 z-0"
+          className="absolute inset-0 w-full h-full object-cover object-center opacity-90 z-0"
         />
 
-        {/* Background Images with Fade Transition (Pure image, full edge-to-edge width display) */}
+        {/* Background Images with Fade Transition (Pure high-definition image, edge-to-edge full width) */}
         {effectiveBanners.map((slide: BannerItem, idx: number) => {
           const imgSrc = normalizeImageUrl(slide.imageUrl);
           const isCurrent = idx === safeCurrentIndex;
@@ -140,7 +134,7 @@ export function ClientHeroBanner({ provinceId = 'santa-fe' }: ClientHeroBannerPr
                 style={{
                   width: '100%',
                   height: '100%',
-                  objectFit: 'fill',
+                  objectFit: 'cover',
                   objectPosition: 'center',
                   display: 'block',
                 }}
@@ -149,24 +143,34 @@ export function ClientHeroBanner({ provinceId = 'santa-fe' }: ClientHeroBannerPr
           );
         })}
 
-        {/* Minimal controls at bottom right */}
+        {/* Floating controls at bottom right */}
         {totalSlides > 1 && (
-          <div className="absolute bottom-4 right-4 z-20 flex items-center gap-2 bg-slate-900/60 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/20 shadow-xl">
+          <div className="absolute bottom-5 right-6 z-30 flex items-center gap-2 bg-slate-900/70 backdrop-blur-md px-3.5 py-2 rounded-full border border-white/20 shadow-2xl">
             <button
-              onClick={prevSlide}
+              type="button"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                prevSlide();
+              }}
               className="text-white/80 hover:text-white p-1 rounded-full hover:bg-white/20 transition-colors cursor-pointer"
               aria-label="Slide anterior"
             >
-              <ChevronLeft className="w-4 h-4" />
+              <ChevronLeft className="w-5 h-5" />
             </button>
 
-            <div className="flex items-center gap-1.5 px-1">
+            <div className="flex items-center gap-2 px-1">
               {effectiveBanners.map((_, idx) => (
                 <button
                   key={idx}
-                  onClick={() => setCurrentIndex(idx)}
-                  className={`h-2 rounded-full transition-all duration-300 cursor-pointer ${
-                    idx === safeCurrentIndex ? 'w-6 bg-cyan-400' : 'w-2 bg-white/50 hover:bg-white/80'
+                  type="button"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    setCurrentIndex(idx);
+                  }}
+                  className={`h-2.5 rounded-full transition-all duration-300 cursor-pointer ${
+                    idx === safeCurrentIndex ? 'w-7 bg-cyan-400' : 'w-2.5 bg-white/50 hover:bg-white/90'
                   }`}
                   aria-label={`Ir a slide ${idx + 1}`}
                 />
@@ -174,11 +178,16 @@ export function ClientHeroBanner({ provinceId = 'santa-fe' }: ClientHeroBannerPr
             </div>
 
             <button
-              onClick={nextSlide}
+              type="button"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                nextSlide();
+              }}
               className="text-white/80 hover:text-white p-1 rounded-full hover:bg-white/20 transition-colors cursor-pointer"
               aria-label="Slide siguiente"
             >
-              <ChevronRight className="w-4 h-4" />
+              <ChevronRight className="w-5 h-5" />
             </button>
           </div>
         )}

@@ -372,6 +372,10 @@ export function GeoCustomizerManager({ initialCities }: GeoCustomizerManagerProp
             <p className="text-xs text-slate-500">
               Subí las imágenes que se mostrarán en el carrusel hero de {currentProv.name}.
             </p>
+            <div className="mt-2 inline-flex items-center gap-1.5 bg-cyan-50 border border-cyan-300 text-cyan-900 px-3 py-1 rounded-xl text-[11px] font-black shadow-2xs">
+              <span>📐 Tamaño Recomendado de Imagen:</span>
+              <span className="text-[#0047BA]">1920 x 500 px (o proporción 16:4 en HD)</span>
+            </div>
           </div>
         </div>
 
