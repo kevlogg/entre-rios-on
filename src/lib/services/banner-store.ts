@@ -169,6 +169,48 @@ export function getBannersByProvince(provinceId: string): BannerItem[] {
     : fallback;
 }
 
+export async function fetchBannersFromSupabase(provinceId: string): Promise<BannerItem[]> {
+  try {
+    const { createPublicClient } = await import('@/lib/supabase/public');
+    const supabase = createPublicClient();
+    const { data, error } = await supabase
+      .from('banner_slides')
+      .select('*')
+      .eq('province_id', provinceId)
+      .order('created_at', { ascending: false });
+
+    if (!error && Array.isArray(data) && data.length > 0) {
+      const mapped: BannerItem[] = data
+        .filter((slide) => slide && (slide.image_url || slide.imageUrl))
+        .map((slide, idx) => ({
+          id: slide.id || `b-sp-${idx}`,
+          provinceId: slide.province_id || provinceId,
+          imageUrl: slide.image_url || slide.imageUrl,
+          ctaHref: slide.cta_url || slide.ctaHref || `/${provinceId}`,
+          location: slide.city_tag || slide.location || '',
+          titleLine1: slide.title || '',
+        }));
+
+      if (mapped.length > 0) {
+        memoryStore[provinceId] = mapped;
+        if (typeof window !== 'undefined') {
+          try {
+            const raw = localStorage.getItem(STORAGE_KEY);
+            const store: Record<string, BannerItem[]> = raw ? JSON.parse(raw) : { ...DEFAULT_PROVINCE_BANNERS };
+            store[provinceId] = mapped;
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(store));
+          } catch (e) {}
+        }
+        return mapped;
+      }
+    }
+  } catch (e) {
+    console.warn('Notice loading Supabase banners:', e);
+  }
+
+  return getBannersByProvince(provinceId);
+}
+
 export function saveBannersByProvince(provinceId: string, banners: BannerItem[]): void {
   // Always update in-memory cache first
   memoryStore[provinceId] = banners;

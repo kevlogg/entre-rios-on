@@ -4,7 +4,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { getBannersByProvince, DEFAULT_PROVINCE_BANNERS, BannerItem, normalizeImageUrl } from '@/lib/services/banner-store';
+import { getBannersByProvince, fetchBannersFromSupabase, DEFAULT_PROVINCE_BANNERS, BannerItem, normalizeImageUrl } from '@/lib/services/banner-store';
 
 interface ClientHeroBannerProps {
   provinceId?: string;
@@ -28,10 +28,17 @@ export function ClientHeroBanner({ provinceId = 'santa-fe' }: ClientHeroBannerPr
     }
   }, [provinceId]);
 
-  // Load banners on mount or province change, and listen for SuperAdmin live updates
+  // Load banners on mount or province change, fetch from Supabase DB, and listen for live updates
   useEffect(() => {
     loadBanners();
     setCurrentIndex(0);
+
+    // Fetch latest banners asynchronously from Supabase Database
+    fetchBannersFromSupabase(provinceId).then((dbBanners) => {
+      if (dbBanners && dbBanners.length > 0) {
+        setBanners(dbBanners);
+      }
+    }).catch(() => {});
 
     const handleUpdate = () => {
       loadBanners();
