@@ -379,12 +379,21 @@ export async function saveBannerSlidesAction(
     cta_url?: string;
     titleLine1?: string;
     title?: string;
+    subtitle?: string;
+    badgeText?: string;
+    badge_text?: string;
+    badgeType?: string;
+    badge_type?: string;
+    ctaText?: string;
+    cta_text?: string;
     location?: string;
   }>
 ): Promise<{ success: boolean; message: string; banners?: any[] }> {
   try {
     const adminSupabase = getAdminClient();
     const supabase = adminSupabase || (await createClient());
+
+    const isUuid = (str?: string) => typeof str === 'string' && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(str);
 
     // 1. Process each banner slide: upload base64 images to Supabase Storage if needed
     const processedBanners = await Promise.all(
@@ -399,14 +408,23 @@ export async function saveBannerSlidesAction(
           }
         }
 
+        const validId = isUuid(banner.id) ? banner.id! : (typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : `b-${Date.now()}-${idx}`);
+        const rawBadgeType = banner.badgeType || banner.badge_type || 'tourism';
+        const validBadgeType = ['tourism', 'commerce', 'event', 'news', 'general'].includes(rawBadgeType) ? rawBadgeType : 'tourism';
+
         return {
-          id: banner.id || `banner-${provinceId}-${Date.now()}-${idx}`,
+          id: validId,
           province_id: provinceId,
           image_url: imageUrl,
-          title: banner.titleLine1 || banner.title || '',
-          city_tag: banner.location || '',
+          title: banner.titleLine1 || banner.title || 'ON MÁS Portal Regional',
+          subtitle: banner.subtitle || 'Comprá. Vendé. Publicá. Conectá.',
+          badge_text: banner.badgeText || banner.badge_text || 'PORTAL REGIONAL',
+          badge_type: validBadgeType,
+          city_tag: banner.location || provinceId,
+          cta_text: banner.ctaText || banner.cta_text || 'Ver Más',
           cta_url: banner.ctaHref || banner.cta_url || `/${provinceId}`,
           device: banner.device || 'all',
+          published_at: new Date().toISOString().split('T')[0],
           created_at: new Date().toISOString(),
         };
       })
@@ -419,11 +437,13 @@ export async function saveBannerSlidesAction(
         if (processedBanners.length > 0) {
           const { error } = await supabase.from('banner_slides').insert(processedBanners);
           if (error) {
-            console.warn('Notice saving banner_slides to Supabase:', error.message);
+            console.error('Error inserting banner_slides into Supabase:', error.message);
+          } else {
+            console.log(`Successfully saved ${processedBanners.length} banners for ${provinceId} in Supabase DB.`);
           }
         }
       } catch (dbErr) {
-        console.warn('Notice saving banner_slides to Supabase:', dbErr);
+        console.error('Exception saving banner_slides to Supabase:', dbErr);
       }
     }
 
