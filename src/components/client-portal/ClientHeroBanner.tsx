@@ -85,7 +85,7 @@ export function ClientHeroBanner({ provinceId = 'santa-fe' }: ClientHeroBannerPr
   return (
     <section 
       aria-label="Carrusel Destacado Regional"
-      className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-3 pb-2"
+      className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-3 pb-2"
     >
       <div 
         className="relative w-full rounded-3xl overflow-hidden shadow-2xl border border-white/30 group bg-slate-900"

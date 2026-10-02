@@ -15,9 +15,11 @@ export default async function LiveInicioPage() {
       <ClientHeader />
 
       {/* Contenedor principal con estado interactivo y productos reales de la base de datos */}
-      <ClientHomeContainer initialProducts={products} />
+      <main className="w-full flex-1">
+        <ClientHomeContainer initialProducts={products} />
+      </main>
 
-      {/* Footer oficial con silueta del mapa de Entre Ríos */}
+      {/* Footer oficial */}
       <ClientFooter />
     </div>
   );

@@ -79,7 +79,9 @@ export default async function ProvincePage({ params }: ProvincePageProps) {
   return (
     <div className="min-h-screen flex flex-col bg-brand-page-gradient">
       <ClientHeader />
-      <ClientHomeContainer provinceId={prov.id} initialProducts={products} />
+      <main className="w-full flex-1">
+        <ClientHomeContainer provinceId={prov.id} initialProducts={products} />
+      </main>
       <ClientFooter />
     </div>
   );
