@@ -44,11 +44,23 @@ export interface Commerce {
   whatsappClicksCount?: number;
 }
 
+export interface ProductSpecItem {
+  name: string;
+  value: string;
+}
+
+export interface ProductVariantItem {
+  id: string;
+  name: string;
+  imageUrl?: string;
+}
+
 export interface Product {
   id: string;
   title: string;
   slug: string;
   price?: number;
+  originalPrice?: number;
   currency: string;
   commerceId: string;
   commerceName: string;
@@ -57,13 +69,22 @@ export interface Product {
   provinceId?: string;
   provinceName?: string;
   imageUrl: string;
+  galleryImages?: string[];
   category: string;
   categoryId?: string;
-  isFeatured: boolean;
+  isFeatured?: boolean;
   description: string;
   phoneWhatsApp: string;
   whatsappMessageCustom?: string;
   commercePlan?: 'Bronce' | 'Plata' | 'Oro';
+  condition?: 'Nuevo' | 'Usado' | 'Reacondicionado';
+  salesCount?: number;
+  stock?: number;
+  rating?: number;
+  reviewCount?: number;
+  variants?: ProductVariantItem[];
+  specs?: ProductSpecItem[];
+  highlights?: string[];
 }
 
 export interface CommunityEvent {
