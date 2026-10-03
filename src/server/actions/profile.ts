@@ -256,6 +256,7 @@ export async function registerUserOnSignUpAction(data: {
   cityName: string;
   businessName?: string;
   businessCategory?: string;
+  isOnlineOnly?: boolean;
 }): Promise<{ success: boolean; message: string; slug?: string }> {
   try {
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -303,20 +304,25 @@ export async function registerUserOnSignUpAction(data: {
           .maybeSingle();
         const finalSlug = existingSlug ? `${rawSlug}-${Date.now().toString().slice(-4)}` : rawSlug;
 
+        const isOnline = Boolean(data.isOnlineOnly || data.provinceId === 'online');
+
         const { error: insertErr } = await supabase.from('commerces').insert({
           name: data.businessName,
           slug: finalSlug,
           category: commerceCategory,
-          province_id: data.provinceId,
-          city_id: data.cityId,
-          city_name: data.cityName,
-          description: `${data.businessName} - ${commerceCategory} en ${data.cityName} (${data.provinceId === 'santa-fe' ? 'Santa Fe' : 'Entre Ríos'}).`,
+          province_id: isOnline ? 'online' : data.provinceId,
+          city_id: isOnline ? 'online' : data.cityId,
+          city_name: isOnline ? 'Venta Online / Cobertura Nacional' : data.cityName,
+          description: isOnline
+            ? `${data.businessName} - ${commerceCategory} (Negocio 100% Online / Cobertura Nacional).`
+            : `${data.businessName} - ${commerceCategory} en ${data.cityName} (${data.provinceId === 'santa-fe' ? 'Santa Fe' : 'Entre Ríos'}).`,
           phone_whatsapp: data.phoneWhatsApp || '',
-          address: `${data.cityName}, Argentina`,
+          address: isOnline ? 'Atención Online / Todo el País' : `${data.cityName}, Argentina`,
           logo_url: '/images/city-rosario.jpg',
           cover_url: '/images/city-rosario.jpg',
           is_verified: true,
           is_subscription_active: false,
+          is_digital_only: isOnline,
           owner_id: data.userId,
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
@@ -355,6 +361,7 @@ export async function registerMerchantFallbackAction(data: {
   businessName: string;
   businessCategory?: string;
   userType: 'comercio' | 'turismo' | 'particular';
+  isOnlineOnly?: boolean;
 }): Promise<{ success: boolean; message: string; commerceId?: string }> {
   try {
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -370,22 +377,25 @@ export async function registerMerchantFallbackAction(data: {
         .maybeSingle();
       const finalSlug = existingSlug ? `${rawSlug}-${Date.now().toString().slice(-4)}` : rawSlug;
 
+      const isOnline = Boolean(data.isOnlineOnly || data.provinceId === 'online');
+
       const { data: inserted, error: insertErr } = await supabase
         .from('commerces')
         .insert({
           name: data.businessName,
           slug: finalSlug,
           category: data.businessCategory || (data.userType === 'turismo' ? 'Turismo & Alojamientos' : 'Comercio General'),
-          province_id: data.provinceId,
-          city_id: data.cityId || 'rosario',
-          city_name: data.cityName || 'Rosario',
+          province_id: isOnline ? 'online' : data.provinceId,
+          city_id: isOnline ? 'online' : (data.cityId || 'rosario'),
+          city_name: isOnline ? 'Venta Online / Cobertura Nacional' : (data.cityName || 'Rosario'),
           description: `${data.businessName} - Perfil registrado en el portal ON MÁS.`,
           phone_whatsapp: data.phoneWhatsApp || '',
-          address: `${data.cityName}, Argentina`,
+          address: isOnline ? 'Atención Online / Todo el País' : `${data.cityName}, Argentina`,
           logo_url: '/images/city-rosario.jpg',
           cover_url: '/images/city-rosario.jpg',
           is_verified: true,
           is_subscription_active: false,
+          is_digital_only: isOnline,
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
         })

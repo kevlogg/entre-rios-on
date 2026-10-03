@@ -4,7 +4,7 @@ import React, { useState, Suspense } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
-import { Mail, Lock, ArrowRight, Sparkles, MapPin, KeyRound, User, Store, Palmtree, CheckCircle2 } from 'lucide-react';
+import { Mail, Lock, ArrowRight, Sparkles, MapPin, KeyRound, User, Store, Palmtree, CheckCircle2, Globe } from 'lucide-react';
 import { getCitiesByProvince } from '@/lib/constants/locations';
 
 type UserType = 'particular' | 'comercio' | 'turismo';
@@ -91,6 +91,7 @@ function LoginFormContent() {
   const [provinceId, setProvinceId] = useState('santa-fe');
   const [cityName, setCityName] = useState('Rosario');
   const [phoneWhatsApp, setPhoneWhatsApp] = useState('');
+  const [isOnlineOnly, setIsOnlineOnly] = useState(false);
 
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
@@ -141,6 +142,10 @@ function LoginFormContent() {
         const computedRole = needsBusiness ? 'MERCHANT_ADMIN' : 'PUBLIC_USER';
         const computedRedirect = needsBusiness ? '/admin' : (redirectTo === '/admin' ? '/' : redirectTo);
 
+        const effectiveProvinceId = isOnlineOnly ? 'online' : provinceId;
+        const effectiveCityName = isOnlineOnly ? 'Venta Online / Cobertura Nacional' : cityName;
+        const effectiveCityId = isOnlineOnly ? 'online' : (cityObj?.id || 'rosario');
+
         const { data: authData, error: signUpErr } = await supabase.auth.signUp({
           email,
           password,
@@ -154,9 +159,10 @@ function LoginFormContent() {
               commerce_name: needsBusiness ? businessName : undefined,
               business_category: needsBusiness ? businessCategory : undefined,
               phone_whatsapp: phoneWhatsApp,
-              province_id: provinceId,
-              city_id: cityObj?.id,
-              city_name: cityName,
+              province_id: effectiveProvinceId,
+              city_id: effectiveCityId,
+              city_name: effectiveCityName,
+              is_online_only: isOnlineOnly,
               role: computedRole,
             },
           },
@@ -170,12 +176,13 @@ function LoginFormContent() {
                 email,
                 fullName,
                 phoneWhatsApp,
-                provinceId,
-                cityId: cityObj?.id || 'rosario',
-                cityName: cityObj?.name || cityName,
+                provinceId: effectiveProvinceId,
+                cityId: effectiveCityId,
+                cityName: effectiveCityName,
                 businessName,
                 businessCategory,
                 userType,
+                isOnlineOnly,
               });
 
               if (fallbackRes.success) {
@@ -216,11 +223,12 @@ function LoginFormContent() {
               userType,
               fullName,
               phoneWhatsApp,
-              provinceId,
-              cityId: cityObj?.id || '',
-              cityName: cityObj?.name || cityName,
+              provinceId: effectiveProvinceId,
+              cityId: effectiveCityId,
+              cityName: effectiveCityName,
               businessName: needsBusiness ? businessName : undefined,
               businessCategory: needsBusiness ? businessCategory : undefined,
+              isOnlineOnly,
             });
           } catch (regErr) {
             console.warn('Nota registro Server Action:', regErr);
@@ -420,32 +428,63 @@ function LoginFormContent() {
                 </>
               )}
 
+              {/* Opción de Negocio Online (Comercios o Turismo) */}
+              {needsBusiness && (
+                <div className="bg-[#00ADB5]/10 border border-[#00ADB5]/30 rounded-xl p-3.5 flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-lg bg-[#00ADB5] text-white flex items-center justify-center shrink-0">
+                      <Globe className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <p className="text-xs font-black text-slate-800">Negocio 100% Online / Cobertura Nacional</p>
+                      <p className="text-[11px] text-slate-600">Marcá si vendés online a todo el país sin local físico exclusivo</p>
+                    </div>
+                  </div>
+                  <label className="relative inline-flex items-center cursor-pointer shrink-0">
+                    <input
+                      type="checkbox"
+                      checked={isOnlineOnly}
+                      onChange={(e) => setIsOnlineOnly(e.target.checked)}
+                      className="sr-only peer"
+                    />
+                    <div className="w-9 h-5 bg-slate-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[#00ADB5]"></div>
+                  </label>
+                </div>
+              )}
+
               {/* Provincia y Ciudad */}
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">Provincia *</label>
-                  <select
-                    value={provinceId}
-                    onChange={(e) => handleProvinceChange(e.target.value)}
-                    className="w-full px-3 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-xs font-bold text-slate-800 focus:ring-2 focus:ring-[#00ADB5] disabled:bg-slate-100"
-                  >
-                    <option value="santa-fe">Santa Fe</option>
-                    <option value="entre-rios">Entre Ríos</option>
-                  </select>
+              {isOnlineOnly ? (
+                <div className="bg-slate-100 border border-slate-200 rounded-xl p-3 flex items-center gap-2.5 text-slate-700 text-xs font-bold">
+                  <Globe className="w-4 h-4 text-[#00ADB5] shrink-0" />
+                  <span>Ubicación: <strong>Venta Online / Cobertura Nacional</strong> (No requiere selección de provincia)</span>
                 </div>
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">Ciudad *</label>
-                  <select
-                    value={cityName}
-                    onChange={(e) => setCityName(e.target.value)}
-                    className="w-full px-3 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-xs font-bold text-slate-800 focus:ring-2 focus:ring-[#00ADB5] disabled:bg-slate-100"
-                  >
-                    {availableCities.map((city) => (
-                      <option key={city.id} value={city.name}>{city.name}</option>
-                    ))}
-                  </select>
+              ) : (
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1">Provincia *</label>
+                    <select
+                      value={provinceId}
+                      onChange={(e) => handleProvinceChange(e.target.value)}
+                      className="w-full px-3 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-xs font-bold text-slate-800 focus:ring-2 focus:ring-[#00ADB5] disabled:bg-slate-100"
+                    >
+                      <option value="santa-fe">Santa Fe</option>
+                      <option value="entre-rios">Entre Ríos</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1">Ciudad *</label>
+                    <select
+                      value={cityName}
+                      onChange={(e) => setCityName(e.target.value)}
+                      className="w-full px-3 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-xs font-bold text-slate-800 focus:ring-2 focus:ring-[#00ADB5] disabled:bg-slate-100"
+                    >
+                      {availableCities.map((city) => (
+                        <option key={city.id} value={city.name}>{city.name}</option>
+                      ))}
+                    </select>
+                  </div>
                 </div>
-              </div>
+              )}
 
               {/* WhatsApp (todos) */}
               <div>
