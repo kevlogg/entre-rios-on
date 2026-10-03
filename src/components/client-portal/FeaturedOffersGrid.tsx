@@ -56,29 +56,29 @@ export function FeaturedOffersGrid({
 
   return (
     <section id="ofertas-destacadas" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/20 pb-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-300/70 pb-4">
         <div>
-          <h2 className="text-xl sm:text-2xl font-extrabold text-white flex items-center gap-2">
-            <ShoppingBag className="w-5 h-5 text-[#00E5FF]" />
+          <h2 className="text-xl sm:text-2xl font-black text-slate-900 flex items-center gap-2">
+            <ShoppingBag className="w-5 h-5 text-[#0047BA]" />
             <span>Catálogo u Ofertas Destacadas</span>
-            <span className="text-[#00E5FF]">
+            <span className="text-[#0047BA]">
               {selectedCategory !== 'all' && activeCategoryObj ? `• ${activeCategoryObj.label}` : ''}
             </span>
           </h2>
           {selectedCategory !== 'all' && activeCategoryObj && (
-            <p className="text-xs text-white/60 font-medium mt-0.5">
+            <p className="text-xs text-slate-600 font-medium mt-0.5">
               {activeCategoryObj.description}
             </p>
           )}
         </div>
 
         <div className="flex items-center gap-3">
-          <span className="text-xs font-extrabold text-[#00E5FF] bg-white/10 px-3 py-1.5 rounded-xl border border-white/20">
+          <span className="text-xs font-extrabold text-[#0047BA] bg-white px-3 py-1.5 rounded-xl border border-slate-300 shadow-2xs">
             {displayedProducts.length} {displayedProducts.length === 1 ? 'producto real' : 'productos reales'}
           </span>
-          <Link href="/catalogo" className="text-xs font-bold text-[#00E5FF] hover:text-white flex items-center gap-1 transition-colors">
+          <Link href="/catalogo" className="text-xs font-black text-[#0047BA] hover:text-[#002878] flex items-center gap-1 transition-colors">
             <span>Ver todo el catálogo</span>
-            <ArrowRight className="w-3.5 h-3.5 text-[#00E5FF]" />
+            <ArrowRight className="w-3.5 h-3.5 text-[#00ADB5]" />
           </Link>
         </div>
       </div>

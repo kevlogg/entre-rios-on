@@ -315,7 +315,7 @@ export function Header({ selectedCityId = 'all' }: HeaderProps) {
               placeholder="Buscar productos, comercios, ofertas..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-10 pr-4 py-2 text-xs text-slate-800 placeholder-slate-400 focus:outline-hidden focus:ring-2 focus:ring-[#00ADB5] focus:bg-white transition-all shadow-xs"
+              className="w-full bg-white border border-slate-200 rounded-xl pl-10 pr-4 py-2 text-xs font-bold text-slate-900 placeholder-slate-400 focus:outline-hidden focus:ring-2 focus:ring-[#00ADB5] focus:bg-white transition-all shadow-md"
             />
             <Search className="w-4 h-4 text-slate-400 absolute left-3.5 pointer-events-none" />
           </form>

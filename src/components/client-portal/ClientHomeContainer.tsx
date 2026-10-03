@@ -54,23 +54,26 @@ export function ClientHomeContainer({ provinceId, initialProducts = [] }: Client
         onSelectCategory={(catId) => setSelectedCategory(catId)}
       />
 
-      {/* Primer Bento: Comercio Digital, Comunidad ON, Sorteos ON */}
-      <BentoRowOne />
+      {/* Contenedor con fondo gris suave liso a partir de aquí para abajo hasta el footer */}
+      <div className="bg-[#e9ecef] w-full border-t border-slate-300/60 pb-8 space-y-2">
+        {/* Primer Bento: Comercio Digital, Comunidad ON, Sorteos ON */}
+        <BentoRowOne />
 
-      {/* Ofertas e ítems reales de la base de datos Supabase / DAL */}
-      <FeaturedOffersGrid
-        products={initialProducts}
-        selectedCategory={selectedCategory}
-      />
+        {/* Ofertas e ítems reales de la base de datos Supabase / DAL */}
+        <FeaturedOffersGrid
+          products={initialProducts}
+          selectedCategory={selectedCategory}
+        />
 
-      {/* Explorá por ciudad (Carrusel dinámico con ciudades de la provincia activa) */}
-      <CityExploreBar provinceId={activeProvince} />
+        {/* Explorá por ciudad (Carrusel dinámico con ciudades de la provincia activa) */}
+        <CityExploreBar provinceId={activeProvince} />
 
-      {/* Segundo Bento: Industria, Turismo, Clasificados, Publicá tu Negocio */}
-      <BentoRowTwo />
+        {/* Segundo Bento: Industria, Turismo, Clasificados, Publicá tu Negocio */}
+        <BentoRowTwo />
 
-      {/* Sección resumen de ¿Quiénes Somos? con acceso directo a la página */}
-      <AboutUsHomeSection />
+        {/* Sección resumen de ¿Quiénes Somos? con acceso directo a la página */}
+        <AboutUsHomeSection />
+      </div>
     </>
   );
 }

@@ -411,11 +411,11 @@ export function ClientHeader() {
                   setSearchQuery(e.target.value);
                   setIsSearchFocused(true);
                 }}
-                className="w-full bg-white/15 backdrop-blur-md border border-white/30 rounded-xl pl-4 pr-12 py-2 text-xs text-white placeholder-white/70 focus:outline-hidden focus:ring-2 focus:ring-cyan-300 focus:bg-white/25 transition-all shadow-inner"
+                className="w-full bg-white border border-slate-200 rounded-xl pl-4 pr-12 py-2 text-xs font-bold text-slate-900 placeholder-slate-400 focus:outline-hidden focus:ring-2 focus:ring-[#00ADB5] focus:bg-white transition-all shadow-md"
               />
               <button
                 type="submit"
-                className="absolute right-1 top-1 bottom-1 bg-gradient-to-r from-cyan-300 to-blue-500 hover:from-cyan-200 hover:to-blue-400 text-slate-950 font-black px-3 rounded-lg flex items-center justify-center transition-all shadow-md cursor-pointer"
+                className="absolute right-1 top-1 bottom-1 bg-gradient-to-r from-[#00ADB5] to-[#0047BA] hover:from-[#00E5E8] hover:to-[#00ADB5] text-white font-black px-3 rounded-lg flex items-center justify-center transition-all shadow-md cursor-pointer"
                 aria-label="Buscar"
               >
                 <Search className="w-3.5 h-3.5" />
@@ -715,9 +715,9 @@ export function ClientHeader() {
               placeholder="Buscá productos, comercios, ofertas..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-slate-800 border border-white/20 rounded-xl pl-4 pr-10 py-2 text-xs text-white placeholder-slate-400"
+              className="w-full bg-white border border-slate-200 rounded-xl pl-4 pr-10 py-2 text-xs font-bold text-slate-900 placeholder-slate-400 focus:outline-hidden focus:ring-2 focus:ring-[#00ADB5]"
             />
-            <button type="submit" className="absolute right-2 top-2 bg-gradient-to-r from-cyan-400 to-blue-600 text-slate-950 p-1 rounded-lg">
+            <button type="submit" className="absolute right-1.5 top-1.5 bottom-1.5 bg-gradient-to-r from-[#00ADB5] to-[#0047BA] text-white p-1.5 rounded-lg flex items-center justify-center">
               <Search className="w-3.5 h-3.5" />
             </button>
           </form>

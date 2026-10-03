@@ -23,17 +23,17 @@ export function CityExploreBar({ provinceId = 'santa-fe' }: CityExploreBarProps)
 
   return (
     <section id="ciudades" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
-      <div className="flex items-center justify-between border-b border-white/20 pb-3">
-        <h2 className="text-2xl font-extrabold text-white flex items-center gap-2">
+      <div className="flex items-center justify-between border-b border-slate-300/70 pb-3">
+        <h2 className="text-2xl font-black text-slate-900 flex items-center gap-2">
           <span>Explorá por ciudad</span>
-          <span className="text-[#00E5FF] font-black">• {currentProvince.name}</span>
+          <span className="text-[#0047BA] font-black">• {currentProvince.name}</span>
         </h2>
         <Link 
           href={`/${currentProvince.slug}`} 
-          className="text-xs font-bold text-[#00E5FF] hover:text-white flex items-center gap-1"
+          className="text-xs font-black text-[#0047BA] hover:text-[#002878] flex items-center gap-1 transition-colors"
         >
           <span>Ver todas las ciudades de {currentProvince.name}</span>
-          <ArrowRight className="w-3.5 h-3.5" />
+          <ArrowRight className="w-3.5 h-3.5 text-[#00ADB5]" />
         </Link>
       </div>
 
@@ -43,9 +43,9 @@ export function CityExploreBar({ provinceId = 'santa-fe' }: CityExploreBarProps)
             key={city.id}
             href={`/${currentProvince.slug}/${city.slug || city.id}`}
             onClick={() => handleSelect(city.id, city.name)}
-            className="group flex flex-col items-center rounded-2xl overflow-hidden border border-white/20 bg-slate-900/70 hover:bg-slate-900/90 hover:border-cyan-300 hover:shadow-xl transition-all text-center shadow-lg"
+            className="group flex flex-col items-center rounded-2xl overflow-hidden border border-slate-200/80 bg-white hover:border-[#00ADB5] hover:shadow-md transition-all text-center shadow-2xs"
           >
-            <div className="relative h-20 sm:h-24 w-full bg-slate-800 overflow-hidden">
+            <div className="relative h-20 sm:h-24 w-full bg-slate-100 overflow-hidden">
               <Image
                 src={city.imageUrl || '/images/city-parana.jpg'}
                 alt={city.name}
@@ -55,8 +55,8 @@ export function CityExploreBar({ provinceId = 'santa-fe' }: CityExploreBarProps)
               />
             </div>
 
-            <div className="p-2 w-full">
-              <span className="text-xs font-extrabold text-white line-clamp-1 group-hover:text-cyan-300 transition-colors">
+            <div className="p-2.5 w-full bg-white">
+              <span className="text-xs font-extrabold text-slate-800 line-clamp-1 group-hover:text-[#0047BA] transition-colors">
                 {city.name}
               </span>
             </div>
@@ -66,14 +66,14 @@ export function CityExploreBar({ provinceId = 'santa-fe' }: CityExploreBarProps)
         {/* Card final para Ver Todas */}
         <Link
           href={`/${currentProvince.slug}`}
-          className="group flex flex-col items-center rounded-2xl overflow-hidden border border-white/30 bg-white/15 hover:bg-white/30 transition-all text-center shadow-lg backdrop-blur-md"
+          className="group flex flex-col items-center justify-center rounded-2xl overflow-hidden border-2 border-dashed border-[#00ADB5] bg-cyan-50/70 hover:bg-cyan-100/70 transition-all text-center shadow-2xs"
         >
-          <div className="h-20 sm:h-24 w-full flex items-center justify-center text-cyan-300 group-hover:scale-110 transition-transform">
-            <MapPin className="w-8 h-8 text-cyan-300" />
+          <div className="h-20 sm:h-24 w-full flex items-center justify-center text-[#0047BA] group-hover:scale-110 transition-transform">
+            <MapPin className="w-8 h-8 text-[#00ADB5]" />
           </div>
-          <div className="p-2 w-full">
-            <span className="text-xs font-black text-cyan-200 line-clamp-1">
-              Todas las...
+          <div className="p-2.5 w-full">
+            <span className="text-xs font-black text-[#0047BA] line-clamp-1">
+              Ver Todas
             </span>
           </div>
         </Link>
