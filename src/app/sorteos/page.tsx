@@ -48,14 +48,14 @@ export default function SorteosPage() {
     return (
       <DynamicLayoutWrapper>
         <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16 text-center space-y-6 w-full">
-          {/* Breadcrumb */}
-          <div className="flex items-center justify-center gap-2 text-xs font-bold text-slate-500 mb-6">
-            <Link href="/" className="hover:text-[#00ADB5] flex items-center gap-1">
+          {/* Breadcrumb Glass Badge */}
+          <div className="bg-white/15 backdrop-blur-md border border-white/25 px-4 py-2 rounded-2xl w-fit mx-auto flex items-center gap-2 text-xs font-extrabold text-white shadow-xs mb-6">
+            <Link href="/" className="hover:text-cyan-300 text-slate-100 flex items-center gap-1">
               <ArrowLeft className="w-3.5 h-3.5" />
               <span>Inicio</span>
             </Link>
-            <span>/</span>
-            <span className="text-[#0047BA]">Sorteos Mensuales ON MÁS</span>
+            <span className="text-white/40">/</span>
+            <span className="text-cyan-300 font-black">Sorteos Mensuales ON MÁS</span>
           </div>
 
           <div className="w-20 h-20 bg-gradient-to-tr from-[#0047BA] to-[#00ADB5] rounded-3xl mx-auto flex items-center justify-center text-white shadow-xl animate-pulse">
@@ -125,14 +125,14 @@ export default function SorteosPage() {
   return (
     <DynamicLayoutWrapper>
       <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 w-full">
-        {/* Breadcrumb */}
-        <div className="flex items-center gap-2 text-xs font-bold text-slate-500">
-          <Link href="/" className="hover:text-[#00ADB5] flex items-center gap-1">
+        {/* Breadcrumb Glass Badge */}
+        <div className="bg-white/15 backdrop-blur-md border border-white/25 px-4 py-2 rounded-2xl w-fit flex items-center gap-2 text-xs font-extrabold text-white shadow-xs">
+          <Link href="/" className="hover:text-cyan-300 text-slate-100 flex items-center gap-1">
             <ArrowLeft className="w-3.5 h-3.5" />
             <span>Inicio</span>
           </Link>
-          <span>/</span>
-          <span className="text-[#0047BA]">Sorteos Mensuales ON MÁS</span>
+          <span className="text-white/40">/</span>
+          <span className="text-cyan-300 font-black">Sorteos Mensuales ON MÁS</span>
         </div>
 
         {/* Hero Banner del Sorteo Mensual */}

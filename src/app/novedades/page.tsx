@@ -16,14 +16,14 @@ export default function NovedadesPage() {
       <ClientHeader />
 
       <main className="w-full flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
-        {/* Breadcrumb */}
-        <div className="flex items-center gap-2 text-xs font-bold text-slate-500">
-          <Link href="/" className="hover:text-[#00ADB5] flex items-center gap-1">
+        {/* Breadcrumb Glass Badge */}
+        <div className="bg-white/15 backdrop-blur-md border border-white/25 px-4 py-2 rounded-2xl w-fit flex items-center gap-2 text-xs font-extrabold text-white shadow-xs">
+          <Link href="/" className="hover:text-cyan-300 text-slate-100 flex items-center gap-1">
             <ArrowLeft className="w-3.5 h-3.5" />
             <span>Inicio</span>
           </Link>
-          <span>/</span>
-          <span className="text-[#0047BA]">Novedades</span>
+          <span className="text-white/40">/</span>
+          <span className="text-cyan-300 font-black">Novedades</span>
         </div>
 
         {/* Hero Section */}

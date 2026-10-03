@@ -24,27 +24,29 @@ export default async function ComerciosPage() {
   return (
     <DynamicLayoutWrapper>
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 w-full">
-        {/* Breadcrumb */}
-        <div className="flex items-center gap-2 text-xs font-bold text-slate-500">
-          <Link href="/" className="hover:text-[#00a859] flex items-center gap-1">
+        {/* Breadcrumb Glass Badge */}
+        <div className="bg-white/15 backdrop-blur-md border border-white/25 px-4 py-2 rounded-2xl w-fit flex items-center gap-2 text-xs font-extrabold text-white shadow-xs">
+          <Link href="/" className="hover:text-cyan-300 text-slate-100 flex items-center gap-1">
             <ArrowLeft className="w-3.5 h-3.5" />
             <span>Inicio</span>
           </Link>
-          <span>/</span>
-          <span className="text-[#004b87]">Directorio Comercial B2B</span>
+          <span className="text-white/40">/</span>
+          <span className="text-cyan-300 font-black">Directorio Comercial B2B</span>
         </div>
 
-        {/* Page Header */}
-        <div className="border-b border-slate-200 pb-4 space-y-2">
-          <span className="text-xs font-extrabold uppercase tracking-widest text-[#00a859] flex items-center gap-1.5">
-            <Store className="w-4 h-4" />
-            Directorio Provincial de Socios B2B
-          </span>
-          <h1 className="text-3xl sm:text-4xl font-extrabold text-[#004b87]">
-            Comercios, Productores & Servicios en Entre Ríos
+        {/* Page Hero Banner */}
+        <div className="bg-gradient-to-r from-[#002878] via-[#0047BA] to-[#00ADB5] rounded-3xl p-8 sm:p-12 text-white shadow-xl relative overflow-hidden space-y-4">
+          <div className="inline-flex items-center gap-2 bg-white/15 border border-white/20 text-[#00E5E8] text-xs font-extrabold px-3.5 py-1.5 rounded-full backdrop-blur-md">
+            <Store className="w-4 h-4 text-[#00E5E8]" />
+            <span>Directorio Provincial de Socios B2B</span>
+          </div>
+
+          <h1 className="text-3xl sm:text-5xl font-black tracking-tight leading-tight">
+            Comercios, Productores & Servicios en Entre Ríos y Santa Fe
           </h1>
-          <p className="text-sm text-slate-600 font-medium max-w-2xl">
-            Conectá directamente con talleres artesanales, gastronómicos, bodegas y servicios verificados de la provincia.
+
+          <p className="text-sm sm:text-base text-slate-100 font-medium max-w-2xl leading-relaxed">
+            Conectá directamente con talleres artesanales, gastronómicos, bodegas, pymes y servicios verificados de la provincia. Venta e informes directos a WhatsApp sin comisiones.
           </p>
         </div>
 
