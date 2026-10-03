@@ -48,17 +48,14 @@ export function ClientHomeContainer({ provinceId, initialProducts = [] }: Client
       {/* Hero panorámico según provincia activa (Santa Fe por defecto) */}
       <ClientHeroBanner provinceId={activeProvince} />
 
-      {/* Barra de categorías en grid 2x4 */}
+      {/* Barra de categorías en grid 2x4 (incorpora la transición difuminada hacia el gris suave) */}
       <CategoryIconBar
         selectedCategory={selectedCategory}
         onSelectCategory={(catId) => setSelectedCategory(catId)}
       />
 
-      {/* Transición difuminada superior: del fondo de marca al gris suave */}
-      <div className="w-full h-16 bg-gradient-to-b from-transparent via-[#e9ecef]/60 to-[#e9ecef] -mb-1 relative z-10 pointer-events-none" />
-
-      {/* Contenedor con fondo gris suave liso */}
-      <div className="bg-[#e9ecef] w-full space-y-2">
+      {/* Contenedor principal con fondo gris suave liso (#e9ecef) */}
+      <div className="bg-[#e9ecef] w-full pt-2 pb-6 space-y-2">
         {/* Primer Bento: Comercio Digital, Comunidad ON, Sorteos ON */}
         <BentoRowOne />
 
@@ -78,8 +75,8 @@ export function ClientHomeContainer({ provinceId, initialProducts = [] }: Client
         <AboutUsHomeSection />
       </div>
 
-      {/* Transición difuminada inferior: del gris suave hacia el footer */}
-      <div className="w-full h-16 bg-gradient-to-b from-[#e9ecef] via-[#e9ecef]/40 to-transparent -mt-1 relative z-10 pointer-events-none" />
+      {/* Transición suave final desde el gris hacia el pie de página */}
+      <div className="w-full h-12 bg-gradient-to-b from-[#e9ecef] to-[#001845]" />
     </>
   );
 }
