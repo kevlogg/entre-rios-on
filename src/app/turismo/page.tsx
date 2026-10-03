@@ -1,3 +1,4 @@
+import { Metadata } from 'next';
 import React from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -6,6 +7,15 @@ import { DynamicLayoutWrapper } from '@/components/layout/DynamicLayoutWrapper';
 import { getTourismServices } from '@/lib/dal/portal';
 
 export const revalidate = 60;
+
+export const metadata: Metadata = {
+  title: 'Turismo, Termas, Spas & Paseos del Litoral | ON MÁS Portal',
+  description: 'Guía oficial de turismo en Entre Ríos y Santa Fe: complejos termales, alojamientos, paseos en lancha, gastronomía costera y reservas sin comisiones.',
+  openGraph: {
+    title: 'Turismo, Termas & Experiencias del Litoral | ON MÁS',
+    description: 'Descubrí los mejores destinos turísticos y experiencias del Litoral argentino.',
+  },
+};
 
 export default async function TurismoPage() {
   const servicios = await getTourismServices();

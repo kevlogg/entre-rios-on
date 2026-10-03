@@ -1,3 +1,4 @@
+import { Metadata } from 'next';
 import React from 'react';
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
@@ -6,6 +7,15 @@ import { getFeaturedProducts } from '@/lib/dal/portal';
 import { CatalogInteractiveView } from '@/components/catalog/CatalogInteractiveView';
 
 export const revalidate = 60;
+
+export const metadata: Metadata = {
+  title: 'Catálogo de Productos & Ofertas Regionales | ON MÁS Portal',
+  description: 'Explorá miles de productos, ofertas, promociones y artículos regionales directos del productor en Santa Fe y Entre Ríos sin comisiones.',
+  openGraph: {
+    title: 'Catálogo de Productos & Ofertas Regionales | ON MÁS',
+    description: 'Miles de productos y ofertas directas por WhatsApp sin comisiones.',
+  },
+};
 
 export default async function CatalogoPage() {
   const products = await getFeaturedProducts();

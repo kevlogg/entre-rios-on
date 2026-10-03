@@ -70,12 +70,26 @@ export async function deleteCommerceAction(
     const adminSupabase = getAdminClient();
     const client = adminSupabase || (await createClient());
 
+    // 1. Obtener el owner_id (ID de usuario registrado) antes de eliminar el comercio
+    let ownerId: string | null = null;
+    const { data: commerceData } = await client
+      .from('commerces')
+      .select('owner_id')
+      .eq('id', commerceId)
+      .maybeSingle();
+
+    if (commerceData && commerceData.owner_id) {
+      ownerId = commerceData.owner_id;
+    }
+
+    // 2. Eliminar productos asociados a este comercio
     try {
       await client.from('products').delete().eq('commerce_id', commerceId);
     } catch (pErr) {
       console.warn('Nota eliminando productos:', pErr);
     }
 
+    // 3. Eliminar la fila del comercio en la base de datos
     const { error } = await client
       .from('commerces')
       .delete()
@@ -85,12 +99,21 @@ export async function deleteCommerceAction(
       return { success: false, message: `Error eliminando comercio: ${error.message}` };
     }
 
+    // 4. Eliminar el usuario registrado en Supabase Auth
+    if (ownerId && adminSupabase) {
+      try {
+        await adminSupabase.auth.admin.deleteUser(ownerId);
+      } catch (uErr) {
+        console.warn('Nota eliminando usuario auth de Supabase:', uErr);
+      }
+    }
+
     revalidatePath('/comercios');
     revalidatePath('/catalogo');
     revalidatePath('/turismo');
     revalidatePath('/superadmin');
 
-    return { success: true, message: 'Comercio eliminado exitosamente.' };
+    return { success: true, message: 'Comercio y su usuario registrado fueron eliminados exitosamente.' };
   } catch (err) {
     return { success: false, message: `Error inesperado: ${(err as Error).message}` };
   }

@@ -1,3 +1,4 @@
+import { Metadata } from 'next';
 import React from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -7,6 +8,15 @@ import { DynamicLayoutWrapper } from '@/components/layout/DynamicLayoutWrapper';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
+
+export const metadata: Metadata = {
+  title: 'Directorio Comercial & Empresas Adheridas | ON MÁS Portal',
+  description: 'Directorio unificado de comercios, marcas, talleres artesanales, gastronómicos y servicios verificados de Santa Fe, Entre Ríos y el Litoral. Venta directa por WhatsApp.',
+  openGraph: {
+    title: 'Directorio Comercial & Empresas | ON MÁS Portal',
+    description: 'Conectá directamente con más de 500 comercios y productores del Litoral.',
+  },
+};
 
 export default async function ComerciosPage() {
   const commerces = await getAllCommerces();
