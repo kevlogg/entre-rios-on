@@ -1,5 +1,7 @@
 'use client';
 
+import { useState, useEffect } from 'react';
+
 export interface BannerItem {
   id: string;
   provinceId: string;
@@ -135,38 +137,39 @@ export const DEFAULT_PROVINCE_BANNERS: Record<string, BannerItem[]> = {
 
 const STORAGE_KEY = 'onmas_province_banners_v2';
 
-// In-memory cache to ensure live updates across components without depending solely on localStorage quota
-const memoryStore: Record<string, BannerItem[]> = { ...DEFAULT_PROVINCE_BANNERS };
+// In-memory store
+const memoryStore: Record<string, BannerItem[]> = {};
+const configuredProvinces = new Set<string>();
 
 export function getBannersByProvince(provinceId: string): BannerItem[] {
-  const fallback = DEFAULT_PROVINCE_BANNERS[provinceId] || DEFAULT_PROVINCE_BANNERS['santa-fe'] || [];
-
-  if (typeof window === 'undefined') {
-    return memoryStore[provinceId] && memoryStore[provinceId].length > 0
-      ? memoryStore[provinceId]
-      : fallback;
+  if (configuredProvinces.has(provinceId) && memoryStore[provinceId] !== undefined) {
+    return memoryStore[provinceId];
   }
 
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (raw) {
-      const parsed: Record<string, BannerItem[]> = JSON.parse(raw);
-      const targetList = parsed[provinceId] || (provinceId !== 'santa-fe' ? parsed['santa-fe'] : undefined);
-      if (targetList && Array.isArray(targetList)) {
-        const valid = targetList.filter((b) => b && typeof b.imageUrl === 'string' && b.imageUrl.trim().length > 0);
-        if (valid.length > 0) {
+  if (typeof window !== 'undefined') {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (raw) {
+        const parsed: Record<string, BannerItem[]> = JSON.parse(raw);
+        if (provinceId in parsed && Array.isArray(parsed[provinceId])) {
+          const targetList = parsed[provinceId];
+          const valid = targetList.filter((b) => b && typeof b.imageUrl === 'string' && b.imageUrl.trim().length > 0);
           memoryStore[provinceId] = valid;
+          configuredProvinces.add(provinceId);
           return valid;
         }
       }
+    } catch (e) {
+      console.error('Error reading province banners from localStorage:', e);
     }
-  } catch (e) {
-    console.error('Error reading province banners from localStorage:', e);
   }
 
-  return memoryStore[provinceId] && memoryStore[provinceId].length > 0
-    ? memoryStore[provinceId]
-    : fallback;
+  if (memoryStore[provinceId] !== undefined) {
+    return memoryStore[provinceId];
+  }
+
+  const fallback = DEFAULT_PROVINCE_BANNERS[provinceId] || DEFAULT_PROVINCE_BANNERS['santa-fe'] || [];
+  return fallback;
 }
 
 export async function fetchBannersFromSupabase(provinceId: string): Promise<BannerItem[]> {
@@ -179,7 +182,7 @@ export async function fetchBannersFromSupabase(provinceId: string): Promise<Bann
       .eq('province_id', provinceId)
       .order('created_at', { ascending: false });
 
-    if (!error && Array.isArray(data) && data.length > 0) {
+    if (!error && Array.isArray(data)) {
       const mapped: BannerItem[] = data
         .filter((slide) => slide && (slide.image_url || slide.imageUrl))
         .map((slide, idx) => ({
@@ -191,18 +194,19 @@ export async function fetchBannersFromSupabase(provinceId: string): Promise<Bann
           titleLine1: slide.title || '',
         }));
 
-      if (mapped.length > 0) {
-        memoryStore[provinceId] = mapped;
-        if (typeof window !== 'undefined') {
-          try {
-            const raw = localStorage.getItem(STORAGE_KEY);
-            const store: Record<string, BannerItem[]> = raw ? JSON.parse(raw) : { ...DEFAULT_PROVINCE_BANNERS };
-            store[provinceId] = mapped;
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(store));
-          } catch (e) {}
-        }
-        return mapped;
+      memoryStore[provinceId] = mapped;
+      configuredProvinces.add(provinceId);
+
+      if (typeof window !== 'undefined') {
+        try {
+          const raw = localStorage.getItem(STORAGE_KEY);
+          const store: Record<string, BannerItem[]> = raw ? JSON.parse(raw) : {};
+          store[provinceId] = mapped;
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(store));
+          window.dispatchEvent(new Event('onmas_banners_updated'));
+        } catch (e) {}
       }
+      return mapped;
     }
   } catch (e) {
     console.warn('Notice loading Supabase banners:', e);
@@ -212,21 +216,52 @@ export async function fetchBannersFromSupabase(provinceId: string): Promise<Bann
 }
 
 export function saveBannersByProvince(provinceId: string, banners: BannerItem[]): void {
-  // Always update in-memory cache first
   memoryStore[provinceId] = banners;
+  configuredProvinces.add(provinceId);
 
   if (typeof window !== 'undefined') {
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
-      const store: Record<string, BannerItem[]> = raw ? JSON.parse(raw) : { ...DEFAULT_PROVINCE_BANNERS };
+      const store: Record<string, BannerItem[]> = raw ? JSON.parse(raw) : {};
       store[provinceId] = banners;
       localStorage.setItem(STORAGE_KEY, JSON.stringify(store));
     } catch (e) {
-      console.warn('Warning saving province banners to localStorage (storage quota or access issue):', e);
+      console.warn('Warning saving province banners to localStorage:', e);
     }
 
-    // Always dispatch event to notify active UI components
     window.dispatchEvent(new Event('onmas_banners_updated'));
   }
 }
+
+export function useProvinceBanners(provinceId: string): BannerItem[] {
+  const [banners, setBanners] = useState<BannerItem[]>(() => getBannersByProvince(provinceId));
+
+  useEffect(() => {
+    let isMounted = true;
+    const sync = () => {
+      if (isMounted) setBanners(getBannersByProvince(provinceId));
+    };
+
+    sync();
+
+    fetchBannersFromSupabase(provinceId).then((b) => {
+      if (isMounted) setBanners(b);
+    });
+
+    if (typeof window !== 'undefined') {
+      window.addEventListener('onmas_banners_updated', sync);
+      window.addEventListener('storage', sync);
+    }
+    return () => {
+      isMounted = false;
+      if (typeof window !== 'undefined') {
+        window.removeEventListener('onmas_banners_updated', sync);
+        window.removeEventListener('storage', sync);
+      }
+    };
+  }, [provinceId]);
+
+  return banners;
+}
+
 

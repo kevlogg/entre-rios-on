@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { getProvincesConfigAction, saveProvincesConfigAction } from '@/server/actions/superadmin';
 
 export interface ProvinceItem {
   id: string;
@@ -17,20 +18,48 @@ export const DEFAULT_PROVINCES_CONFIG: ProvinceItem[] = [
 
 const PROVINCE_STORAGE_KEY = 'onmas_province_config_v1';
 
+let memoryStoreProvinces: ProvinceItem[] | null = null;
+
 export function getProvincesConfig(): ProvinceItem[] {
-  if (typeof window === 'undefined') {
-    return DEFAULT_PROVINCES_CONFIG;
+  if (memoryStoreProvinces && memoryStoreProvinces.length > 0) {
+    return memoryStoreProvinces;
   }
+
+  if (typeof window !== 'undefined') {
+    try {
+      const raw = localStorage.getItem(PROVINCE_STORAGE_KEY);
+      if (raw) {
+        const parsed: ProvinceItem[] = JSON.parse(raw);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          memoryStoreProvinces = parsed;
+          return parsed;
+        }
+      }
+    } catch (e) {
+      console.error('Error al leer configuración de provincias de localStorage:', e);
+    }
+  }
+
+  return DEFAULT_PROVINCES_CONFIG;
+}
+
+export async function fetchProvincesFromSupabase(): Promise<ProvinceItem[]> {
   try {
-    const raw = localStorage.getItem(PROVINCE_STORAGE_KEY);
-    if (raw) {
-      const parsed: ProvinceItem[] = JSON.parse(raw);
-      if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+    const res = await getProvincesConfigAction();
+    if (res.success && Array.isArray(res.data) && res.data.length > 0) {
+      memoryStoreProvinces = res.data;
+      if (typeof window !== 'undefined') {
+        try {
+          localStorage.setItem(PROVINCE_STORAGE_KEY, JSON.stringify(res.data));
+          window.dispatchEvent(new Event('onmas_provinces_updated'));
+        } catch (e) {}
+      }
+      return res.data;
     }
   } catch (e) {
-    console.error('Error al leer configuración de provincias:', e);
+    console.warn('Nota leyendo provincias de Supabase:', e);
   }
-  return DEFAULT_PROVINCES_CONFIG;
+  return getProvincesConfig();
 }
 
 export function getActiveProvinces(): ProvinceItem[] {
@@ -40,18 +69,25 @@ export function getActiveProvinces(): ProvinceItem[] {
 }
 
 export function saveProvincesConfig(provinces: ProvinceItem[]): void {
-  if (typeof window === 'undefined') return;
-  try {
-    localStorage.setItem(PROVINCE_STORAGE_KEY, JSON.stringify(provinces));
-    window.dispatchEvent(new Event('onmas_provinces_updated'));
-  } catch (e) {
-    console.error('Error al guardar configuración de provincias:', e);
+  memoryStoreProvinces = provinces;
+
+  if (typeof window !== 'undefined') {
+    try {
+      localStorage.setItem(PROVINCE_STORAGE_KEY, JSON.stringify(provinces));
+      window.dispatchEvent(new Event('onmas_provinces_updated'));
+    } catch (e) {
+      console.error('Error al guardar configuración de provincias:', e);
+    }
   }
+
+  // Persistir en Supabase Cloud
+  saveProvincesConfigAction(provinces).catch((err) => {
+    console.warn('Error guardando provincias en Supabase:', err);
+  });
 }
 
 export function useActiveProvinces(): ProvinceItem[] {
   const [activeProvinces, setActiveProvinces] = useState<ProvinceItem[]>(() => {
-    if (typeof window === 'undefined') return [DEFAULT_PROVINCES_CONFIG[0]];
     return getActiveProvinces();
   });
 
@@ -60,7 +96,13 @@ export function useActiveProvinces(): ProvinceItem[] {
       setActiveProvinces(getActiveProvinces());
     };
 
+    // 1. Sincronizar desde memoria / localStorage
     syncProvinces();
+
+    // 2. Fetch desde Supabase Cloud
+    fetchProvincesFromSupabase().then(() => {
+      syncProvinces();
+    });
 
     window.addEventListener('onmas_provinces_updated', syncProvinces);
     window.addEventListener('storage', syncProvinces);
@@ -72,4 +114,5 @@ export function useActiveProvinces(): ProvinceItem[] {
 
   return activeProvinces;
 }
+
 

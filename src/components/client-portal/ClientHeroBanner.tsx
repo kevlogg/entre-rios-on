@@ -12,20 +12,13 @@ interface ClientHeroBannerProps {
 
 export function ClientHeroBanner({ provinceId = 'santa-fe' }: ClientHeroBannerProps) {
   const [banners, setBanners] = useState<BannerItem[]>(() => {
-    const initial = getBannersByProvince(provinceId);
-    return initial && initial.length > 0 
-      ? initial 
-      : (DEFAULT_PROVINCE_BANNERS[provinceId] || DEFAULT_PROVINCE_BANNERS['santa-fe'] || []);
+    return getBannersByProvince(provinceId);
   });
   const [currentIndex, setCurrentIndex] = useState(0);
 
   const loadBanners = useCallback(() => {
     const activeBanners = getBannersByProvince(provinceId);
-    if (activeBanners && activeBanners.length > 0) {
-      setBanners(activeBanners);
-    } else {
-      setBanners(DEFAULT_PROVINCE_BANNERS[provinceId] || DEFAULT_PROVINCE_BANNERS['santa-fe'] || []);
-    }
+    setBanners(activeBanners);
   }, [provinceId]);
 
   // Load banners on mount or province change, fetch from Supabase DB, and listen for live updates
@@ -35,9 +28,7 @@ export function ClientHeroBanner({ provinceId = 'santa-fe' }: ClientHeroBannerPr
 
     // Fetch latest banners asynchronously from Supabase Database
     fetchBannersFromSupabase(provinceId).then((dbBanners) => {
-      if (dbBanners && dbBanners.length > 0) {
-        setBanners(dbBanners);
-      }
+      setBanners(dbBanners);
     }).catch(() => {});
 
     const handleUpdate = () => {
@@ -50,9 +41,8 @@ export function ClientHeroBanner({ provinceId = 'santa-fe' }: ClientHeroBannerPr
     };
   }, [provinceId, loadBanners]);
 
-  const effectiveBanners = banners && banners.length > 0 
-    ? banners 
-    : (DEFAULT_PROVINCE_BANNERS[provinceId] || DEFAULT_PROVINCE_BANNERS['santa-fe'] || []);
+  const effectiveBanners = banners;
+
 
   const totalSlides = effectiveBanners.length;
 

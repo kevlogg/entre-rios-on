@@ -17,9 +17,12 @@ import {
 import { 
   getSubscriptionPlansAction, 
   updateSubscriptionPlansAction, 
+} from '@/server/actions/superadmin';
+import { 
   PlanConfigItem, 
   DEFAULT_SUBSCRIPTION_PLANS 
-} from '@/server/actions/superadmin';
+} from '@/lib/services/plans-config';
+
 
 function getNextMonthEffectiveDateText(): string {
   const now = new Date();

@@ -3,8 +3,8 @@
 import React, { useState, useEffect } from 'react';
 import { City } from '@/types';
 import { Image as ImageIcon, Plus, Trash2, CheckCircle, Upload, Monitor, Smartphone, RefreshCw, ExternalLink, MapPin, ToggleLeft, ToggleRight, Eye, EyeOff, Sparkles } from 'lucide-react';
-import { getBannersByProvince, saveBannersByProvince, BannerItem, normalizeImageUrl } from '@/lib/services/banner-store';
-import { getProvincesConfig, saveProvincesConfig, ProvinceItem } from '@/lib/services/province-store';
+import { getBannersByProvince, saveBannersByProvince, fetchBannersFromSupabase, BannerItem, normalizeImageUrl } from '@/lib/services/banner-store';
+import { getProvincesConfig, saveProvincesConfig, fetchProvincesFromSupabase, ProvinceItem } from '@/lib/services/province-store';
 import { saveBannerSlidesAction } from '@/server/actions/superadmin';
 import { uploadImageToSupabase } from '@/lib/supabase/storage';
 
@@ -31,19 +31,34 @@ export function GeoCustomizerManager({ initialCities }: GeoCustomizerManagerProp
 
   // Cargar lista de provincias al montar
   useEffect(() => {
+    let isMounted = true;
     const loadedProvinces = getProvincesConfig();
     setProvinces(loadedProvinces);
     if (loadedProvinces.length > 0 && !loadedProvinces.some((p) => p.id === selectedProvinceId)) {
       setSelectedProvinceId(loadedProvinces[0].id);
     }
+
+    fetchProvincesFromSupabase().then((provs) => {
+      if (isMounted && provs && provs.length > 0) {
+        setProvinces(provs);
+      }
+    });
+
+    return () => { isMounted = false; };
   }, []);
 
   // Cargar banners al cambiar la provincia seleccionada
   useEffect(() => {
+    let isMounted = true;
     if (selectedProvinceId) {
       const loadedBanners = getBannersByProvince(selectedProvinceId);
       setBanners(loadedBanners);
+
+      fetchBannersFromSupabase(selectedProvinceId).then((b) => {
+        if (isMounted) setBanners(b);
+      });
     }
+    return () => { isMounted = false; };
   }, [selectedProvinceId]);
 
   const currentProv = provinces.find((p) => p.id === selectedProvinceId) || {
@@ -125,9 +140,10 @@ export function GeoCustomizerManager({ initialCities }: GeoCustomizerManagerProp
     setIsUploading(true);
     try {
       const res = await saveBannerSlidesAction(provId, updatedBanners);
-      if (res.success && res.banners && res.banners.length > 0) {
-        setBanners(res.banners);
-        saveBannersByProvince(provId, res.banners);
+      if (res.success) {
+        const finalBanners = res.banners !== undefined ? res.banners : updatedBanners;
+        setBanners(finalBanners);
+        saveBannersByProvince(provId, finalBanners);
       } else {
         saveBannersByProvince(provId, updatedBanners);
       }
@@ -159,6 +175,7 @@ export function GeoCustomizerManager({ initialCities }: GeoCustomizerManagerProp
     const updated = [newBanner, ...banners];
     setBanners(updated);
     setNewBannerImage(null);
+    saveBannersByProvince(selectedProvinceId, updated);
 
     await syncToSupabase(selectedProvinceId, updated);
 
@@ -170,6 +187,7 @@ export function GeoCustomizerManager({ initialCities }: GeoCustomizerManagerProp
     handleFileUpload(e, async (base64) => {
       const updated = banners.map((b) => (b.id === id ? { ...b, imageUrl: base64 } : b));
       setBanners(updated);
+      saveBannersByProvince(selectedProvinceId, updated);
       await syncToSupabase(selectedProvinceId, updated);
 
       setSuccessMsg('Imagen del banner actualizada exitosamente.');
@@ -180,6 +198,7 @@ export function GeoCustomizerManager({ initialCities }: GeoCustomizerManagerProp
   const handleDeleteBanner = async (id: string) => {
     const updated = banners.filter((b) => b.id !== id);
     setBanners(updated);
+    saveBannersByProvince(selectedProvinceId, updated);
     await syncToSupabase(selectedProvinceId, updated);
 
     setSuccessMsg('Banner eliminado correctamente.');

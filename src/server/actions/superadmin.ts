@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache';
 import { createClient } from '@/lib/supabase/server';
 import { createClient as createSupabaseJSClient } from '@supabase/supabase-js';
 import { uploadImageServerAction } from '@/server/actions/storage';
+import { PlanConfigItem, DEFAULT_SUBSCRIPTION_PLANS } from '@/lib/services/plans-config';
 
 export async function toggleCommerceVerificationAction(
   commerceId: string,
@@ -368,6 +369,49 @@ export async function saveProvinceConfigAction(config: {
   }
 }
 
+export async function getProvincesConfigAction(): Promise<{ success: boolean; data: any[] }> {
+  try {
+    const adminSupabase = getAdminClient();
+    const client = adminSupabase || (await createClient());
+
+    const { data, error } = await client.storage.from('commerces').download('config/province_config.json');
+    if (!error && data) {
+      const text = await data.text();
+      const parsed = JSON.parse(text);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        return { success: true, data: parsed };
+      }
+    }
+  } catch (err) {
+    console.warn('Error fetching provinces config from Supabase storage:', err);
+  }
+  return { success: false, data: [] };
+}
+
+export async function saveProvincesConfigAction(provinces: any[]): Promise<{ success: boolean; message: string }> {
+  try {
+    const adminSupabase = getAdminClient();
+    const client = adminSupabase || (await createClient());
+
+    const buffer = Buffer.from(JSON.stringify(provinces, null, 2));
+    const { error } = await client.storage.from('commerces').upload('config/province_config.json', buffer, {
+      contentType: 'application/json',
+      upsert: true,
+    });
+
+    if (error) {
+      return { success: false, message: `Error guardando provincias en Supabase: ${error.message}` };
+    }
+
+    revalidatePath('/');
+    revalidatePath('/inicio');
+    revalidatePath('/superadmin');
+    return { success: true, message: 'Configuración global de provincias guardada en Supabase.' };
+  } catch (err) {
+    return { success: false, message: `Error: ${(err as Error).message}` };
+  }
+}
+
 export async function saveBannerSlidesAction(
   provinceId: string,
   banners: Array<{
@@ -408,7 +452,11 @@ export async function saveBannerSlidesAction(
           }
         }
 
-        const validId = isUuid(banner.id) ? banner.id! : (typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : `b-${Date.now()}-${idx}`);
+        const validId = isUuid(banner.id)
+          ? banner.id!
+          : typeof crypto !== 'undefined' && crypto.randomUUID
+          ? crypto.randomUUID()
+          : `${Math.random().toString(36).substring(2, 10)}-${Date.now().toString(36)}`;
         const rawBadgeType = banner.badgeType || banner.badge_type || 'tourism';
         const validBadgeType = ['tourism', 'commerce', 'event', 'news', 'general'].includes(rawBadgeType) ? rawBadgeType : 'tourism';
 
@@ -423,7 +471,6 @@ export async function saveBannerSlidesAction(
           city_tag: banner.location || provinceId,
           cta_text: banner.ctaText || banner.cta_text || 'Ver Más',
           cta_url: banner.ctaHref || banner.cta_url || `/${provinceId}`,
-          device: banner.device || 'all',
           published_at: new Date().toISOString().split('T')[0],
           created_at: new Date().toISOString(),
         };
@@ -433,7 +480,10 @@ export async function saveBannerSlidesAction(
     // 2. Replace banner slides for this province in database
     if (supabase) {
       try {
-        await supabase.from('banner_slides').delete().eq('province_id', provinceId);
+        const delRes = await supabase.from('banner_slides').delete().eq('province_id', provinceId);
+        if (delRes.error) {
+          console.error('Error deleting old banner_slides:', delRes.error.message);
+        }
         if (processedBanners.length > 0) {
           const { error } = await supabase.from('banner_slides').insert(processedBanners);
           if (error) {
@@ -448,14 +498,14 @@ export async function saveBannerSlidesAction(
     }
 
     // 3. Map back for frontend
-    const finalBanners = processedBanners.map((p) => ({
+    const finalBanners = processedBanners.map((p, idx) => ({
       id: p.id,
       provinceId: p.province_id,
       imageUrl: p.image_url,
       titleLine1: p.title,
       location: p.city_tag,
       ctaHref: p.cta_url,
-      device: p.device,
+      device: banners[idx]?.device || 'all',
     }));
 
     revalidatePath('/');
@@ -826,13 +876,18 @@ export async function deleteTourismServiceAction(serviceId: string): Promise<{ s
 
 
 function getAdminClient() {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://oetagnusdhbqrznugwuo.supabase.co';
   const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
   const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
   const key = serviceKey || anonKey;
 
   if (url && key) {
-    return createSupabaseJSClient(url, key);
+    return createSupabaseJSClient(url, key, {
+      auth: {
+        persistSession: false,
+        autoRefreshToken: false,
+      }
+    });
   }
   return null;
 }
@@ -1295,76 +1350,7 @@ export async function deleteWebRequestAction(
   }
 }
 
-export interface PlanConfigItem {
-  id: string;
-  name: string;
-  price: number;
-  period: string;
-  badge: string;
-  catalogLimitText: string;
-  description: string;
-  targetAudience: string;
-  features: string[];
-}
 
-export const DEFAULT_SUBSCRIPTION_PLANS: PlanConfigItem[] = [
-  {
-    id: 'bronce',
-    name: 'Plan Bronce',
-    price: 29000,
-    period: 'mes',
-    badge: 'Presencia Básica',
-    catalogLimitText: 'Catálogo de hasta 5 productos / servicios',
-    description: 'Presencia inicial en el portal regional para comercios y turismo.',
-    targetAudience: 'Comercios y Turismo que inician su presencia digital',
-    features: [
-      'Presencia local en directorio ON MÁS',
-      'Botón directo a WhatsApp (sin comisiones)',
-      'Catálogo de hasta 5 productos / servicios',
-    ],
-  },
-  {
-    id: 'plata',
-    name: 'Plan Plata',
-    price: 49000,
-    period: 'mes',
-    badge: 'Mayor Visibilidad',
-    catalogLimitText: 'Catálogo de hasta 20 productos / servicios',
-    description: 'Para comercios y emprendimientos turísticos en crecimiento activo.',
-    targetAudience: 'Comercios y Prestadores Turísticos destacados',
-    features: [
-      'Presencia local en directorio ON MÁS',
-      'Botón directo a WhatsApp (sin comisiones)',
-      'Catálogo de hasta 20 productos / servicios',
-      'Posicionamiento destacado en guía local y categoría',
-      'Métricas en tiempo real (visitas y clics a WhatsApp)',
-      'Insignia Comercio Verificado Plata',
-    ],
-  },
-  {
-    id: 'oro',
-    name: 'Plan Oro',
-    price: 99000,
-    period: 'mes',
-    badge: 'MÁXIMO ALCANCE • VIP',
-    catalogLimitText: 'Catálogo ILIMITADO de productos y servicios',
-    description: 'Liderazgo y máxima cobertura provincial en el portal y redes sociales.',
-    targetAudience: 'Grandes comercios, cadenas y complejos turísticos VIP',
-    features: [
-      'Presencia local en directorio ON MÁS',
-      'Botón directo a WhatsApp (sin comisiones)',
-      'Catálogo ILIMITADO de productos y servicios',
-      'Posicionamiento destacado en guía local y categoría',
-      'Métricas en tiempo real (visitas y clics a WhatsApp)',
-      'Insignia Comercio Verificado Plata',
-      'Destacado TOP en portada provincial',
-      'Cobertura especial y notas de prensa / editoriales',
-      'Insignia Gold / Comercio Verificado Oro',
-      'Soporte prioritario 24/7 y asesoramiento comercial',
-      'Publicidad y visibilidad exclusiva dentro del sitio web y en redes sociales',
-    ],
-  },
-];
 
 export async function getSubscriptionPlansAction(): Promise<{
   success: boolean;
