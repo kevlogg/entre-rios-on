@@ -3,12 +3,20 @@
 import { useState, useEffect } from 'react';
 import { getProvincesConfigAction, saveProvincesConfigAction } from '@/server/actions/superadmin';
 
+export interface ProvinceCityItem {
+  id: string;
+  name: string;
+  slug: string;
+  isActive: boolean;
+}
+
 export interface ProvinceItem {
   id: string;
   name: string;
   slug: string;
   isActive: boolean;
   badge?: string;
+  cities?: ProvinceCityItem[];
 }
 
 export const DEFAULT_PROVINCES_CONFIG: ProvinceItem[] = [

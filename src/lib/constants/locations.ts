@@ -183,6 +183,36 @@ export function getCitiesByProvince(provinceId: string): City[] {
   if (!provinceId || provinceId === 'all' || provinceId === 'todas') {
     return ALL_CITIES;
   }
+
+  // Check if province has custom configured cities in province-store
+  try {
+    const { getProvincesConfig } = require('@/lib/services/province-store');
+    const configs = getProvincesConfig();
+    const targetProv = configs.find((p: any) => p.id === provinceId || p.slug === provinceId);
+    if (targetProv && Array.isArray(targetProv.cities) && targetProv.cities.length > 0) {
+      const activeCustomCities = targetProv.cities
+        .filter((c: any) => c.isActive)
+        .map((c: any) => {
+          const matchDefault = ALL_CITIES.find((dc) => dc.id === c.id || dc.slug === c.slug);
+          return {
+            id: c.id,
+            name: c.name,
+            slug: c.slug || c.id,
+            department: matchDefault?.department || targetProv.name,
+            description: matchDefault?.description || `Ciudad de ${targetProv.name}`,
+            imageUrl: matchDefault?.imageUrl || '/images/city-rosario.jpg',
+            isFeatured: matchDefault?.isFeatured ?? true,
+            provinceId: targetProv.id,
+            provinceName: targetProv.name,
+          };
+        });
+
+      if (activeCustomCities.length > 0) return activeCustomCities;
+    }
+  } catch (e) {
+    // Fallback to static defaults
+  }
+
   return ALL_CITIES.filter((city) => city.provinceId === provinceId);
 }
 
