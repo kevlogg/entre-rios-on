@@ -845,14 +845,25 @@ export async function getProductBySlug(slug: string): Promise<Product | undefine
     try {
       const { createPublicClient } = await import('@/lib/supabase/public');
       const supabase = createPublicClient();
-      const { data, error } = await supabase.from('products').select('*').or(`slug.eq.${slug},id.eq.${slug}`).maybeSingle();
+      const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(slug);
+      let prodQuery = supabase.from('products').select('*');
+      if (isUuid) {
+        prodQuery = prodQuery.or(`slug.eq.${slug},id.eq.${slug}`);
+      } else {
+        prodQuery = prodQuery.eq('slug', slug);
+      }
+      const { data, error } = await prodQuery.maybeSingle();
       if (!error) {
         if (!data) return undefined;
         if (data.commerce_id || data.commerce_name) {
           const cId = (data.commerce_id || '').toLowerCase();
           const cName = (data.commerce_name || '').toLowerCase();
-          if (!activeCommerceIds.has(cId) && !activeCommerceSlugs.has(cId) && !activeCommerceNames.has(cName)) {
-            return undefined;
+          if (activeCommerceIds.size > 0 && !activeCommerceIds.has(cId) && !activeCommerceSlugs.has(cId) && !activeCommerceNames.has(cName)) {
+            // Si la consulta estricta no lo encuentra pero existe el comercio en la DB
+            const { data: commData } = await supabase.from('commerces').select('id').or(`id.eq.${data.commerce_id},name.ilike.${data.commerce_name}`).maybeSingle();
+            if (!commData) {
+              return undefined;
+            }
           }
         }
         return {
