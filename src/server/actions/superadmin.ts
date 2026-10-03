@@ -938,11 +938,12 @@ export async function createCashPaymentAction(paymentData: {
     let resolvedPhone = paymentData.phoneWhatsApp || '5493434001122';
     let resolvedCity = paymentData.cityName || 'Entre Ríos / Santa Fe';
 
-    if (paymentData.commerceId && paymentData.commerceId.startsWith('c')) {
+    if (paymentData.commerceId) {
+      const cleanId = paymentData.commerceId.replace(/^comm-/, '');
       const { data: comm } = await adminSupabase
         .from('commerces')
         .select('*')
-        .eq('id', paymentData.commerceId)
+        .or(`id.eq.${paymentData.commerceId},slug.eq.${cleanId},slug.eq.${paymentData.commerceId}`)
         .maybeSingle();
 
       if (comm) {
@@ -955,20 +956,20 @@ export async function createCashPaymentAction(paymentData: {
     const rawPlan = (paymentData.planName || '').toLowerCase();
     const cleanPlanName = rawPlan.includes('oro') ? 'Oro' : rawPlan.includes('plata') ? 'Plata' : 'Bronce';
 
+    let finalOwnerName = resolvedOwner;
+    if (paymentData.referenceNote) {
+      finalOwnerName = `${resolvedOwner} (${paymentData.referenceNote})`;
+    }
+
     const insertPayload: Record<string, any> = {
       commerce_name: resolvedName,
-      owner_name: resolvedOwner,
+      owner_name: finalOwnerName,
       phone_whatsapp: resolvedPhone,
       plan_name: cleanPlanName,
       amount: paymentData.amount || 29000,
       city_name: resolvedCity,
       status: 'PENDING',
     };
-
-    // Agregar campos extendidos si la tabla los soporta o como notas
-    if (paymentData.referenceNote) {
-      insertPayload.notes = paymentData.referenceNote;
-    }
 
     const { error } = await adminSupabase.from('cash_payments').insert(insertPayload);
 
@@ -977,8 +978,11 @@ export async function createCashPaymentAction(paymentData: {
       return { success: false, message: `Error registrando pago en Supabase: ${error.message}` };
     }
 
-    revalidatePath('/superadmin');
-    revalidatePath('/admin');
+    try {
+      revalidatePath('/superadmin');
+      revalidatePath('/admin');
+    } catch {}
+
     return { success: true, message: 'Aviso de pago de cuota mensual registrado exitosamente.' };
   } catch (err) {
     return { success: false, message: `Error: ${(err as Error).message}` };

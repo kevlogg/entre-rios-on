@@ -369,7 +369,18 @@ export default function AdminPage() {
               </div>
             )}
 
-            {/* TAB 4: SUBSCRIPTION */}
+            {/* TAB 4: MI SITIO WEB */}
+            {activeTab === 'website' && (
+              <div className="animate-in fade-in duration-200">
+                {/* Dynamically imported website promo component */}
+                {React.createElement(
+                  require('@/components/admin/WebsitePromotion').WebsitePromotion,
+                  { commerce }
+                )}
+              </div>
+            )}
+
+            {/* TAB 5: SUBSCRIPTION */}
             {activeTab === 'subscription' && (
               <SubscriptionPlans
                 commerceId={commerce.id}

@@ -9,10 +9,11 @@ import {
   ShieldCheck, 
   Gift, 
   Sparkles,
-  ChevronRight
+  ChevronRight,
+  Globe
 } from 'lucide-react';
 
-export type AdminTab = 'dashboard' | 'catalog' | 'profile' | 'subscription';
+export type AdminTab = 'dashboard' | 'catalog' | 'profile' | 'subscription' | 'website';
 
 interface AdminSidebarProps {
   activeTab: AdminTab;
@@ -25,6 +26,7 @@ export function AdminSidebar({ activeTab, onTabChange, productCount }: AdminSide
     { id: 'dashboard', label: 'Resumen & Métricas', icon: LayoutDashboard },
     { id: 'catalog', label: 'Mi Catálogo', icon: ShoppingBag, badge: `${productCount}` },
     { id: 'profile', label: 'Perfil del Negocio', icon: Store },
+    { id: 'website', label: 'Mi Sitio Web', icon: Globe, badge: 'Exclusivo' },
     { id: 'subscription', label: 'Suscripción', icon: ShieldCheck, badge: '3 Planes' },
   ];
 

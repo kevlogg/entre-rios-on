@@ -154,9 +154,12 @@ export function SubscriptionPlans({
         setIsReportModalOpen(false);
         setReportReference('');
         await checkPendingPaymentAndHistory();
+      } else {
+        alert(`Error enviando aviso: ${res.message || 'Intente nuevamente'}`);
       }
     } catch (err) {
       console.warn('Error enviando reporte de pago:', err);
+      alert('Hubo un error inesperado al enviar el aviso. Por favor reintentá.');
     } finally {
       setLoadingTier(null);
     }
@@ -178,6 +181,8 @@ export function SubscriptionPlans({
       if (res.success) {
         setActivatedSuccess(`¡Solicitud de Pago en Efectivo Enviada! Notificamos al equipo SuperAdmin para verificar tu pago del plan "${planName}" y activar tu cuenta.`);
         await checkPendingPaymentAndHistory();
+      } else {
+        alert(`Error al enviar la solicitud: ${res.message || 'Intente nuevamente'}`);
       }
     } catch (err) {
       console.warn('Error al solicitar verificación de pago en efectivo:', err);
