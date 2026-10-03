@@ -54,8 +54,11 @@ export function ClientHomeContainer({ provinceId, initialProducts = [] }: Client
         onSelectCategory={(catId) => setSelectedCategory(catId)}
       />
 
-      {/* Contenedor con fondo gris suave liso a partir de aquí para abajo hasta el footer */}
-      <div className="bg-[#e9ecef] w-full border-t border-slate-300/60 pb-8 space-y-2">
+      {/* Transición difuminada superior: del fondo de marca al gris suave */}
+      <div className="w-full h-16 bg-gradient-to-b from-transparent via-[#e9ecef]/60 to-[#e9ecef] -mb-1 relative z-10 pointer-events-none" />
+
+      {/* Contenedor con fondo gris suave liso */}
+      <div className="bg-[#e9ecef] w-full space-y-2">
         {/* Primer Bento: Comercio Digital, Comunidad ON, Sorteos ON */}
         <BentoRowOne />
 
@@ -74,6 +77,9 @@ export function ClientHomeContainer({ provinceId, initialProducts = [] }: Client
         {/* Sección resumen de ¿Quiénes Somos? con acceso directo a la página */}
         <AboutUsHomeSection />
       </div>
+
+      {/* Transición difuminada inferior: del gris suave hacia el footer */}
+      <div className="w-full h-16 bg-gradient-to-b from-[#e9ecef] via-[#e9ecef]/40 to-transparent -mt-1 relative z-10 pointer-events-none" />
     </>
   );
 }
