@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
@@ -14,11 +14,14 @@ import {
   Sparkles,
   Crown,
   Building2,
-  User
+  User,
+  LayoutGrid,
+  ArrowRight
 } from 'lucide-react';
 import { trackCitySelect, trackSearchQuery } from '@/lib/analytics/events';
 import { PROVINCES, getCitiesByProvince, getProvinceBySlug, getCityBySlug } from '@/lib/constants/locations';
 import { useActiveProvinces } from '@/lib/services/province-store';
+import { CATEGORIES_LIST } from '@/lib/constants/categories';
 
 interface HeaderProps {
   selectedCityId?: string;
@@ -34,6 +37,8 @@ export function Header({ selectedCityId = 'all' }: HeaderProps) {
   const [isProvinceDropdownOpen, setIsProvinceDropdownOpen] = useState(false);
   const [isCityDropdownOpen, setIsCityDropdownOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isCategoriesHovered, setIsCategoriesHovered] = useState(false);
+  const categoriesTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const activeProvinces = useActiveProvinces();
 
@@ -182,15 +187,27 @@ export function Header({ selectedCityId = 'all' }: HeaderProps) {
     }
   };
 
-  const navLinks = [
-    { name: 'Inicio', href: getGeoUrl('') },
-    { name: 'Comercios Adheridos', href: getGeoUrl('comercios') },
-    { name: 'Catálogo & Ofertas', href: getGeoUrl('catalogo') },
-    { name: 'Turismo', href: getGeoUrl('turismo') },
-    { name: 'Comunidad', href: getGeoUrl('comunidad') },
-    { name: 'Sorteos ON MÁS', href: getGeoUrl('sorteos') },
-    { name: 'Empleos', href: '/empleos' },
-    { name: 'Mi Sitio Web', href: '/mi-sitio-web' },
+  const handleCategoriesMouseEnter = () => {
+    if (categoriesTimeoutRef.current) clearTimeout(categoriesTimeoutRef.current);
+    setIsCategoriesHovered(true);
+  };
+
+  const handleCategoriesMouseLeave = () => {
+    categoriesTimeoutRef.current = setTimeout(() => {
+      setIsCategoriesHovered(false);
+    }, 200);
+  };
+
+  const navLinks: { name: string; href: string; slug: string }[] = [
+    { name: 'Inicio', href: getGeoUrl(''), slug: '' },
+    { name: 'Categorías', href: getGeoUrl('catalogo'), slug: 'catalogo' },
+    { name: 'Comercios Adheridos', href: getGeoUrl('comercios'), slug: 'comercios' },
+    { name: 'Turismo', href: getGeoUrl('turismo'), slug: 'turismo' },
+    { name: 'Comunidad', href: getGeoUrl('comunidad'), slug: 'comunidad' },
+    { name: 'Novedades', href: '/novedades', slug: 'novedades' },
+    { name: 'Oportunidades', href: '/oportunidades', slug: 'oportunidades' },
+    { name: 'Empleos', href: '/empleos', slug: 'empleos' },
+    { name: 'Sorteos ON MÁS', href: getGeoUrl('sorteos'), slug: 'sorteos' },
   ];
 
   return (
@@ -382,21 +399,90 @@ export function Header({ selectedCityId = 'all' }: HeaderProps) {
         </div>
       </div>
 
-      {/* Secondary Horizontal Nav Bar (Top 5 items only, NO cities) */}
+      {/* Secondary Horizontal Nav Bar */}
       <nav className="hidden md:block border-t border-white/10 bg-black/10 backdrop-blur-md">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <ul className="flex items-center justify-start gap-1 sm:gap-2 overflow-x-auto text-xs font-bold text-slate-700 scrollbar-none py-1.5">
-            {navLinks.map((link) => (
-              <li key={link.name}>
-                <Link
-                  href={link.href}
-                  className="px-4 py-1.5 rounded-xl hover:bg-cyan-50/60 hover:text-[#00ADB5] text-slate-700 flex items-center gap-1.5 transition-all whitespace-nowrap"
-                >
-                  {link.name === 'Sorteos ON MÁS' && <Sparkles className="w-3.5 h-3.5 text-amber-400" />}
-                  <span>{link.name}</span>
-                </Link>
-              </li>
-            ))}
+            {navLinks.map((link) => {
+              if (link.slug === 'catalogo') {
+                return (
+                  <li 
+                    key={link.name}
+                    className="relative"
+                    onMouseEnter={handleCategoriesMouseEnter}
+                    onMouseLeave={handleCategoriesMouseLeave}
+                  >
+                    <Link
+                      href={link.href}
+                      className="px-4 py-1.5 rounded-xl hover:bg-cyan-50/60 hover:text-[#00ADB5] text-slate-700 flex items-center gap-1.5 transition-all whitespace-nowrap"
+                    >
+                      <span>{link.name}</span>
+                      <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${isCategoriesHovered ? 'rotate-180 text-[#00ADB5]' : 'text-slate-400'}`} />
+                    </Link>
+
+                    {/* Desplegable de Categorías */}
+                    {isCategoriesHovered && (
+                      <div 
+                        className="absolute top-full left-0 mt-1.5 w-[540px] bg-white border border-slate-200 rounded-3xl p-4 shadow-2xl z-50 animate-in fade-in slide-in-from-top-2 duration-150 grid grid-cols-2 gap-2 text-slate-800"
+                        onMouseEnter={handleCategoriesMouseEnter}
+                        onMouseLeave={handleCategoriesMouseLeave}
+                      >
+                        <div className="col-span-2 px-2 py-1 flex items-center justify-between border-b border-slate-100 pb-2 mb-1">
+                          <span className="text-[11px] font-black uppercase tracking-wider text-[#0047BA] flex items-center gap-1.5">
+                            <LayoutGrid className="w-3.5 h-3.5 text-[#00ADB5]" />
+                            Categorías del Catálogo ON MÁS
+                          </span>
+                          <Link
+                            href="/catalogo"
+                            onClick={() => setIsCategoriesHovered(false)}
+                            className="text-[11px] font-bold text-[#00ADB5] hover:text-[#0047BA] flex items-center gap-1 transition-colors"
+                          >
+                            <span>Ver Todo</span>
+                            <ArrowRight className="w-3 h-3" />
+                          </Link>
+                        </div>
+
+                        {CATEGORIES_LIST.map((cat) => {
+                          const IconComp = cat.icon;
+                          return (
+                            <Link
+                              key={cat.id}
+                              href={`/catalogo?categoria=${cat.id}`}
+                              onClick={() => setIsCategoriesHovered(false)}
+                              className="flex items-center gap-3 p-2 rounded-2xl hover:bg-slate-50 transition-colors group cursor-pointer"
+                            >
+                              <div className={`w-8 h-8 rounded-xl ${cat.iconBg} flex items-center justify-center shrink-0 border border-slate-100 shadow-2xs`}>
+                                <IconComp className={`w-4 h-4 ${cat.iconColor}`} />
+                              </div>
+                              <div className="truncate">
+                                <span className="text-xs font-bold text-slate-900 group-hover:text-[#0047BA] block truncate transition-colors">
+                                  {cat.label}
+                                </span>
+                                <span className="text-[10px] text-slate-500 block truncate font-medium">
+                                  {cat.description}
+                                </span>
+                              </div>
+                            </Link>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </li>
+                );
+              }
+
+              return (
+                <li key={link.name}>
+                  <Link
+                    href={link.href}
+                    className="px-4 py-1.5 rounded-xl hover:bg-cyan-50/60 hover:text-[#00ADB5] text-slate-700 flex items-center gap-1.5 transition-all whitespace-nowrap"
+                  >
+                    {link.name === 'Sorteos ON MÁS' && <Sparkles className="w-3.5 h-3.5 text-amber-400" />}
+                    <span>{link.name}</span>
+                  </Link>
+                </li>
+              );
+            })}
           </ul>
         </div>
       </nav>

@@ -22,7 +22,8 @@ import {
   Globe,
   Tag,
   ArrowRight,
-  Clock
+  Clock,
+  LayoutGrid
 } from 'lucide-react';
 import { trackSearchQuery, trackCitySelect } from '@/lib/analytics/events';
 import { PROVINCES, getCitiesByProvince, getProvinceBySlug, getCityBySlug } from '@/lib/constants/locations';
@@ -32,12 +33,14 @@ import { getFeaturedProducts, getAllCommerces } from '@/lib/dal/portal';
 import { Product, Commerce } from '@/types';
 
 const SITE_PAGES = [
-  { name: 'Catálogo & Ofertas', href: '/catalogo', category: 'Sección del Sitio', icon: ShoppingBag, description: 'Explorá todos los productos y ofertas regionales', keywords: ['catalogo', 'oferta', 'producto', 'descuento', 'compras', 'precio', 'articulo', 'tienda'] },
+  { name: 'Categorías del Catálogo', href: '/catalogo', category: 'Sección del Sitio', icon: ShoppingBag, description: 'Explorá todas las categorías y productos regionales', keywords: ['catalogo', 'categoria', 'oferta', 'producto', 'descuento', 'compras', 'precio', 'articulo', 'tienda'] },
   { name: 'Comercios Adheridos', href: '/comercios', category: 'Sección del Sitio', icon: Store, description: 'Directorio unificado de locales y empresas', keywords: ['comercio', 'negocio', 'tienda', 'local', 'adherido', 'directorio', 'empresa'] },
-  { name: 'Bolsa de Empleos', href: '/empleos', category: 'Sección del Sitio', icon: Briefcase, description: 'Ofertas laborales y perfiles de candidatos', keywords: ['empleo', 'trabajo', 'busqueda', 'laboral', 'puesto', 'candidato', 'cv', 'postularme', 'contratar'] },
   { name: 'Turismo, Termas & Spa', href: '/turismo', category: 'Sección del Sitio', icon: Compass, description: 'Termas, alojamientos y paseos turísticos', keywords: ['turismo', 'termas', 'hotel', 'posada', 'spa', 'paseo', 'viaje', 'vacaciones', 'gastronomia', 'alojamiento'] },
-  { name: 'Sorteos ON MÁS', href: '/sorteos', category: 'Sección del Sitio', icon: Gift, description: 'Participá en sorteos mensuales gratuitos', keywords: ['sorteo', 'premio', 'ganador', 'participar', 'concurso', 'gratuitos'] },
   { name: 'Comunidad & Noticias', href: '/comunidad', category: 'Sección del Sitio', icon: Newspaper, description: 'Eventos comunitarios, agenda y noticias', keywords: ['comunidad', 'noticia', 'evento', 'festival', 'maraton', 'nota', 'agenda', 'cultura'] },
+  { name: 'Novedades', href: '/novedades', category: 'Sección del Sitio', icon: Newspaper, description: 'Últimas novedades y comunicados del portal', keywords: ['novedades', 'novedad', 'noticias', 'anuncios', 'comunicados'] },
+  { name: 'Oportunidades', href: '/oportunidades', category: 'Sección del Sitio', icon: Tag, description: 'Oportunidades comerciales y beneficios', keywords: ['oportunidades', 'oportunidad', 'descuentos', 'beneficios', 'ofertas'] },
+  { name: 'Bolsa de Empleos', href: '/empleos', category: 'Sección del Sitio', icon: Briefcase, description: 'Ofertas laborales y perfiles de candidatos', keywords: ['empleo', 'trabajo', 'busqueda', 'laboral', 'puesto', 'candidato', 'cv', 'postularme', 'contratar'] },
+  { name: 'Sorteos ON MÁS', href: '/sorteos', category: 'Sección del Sitio', icon: Gift, description: 'Participá en sorteos mensuales gratuitos', keywords: ['sorteo', 'premio', 'ganador', 'participar', 'concurso', 'gratuitos'] },
   { name: 'Mi Sitio Web Propio', href: '/mi-sitio-web', category: 'Sección del Sitio', icon: Globe, description: 'Solicitá tu sitio web para tu comercio', keywords: ['sitio web', 'pagina web', 'dominio', 'crear web', 'mi sitio', 'diseño web'] },
 ];
 
@@ -53,6 +56,8 @@ export function ClientHeader() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isProvinceDropdownOpen, setIsProvinceDropdownOpen] = useState(false);
   const [isCityDropdownOpen, setIsCityDropdownOpen] = useState(false);
+  const [isCategoriesHovered, setIsCategoriesHovered] = useState(false);
+  const categoriesTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const activeProvinces = useActiveProvinces();
 
@@ -281,15 +286,27 @@ export function ClientHeader() {
     router.push(`/catalogo?q=${encodeURIComponent(q)}`);
   };
 
+  const handleCategoriesMouseEnter = () => {
+    if (categoriesTimeoutRef.current) clearTimeout(categoriesTimeoutRef.current);
+    setIsCategoriesHovered(true);
+  };
+
+  const handleCategoriesMouseLeave = () => {
+    categoriesTimeoutRef.current = setTimeout(() => {
+      setIsCategoriesHovered(false);
+    }, 200);
+  };
+
   const navLinks: { name: string; href: string; slug: string }[] = [
     { name: 'Inicio', href: getGeoUrl(''), slug: '' },
+    { name: 'Categorías', href: getGeoUrl('catalogo'), slug: 'catalogo' },
     { name: 'Comercios Adheridos', href: getGeoUrl('comercios'), slug: 'comercios' },
-    { name: 'Catálogo & Ofertas', href: getGeoUrl('catalogo'), slug: 'catalogo' },
     { name: 'Turismo', href: getGeoUrl('turismo'), slug: 'turismo' },
     { name: 'Comunidad', href: getGeoUrl('comunidad'), slug: 'comunidad' },
-    { name: 'Sorteos ON MÁS', href: getGeoUrl('sorteos'), slug: 'sorteos' },
+    { name: 'Novedades', href: '/novedades', slug: 'novedades' },
+    { name: 'Oportunidades', href: '/oportunidades', slug: 'oportunidades' },
     { name: 'Empleos', href: '/empleos', slug: 'empleos' },
-    { name: 'Mi Sitio Web', href: '/mi-sitio-web', slug: 'mi-sitio-web' },
+    { name: 'Sorteos ON MÁS', href: getGeoUrl('sorteos'), slug: 'sorteos' },
   ];
 
   return (
@@ -613,6 +630,78 @@ export function ClientHeader() {
           <ul className="flex items-center justify-start gap-2 overflow-x-auto text-xs font-bold scrollbar-none py-0.5">
             {navLinks.map((link) => {
               const isActive = pathname === link.href || (link.slug !== '' && pathname?.includes(`/${link.slug}`));
+
+              if (link.slug === 'catalogo') {
+                return (
+                  <li 
+                    key={link.name}
+                    className="relative"
+                    onMouseEnter={handleCategoriesMouseEnter}
+                    onMouseLeave={handleCategoriesMouseLeave}
+                  >
+                    <Link
+                      href={link.href}
+                      className={`px-4 py-1.5 rounded-xl flex items-center gap-1.5 transition-all whitespace-nowrap ${
+                        isActive
+                          ? 'bg-gradient-to-r from-cyan-300 to-cyan-400 text-slate-950 font-black shadow-lg border border-white/60 scale-[1.04]'
+                          : 'bg-white/15 hover:bg-white/30 border border-white/25 text-white font-extrabold backdrop-blur-md shadow-xs hover:scale-[1.02] hover:shadow-md'
+                      }`}
+                    >
+                      <span>{link.name}</span>
+                      <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${isCategoriesHovered ? 'rotate-180 text-cyan-300' : 'text-white/70'}`} />
+                    </Link>
+
+                    {/* Desplegable de Categorías al pasar el mouse */}
+                    {isCategoriesHovered && (
+                      <div 
+                        className="absolute top-full left-0 mt-2 w-[540px] bg-slate-950/95 backdrop-blur-2xl border border-white/20 rounded-3xl p-4 shadow-2xl z-50 animate-in fade-in slide-in-from-top-2 duration-150 grid grid-cols-2 gap-2 text-white"
+                        onMouseEnter={handleCategoriesMouseEnter}
+                        onMouseLeave={handleCategoriesMouseLeave}
+                      >
+                        <div className="col-span-2 px-2 py-1 flex items-center justify-between border-b border-white/10 pb-2 mb-1">
+                          <span className="text-[11px] font-black uppercase tracking-wider text-cyan-300 flex items-center gap-1.5">
+                            <LayoutGrid className="w-3.5 h-3.5 text-cyan-300" />
+                            Categorías del Catálogo ON MÁS
+                          </span>
+                          <Link
+                            href="/catalogo"
+                            onClick={() => setIsCategoriesHovered(false)}
+                            className="text-[11px] font-bold text-cyan-300 hover:text-white flex items-center gap-1 transition-colors"
+                          >
+                            <span>Ver Todo</span>
+                            <ArrowRight className="w-3 h-3" />
+                          </Link>
+                        </div>
+
+                        {CATEGORIES_LIST.map((cat) => {
+                          const IconComp = cat.icon;
+                          return (
+                            <Link
+                              key={cat.id}
+                              href={`/catalogo?categoria=${cat.id}`}
+                              onClick={() => setIsCategoriesHovered(false)}
+                              className="flex items-center gap-3 p-2 rounded-2xl hover:bg-white/10 transition-colors group cursor-pointer"
+                            >
+                              <div className={`w-8 h-8 rounded-xl ${cat.iconBg} flex items-center justify-center shrink-0 border border-white/10 shadow-2xs`}>
+                                <IconComp className={`w-4 h-4 ${cat.iconColor}`} />
+                              </div>
+                              <div className="truncate">
+                                <span className="text-xs font-bold text-white group-hover:text-cyan-300 block truncate transition-colors">
+                                  {cat.label}
+                                </span>
+                                <span className="text-[10px] text-slate-400 block truncate font-medium">
+                                  {cat.description}
+                                </span>
+                              </div>
+                            </Link>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </li>
+                );
+              }
+
               return (
                 <li key={link.name}>
                   <Link
