@@ -48,14 +48,14 @@ export function ClientHomeContainer({ provinceId, initialProducts = [] }: Client
       {/* Hero panorámico según provincia activa (Santa Fe por defecto) */}
       <ClientHeroBanner provinceId={activeProvince} />
 
-      {/* Barra de categorías en grid 2x4 (incorpora la transición difuminada hacia el gris suave) */}
+      {/* Barra de categorías en grid 2x4 */}
       <CategoryIconBar
         selectedCategory={selectedCategory}
         onSelectCategory={(catId) => setSelectedCategory(catId)}
       />
 
       {/* Contenedor principal con fondo gris suave liso (#e9ecef) */}
-      <div className="bg-[#e9ecef] w-full pt-2 pb-6 space-y-2">
+      <div className="bg-[#e9ecef] w-full py-4 space-y-2">
         {/* Primer Bento: Comercio Digital, Comunidad ON, Sorteos ON */}
         <BentoRowOne />
 
@@ -74,9 +74,6 @@ export function ClientHomeContainer({ provinceId, initialProducts = [] }: Client
         {/* Sección resumen de ¿Quiénes Somos? con acceso directo a la página */}
         <AboutUsHomeSection />
       </div>
-
-      {/* Transición suave final desde el gris hacia el pie de página */}
-      <div className="w-full h-12 bg-gradient-to-b from-[#e9ecef] to-[#001845]" />
     </>
   );
 }

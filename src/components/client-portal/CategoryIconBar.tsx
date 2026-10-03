@@ -56,7 +56,7 @@ export function CategoryIconBar({
   };
 
   return (
-    <section className="bg-gradient-to-b from-[#002878]/70 via-[#00388b]/40 to-[#e9ecef] pt-6 pb-8 border-b border-slate-300/40">
+    <section className="bg-white/10 backdrop-blur-md border-b border-white/10 py-6">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-4">
         {/* Header Row with Arrows */}
         <div className="flex items-center justify-between">
