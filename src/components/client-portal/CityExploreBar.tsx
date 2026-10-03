@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { MapPin, ArrowRight } from 'lucide-react';
 import { trackCitySelect } from '@/lib/analytics/events';
 import { getCitiesByProvince, getProvinceById, PROVINCES } from '@/lib/constants/locations';
+import { useActiveProvinces } from '@/lib/services/province-store';
 import { City } from '@/types';
 
 interface CityExploreBarProps {
@@ -13,9 +14,19 @@ interface CityExploreBarProps {
 }
 
 export function CityExploreBar({ provinceId = 'santa-fe' }: CityExploreBarProps) {
-  // Get province object and cities for the selected province
-  const currentProvince = getProvinceById(provinceId) || PROVINCES[0]; // Default to Santa Fe
-  const cities: City[] = getCitiesByProvince(currentProvince.id);
+  const activeProvinces = useActiveProvinces();
+  const currentProvinceConfig = activeProvinces.find((p) => p.id === provinceId || p.slug === provinceId);
+  const currentProvince = getProvinceById(provinceId) || PROVINCES[0];
+  const staticCities: City[] = getCitiesByProvince(currentProvince.id);
+
+  // Merge static cities with dynamic province config (which includes custom imageUrl per city)
+  const cities: City[] = staticCities.map((c) => {
+    const customCity = currentProvinceConfig?.cities?.find((cc) => cc.id === c.id || cc.slug === c.slug);
+    return {
+      ...c,
+      imageUrl: customCity?.imageUrl || c.imageUrl || '/images/city-parana.jpg',
+    };
+  });
 
   const handleSelect = (cityId: string, cityName: string) => {
     trackCitySelect(cityId, cityName);

@@ -1455,6 +1455,49 @@ export async function deleteRaffleAction(
   }
 }
 
+export async function getSectionCardsAction(): Promise<{ success: boolean; data: any[] }> {
+  try {
+    const adminSupabase = getAdminClient();
+    const client = adminSupabase || (await createClient());
+
+    const { data, error } = await client.storage.from('commerces').download('config/section_cards.json');
+    if (!error && data) {
+      const text = await data.text();
+      const parsed = JSON.parse(text);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        return { success: true, data: parsed };
+      }
+    }
+  } catch (err) {
+    console.warn('Error fetching section cards config from Supabase storage:', err);
+  }
+  return { success: false, data: [] };
+}
+
+export async function saveSectionCardsAction(cards: any[]): Promise<{ success: boolean; message: string }> {
+  try {
+    const adminSupabase = getAdminClient();
+    const client = adminSupabase || (await createClient());
+
+    const buffer = Buffer.from(JSON.stringify(cards, null, 2));
+    const { error } = await client.storage.from('commerces').upload('config/section_cards.json', buffer, {
+      contentType: 'application/json',
+      upsert: true,
+    });
+
+    if (error) {
+      return { success: false, message: `Error guardando section cards en Supabase: ${error.message}` };
+    }
+
+    revalidatePath('/');
+    revalidatePath('/inicio');
+    revalidatePath('/superadmin');
+    return { success: true, message: 'Imágenes de cards de secciones guardadas en Supabase.' };
+  } catch (err) {
+    return { success: false, message: `Error: ${(err as Error).message}` };
+  }
+}
+
 
 
 

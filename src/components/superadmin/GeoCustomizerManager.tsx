@@ -29,6 +29,7 @@ import { getProvincesConfig, saveProvincesConfig, fetchProvincesFromSupabase, Pr
 import { saveBannerSlidesAction } from '@/server/actions/superadmin';
 import { uploadImageToSupabase } from '@/lib/supabase/storage';
 import { getCitiesByProvince } from '@/lib/constants/locations';
+import { useSectionCards, saveSectionCards, SectionCardItem } from '@/lib/services/section-cards-store';
 
 const MAX_PROVINCES = 5;
 
@@ -58,6 +59,16 @@ export function GeoCustomizerManager({ initialCities }: GeoCustomizerManagerProp
 
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
+
+  // Section Cards state
+  const sectionCards = useSectionCards();
+  const [localSectionCards, setLocalSectionCards] = useState<SectionCardItem[]>([]);
+
+  useEffect(() => {
+    if (sectionCards && sectionCards.length > 0) {
+      setLocalSectionCards(sectionCards);
+    }
+  }, [sectionCards]);
 
   // Cargar lista de provincias al montar
   useEffect(() => {
@@ -277,6 +288,30 @@ export function GeoCustomizerManager({ initialCities }: GeoCustomizerManagerProp
     } finally {
       setIsUploading(false);
     }
+  };
+
+  const handleChangeCityImage = (cityId: string, e: React.ChangeEvent<HTMLInputElement>) => {
+    handleFileUpload(e, (url) => {
+      const updated = provinceCities.map((c) => (c.id === cityId ? { ...c, imageUrl: url } : c));
+      setProvinceCities(updated);
+      const updatedProvinces = provinces.map((p) =>
+        p.id === selectedProvinceId ? { ...p, cities: updated } : p
+      );
+      setProvinces(updatedProvinces);
+      saveProvincesConfig(updatedProvinces);
+      setSuccessMsg(`Imagen de fondo actualizada para la card de ciudad.`);
+      setTimeout(() => setSuccessMsg(null), 3000);
+    });
+  };
+
+  const handleChangeSectionCardImage = (cardId: string, e: React.ChangeEvent<HTMLInputElement>) => {
+    handleFileUpload(e, (url) => {
+      const updated = localSectionCards.map((c) => (c.id === cardId ? { ...c, image: url } : c));
+      setLocalSectionCards(updated);
+      saveSectionCards(updated);
+      setSuccessMsg(`Imagen de fondo actualizada para la card de sección.`);
+      setTimeout(() => setSuccessMsg(null), 3000);
+    });
   };
 
   const syncToSupabase = async (provId: string, updatedBanners: BannerItem[]) => {
@@ -551,17 +586,21 @@ export function GeoCustomizerManager({ initialCities }: GeoCustomizerManagerProp
         </div>
       </div>
 
-      {/* BLOQUE 2: Selector de Ciudades para la Provincia Seleccionada */}
+      {/* BLOQUE 2: Selector & Imágenes de Cards para Ciudades (Imagen 1) */}
       <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-sm space-y-6">
         <div className="border-b border-slate-100 pb-3 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <h3 className="text-base font-black text-slate-900 flex items-center gap-2">
               <Building2 className="w-5 h-5 text-[#0047BA]" />
-              Ciudades para el Selector de: <span className="text-[#0047BA]">{currentProv.name}</span>
+              Ciudades & Cards de: <span className="text-[#0047BA]">{currentProv.name}</span>
             </h3>
             <p className="text-xs text-slate-500">
-              Elegí qué ciudades se muestran en el menú selector superior y agregá nuevas ciudades para {currentProv.name}.
+              Personalizá la imagen de fondo para la card de cada ciudad que se muestra en el inicio y activá/desactivá su presencia en los selectores.
             </p>
+            <div className="mt-2 inline-flex items-center gap-1.5 bg-cyan-50 border border-cyan-300 text-cyan-900 px-3 py-1 rounded-xl text-[11px] font-black shadow-2xs">
+              <span>📐 Tamaño Ideal para Card de Ciudad:</span>
+              <span className="text-[#0047BA]">400 x 300 px (o proporción 4:3 en HD)</span>
+            </div>
           </div>
 
           <button
@@ -596,35 +635,65 @@ export function GeoCustomizerManager({ initialCities }: GeoCustomizerManagerProp
           </button>
         </form>
 
-        {/* Grilla de Ciudades de la Provincia con checkbox Activa / Inactiva */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
+        {/* Grilla de Cards de Ciudades con vista previa e imagen de fondo (Matching Image 1) */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           {provinceCities.map((city) => (
             <div
               key={city.id}
-              className={`p-3 rounded-xl border flex items-center justify-between gap-2 transition-all ${
+              className={`p-3.5 rounded-2xl border flex flex-col justify-between gap-3 transition-all ${
                 city.isActive
-                  ? 'bg-cyan-50/60 border-cyan-300 text-slate-900'
-                  : 'bg-slate-100 border-slate-200 text-slate-400 opacity-60'
+                  ? 'bg-white border-cyan-300 shadow-2xs'
+                  : 'bg-slate-100 border-slate-200 opacity-60'
               }`}
             >
-              <label className="flex items-center gap-2 cursor-pointer select-none text-xs font-bold flex-1 truncate">
-                <input
-                  type="checkbox"
-                  checked={city.isActive}
-                  onChange={() => handleToggleCityActive(city.id)}
-                  className="w-4 h-4 text-[#00ADB5] rounded focus:ring-[#00ADB5] cursor-pointer"
-                />
-                <span className="truncate">{city.name}</span>
-              </label>
+              <div className="flex items-center justify-between">
+                <label className="flex items-center gap-2 cursor-pointer select-none text-xs font-black text-slate-900 truncate">
+                  <input
+                    type="checkbox"
+                    checked={city.isActive}
+                    onChange={() => handleToggleCityActive(city.id)}
+                    className="w-4 h-4 text-[#00ADB5] rounded focus:ring-[#00ADB5] cursor-pointer"
+                  />
+                  <span className="truncate">{city.name}</span>
+                </label>
 
-              <button
-                type="button"
-                onClick={() => handleDeleteCity(city.id)}
-                className="text-slate-400 hover:text-rose-600 p-1"
-                title={`Eliminar ciudad ${city.name}`}
-              >
-                <Trash2 className="w-3.5 h-3.5" />
-              </button>
+                <button
+                  type="button"
+                  onClick={() => handleDeleteCity(city.id)}
+                  className="text-slate-400 hover:text-rose-600 p-1"
+                  title={`Eliminar ciudad ${city.name}`}
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                </button>
+              </div>
+
+              {/* Live Preview Card matching Image 1 */}
+              <div className="relative h-24 w-full bg-slate-100 rounded-xl overflow-hidden border border-slate-200 group shadow-2xs">
+                <img
+                  src={city.imageUrl || '/images/city-parana.jpg'}
+                  alt={city.name}
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                />
+                <div className="absolute top-1.5 left-1.5 bg-black/60 backdrop-blur-md text-white text-[8px] font-black px-2 py-0.5 rounded-md uppercase">
+                  Vista Previa Card
+                </div>
+                <div className="absolute bottom-0 inset-x-0 bg-white/95 backdrop-blur-xs py-1 px-2 text-center border-t border-slate-100">
+                  <span className="text-[11px] font-black text-slate-800 truncate block">{city.name}</span>
+                </div>
+              </div>
+
+              {/* Botón Uploader para cambiar foto de la Card de Ciudad */}
+              <div>
+                <label className="block text-[10px] font-bold text-slate-600 mb-1">
+                  Elegir Foto de Fondo (400x300 px)
+                </label>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => handleChangeCityImage(city.id, e)}
+                  className="w-full text-[10px] text-slate-600 file:mr-2 file:py-1 file:px-2.5 file:rounded-lg file:border-0 file:text-[10px] file:font-bold file:bg-[#00ADB5] file:text-white cursor-pointer"
+                />
+              </div>
             </div>
           ))}
         </div>
@@ -832,6 +901,107 @@ export function GeoCustomizerManager({ initialCities }: GeoCustomizerManagerProp
             ))}
           </div>
         )}
+      </div>
+
+      {/* BLOQUE 5: Personalización de Cards de Secciones (Comercios, Catálogo, Turismo, Comunidad) */}
+      <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-sm space-y-6">
+        <div className="border-b border-slate-100 pb-3 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <h3 className="text-base font-black text-slate-900 flex items-center gap-2">
+              <Sparkles className="w-5 h-5 text-[#00ADB5]" />
+              Imágenes de Fondo para Cards de Secciones (Portada)
+            </h3>
+            <p className="text-xs text-slate-500">
+              Personalizá las imágenes principales que se muestran en el grid de la página de inicio (Comercios, Catálogo, Turismo y Comunidad).
+            </p>
+            <div className="mt-2 inline-flex items-center gap-1.5 bg-cyan-50 border border-cyan-300 text-cyan-900 px-3 py-1 rounded-xl text-[11px] font-black shadow-2xs">
+              <span>📐 Tamaño Recomendado de Imagen:</span>
+              <span className="text-[#0047BA]">600 x 400 px (o proporción 3:2 en HD)</span>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => {
+              saveSectionCards(localSectionCards);
+              setSuccessMsg('Imágenes de fondo de secciones guardadas exitosamente.');
+              setTimeout(() => setSuccessMsg(null), 3500);
+            }}
+            className="inline-flex items-center gap-2 bg-[#0047BA] hover:bg-[#002878] text-white px-4 py-2.5 rounded-2xl text-xs font-black shadow-md transition-all active:scale-95 cursor-pointer shrink-0"
+          >
+            <Save className="w-4 h-4" />
+            <span>Guardar Cards de Secciones</span>
+          </button>
+        </div>
+
+        {/* Grilla de 4 Cards de Secciones con Live Preview (matching Image 2) */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {localSectionCards.map((card) => (
+            <div key={card.id} className="bg-slate-50 p-5 rounded-2xl border border-slate-200 space-y-4 shadow-2xs">
+              
+              <div className="flex items-center justify-between border-b border-slate-200 pb-2">
+                <div>
+                  <h4 className="text-xs font-black text-slate-900 uppercase tracking-wide">{card.title}</h4>
+                  <span className="text-[10px] text-slate-500 font-medium">{card.subtitle}</span>
+                </div>
+                <span className="text-[10px] font-extrabold text-[#00ADB5] bg-cyan-100/80 border border-cyan-300 px-2.5 py-0.5 rounded-md">
+                  {card.idealSize}
+                </span>
+              </div>
+
+              {/* Vista Previa Fiel de la Card de Sección (Matching Image 2) */}
+              <div className="group relative rounded-2xl overflow-hidden shadow-md border border-slate-200 min-h-[180px] flex flex-col justify-end p-5 bg-slate-900">
+                <img
+                  src={card.image}
+                  alt={card.title}
+                  className="absolute inset-0 w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500 opacity-70"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/60 to-transparent" />
+
+                <div className="relative z-10 space-y-1.5">
+                  <h5 className="text-sm font-black text-white tracking-tight">{card.title}</h5>
+                  <p className="text-[11px] text-slate-200 font-medium line-clamp-2">{card.subtitle}</p>
+                  <div className="pt-1">
+                    <span className="inline-flex items-center gap-1 bg-white/20 text-white text-[10px] font-extrabold px-3 py-1 rounded-xl border border-white/30 backdrop-blur-md">
+                      {card.cta} →
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Selector de Archivo e URL */}
+              <div className="space-y-2 pt-1">
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-700 mb-1">
+                    Cargar Nueva Imagen (Ideal: 600x400 px)
+                  </label>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => handleChangeSectionCardImage(card.id, e)}
+                    className="w-full text-xs text-slate-600 file:mr-3 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-[#00ADB5] file:text-white cursor-pointer"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-[10px] font-bold text-slate-500 mb-1">O pegar URL de Imagen:</label>
+                  <input
+                    type="text"
+                    value={card.image}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      const updated = localSectionCards.map((c) => (c.id === card.id ? { ...c, image: val } : c));
+                      setLocalSectionCards(updated);
+                      saveSectionCards(updated);
+                    }}
+                    className="w-full bg-white border border-slate-300 rounded-xl px-3 py-1.5 text-xs font-bold text-slate-800 focus:ring-2 focus:ring-[#00ADB5]"
+                  />
+                </div>
+              </div>
+
+            </div>
+          ))}
+        </div>
       </div>
 
     </div>

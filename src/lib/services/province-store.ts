@@ -8,6 +8,7 @@ export interface ProvinceCityItem {
   name: string;
   slug: string;
   isActive: boolean;
+  imageUrl?: string;
 }
 
 export interface ProvinceItem {

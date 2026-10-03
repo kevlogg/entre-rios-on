@@ -3,43 +3,11 @@
 import React from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { ArrowRight, ShoppingBag, Users, Gift } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
+import { useSectionCards } from '@/lib/services/section-cards-store';
 
 export function BentoRowOne() {
-  const cards = [
-    {
-      id: 'comercio-digital',
-      title: 'COMERCIOS ADHERIDOS',
-      subtitle: 'Directorio unificado de locales, marcas y empresas.',
-      cta: 'Explorar comercios',
-      href: '/comercios',
-      image: '/images/bento-1.jpg',
-    },
-    {
-      id: 'catalogo-ofertas',
-      title: 'CATÁLOGO & OFERTAS',
-      subtitle: 'Miles de productos, servicios y promociones.',
-      cta: 'Ver ofertas',
-      href: '/catalogo',
-      image: '/images/offer-2.jpg',
-    },
-    {
-      id: 'turismo-experiencias',
-      title: 'TURISMO & EXPERIENCIAS',
-      subtitle: 'Descubrí paseos, termas y gastronomía regional.',
-      cta: 'Explorar turismo',
-      href: '/turismo',
-      image: '/images/bento-5.jpg',
-    },
-    {
-      id: 'comunidad-on',
-      title: 'COMUNIDAD ON MÁS',
-      subtitle: 'Conectate, compartí y hacé crecer lo nuestro.',
-      cta: 'Sumate',
-      href: '/comunidad',
-      image: '/images/bento-2.jpg',
-    },
-  ];
+  const cards = useSectionCards();
 
   return (
     <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
