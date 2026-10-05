@@ -102,7 +102,7 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, '\\u003c') }}
         />
       </head>
-      <body className="min-h-screen flex flex-col text-white antialiased selection:bg-[#00C7B7] selection:text-white">
+      <body className="min-h-screen flex flex-col text-white antialiased selection:bg-[#00C7B7] selection:text-white app-compact-scale">
         <PageBackground />
         <main className="flex-1">
           {children}

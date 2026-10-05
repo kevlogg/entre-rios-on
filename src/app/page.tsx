@@ -8,7 +8,7 @@ import { getFeaturedProducts } from '@/lib/dal/portal';
 export const revalidate = 60;
 
 // FLAG MODO PRÓXIMAMENTE (true = Muestra pantalla de lanzamiento / false = Muestra sitio completo)
-const SHOW_COMING_SOON = true;
+const SHOW_COMING_SOON = false;
 
 interface ClientHomePageProps {
   searchParams?: Promise<{ preview?: string; view?: string }>;

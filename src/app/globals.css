@@ -177,3 +177,11 @@ body {
 
 .scrollbar-none::-webkit-scrollbar { display: none; }
 .scrollbar-none { -ms-overflow-style: none; scrollbar-width: none; }
+
+/* Visual Density & Scale adjustment (Equivalent to 75-82% browser zoom on desktop) */
+@media (min-width: 1024px) {
+  .app-compact-scale {
+    zoom: 0.82;
+  }
+}
+
