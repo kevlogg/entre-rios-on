@@ -25,12 +25,14 @@ export default async function ClientHomePage({ searchParams }: ClientHomePagePro
   const products = await getFeaturedProducts();
 
   return (
-    <div className="min-h-screen flex flex-col bg-brand-page-gradient">
-      {/* Header oficial del cliente */}
-      <ClientHeader />
+    <div className="min-h-screen flex flex-col bg-[#e9ecef]">
+      {/* Header oficial del cliente dentro del área con degradé de marca */}
+      <div className="relative bg-gradient-on-mas">
+        <ClientHeader />
+      </div>
 
-      {/* Contenedor principal con estado interactivo y productos reales de la base de datos */}
-      <main className="w-full flex-1">
+      {/* Contenedor principal */}
+      <main className="w-full flex-1 bg-[#e9ecef]">
         <ClientHomeContainer initialProducts={products} />
       </main>
 

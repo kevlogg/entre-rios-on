@@ -44,36 +44,37 @@ export function ClientHomeContainer({ provinceId, initialProducts = [] }: Client
   }, [pathname, provinceId]);
 
   return (
-    <>
-      {/* Hero panorámico según provincia activa (Santa Fe por defecto) */}
-      <ClientHeroBanner provinceId={activeProvince} />
+    <div className="w-full">
+      {/* 1. SECCIÓN HERO (Dentro del área con Degradé de Marca ON MÁS) */}
+      <div className="relative bg-gradient-on-mas pb-2 sm:pb-3 shadow-md">
+        <ClientHeroBanner provinceId={activeProvince} />
+      </div>
 
-      {/* Barra de categorías en grid 2x4 */}
-      <CategoryIconBar
-        selectedCategory={selectedCategory}
-        onSelectCategory={(catId) => setSelectedCategory(catId)}
-      />
-
-      {/* Contenedor principal con fondo gris suave liso (#e9ecef) */}
-      <div className="bg-[#e9ecef] w-full py-4 space-y-2">
-        {/* Primer Bento: Comercio Digital, Comunidad ON, Sorteos ON */}
+      {/* 2. ÁREA RESTANTE CON FONDO GRIS SUAVE LISO (#e9ecef) */}
+      <div className="bg-[#e9ecef] w-full py-2 sm:py-4 space-y-2 text-slate-900">
+        
+        {/* A. Abajo del Hero: Las 8 Cards Grandes Cuadradas (BentoRowOne + BentoRowTwo) */}
         <BentoRowOne />
+        <BentoRowTwo />
 
-        {/* Ofertas e ítems reales de la base de datos Supabase / DAL */}
+        {/* B. Por debajo: Explorá por Ciudad */}
+        <CityExploreBar provinceId={activeProvince} />
+
+        {/* C. Abajo: Categorías (sobre el mismo gris de la página) */}
+        <CategoryIconBar
+          selectedCategory={selectedCategory}
+          onSelectCategory={(catId) => setSelectedCategory(catId)}
+        />
+
+        {/* D. Debajo: Catálogo y Ofertas */}
         <FeaturedOffersGrid
           products={initialProducts}
           selectedCategory={selectedCategory}
         />
 
-        {/* Explorá por ciudad (Carrusel dinámico con ciudades de la provincia activa) */}
-        <CityExploreBar provinceId={activeProvince} />
-
-        {/* Segundo Bento: Industria, Turismo, Clasificados, Publicá tu Negocio */}
-        <BentoRowTwo />
-
-        {/* Sección resumen de ¿Quiénes Somos? con acceso directo a la página */}
+        {/* E. Luego: Card de Quiénes Somos */}
         <AboutUsHomeSection />
       </div>
-    </>
+    </div>
   );
 }
