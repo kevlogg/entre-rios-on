@@ -903,20 +903,20 @@ export function GeoCustomizerManager({ initialCities }: GeoCustomizerManagerProp
         )}
       </div>
 
-      {/* BLOQUE 5: Personalización de Cards de Secciones (Comercios, Catálogo, Turismo, Comunidad) */}
+      {/* BLOQUE 5: Personalización de las 8 Cards de Secciones (Portada) */}
       <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-sm space-y-6">
         <div className="border-b border-slate-100 pb-3 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <h3 className="text-base font-black text-slate-900 flex items-center gap-2">
               <Sparkles className="w-5 h-5 text-[#00ADB5]" />
-              Imágenes de Fondo para Cards de Secciones (Portada)
+              Imágenes y Contenido para Cards de Secciones (8 Cards en Portada)
             </h3>
             <p className="text-xs text-slate-500">
-              Personalizá las imágenes principales que se muestran en el grid de la página de inicio (Comercios, Catálogo, Turismo y Comunidad).
+              Personalizá las 8 cards principales que se muestran en el inicio. Podés cambiar la imagen subiendo un archivo, editar el título, la descripción, el botón y la URL a donde redirige al hacer clic.
             </p>
             <div className="mt-2 inline-flex items-center gap-1.5 bg-cyan-50 border border-cyan-300 text-cyan-900 px-3 py-1 rounded-xl text-[11px] font-black shadow-2xs">
               <span>📐 Tamaño Recomendado de Imagen:</span>
-              <span className="text-[#0047BA]">600 x 400 px (o proporción 3:2 en HD)</span>
+              <span className="text-[#0047BA]">600 × 400 px (o proporción 3:2 en HD)</span>
             </div>
           </div>
 
@@ -924,32 +924,31 @@ export function GeoCustomizerManager({ initialCities }: GeoCustomizerManagerProp
             type="button"
             onClick={() => {
               saveSectionCards(localSectionCards);
-              setSuccessMsg('Imágenes de fondo de secciones guardadas exitosamente.');
+              setSuccessMsg('Las 8 cards de secciones fueron guardadas exitosamente.');
               setTimeout(() => setSuccessMsg(null), 3500);
             }}
             className="inline-flex items-center gap-2 bg-[#0047BA] hover:bg-[#002878] text-white px-4 py-2.5 rounded-2xl text-xs font-black shadow-md transition-all active:scale-95 cursor-pointer shrink-0"
           >
             <Save className="w-4 h-4" />
-            <span>Guardar Cards de Secciones</span>
+            <span>Guardar Cards de Secciones ({localSectionCards.length})</span>
           </button>
         </div>
 
-        {/* Grilla de 4 Cards de Secciones con Live Preview (matching Image 2) */}
+        {/* Grilla de las 8 Cards de Secciones con Live Preview */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {localSectionCards.map((card) => (
-            <div key={card.id} className="bg-slate-50 p-5 rounded-2xl border border-slate-200 space-y-4 shadow-2xs">
+          {localSectionCards.map((card, index) => (
+            <div key={card.id || index} className="bg-slate-50 p-5 rounded-2xl border border-slate-200 space-y-4 shadow-2xs">
               
               <div className="flex items-center justify-between border-b border-slate-200 pb-2">
-                <div>
-                  <h4 className="text-xs font-black text-slate-900 uppercase tracking-wide">{card.title}</h4>
-                  <span className="text-[10px] text-slate-500 font-medium">{card.subtitle}</span>
-                </div>
+                <span className="text-xs font-black text-slate-900 uppercase tracking-wide">
+                  Card #{index + 1}: {card.title}
+                </span>
                 <span className="text-[10px] font-extrabold text-[#00ADB5] bg-cyan-100/80 border border-cyan-300 px-2.5 py-0.5 rounded-md">
-                  {card.idealSize}
+                  {card.idealSize || '600 × 400 px'}
                 </span>
               </div>
 
-              {/* Vista Previa Fiel de la Card de Sección (Matching Image 2) */}
+              {/* Vista Previa Fiel en Vivo de la Card */}
               <div className="group relative rounded-2xl overflow-hidden shadow-md border border-slate-200 min-h-[180px] flex flex-col justify-end p-5 bg-slate-900">
                 <img
                   src={card.image}
@@ -969,11 +968,81 @@ export function GeoCustomizerManager({ initialCities }: GeoCustomizerManagerProp
                 </div>
               </div>
 
-              {/* Selector de Archivo e URL */}
-              <div className="space-y-2 pt-1">
+              {/* Campos Editables */}
+              <div className="space-y-3 pt-1">
+                
+                {/* 1. Título */}
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-700 mb-1">Título de la Card:</label>
+                  <input
+                    type="text"
+                    value={card.title}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      const updated = localSectionCards.map((c) => (c.id === card.id ? { ...c, title: val } : c));
+                      setLocalSectionCards(updated);
+                      saveSectionCards(updated);
+                    }}
+                    className="w-full bg-white border border-slate-300 rounded-xl px-3 py-1.5 text-xs font-bold text-slate-800 focus:ring-2 focus:ring-[#00ADB5]"
+                  />
+                </div>
+
+                {/* 2. Subtítulo / Descripción */}
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-700 mb-1">Subtítulo / Descripción:</label>
+                  <input
+                    type="text"
+                    value={card.subtitle}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      const updated = localSectionCards.map((c) => (c.id === card.id ? { ...c, subtitle: val } : c));
+                      setLocalSectionCards(updated);
+                      saveSectionCards(updated);
+                    }}
+                    className="w-full bg-white border border-slate-300 rounded-xl px-3 py-1.5 text-xs font-bold text-slate-800 focus:ring-2 focus:ring-[#00ADB5]"
+                  />
+                </div>
+
+                {/* 3. Texto del Botón CTA */}
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-700 mb-1">Texto del Botón CTA:</label>
+                  <input
+                    type="text"
+                    value={card.cta}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      const updated = localSectionCards.map((c) => (c.id === card.id ? { ...c, cta: val } : c));
+                      setLocalSectionCards(updated);
+                      saveSectionCards(updated);
+                    }}
+                    className="w-full bg-white border border-slate-300 rounded-xl px-3 py-1.5 text-xs font-bold text-slate-800 focus:ring-2 focus:ring-[#00ADB5]"
+                  />
+                </div>
+
+                {/* 4. URL de Redirección (al hacer clic) */}
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-700 mb-1 flex items-center gap-1">
+                    <LinkIcon className="w-3.5 h-3.5 text-[#00ADB5]" />
+                    <span>URL de Redirección (al hacer clic):</span>
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="Ej. /comercios, /sorteos o https://..."
+                    value={card.href}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      const updated = localSectionCards.map((c) => (c.id === card.id ? { ...c, href: val } : c));
+                      setLocalSectionCards(updated);
+                      saveSectionCards(updated);
+                    }}
+                    className="w-full bg-white border border-slate-300 rounded-xl px-3 py-1.5 text-xs font-bold text-slate-800 focus:ring-2 focus:ring-[#00ADB5]"
+                  />
+                </div>
+
+                {/* 5. Cargar Nueva Imagen (Upload) */}
                 <div>
                   <label className="block text-[11px] font-bold text-slate-700 mb-1">
-                    Cargar Nueva Imagen (Ideal: 600x400 px)
+                    Cargar Nueva Imagen (Ideal: 600×400 px):
                   </label>
                   <input
                     type="file"
@@ -983,20 +1052,6 @@ export function GeoCustomizerManager({ initialCities }: GeoCustomizerManagerProp
                   />
                 </div>
 
-                <div>
-                  <label className="block text-[10px] font-bold text-slate-500 mb-1">O pegar URL de Imagen:</label>
-                  <input
-                    type="text"
-                    value={card.image}
-                    onChange={(e) => {
-                      const val = e.target.value;
-                      const updated = localSectionCards.map((c) => (c.id === card.id ? { ...c, image: val } : c));
-                      setLocalSectionCards(updated);
-                      saveSectionCards(updated);
-                    }}
-                    className="w-full bg-white border border-slate-300 rounded-xl px-3 py-1.5 text-xs font-bold text-slate-800 focus:ring-2 focus:ring-[#00ADB5]"
-                  />
-                </div>
               </div>
 
             </div>

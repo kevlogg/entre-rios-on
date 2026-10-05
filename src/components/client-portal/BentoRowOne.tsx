@@ -8,11 +8,12 @@ import { useSectionCards } from '@/lib/services/section-cards-store';
 
 export function BentoRowOne() {
   const cards = useSectionCards();
+  const rowOneCards = cards.slice(0, 4);
 
   return (
     <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-4">
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        {cards.map((card) => (
+        {rowOneCards.map((card) => (
           <div
             key={card.id}
             className="group relative rounded-3xl overflow-hidden shadow-md border border-slate-200 min-h-[220px] flex flex-col justify-end p-6 bg-slate-900"

@@ -4,47 +4,16 @@ import React from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
+import { useSectionCards } from '@/lib/services/section-cards-store';
 
 export function BentoRowTwo() {
-  const cards = [
-    {
-      id: 'sorteos',
-      title: 'SORTEOS ON MÁS',
-      subtitle: 'Todos los meses, nuevos premios y sorteos regionales.',
-      cta: 'Quiero participar',
-      href: '/sorteos',
-      image: '/images/bento-3.jpg',
-    },
-    {
-      id: 'empleos',
-      title: 'EMPLEOS & OPORTUNIDADES',
-      subtitle: 'Encontrá ofertas laborales o cargá tu perfil profesional.',
-      cta: 'Ver empleos',
-      href: '/empleos',
-      image: '/images/bento-4.jpg',
-    },
-    {
-      id: 'mi-sitio-web',
-      title: 'MI SITIO WEB',
-      subtitle: 'Obtené la página web propia para tu comercio o negocio.',
-      cta: 'Solicitar sitio',
-      href: '/mi-sitio-web',
-      image: '/images/bento-7.jpg',
-    },
-    {
-      id: 'publica-tu-negocio',
-      title: 'PUBLICÁ TU NEGOCIO',
-      subtitle: 'Llegá a miles de clientes en toda la provincia.',
-      cta: 'Quiero publicar',
-      href: '/login',
-      image: '/images/bento-6.jpg',
-    },
-  ];
+  const cards = useSectionCards();
+  const rowTwoCards = cards.slice(4, 8);
 
   return (
     <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-3 pt-1 sm:pb-4 sm:pt-1">
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        {cards.map((card) => (
+        {rowTwoCards.map((card) => (
           <div
             key={card.id}
             className="group relative rounded-3xl overflow-hidden shadow-md border border-slate-200 min-h-[220px] flex flex-col justify-end p-6 bg-slate-900"
