@@ -106,9 +106,47 @@ export function CategoryIconBar({
         </div>
       </div>
 
-      {/* 2 Rows x 4 Columns Marketplace Grid (8 Category Cards Per View) */}
+      {/* 2 Rows Horizontal Scroll on Mobile / Paginated 8 Grid on Tablet & Desktop */}
       <div className="relative group/carousel">
-        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-3.5 transition-all duration-300">
+        {/* Mobile: 2 Rows Horizontal Touch Scroll for ALL categories */}
+        <div className="grid sm:hidden grid-rows-2 grid-flow-col auto-cols-[165px] gap-3 overflow-x-auto snap-x snap-mandatory scrollbar-none pb-2">
+          {CATEGORIES_LIST.map((cat) => {
+            const isSelected = selectedCat === cat.id;
+
+            return (
+              <button
+                key={cat.id}
+                onClick={() => handleCategoryClick(cat.id)}
+                className={`snap-start group flex items-center rounded-2xl border transition-all text-left overflow-hidden h-20 cursor-pointer shadow-md ${
+                  isSelected
+                    ? 'bg-gradient-to-r from-[#00ADB5] to-[#0047BA] text-white border-white shadow-xl scale-[1.02] ring-2 ring-cyan-400/50'
+                    : 'bg-white hover:bg-slate-50 text-slate-900 border-slate-200 hover:border-[#00ADB5] hover:shadow-xl'
+                }`}
+              >
+                {/* Left Box: Product Image Asset */}
+                <div className="w-1/3 h-full bg-slate-100 border-r border-slate-200/80 shrink-0 relative overflow-hidden flex items-center justify-center p-1.5">
+                  <img
+                    src={cat.imageUrl}
+                    alt={cat.label}
+                    className="w-full h-full object-cover rounded-xl group-hover:scale-108 transition-transform duration-300"
+                  />
+                </div>
+
+                {/* Right Box: Bold Category Label */}
+                <div className="w-2/3 p-2.5">
+                  <span className={`font-extrabold text-xs leading-snug line-clamp-2 block ${
+                    isSelected ? 'text-white font-black' : 'text-slate-900 group-hover:text-[#0047BA]'
+                  }`}>
+                    {cat.label}
+                  </span>
+                </div>
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Desktop & Tablet: 8 Items Paginated Grid with Arrows */}
+        <div className="hidden sm:grid grid-cols-2 md:grid-cols-4 gap-3.5 transition-all duration-300">
           {visibleCategories.map((cat) => {
             const isSelected = selectedCat === cat.id;
 
@@ -144,11 +182,11 @@ export function CategoryIconBar({
           })}
         </div>
 
-        {/* Floating Right Arrow Button for Next 8 */}
+        {/* Floating Right Arrow Button for Next 8 (Desktop Only) */}
         <button
           onClick={handleNextPage}
           title="Pasar a las próximas 8 categorías"
-          className="absolute -right-3 top-1/2 -translate-y-1/2 z-20 w-10 h-10 rounded-full bg-white text-[#0047BA] border border-slate-200 shadow-2xl flex items-center justify-center hover:bg-[#00ADB5] hover:text-white hover:border-[#00ADB5] transition-all cursor-pointer active:scale-95"
+          className="hidden sm:flex absolute -right-3 top-1/2 -translate-y-1/2 z-20 w-10 h-10 rounded-full bg-white text-[#0047BA] border border-slate-200 shadow-2xl items-center justify-center hover:bg-[#00ADB5] hover:text-white hover:border-[#00ADB5] transition-all cursor-pointer active:scale-95"
         >
           <ChevronRight className="w-5 h-5 stroke-[3]" />
         </button>
@@ -157,7 +195,7 @@ export function CategoryIconBar({
           <button
             onClick={handlePrevPage}
             title="Volver a las 8 categorías anteriores"
-            className="absolute -left-3 top-1/2 -translate-y-1/2 z-20 w-10 h-10 rounded-full bg-white text-[#0047BA] border border-slate-200 shadow-2xl flex items-center justify-center hover:bg-[#00ADB5] hover:text-white hover:border-[#00ADB5] transition-all cursor-pointer active:scale-95"
+            className="hidden sm:flex absolute -left-3 top-1/2 -translate-y-1/2 z-20 w-10 h-10 rounded-full bg-white text-[#0047BA] border border-slate-200 shadow-2xl items-center justify-center hover:bg-[#00ADB5] hover:text-white hover:border-[#00ADB5] transition-all cursor-pointer active:scale-95"
           >
             <ChevronLeft className="w-5 h-5 stroke-[3]" />
           </button>

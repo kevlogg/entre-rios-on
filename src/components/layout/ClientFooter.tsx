@@ -13,7 +13,7 @@ export function ClientFooter() {
         <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-center justify-between">
           
           {/* Left Column: Brand Logo Card & Handwritten Slogan */}
-          <div className="md:col-span-4 space-y-3">
+          <div className="md:col-span-4 space-y-3 flex flex-col items-center text-center md:items-start md:text-left">
             <Link href="/" className="inline-block">
               <div className="flex flex-col items-center justify-center bg-white/95 hover:bg-white backdrop-blur-md border border-white/50 px-5 py-2 rounded-2xl shadow-xl transition-all group">
                 <div className="relative w-44 h-11 sm:w-48 sm:h-12">
@@ -64,7 +64,7 @@ export function ClientFooter() {
           </div>
 
           {/* Right Column: Portal Slogan */}
-          <div className="md:col-span-4 flex items-center justify-end gap-3 text-right">
+          <div className="md:col-span-4 flex items-center justify-center md:justify-end gap-3 text-center md:text-right">
             <div className="w-11 h-11 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center text-cyan-300 shadow-md shrink-0">
               <svg className="w-6 h-6 text-cyan-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m6 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
@@ -76,7 +76,6 @@ export function ClientFooter() {
               </p>
             </div>
           </div>
-
         </div>
       </div>
 
