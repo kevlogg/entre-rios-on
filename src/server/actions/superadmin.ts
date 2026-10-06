@@ -1071,6 +1071,15 @@ export async function approveCashPaymentAction(
       return { success: false, message: 'No se pudo conectar a Supabase.' };
     }
 
+    const { data: payment } = await adminSupabase
+      .from('cash_payments')
+      .select('plan_name')
+      .eq('id', paymentId)
+      .maybeSingle();
+
+    const planName = (payment?.plan_name || 'BRONCE').toUpperCase();
+    const resolvedTier = planName.includes('ORO') ? 'ORO' : planName.includes('PLATA') ? 'PLATA' : 'BRONCE';
+
     const { error: payErr } = await adminSupabase
       .from('cash_payments')
       .update({ status: 'APPROVED' })
@@ -1080,14 +1089,13 @@ export async function approveCashPaymentAction(
       return { success: false, message: `Error al aprobar pago: ${payErr.message}` };
     }
 
-    const nextExpiration = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString();
-
     if (commerceId) {
       await adminSupabase
         .from('commerces')
         .update({ 
           is_subscription_active: true, 
           is_verified: true,
+          subscription_tier: resolvedTier,
           updated_at: new Date().toISOString()
         })
         .eq('id', commerceId);
@@ -1097,6 +1105,7 @@ export async function approveCashPaymentAction(
         .update({ 
           is_subscription_active: true, 
           is_verified: true,
+          subscription_tier: resolvedTier,
           updated_at: new Date().toISOString()
         })
         .ilike('name', `%${commerceName}%`);
@@ -1108,6 +1117,63 @@ export async function approveCashPaymentAction(
     return { success: true, message: 'Pago de cuota mensual aprobado exitosamente. El comercio ha sido renovado en el portal.' };
   } catch (err) {
     return { success: false, message: `Error: ${(err as Error).message}` };
+  }
+}
+
+export async function activateFreePlanAction(
+  commerceId?: string,
+  commerceName?: string
+): Promise<{ success: boolean; message: string }> {
+  try {
+    const adminSupabase = getAdminClient();
+    const supabaseUserClient = await createClient();
+    const supabase = adminSupabase || supabaseUserClient;
+
+    const { data: { user } } = await supabaseUserClient.auth.getUser();
+
+    let targetId = commerceId;
+
+    if (!targetId && user) {
+      const { data: userComm } = await supabase
+        .from('commerces')
+        .select('id')
+        .eq('owner_id', user.id)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if (userComm) {
+        targetId = userComm.id;
+      }
+    }
+
+    if (targetId) {
+      await supabase
+        .from('commerces')
+        .update({
+          is_subscription_active: true,
+          subscription_tier: 'GRATIS',
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', targetId);
+    } else if (commerceName) {
+      await supabase
+        .from('commerces')
+        .update({
+          is_subscription_active: true,
+          subscription_tier: 'GRATIS',
+          updated_at: new Date().toISOString(),
+        })
+        .ilike('name', `%${commerceName}%`);
+    } else {
+      return { success: false, message: 'No se encontró el comercio a activar.' };
+    }
+
+    revalidatePath('/admin');
+    revalidatePath('/superadmin');
+    revalidatePath('/comercios');
+    return { success: true, message: '¡Plan Gratis activado con éxito! Podés crear tu perfil y publicar 1 producto.' };
+  } catch (err) {
+    return { success: false, message: `Error activando Plan Gratis: ${(err as Error).message}` };
   }
 }
 

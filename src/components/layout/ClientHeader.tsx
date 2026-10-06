@@ -35,11 +35,14 @@ import { Product, Commerce } from '@/types';
 const SITE_PAGES = [
   { name: 'Categorías del Catálogo', href: '/catalogo', category: 'Sección del Sitio', icon: ShoppingBag, description: 'Explorá todas las categorías y productos regionales', keywords: ['catalogo', 'categoria', 'oferta', 'producto', 'descuento', 'compras', 'precio', 'articulo', 'tienda'] },
   { name: 'Comercios Adheridos', href: '/comercios', category: 'Sección del Sitio', icon: Store, description: 'Directorio unificado de locales y empresas', keywords: ['comercio', 'negocio', 'tienda', 'local', 'adherido', 'directorio', 'empresa'] },
+  { name: 'Supermercado', href: '/supermercado', category: 'Sección del Sitio', icon: ShoppingBag, description: 'Catálogo y ofertas de supermercados y alimentos', keywords: ['supermercado', 'super', 'alimentos', 'comida', 'mercado', 'ofertas'] },
   { name: 'Turismo, Termas & Spa', href: '/turismo', category: 'Sección del Sitio', icon: Compass, description: 'Termas, alojamientos y paseos turísticos', keywords: ['turismo', 'termas', 'hotel', 'posada', 'spa', 'paseo', 'viaje', 'vacaciones', 'gastronomia', 'alojamiento'] },
   { name: 'Comunidad & Noticias', href: '/comunidad', category: 'Sección del Sitio', icon: Newspaper, description: 'Eventos comunitarios, agenda y noticias', keywords: ['comunidad', 'noticia', 'evento', 'festival', 'maraton', 'nota', 'agenda', 'cultura'] },
   { name: 'Novedades', href: '/novedades', category: 'Sección del Sitio', icon: Newspaper, description: 'Últimas novedades y comunicados del portal', keywords: ['novedades', 'novedad', 'noticias', 'anuncios', 'comunicados'] },
   { name: 'Oportunidades', href: '/oportunidades', category: 'Sección del Sitio', icon: Tag, description: 'Oportunidades comerciales y beneficios', keywords: ['oportunidades', 'oportunidad', 'descuentos', 'beneficios', 'ofertas'] },
-  { name: 'Bolsa de Empleos', href: '/empleos', category: 'Sección del Sitio', icon: Briefcase, description: 'Ofertas laborales y perfiles de candidatos', keywords: ['empleo', 'trabajo', 'busqueda', 'laboral', 'puesto', 'candidato', 'cv', 'postularme', 'contratar'] },
+  { name: 'Comercio Online', href: '/comercio-online', category: 'Sección del Sitio', icon: Store, description: 'Plataforma e-commerce y tiendas digitales', keywords: ['comercio online', 'ecommerce', 'tienda online', 'vender', 'comprar'] },
+  { name: 'Planes para Comercios', href: '/planes', category: 'Sección del Sitio', icon: Tag, description: 'Planes y membresías para publicar tu negocio', keywords: ['planes', 'precios', 'suscripcion', 'membresia', 'gratis', 'plan'] },
+  { name: 'Ayuda & Soporte', href: '/ayuda', category: 'Sección del Sitio', icon: Compass, description: 'Preguntas frecuentes y asistencia técnica', keywords: ['ayuda', 'soporte', 'contacto', 'faq', 'preguntas'] },
   { name: 'Sorteos ON MÁS', href: '/sorteos', category: 'Sección del Sitio', icon: Gift, description: 'Participá en sorteos mensuales gratuitos', keywords: ['sorteo', 'premio', 'ganador', 'participar', 'concurso', 'gratuitos'] },
   { name: 'Mi Sitio Web Propio', href: '/mi-sitio-web', category: 'Sección del Sitio', icon: Globe, description: 'Solicitá tu sitio web para tu comercio', keywords: ['sitio web', 'pagina web', 'dominio', 'crear web', 'mi sitio', 'diseño web'] },
 ];
@@ -301,11 +304,14 @@ export function ClientHeader() {
     { name: 'Inicio', href: getGeoUrl(''), slug: '' },
     { name: 'Categorías', href: getGeoUrl('catalogo'), slug: 'catalogo' },
     { name: 'Comercios Adheridos', href: getGeoUrl('comercios'), slug: 'comercios' },
+    { name: 'Supermercado', href: getGeoUrl('supermercado'), slug: 'supermercado' },
     { name: 'Turismo', href: getGeoUrl('turismo'), slug: 'turismo' },
     { name: 'Comunidad', href: getGeoUrl('comunidad'), slug: 'comunidad' },
     { name: 'Novedades', href: '/novedades', slug: 'novedades' },
     { name: 'Oportunidades', href: '/oportunidades', slug: 'oportunidades' },
-    { name: 'Empleos', href: '/empleos', slug: 'empleos' },
+    { name: 'Comercio Online', href: '/comercio-online', slug: 'comercio-online' },
+    { name: 'Planes', href: '/planes', slug: 'planes' },
+    { name: 'Ayuda', href: '/ayuda', slug: 'ayuda' },
     { name: 'Sorteos ON MÁS', href: getGeoUrl('sorteos'), slug: 'sorteos' },
   ];
 
@@ -333,23 +339,23 @@ export function ClientHeader() {
             </div>
           </Link>
 
-          {/* Location Selectors */}
-          <div className="hidden lg:flex items-center gap-1.5 bg-white/15 backdrop-blur-md border border-white/30 rounded-2xl p-1 shadow-md relative z-30">
+          {/* Location Selectors - LARGER SIZE */}
+          <div className="hidden lg:flex items-center gap-2 bg-white/20 backdrop-blur-md border border-white/35 rounded-2xl p-1.5 shadow-lg relative z-30">
             
             {/* Selector de Provincia */}
             <div className="relative">
               <button
                 onClick={() => setIsProvinceDropdownOpen(!isProvinceDropdownOpen)}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-extrabold text-white hover:bg-white/20 transition-all cursor-pointer"
+                className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-black text-white hover:bg-white/25 transition-all cursor-pointer"
               >
-                <MapPin className="w-3.5 h-3.5 text-cyan-200" />
-                <span className="truncate max-w-[100px]">{currentProvinceObj.name}</span>
-                <ChevronDown className="w-3 h-3 text-cyan-100" />
+                <MapPin className="w-4.5 h-4.5 text-cyan-300 shrink-0" />
+                <span className="truncate max-w-[160px]">{currentProvinceObj.name}</span>
+                <ChevronDown className="w-4 h-4 text-cyan-200" />
               </button>
 
               {isProvinceDropdownOpen && (
-                <div className="absolute top-full left-0 mt-1.5 w-52 bg-slate-900/95 backdrop-blur-xl border border-white/20 rounded-2xl shadow-2xl py-2 z-50 animate-in fade-in duration-100 space-y-1">
-                  <div className="px-3.5 py-1 text-[10px] font-black text-cyan-300 uppercase tracking-wider">
+                <div className="absolute top-full left-0 mt-2 w-60 bg-slate-900/95 backdrop-blur-xl border border-white/20 rounded-2xl shadow-2xl py-2.5 z-50 animate-in fade-in duration-100 space-y-1">
+                  <div className="px-4 py-1 text-[11px] font-black text-cyan-300 uppercase tracking-wider">
                     Provincias Activas
                   </div>
                   {activeProvinces.map((prov) => (
@@ -357,15 +363,15 @@ export function ClientHeader() {
                       key={prov.id}
                       type="button"
                       onClick={() => handleProvinceSelect(prov.id)}
-                      className={`w-full text-left px-3.5 py-1.5 text-xs font-bold flex items-center justify-between hover:bg-white/10 transition-colors ${
+                      className={`w-full text-left px-4 py-2 text-xs font-bold flex items-center justify-between hover:bg-white/10 transition-colors ${
                         selectedProvince === prov.id || selectedProvince === prov.slug
-                          ? 'text-cyan-300 bg-white/10 font-extrabold'
+                          ? 'text-cyan-300 bg-white/10 font-black'
                           : 'text-slate-200'
                       }`}
                     >
                       <span>{prov.name}</span>
                       {(selectedProvince === prov.id || selectedProvince === prov.slug) && (
-                        <span className="w-1.5 h-1.5 rounded-full bg-cyan-400" />
+                        <span className="w-2 h-2 rounded-full bg-cyan-400" />
                       )}
                     </button>
                   ))}
@@ -379,36 +385,36 @@ export function ClientHeader() {
             <div className="relative">
               <button
                 onClick={() => setIsCityDropdownOpen(!isCityDropdownOpen)}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-extrabold text-white hover:bg-white/20 transition-all cursor-pointer"
+                className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-black text-white hover:bg-white/25 transition-all cursor-pointer"
               >
-                <Building2 className="w-3.5 h-3.5 text-cyan-200" />
-                <span className="truncate max-w-[130px]">{currentCityObj.name}</span>
-                <ChevronDown className="w-3 h-3 text-cyan-100" />
+                <Building2 className="w-4.5 h-4.5 text-cyan-300 shrink-0" />
+                <span className="truncate max-w-[180px]">{currentCityObj.name}</span>
+                <ChevronDown className="w-4 h-4 text-cyan-200" />
               </button>
 
               {isCityDropdownOpen && (
-                <div className="absolute top-full left-0 mt-1.5 w-52 max-h-60 overflow-y-auto bg-slate-900/95 backdrop-blur-xl border border-white/20 rounded-2xl shadow-2xl py-1.5 z-50 animate-in fade-in duration-100 scrollbar-none">
+                <div className="absolute top-full left-0 mt-2 w-60 max-h-64 overflow-y-auto bg-slate-900/95 backdrop-blur-xl border border-white/20 rounded-2xl shadow-2xl py-2 z-50 animate-in fade-in duration-100 scrollbar-none">
                   <button
                     type="button"
                     onClick={() => handleCitySelect('all', 'Todas las ciudades')}
-                    className={`w-full text-left px-3 py-1.5 text-xs flex items-center justify-between hover:bg-white/10 transition-colors ${
-                      selectedCity === 'all' ? 'font-bold text-cyan-300 bg-white/10' : 'text-slate-200'
+                    className={`w-full text-left px-4 py-2 text-xs flex items-center justify-between hover:bg-white/10 transition-colors ${
+                      selectedCity === 'all' ? 'font-black text-cyan-300 bg-white/10' : 'text-slate-200'
                     }`}
                   >
                     <span>Todas las ciudades</span>
-                    {selectedCity === 'all' && <span className="w-1.5 h-1.5 rounded-full bg-cyan-400" />}
+                    {selectedCity === 'all' && <span className="w-2 h-2 rounded-full bg-cyan-400" />}
                   </button>
                   {availableCities.map((city) => (
                     <button
                       key={city.id}
                       type="button"
                       onClick={() => handleCitySelect(city.id, city.name)}
-                      className={`w-full text-left px-3 py-1.5 text-xs flex items-center justify-between hover:bg-white/10 transition-colors ${
-                        selectedCity === city.id ? 'font-bold text-cyan-300 bg-white/10' : 'text-slate-200'
+                      className={`w-full text-left px-4 py-2 text-xs flex items-center justify-between hover:bg-white/10 transition-colors ${
+                        selectedCity === city.id ? 'font-black text-cyan-300 bg-white/10' : 'text-slate-200'
                       }`}
                     >
                       <span>{city.name}</span>
-                      {selectedCity === city.id && <span className="w-1.5 h-1.5 rounded-full bg-cyan-400" />}
+                      {selectedCity === city.id && <span className="w-2 h-2 rounded-full bg-cyan-400" />}
                     </button>
                   ))}
                 </div>
@@ -416,8 +422,8 @@ export function ClientHeader() {
             </div>
           </div>
 
-          {/* Buscador Global Interactivo (Desktop) */}
-          <div ref={searchContainerRef} className="hidden md:block flex-1 max-w-md relative z-30">
+          {/* Buscador Global Interactivo (Desktop) - LARGER SIZE */}
+          <div ref={searchContainerRef} className="hidden md:block flex-1 max-w-xl relative z-30">
             <form onSubmit={handleSearchSubmit} className="relative flex items-center">
               <input
                 type="text"
@@ -428,14 +434,14 @@ export function ClientHeader() {
                   setSearchQuery(e.target.value);
                   setIsSearchFocused(true);
                 }}
-                className="w-full bg-white border border-slate-200 rounded-xl pl-4 pr-12 py-2 text-xs font-bold text-slate-900 placeholder-slate-400 focus:outline-hidden focus:ring-2 focus:ring-[#00ADB5] focus:bg-white transition-all shadow-md"
+                className="w-full bg-white border border-slate-200 rounded-xl pl-4 pr-14 py-2.5 sm:py-3 text-sm font-extrabold text-slate-900 placeholder-slate-400 focus:outline-hidden focus:ring-2 focus:ring-[#00ADB5] focus:bg-white transition-all shadow-lg"
               />
               <button
                 type="submit"
-                className="absolute right-1 top-1 bottom-1 bg-gradient-to-r from-[#00ADB5] to-[#0047BA] hover:from-[#00E5E8] hover:to-[#00ADB5] text-white font-black px-3 rounded-lg flex items-center justify-center transition-all shadow-md cursor-pointer"
+                className="absolute right-1.5 top-1.5 bottom-1.5 bg-gradient-to-r from-[#00ADB5] to-[#0047BA] hover:from-[#00E5E8] hover:to-[#00ADB5] text-white font-black px-4 rounded-lg flex items-center justify-center transition-all shadow-md cursor-pointer"
                 aria-label="Buscar"
               >
-                <Search className="w-3.5 h-3.5" />
+                <Search className="w-4 h-4 sm:w-5 sm:h-5" />
               </button>
             </form>
 

@@ -41,7 +41,7 @@ export async function createProductAction(productData: Partial<Product>): Promis
 
           // Validar límite del plan en el servidor
           const rawTier = (userComm.subscription_tier || 'BRONCE').toUpperCase();
-          const maxAllowed = rawTier.includes('ORO') ? Infinity : rawTier.includes('PLATA') ? 20 : 5;
+          const maxAllowed = rawTier.includes('ORO') ? Infinity : rawTier.includes('PLATA') ? 20 : rawTier.includes('BRONCE') ? 5 : 1;
 
           if (maxAllowed !== Infinity) {
             const { count: currentCount } = await supabase

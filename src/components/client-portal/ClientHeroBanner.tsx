@@ -3,14 +3,18 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, MapPin } from 'lucide-react';
 import { getBannersByProvince, fetchBannersFromSupabase, DEFAULT_PROVINCE_BANNERS, BannerItem, normalizeImageUrl } from '@/lib/services/banner-store';
+import { getProvinceById } from '@/lib/constants/locations';
 
 interface ClientHeroBannerProps {
   provinceId?: string;
 }
 
 export function ClientHeroBanner({ provinceId = 'santa-fe' }: ClientHeroBannerProps) {
+  const provinceObj = getProvinceById(provinceId);
+  const provinceName = provinceObj ? provinceObj.name : (provinceId === 'santa-fe' ? 'Santa Fe' : 'Entre Ríos');
+
   const [banners, setBanners] = useState<BannerItem[]>(() => {
     return getBannersByProvince(provinceId);
   });
@@ -133,6 +137,16 @@ export function ClientHeroBanner({ provinceId = 'santa-fe' }: ClientHeroBannerPr
               </Link>
             );
           })}
+
+          {/* Selected Province Mention (Centered at bottom inside hero image) */}
+          <div className="absolute bottom-3 sm:bottom-4 left-1/2 -translate-x-1/2 z-30 pointer-events-none">
+            <div className="bg-slate-950/85 backdrop-blur-md px-4 sm:px-6 py-1.5 sm:py-2 border border-cyan-400/50 shadow-2xl flex items-center gap-2 text-center whitespace-nowrap">
+              <MapPin className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-cyan-400 shrink-0 animate-pulse" />
+              <span className="text-white text-xs sm:text-sm font-black uppercase tracking-widest">
+                PROVINCIA: <span className="text-cyan-400 font-black">{provinceName}</span>
+              </span>
+            </div>
+          </div>
 
           {/* Floating controls at bottom right */}
           {totalSlides > 1 && (

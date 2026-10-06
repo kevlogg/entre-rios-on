@@ -131,6 +131,12 @@ export default function AdminPage() {
         const hasActiveSub = targetCommerce?.is_subscription_active ?? (user.user_metadata?.is_subscription_active ?? false);
         setIsSubscriptionActive(Boolean(hasActiveSub));
 
+        const rawTier = (targetCommerce?.subscription_tier || 'BRONCE').toUpperCase();
+        const mappedPlan: 'Gratis' | 'Bronce' | 'Plata' | 'Oro' =
+          rawTier.includes('GRATIS') ? 'Gratis' :
+          rawTier.includes('ORO') ? 'Oro' :
+          rawTier.includes('PLATA') ? 'Plata' : 'Bronce';
+
         const resolvedCommerce: Commerce = {
           id: targetCommerce?.id || `comm-${user.id}`,
           name: targetCommerce?.name || user.user_metadata?.commerce_name || merchantName,
@@ -152,6 +158,7 @@ export default function AdminPage() {
           email: user.email || targetCommerce?.email || '',
           isDigitalOnly: targetCommerce?.is_digital_only ?? user.user_metadata?.is_digital_only ?? false,
           website: targetCommerce?.website || '',
+          plan: mappedPlan,
         };
 
         setCommerce(resolvedCommerce);

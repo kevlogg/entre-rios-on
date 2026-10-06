@@ -8,7 +8,8 @@ import {
   getPendingCashPaymentForCommerceAction, 
   cancelCashPaymentAction,
   getCommercePaymentHistoryAction,
-  getSubscriptionPlansAction
+  getSubscriptionPlansAction,
+  activateFreePlanAction
 } from '@/server/actions/superadmin';
 
 export type UserType = 'comercio' | 'turismo' | 'particular' | string;
@@ -37,15 +38,17 @@ const BASE_FEATURES = [
   { id: 11, text: 'Publicidad y visibilidad exclusiva dentro del sitio web y en redes sociales' },
 ];
 
-const getFeaturesForPlan = (cardType: 'bronce' | 'plata' | 'oro') => {
+const getFeaturesForPlan = (cardType: 'gratis' | 'bronce' | 'plata' | 'oro') => {
   const catalogText = 
-    cardType === 'bronce'
+    cardType === 'gratis'
+      ? 'Catálogo de 1 sólo producto / servicio'
+      : cardType === 'bronce'
       ? 'Catálogo de hasta 5 productos / servicios'
       : cardType === 'plata'
       ? 'Catálogo de hasta 20 productos / servicios'
       : 'Catálogo ILIMITADO de productos y servicios';
 
-  const maxIncluded = cardType === 'bronce' ? 3 : cardType === 'plata' ? 6 : 11;
+  const maxIncluded = cardType === 'gratis' ? 3 : cardType === 'bronce' ? 3 : cardType === 'plata' ? 6 : 11;
 
   return BASE_FEATURES.map((item, index) => {
     const itemNum = index + 1;
@@ -208,6 +211,24 @@ export function SubscriptionPlans({
     }
   };
 
+  const handleSelectGratis = async () => {
+    setLoadingTier('GRATIS');
+    try {
+      const res = await activateFreePlanAction(commerceId, commerceName);
+      if (res.success) {
+        if (onPlanActivated) onPlanActivated('Gratis');
+        setActivatedSuccess('¡Plan Gratis activado exitosamente! Tu perfil está listo y podés publicar 1 producto.');
+        setTimeout(() => setActivatedSuccess(null), 5000);
+      } else {
+        alert(res.message);
+      }
+    } catch (err) {
+      console.warn('Error activando Plan Gratis:', err);
+    } finally {
+      setLoadingTier(null);
+    }
+  };
+
   const handleSelectPlan = async (planTier: 'BRONCE' | 'PLATA' | 'ORO', planName: string) => {
     if (pendingPayment) return;
     setLoadingTier(planTier);
@@ -233,7 +254,7 @@ export function SubscriptionPlans({
     }
   };
 
-  const renderFeaturesList = (cardType: 'bronce' | 'plata' | 'oro') => {
+  const renderFeaturesList = (cardType: 'gratis' | 'bronce' | 'plata' | 'oro') => {
     const features = getFeaturesForPlan(cardType);
     return (
       <ul className="space-y-2.5 text-xs font-semibold">
@@ -333,9 +354,45 @@ export function SubscriptionPlans({
         </div>
       )}
 
-      {/* ==================== PLANES ON MÁS (BRONCE $29k, PLATA $49k, ORO $99k) ==================== */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-stretch max-w-6xl mx-auto">
+      {/* ==================== PLANES ON MÁS (GRATIS $0, BRONCE $29k, PLATA $49k, ORO $99k) ==================== */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 items-stretch max-w-7xl mx-auto">
         
+        {/* 0. PLAN GRATIS ($0) */}
+        <div className="bg-emerald-50/60 border-2 border-emerald-300 rounded-3xl p-6 flex flex-col justify-between space-y-6 transition-all hover:border-emerald-500">
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <span className="text-[11px] font-black text-emerald-800 uppercase tracking-wider block bg-emerald-100 px-2.5 py-1 rounded-full border border-emerald-300">
+                Sin Costo
+              </span>
+              <Sparkles className="w-6 h-6 text-emerald-600" />
+            </div>
+
+            <div className="space-y-1">
+              <h4 className="text-2xl font-black text-slate-900">Plan Gratis</h4>
+              <p className="text-xs text-slate-500 font-medium">Perfil + 1 producto para probar sin costo</p>
+            </div>
+
+            <div className="py-3 border-y border-emerald-200">
+              <span className="text-4xl font-black text-emerald-700">$0</span>
+              <span className="text-xs font-bold text-slate-500"> / siempre</span>
+            </div>
+
+            {/* Lista de características del Plan Gratis */}
+            {renderFeaturesList('gratis')}
+          </div>
+
+          <div className="pt-4 border-t border-emerald-200">
+            <button
+              onClick={handleSelectGratis}
+              disabled={Boolean(pendingPayment) || loadingTier === 'GRATIS'}
+              className="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-3.5 rounded-2xl font-black text-xs transition-transform active:scale-95 cursor-pointer shadow-md flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <span>{loadingTier === 'GRATIS' ? 'Activando...' : 'Activar Plan Gratis (Sin Costo)'}</span>
+              <Check className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+
         {/* 1. PLAN BRONCE ($29.000) - Puntos 1 al 3 */}
         <div className={`bg-slate-50/90 border-2 border-slate-200 rounded-3xl p-6 flex flex-col justify-between space-y-6 transition-all ${
           pendingPayment ? 'opacity-65 grayscale-[20%]' : 'hover:border-amber-600/50'

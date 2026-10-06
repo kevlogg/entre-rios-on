@@ -4,6 +4,7 @@ import './globals.css';
 import { DesignSwitcherBar } from '@/components/layout/DesignSwitcherBar';
 import { FloatingWhatsAppButton } from '@/components/common/FloatingWhatsAppButton';
 import { PageBackground } from '@/components/common/PageBackground';
+import { PwaInstallPrompt } from '@/components/pwa/PwaInstallPrompt';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -108,6 +109,7 @@ export default function RootLayout({
           {children}
         </main>
         <FloatingWhatsAppButton />
+        <PwaInstallPrompt />
       </body>
     </html>
   );

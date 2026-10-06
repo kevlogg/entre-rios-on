@@ -31,7 +31,7 @@ export function CatalogManager({ commerce, products, onAddProduct, onDeleteProdu
   const [images, setImages] = useState<string[]>([]);
 
   const plan = commerce?.plan || 'Bronce';
-  const maxProducts = plan === 'Oro' ? Infinity : plan === 'Plata' ? 20 : 5;
+  const maxProducts = plan === 'Oro' ? Infinity : plan === 'Plata' ? 20 : plan === 'Bronce' ? 5 : 1;
   const isLimitReached = products.length >= maxProducts;
 
   const togglePause = (id: string) => {
@@ -40,7 +40,7 @@ export function CatalogManager({ commerce, products, onAddProduct, onDeleteProdu
 
   const handleOpenNewModal = () => {
     if (isLimitReached) {
-      alert(`Has alcanzado el límite de ${maxProducts} productos / servicios para tu Plan ${plan}. Para agregar más publicaciones, por favor actualizá tu plan a ${plan === 'Bronce' ? 'Plata (hasta 20 productos)' : 'Oro (Ilimitados)'}.`);
+      alert(`Has alcanzado el límite de ${maxProducts} producto(s) / servicio(s) para tu Plan ${plan}. Para agregar más publicaciones, por favor actualizá tu plan a ${plan === 'Gratis' ? 'Bronce (hasta 5 productos)' : plan === 'Bronce' ? 'Plata (hasta 20 productos)' : 'Oro (Ilimitados)'}.`);
       return;
     }
     setEditingProduct(null);
