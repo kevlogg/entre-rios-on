@@ -323,8 +323,8 @@ export function ClientHeader() {
           
           {/* Logo Oficial en Card de Fondo Blanco Brillante */}
           <Link href="/" className="flex items-center shrink-0">
-            <div className="flex flex-col items-center bg-white/95 hover:bg-white backdrop-blur-md border border-white/50 px-4 py-1.5 rounded-2xl shadow-xl transition-all group">
-              <div className="relative w-36 h-9 sm:w-44 sm:h-10">
+            <div className="h-12 flex flex-col items-center justify-center bg-white/95 hover:bg-white backdrop-blur-md border border-white/50 px-4 rounded-2xl shadow-xl transition-all group">
+              <div className="relative w-36 h-7 sm:w-44 sm:h-8">
                 <Image
                   src="/logo.png"
                   alt="ON MÁS - Portal Comercial & Regional"
@@ -333,24 +333,24 @@ export function ClientHeader() {
                   className="object-contain"
                 />
               </div>
-              <span className="text-[9px] font-black uppercase tracking-[0.3em] text-[#0047BA] group-hover:text-[#00ADB5] transition-colors -mt-0.5">
+              <span className="text-[8px] font-black uppercase tracking-[0.3em] text-[#0047BA] group-hover:text-[#00ADB5] transition-colors -mt-0.5">
                 PORTAL
               </span>
             </div>
           </Link>
 
-          {/* Location Selectors - LARGER SIZE */}
-          <div className="hidden lg:flex items-center gap-2 bg-white/20 backdrop-blur-md border border-white/35 rounded-2xl p-1.5 shadow-lg relative z-30">
+          {/* Location Selectors - CONSISTENT HEIGHT h-12 */}
+          <div className="hidden lg:flex items-center gap-2 bg-white/20 backdrop-blur-md border border-white/35 rounded-2xl px-2 h-12 shadow-lg relative z-30">
             
             {/* Selector de Provincia */}
-            <div className="relative">
+            <div className="relative flex items-center">
               <button
                 onClick={() => setIsProvinceDropdownOpen(!isProvinceDropdownOpen)}
-                className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-black text-white hover:bg-white/25 transition-all cursor-pointer"
+                className="flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs sm:text-sm font-black text-white hover:bg-white/25 transition-all cursor-pointer"
               >
-                <MapPin className="w-4.5 h-4.5 text-cyan-300 shrink-0" />
-                <span className="truncate max-w-[160px]">{currentProvinceObj.name}</span>
-                <ChevronDown className="w-4 h-4 text-cyan-200" />
+                <MapPin className="w-4 h-4 text-cyan-300 shrink-0" />
+                <span className="truncate max-w-[150px]">{currentProvinceObj.name}</span>
+                <ChevronDown className="w-3.5 h-3.5 text-cyan-200" />
               </button>
 
               {isProvinceDropdownOpen && (
@@ -382,14 +382,14 @@ export function ClientHeader() {
             <span className="text-white/40 font-light">|</span>
 
             {/* Selector de Ciudad */}
-            <div className="relative">
+            <div className="relative flex items-center">
               <button
                 onClick={() => setIsCityDropdownOpen(!isCityDropdownOpen)}
-                className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-black text-white hover:bg-white/25 transition-all cursor-pointer"
+                className="flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs sm:text-sm font-black text-white hover:bg-white/25 transition-all cursor-pointer"
               >
-                <Building2 className="w-4.5 h-4.5 text-cyan-300 shrink-0" />
-                <span className="truncate max-w-[180px]">{currentCityObj.name}</span>
-                <ChevronDown className="w-4 h-4 text-cyan-200" />
+                <Building2 className="w-4 h-4 text-cyan-300 shrink-0" />
+                <span className="truncate max-w-[170px]">{currentCityObj.name}</span>
+                <ChevronDown className="w-3.5 h-3.5 text-cyan-200" />
               </button>
 
               {isCityDropdownOpen && (
@@ -422,9 +422,9 @@ export function ClientHeader() {
             </div>
           </div>
 
-          {/* Buscador Global Interactivo (Desktop) - LARGER SIZE */}
+          {/* Buscador Global Interactivo (Desktop) - CONSISTENT HEIGHT h-12 */}
           <div ref={searchContainerRef} className="hidden md:block flex-1 max-w-xl relative z-30">
-            <form onSubmit={handleSearchSubmit} className="relative flex items-center">
+            <form onSubmit={handleSearchSubmit} className="relative flex items-center h-12">
               <input
                 type="text"
                 placeholder="Buscá productos, comercios, categorías, secciones..."
@@ -434,11 +434,11 @@ export function ClientHeader() {
                   setSearchQuery(e.target.value);
                   setIsSearchFocused(true);
                 }}
-                className="w-full bg-white border border-slate-200 rounded-xl pl-4 pr-14 py-2.5 sm:py-3 text-sm font-extrabold text-slate-900 placeholder-slate-400 focus:outline-hidden focus:ring-2 focus:ring-[#00ADB5] focus:bg-white transition-all shadow-lg"
+                className="w-full h-full bg-white border border-slate-200 rounded-2xl pl-4 pr-14 text-xs sm:text-sm font-extrabold text-slate-900 placeholder-slate-400 focus:outline-hidden focus:ring-2 focus:ring-[#00ADB5] focus:bg-white transition-all shadow-lg"
               />
               <button
                 type="submit"
-                className="absolute right-1.5 top-1.5 bottom-1.5 bg-gradient-to-r from-[#00ADB5] to-[#0047BA] hover:from-[#00E5E8] hover:to-[#00ADB5] text-white font-black px-4 rounded-lg flex items-center justify-center transition-all shadow-md cursor-pointer"
+                className="absolute right-1 top-1 bottom-1 bg-gradient-to-r from-[#00ADB5] to-[#0047BA] hover:from-[#00E5E8] hover:to-[#00ADB5] text-white font-black px-4 rounded-xl flex items-center justify-center transition-all shadow-md cursor-pointer"
                 aria-label="Buscar"
               >
                 <Search className="w-4 h-4 sm:w-5 sm:h-5" />
@@ -580,7 +580,7 @@ export function ClientHeader() {
             {!currentUser ? (
               <Link 
                 href="/login" 
-                className="flex items-center gap-2 bg-white/15 hover:bg-white/25 text-white hover:text-cyan-200 border border-white/30 px-3.5 py-2 rounded-2xl text-xs font-extrabold transition-all shadow-md cursor-pointer shrink-0 backdrop-blur-md"
+                className="h-12 flex items-center gap-2 bg-white/15 hover:bg-white/25 text-white hover:text-cyan-200 border border-white/30 px-4 rounded-2xl text-xs font-extrabold transition-all shadow-md cursor-pointer shrink-0 backdrop-blur-md"
                 title="Ingresar o Registrarse"
               >
                 <User className="w-4 h-4 text-cyan-200" />
@@ -589,7 +589,7 @@ export function ClientHeader() {
             ) : (
               <Link 
                 href="/admin" 
-                className="flex items-center gap-2.5 bg-white/15 hover:bg-white/25 border border-white/30 p-1 pr-3 rounded-2xl transition-all shadow-md cursor-pointer group shrink-0 backdrop-blur-md"
+                className="h-12 flex items-center gap-2.5 bg-white/15 hover:bg-white/25 border border-white/30 px-3 rounded-2xl transition-all shadow-md cursor-pointer group shrink-0 backdrop-blur-md"
                 title={`Panel de Administración: ${userCommerce?.name || 'Mi Negocio'}`}
               >
                 {userCommerce?.logoUrl ? (
