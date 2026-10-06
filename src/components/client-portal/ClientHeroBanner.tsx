@@ -142,8 +142,8 @@ export function ClientHeroBanner({ provinceId = 'santa-fe' }: ClientHeroBannerPr
           <div className="absolute bottom-3 sm:bottom-4 left-1/2 -translate-x-1/2 z-30 pointer-events-none">
             <div className="bg-slate-950/85 backdrop-blur-md px-4 sm:px-6 py-1.5 sm:py-2 border border-cyan-400/50 shadow-2xl flex items-center gap-2 text-center whitespace-nowrap">
               <MapPin className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-cyan-400 shrink-0 animate-pulse" />
-              <span className="text-white text-xs sm:text-sm font-black uppercase tracking-widest">
-                PROVINCIA: <span className="text-cyan-400 font-black">{provinceName}</span>
+              <span className="text-cyan-400 text-xs sm:text-sm font-black uppercase tracking-widest">
+                {provinceName}
               </span>
             </div>
           </div>
