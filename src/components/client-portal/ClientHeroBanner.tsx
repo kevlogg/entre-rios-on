@@ -139,10 +139,10 @@ export function ClientHeroBanner({ provinceId = 'santa-fe' }: ClientHeroBannerPr
           })}
 
           {/* Selected Province Mention (Centered at bottom inside hero image) */}
-          <div className="absolute bottom-3 sm:bottom-4 left-1/2 -translate-x-1/2 z-30 pointer-events-none">
-            <div className="bg-slate-950/85 backdrop-blur-md px-4 sm:px-6 py-1.5 sm:py-2 border border-cyan-400/50 shadow-2xl flex items-center gap-2 text-center whitespace-nowrap">
-              <MapPin className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-cyan-400 shrink-0 animate-pulse" />
-              <span className="text-cyan-400 text-xs sm:text-sm font-black uppercase tracking-widest">
+          <div className="absolute bottom-4 sm:bottom-6 left-1/2 -translate-x-1/2 z-30 pointer-events-none">
+            <div className="bg-slate-950/90 backdrop-blur-md px-6 sm:px-9 py-2.5 sm:py-3.5 border-2 border-cyan-400/80 shadow-2xl flex items-center gap-3 text-center whitespace-nowrap">
+              <MapPin className="w-5 h-5 sm:w-7 sm:h-7 text-cyan-400 shrink-0 animate-pulse" />
+              <span className="text-cyan-400 text-base sm:text-xl md:text-2xl font-black uppercase tracking-[0.2em] drop-shadow-md">
                 {provinceName}
               </span>
             </div>
