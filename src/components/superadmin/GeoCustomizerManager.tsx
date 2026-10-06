@@ -708,11 +708,16 @@ export function GeoCustomizerManager({ initialCities }: GeoCustomizerManagerProp
               Banners para Provincia: <span className="text-[#0047BA]">{currentProv.name}</span>
             </h3>
             <p className="text-xs text-slate-500">
-              Subí las imágenes y configurá la URL de redirección al hacer clic.
+              Subí las imágenes publicitarias y configurá la URL a la que redirigen al hacer clic.
             </p>
-            <div className="mt-2 inline-flex items-center gap-1.5 bg-cyan-50 border border-cyan-300 text-cyan-900 px-3 py-1 rounded-xl text-[11px] font-black shadow-2xs">
-              <span>📐 Tamaño Recomendado de Imagen:</span>
-              <span className="text-[#0047BA]">1920 x 500 px (o proporción 16:4 en HD)</span>
+            <div className="mt-2 space-y-1">
+              <div className="inline-flex items-center gap-1.5 bg-cyan-50 border border-cyan-300 text-cyan-900 px-3.5 py-1.5 rounded-xl text-[11px] font-black shadow-2xs">
+                <span>📐 Medidas Recomendadas para Hero Banners:</span>
+                <span className="text-[#0047BA] font-extrabold">1920 × 600 px (3:1 Desktop) | 800 × 500 px (Mobile)</span>
+              </div>
+              <p className="text-[11px] text-slate-500 font-medium">
+                ✨ <em>El reproductor adapta automáticamente cada imagen al 100% de su tamaño (<span className="font-bold text-slate-700">sin recortes ni pérdidas de bordes o textos</span>) con un fondo ambiente difuminado.</em>
+              </p>
             </div>
           </div>
         </div>

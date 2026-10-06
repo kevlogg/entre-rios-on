@@ -100,7 +100,7 @@ export function ClientHeroBanner({ provinceId = 'santa-fe' }: ClientHeroBannerPr
               <Link
                 key={slide.id || `slide-${idx}`}
                 href={slide.ctaHref || '#'}
-                className="absolute inset-0 block w-full h-full"
+                className="absolute inset-0 block w-full h-full overflow-hidden"
                 style={{
                   position: 'absolute',
                   top: 0,
@@ -116,6 +116,15 @@ export function ClientHeroBanner({ provinceId = 'santa-fe' }: ClientHeroBannerPr
                   display: 'block',
                 }}
               >
+                {/* Fondo ambiente difuminado para rellenar marcos sin cortes ni franjas vacías */}
+                <img
+                  src={imgSrc}
+                  alt=""
+                  aria-hidden="true"
+                  className="absolute inset-0 w-full h-full object-cover blur-2xl scale-110 opacity-70 pointer-events-none"
+                />
+
+                {/* Imagen principal completa al 100% sin recortes ni pérdida de bordes */}
                 <img
                   src={imgSrc}
                   alt={slide.titleLine1 || 'Banner Publicitario'}
@@ -127,9 +136,11 @@ export function ClientHeroBanner({ provinceId = 'santa-fe' }: ClientHeroBannerPr
                     }
                   }}
                   style={{
+                    position: 'relative',
+                    zIndex: 10,
                     width: '100%',
                     height: '100%',
-                    objectFit: 'cover',
+                    objectFit: 'contain',
                     objectPosition: 'center',
                     display: 'block',
                   }}
