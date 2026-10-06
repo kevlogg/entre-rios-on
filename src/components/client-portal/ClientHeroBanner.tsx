@@ -84,13 +84,6 @@ export function ClientHeroBanner({ provinceId = 'santa-fe' }: ClientHeroBannerPr
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="relative w-full h-[220px] sm:h-[300px] md:h-[360px] lg:h-[400px] rounded-2xl sm:rounded-3xl overflow-hidden group shadow-2xl border border-white/20 bg-slate-950">
-          {/* Base Fallback Background Image (Guarantees zero empty space during load or transition) */}
-          <img
-            src="/images/hero-rosario.jpg"
-            alt="Hero Background"
-            className="absolute inset-0 w-full h-full object-cover object-center opacity-90 z-0"
-          />
-
           {/* Background Images with Fade Transition */}
           {effectiveBanners.map((slide: BannerItem, idx: number) => {
             const imgSrc = normalizeImageUrl(slide.imageUrl);
@@ -100,7 +93,7 @@ export function ClientHeroBanner({ provinceId = 'santa-fe' }: ClientHeroBannerPr
               <Link
                 key={slide.id || `slide-${idx}`}
                 href={slide.ctaHref || '#'}
-                className="absolute inset-0 block w-full h-full overflow-hidden"
+                className="absolute inset-0 block w-full h-full overflow-hidden bg-slate-950"
                 style={{
                   position: 'absolute',
                   top: 0,
@@ -116,15 +109,7 @@ export function ClientHeroBanner({ provinceId = 'santa-fe' }: ClientHeroBannerPr
                   display: 'block',
                 }}
               >
-                {/* Fondo ambiente difuminado para rellenar marcos sin cortes ni franjas vacías */}
-                <img
-                  src={imgSrc}
-                  alt=""
-                  aria-hidden="true"
-                  className="absolute inset-0 w-full h-full object-cover blur-2xl scale-110 opacity-70 pointer-events-none"
-                />
-
-                {/* Imagen principal completa al 100% sin recortes ni pérdida de bordes */}
+                {/* Imagen principal limpia del Banner sin imágenes fantasmas de fondo */}
                 <img
                   src={imgSrc}
                   alt={slide.titleLine1 || 'Banner Publicitario'}
@@ -132,18 +117,9 @@ export function ClientHeroBanner({ provinceId = 'santa-fe' }: ClientHeroBannerPr
                     const target = e.currentTarget;
                     if (!target.dataset.fallbackTried) {
                       target.dataset.fallbackTried = 'true';
-                      target.src = '/images/hero-rosario.jpg';
                     }
                   }}
-                  style={{
-                    position: 'relative',
-                    zIndex: 10,
-                    width: '100%',
-                    height: '100%',
-                    objectFit: 'contain',
-                    objectPosition: 'center',
-                    display: 'block',
-                  }}
+                  className="w-full h-full object-cover object-center"
                 />
               </Link>
             );
