@@ -73,21 +73,6 @@ export function CityExploreBar({ provinceId = 'santa-fe' }: CityExploreBarProps)
             </div>
           </Link>
         ))}
-
-        {/* Card final para Ver Todas */}
-        <Link
-          href={`/${currentProvince.slug}`}
-          className="group flex flex-col items-center justify-center rounded-2xl overflow-hidden border-2 border-dashed border-[#00ADB5] bg-cyan-50/70 hover:bg-cyan-100/70 transition-all text-center shadow-2xs"
-        >
-          <div className="h-20 sm:h-24 w-full flex items-center justify-center text-[#0047BA] group-hover:scale-110 transition-transform">
-            <MapPin className="w-8 h-8 text-[#00ADB5]" />
-          </div>
-          <div className="p-2.5 w-full">
-            <span className="text-xs font-black text-[#0047BA] line-clamp-1">
-              Ver Todas
-            </span>
-          </div>
-        </Link>
       </div>
     </section>
   );
