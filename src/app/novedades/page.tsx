@@ -3,7 +3,7 @@ import { Metadata } from 'next';
 import Link from 'next/link';
 import { ClientHeader } from '@/components/layout/ClientHeader';
 import { ClientFooter } from '@/components/layout/ClientFooter';
-import { Newspaper, Sparkles, ArrowLeft, Calendar, Tag, User, MapPin } from 'lucide-react';
+import { Newspaper, Sparkles, ArrowLeft } from 'lucide-react';
 
 export const metadata: Metadata = {
   title: 'Novedades & Noticias Destacadas | ON MÁS Portal',
@@ -12,40 +12,45 @@ export const metadata: Metadata = {
 
 export default function NovedadesPage() {
   return (
-    <div className="min-h-screen flex flex-col bg-brand-page-gradient">
-      <ClientHeader />
+    <div className="min-h-screen flex flex-col bg-[#e9ecef]">
+      {/* Top Header + Hero Banner inside ON MÁS brand gradient */}
+      <div className="relative bg-gradient-on-mas pb-6 sm:pb-8">
+        <ClientHeader />
 
-      <main className="w-full flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
-        {/* Breadcrumb Glass Badge */}
-        <div className="bg-white/15 backdrop-blur-md border border-white/25 px-4 py-2 rounded-2xl w-fit flex items-center gap-2 text-xs font-extrabold text-white shadow-xs">
-          <Link href="/" className="hover:text-cyan-300 text-slate-100 flex items-center gap-1">
-            <ArrowLeft className="w-3.5 h-3.5" />
-            <span>Inicio</span>
-          </Link>
-          <span className="text-white/40">/</span>
-          <span className="text-cyan-300 font-black">Novedades</span>
-        </div>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 sm:pt-6">
+          {/* Breadcrumb */}
+          <div className="bg-white/15 backdrop-blur-md border border-white/25 px-4 py-2 rounded-2xl w-fit flex items-center gap-2 text-xs font-extrabold text-white shadow-xs mb-4">
+            <Link href="/" className="hover:text-cyan-300 text-slate-100 flex items-center gap-1">
+              <ArrowLeft className="w-3.5 h-3.5" />
+              <span>Inicio</span>
+            </Link>
+            <span className="text-white/40">/</span>
+            <span className="text-cyan-300 font-black">Novedades</span>
+          </div>
 
-        {/* Hero Section */}
-        <div className="bg-gradient-to-r from-[#002878] via-[#0047BA] to-[#00ADB5] rounded-3xl p-8 sm:p-10 text-white shadow-xl flex flex-col md:flex-row md:items-center justify-between gap-6 relative overflow-hidden">
-          <div className="space-y-3 max-w-2xl relative z-10">
-            <div className="inline-flex items-center gap-2 bg-white/10 border border-white/20 text-[#00E5E8] text-xs font-extrabold px-3.5 py-1.5 rounded-full">
-              <Newspaper className="w-4 h-4 text-[#00E5E8]" />
-              <span>Novedades & Anuncios • ON MÁS</span>
+          {/* Hero Section */}
+          <div className="bg-slate-950/70 backdrop-blur-xl border border-white/20 rounded-3xl p-8 sm:p-10 text-white shadow-2xl flex flex-col md:flex-row md:items-center justify-between gap-6 relative overflow-hidden">
+            <div className="space-y-3 max-w-2xl relative z-10">
+              <div className="inline-flex items-center gap-2 bg-white/10 border border-white/20 text-[#00E5E8] text-xs font-extrabold px-3.5 py-1.5 rounded-full">
+                <Newspaper className="w-4 h-4 text-[#00E5E8]" />
+                <span>Novedades & Anuncios • ON MÁS</span>
+              </div>
+
+              <h1 className="text-3xl sm:text-4xl font-black tracking-tight">
+                Novedades del Portal Regional
+              </h1>
+
+              <p className="text-sm text-slate-100 font-medium leading-relaxed">
+                Mantente informado con los lanzamientos, innovaciones comerciales, noticias de la comunidad y eventos destacados en Santa Fe y Entre Ríos.
+              </p>
             </div>
-
-            <h1 className="text-3xl sm:text-4xl font-black tracking-tight">
-              Novedades del Portal Regional
-            </h1>
-
-            <p className="text-sm text-slate-100 font-medium leading-relaxed">
-              Mantente informado con los lanzamientos, innovaciones comerciales, noticias de la comunidad y eventos destacados en Santa Fe y Entre Ríos.
-            </p>
           </div>
         </div>
+      </div>
 
-        {/* Content Container */}
-        <div className="bg-[#e9ecef] rounded-3xl p-6 sm:p-8 border border-slate-300/70 shadow-xs space-y-6">
+      {/* Content Container (Below Hero -> Gray Background #e9ecef) */}
+      <main className="w-full flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 bg-[#e9ecef] text-slate-900">
+        <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-300/70 shadow-xs space-y-6">
           <div className="flex items-center justify-between border-b border-slate-300/70 pb-4">
             <h2 className="text-xl font-black text-slate-900 flex items-center gap-2">
               <Sparkles className="w-5 h-5 text-[#0047BA]" />

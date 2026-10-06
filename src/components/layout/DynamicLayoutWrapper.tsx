@@ -11,9 +11,11 @@ interface DynamicLayoutWrapperProps {
 
 function DynamicLayoutContent({ children }: DynamicLayoutWrapperProps) {
   return (
-    <div className="min-h-screen flex flex-col transition-colors bg-brand-page-gradient">
-      <ClientHeader />
-      <div className="flex-1 w-full">
+    <div className="min-h-screen flex flex-col bg-[#e9ecef]">
+      <div className="relative bg-gradient-on-mas">
+        <ClientHeader />
+      </div>
+      <div className="flex-1 w-full bg-[#e9ecef] text-slate-900">
         {children}
       </div>
       <ClientFooter />
@@ -24,9 +26,11 @@ function DynamicLayoutContent({ children }: DynamicLayoutWrapperProps) {
 export function DynamicLayoutWrapper({ children, selectedCityId }: DynamicLayoutWrapperProps) {
   return (
     <Suspense fallback={
-      <div className="min-h-screen flex flex-col bg-brand-page-gradient">
-        <ClientHeader />
-        <div className="flex-1">{children}</div>
+      <div className="min-h-screen flex flex-col bg-[#e9ecef]">
+        <div className="relative bg-gradient-on-mas">
+          <ClientHeader />
+        </div>
+        <div className="flex-1 w-full bg-[#e9ecef] text-slate-900">{children}</div>
         <ClientFooter />
       </div>
     }>
@@ -36,4 +40,3 @@ export function DynamicLayoutWrapper({ children, selectedCityId }: DynamicLayout
     </Suspense>
   );
 }
-

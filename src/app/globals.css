@@ -64,8 +64,8 @@ html {
    Patrón: Cian ("ON") | Azul Eléctrico ("MÁS") | Azul Marino
    ============================================= */
 body {
-  background-color: #0052ff;
-  color: #ffffff;
+  background-color: #e9ecef;
+  color: #0f172a;
   font-family: var(--font-inter), system-ui, -apple-system, sans-serif;
   overflow-x: hidden;
   margin: 0;
@@ -74,14 +74,16 @@ body {
 
 /* =============================================
    CANVAS DE FONDO ANIMADO (renderizado via PageBackground.tsx)
+   Cubre únicamente el área superior del Header y Hero (hasta 500px)
    ============================================= */
 .page-bg-canvas {
-  position: fixed;
-  inset: 0;
-  width: 100%;
-  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 500px;
   overflow: hidden;
-  z-index: -1;
+  z-index: 0;
   pointer-events: none;
   background: linear-gradient(
     115deg,
@@ -168,7 +170,7 @@ body {
 
 /* Compatibilidad con clases existentes en layout/páginas */
 .bg-brand-page-gradient {
-  background: transparent;
+  background-color: #e9ecef;
 }
 
 .text-gradient-brand {

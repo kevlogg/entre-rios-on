@@ -3,72 +3,77 @@ import { Metadata } from 'next';
 import Link from 'next/link';
 import { ClientHeader } from '@/components/layout/ClientHeader';
 import { ClientFooter } from '@/components/layout/ClientFooter';
-import { Tag, Sparkles, ArrowLeft, TrendingUp, Percent, Gift, Store } from 'lucide-react';
+import { Tag, Sparkles, ArrowLeft } from 'lucide-react';
 
 export const metadata: Metadata = {
-  title: 'Oportunidades & Promociones Especiales | ON MÁS Portal',
-  description: 'Aprovechá las mejores oportunidades comerciales, descuentos exclusivos y beneficios en comercios de la región.',
+  title: 'Oportunidades & Ofertas Especiales | ON MÁS Portal',
+  description: 'Explorá oportunidades comerciales, beneficios exclusivos y descuentos en Entre Ríos y Santa Fe.',
 };
 
 export default function OportunidadesPage() {
   return (
-    <div className="min-h-screen flex flex-col bg-brand-page-gradient">
-      <ClientHeader />
+    <div className="min-h-screen flex flex-col bg-[#e9ecef]">
+      {/* Top Header + Hero Banner inside ON MÁS brand gradient */}
+      <div className="relative bg-gradient-on-mas pb-6 sm:pb-8">
+        <ClientHeader />
 
-      <main className="w-full flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
-        {/* Breadcrumb Glass Badge */}
-        <div className="bg-white/15 backdrop-blur-md border border-white/25 px-4 py-2 rounded-2xl w-fit flex items-center gap-2 text-xs font-extrabold text-white shadow-xs">
-          <Link href="/" className="hover:text-cyan-300 text-slate-100 flex items-center gap-1">
-            <ArrowLeft className="w-3.5 h-3.5" />
-            <span>Inicio</span>
-          </Link>
-          <span className="text-white/40">/</span>
-          <span className="text-cyan-300 font-black">Oportunidades</span>
-        </div>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 sm:pt-6">
+          {/* Breadcrumb */}
+          <div className="bg-white/15 backdrop-blur-md border border-white/25 px-4 py-2 rounded-2xl w-fit flex items-center gap-2 text-xs font-extrabold text-white shadow-xs mb-4">
+            <Link href="/" className="hover:text-cyan-300 text-slate-100 flex items-center gap-1">
+              <ArrowLeft className="w-3.5 h-3.5" />
+              <span>Inicio</span>
+            </Link>
+            <span className="text-white/40">/</span>
+            <span className="text-cyan-300 font-black">Oportunidades</span>
+          </div>
 
-        {/* Hero Section */}
-        <div className="bg-gradient-to-r from-[#002878] via-[#0047BA] to-[#00ADB5] rounded-3xl p-8 sm:p-10 text-white shadow-xl flex flex-col md:flex-row md:items-center justify-between gap-6 relative overflow-hidden">
-          <div className="space-y-3 max-w-2xl relative z-10">
-            <div className="inline-flex items-center gap-2 bg-white/10 border border-white/20 text-[#00E5E8] text-xs font-extrabold px-3.5 py-1.5 rounded-full">
-              <Tag className="w-4 h-4 text-[#00E5E8]" />
-              <span>Oportunidades & Beneficios Exclusivos • ON MÁS</span>
+          {/* Hero Section */}
+          <div className="bg-slate-950/70 backdrop-blur-xl border border-white/20 rounded-3xl p-8 sm:p-10 text-white shadow-2xl flex flex-col md:flex-row md:items-center justify-between gap-6 relative overflow-hidden">
+            <div className="space-y-3 max-w-2xl relative z-10">
+              <div className="inline-flex items-center gap-2 bg-white/10 border border-white/20 text-[#00E5E8] text-xs font-extrabold px-3.5 py-1.5 rounded-full">
+                <Tag className="w-4 h-4 text-[#00E5E8]" />
+                <span>Oportunidades & Descuentos • ON MÁS</span>
+              </div>
+
+              <h1 className="text-3xl sm:text-4xl font-black tracking-tight">
+                Oportunidades Comerciales
+              </h1>
+
+              <p className="text-sm text-slate-100 font-medium leading-relaxed">
+                Descubrí ofertas exclusivas, promociones de liquidación y beneficios para la comunidad comercial regional.
+              </p>
             </div>
-
-            <h1 className="text-3xl sm:text-4xl font-black tracking-tight">
-              Oportunidades Comerciales Regionales
-            </h1>
-
-            <p className="text-sm text-slate-100 font-medium leading-relaxed">
-              Encontrá liquidaciones de temporada, ofertas relámpago, beneficios B2B y promociones directas por WhatsApp.
-            </p>
           </div>
         </div>
+      </div>
 
-        {/* Content Container */}
-        <div className="bg-[#e9ecef] rounded-3xl p-6 sm:p-8 border border-slate-300/70 shadow-xs space-y-6">
+      {/* Content Container (Below Hero -> Gray Background #e9ecef) */}
+      <main className="w-full flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 bg-[#e9ecef] text-slate-900">
+        <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-300/70 shadow-xs space-y-6">
           <div className="flex items-center justify-between border-b border-slate-300/70 pb-4">
             <h2 className="text-xl font-black text-slate-900 flex items-center gap-2">
-              <TrendingUp className="w-5 h-5 text-[#0047BA]" />
+              <Sparkles className="w-5 h-5 text-[#0047BA]" />
               <span>Oportunidades Destacadas</span>
             </h2>
-            <span className="text-xs font-bold text-slate-500 font-medium">Actualización en tiempo real</span>
+            <span className="text-xs font-bold text-slate-500">Sección en actualización constante</span>
           </div>
 
           <div className="bg-white rounded-3xl p-8 sm:p-12 border border-slate-200 shadow-2xs text-center space-y-4 max-w-2xl mx-auto my-4">
-            <div className="w-16 h-16 bg-amber-50 text-amber-600 rounded-3xl flex items-center justify-center mx-auto shadow-2xs">
-              <Percent className="w-8 h-8" />
+            <div className="w-16 h-16 bg-cyan-50 text-[#00ADB5] rounded-3xl flex items-center justify-center mx-auto shadow-2xs">
+              <Tag className="w-8 h-8" />
             </div>
             <h3 className="text-xl font-black text-slate-900">Sección Oportunidades</h3>
             <p className="text-xs text-slate-600 font-medium leading-relaxed max-w-md mx-auto">
-              Próximamente encontrarás aquí las mejores ofertas relámpago, combos especiales y beneficios exclusivos de comercios adheridos de la provincia.
+              Próximamente encontrarás ofertas especiales de comercios de la región, promociones por tiempo limitado y alianzas exclusivas para usuarios del portal.
             </p>
             <div className="pt-2">
               <Link
                 href="/catalogo"
                 className="inline-flex items-center gap-2 bg-gradient-to-r from-[#0047BA] to-[#00ADB5] text-white font-extrabold text-xs px-6 py-3 rounded-xl shadow-md hover:from-[#002878] hover:to-[#007C8A] transition-all"
               >
-                <Store className="w-4 h-4" />
-                <span>Explorar ofertas en el catálogo</span>
+                <Tag className="w-4 h-4" />
+                <span>Ir al Catálogo de Productos</span>
               </Link>
             </div>
           </div>
