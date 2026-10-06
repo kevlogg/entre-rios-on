@@ -46,18 +46,18 @@ export function ClientHomeContainer({ provinceId, initialProducts = [] }: Client
   }, [pathname, provinceId]);
 
   return (
-    <div className="w-full">
+    <div className="w-full max-w-full overflow-x-hidden">
       {/* 1. SECCIÓN SUPERIOR UNIFICADA: Header + Hero (Mismo Contenedor y Degradé de Marca ON MÁS) */}
-      <div className="relative bg-gradient-on-mas pb-6 sm:pb-8 shadow-lg">
+      <div className="relative bg-gradient-on-mas pb-6 sm:pb-8 shadow-lg w-full overflow-hidden">
         <PageBackground />
-        <div className="relative z-10 space-y-2 sm:space-y-4">
+        <div className="relative z-10 space-y-2 sm:space-y-4 w-full">
           <ClientHeader />
           <ClientHeroBanner provinceId={activeProvince} />
         </div>
       </div>
 
       {/* 2. ÁREA RESTANTE CON FONDO GRIS SUAVE LISO (#e9ecef) */}
-      <div className="bg-[#e9ecef] w-full py-2 sm:py-4 space-y-2 text-slate-900">
+      <div className="bg-[#e9ecef] w-full max-w-full overflow-x-hidden py-2 sm:py-4 space-y-2 text-slate-900">
         
         {/* A. Abajo del Hero: Las 8 Cards Grandes Cuadradas (BentoRowOne + BentoRowTwo) */}
         <BentoRowOne />

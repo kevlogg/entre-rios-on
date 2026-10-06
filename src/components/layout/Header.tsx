@@ -211,20 +211,20 @@ export function Header({ selectedCityId = 'all' }: HeaderProps) {
   ];
 
   return (
-    <header className="sticky top-0 z-40 bg-black/20 backdrop-blur-xl border-b border-white/10 shadow-lg transition-all">
+    <header className="sticky top-0 z-40 bg-black/20 backdrop-blur-xl border-b border-white/10 shadow-lg transition-all w-full max-w-full overflow-hidden">
       {/* Top Banner Ribbon */}
-      <div className="bg-gradient-to-r from-[#002878] via-[#0047BA] to-[#00ADB5] text-white text-xs py-1.5 px-4 text-center font-semibold flex items-center justify-center gap-2">
-        <Sparkles className="w-3.5 h-3.5 text-cyan-300 animate-pulse" />
-        <span> Portal Oficial del Comercio, Turismo y Medios: ON MÁS </span>
-        <span className="hidden sm:inline-block opacity-85">• Impulsando la economía del Litoral</span>
+      <div className="bg-gradient-to-r from-[#002878] via-[#0047BA] to-[#00ADB5] text-white text-[10px] sm:text-xs py-1.5 px-2 sm:px-4 text-center font-semibold flex items-center justify-center gap-1.5 sm:gap-2 overflow-hidden">
+        <Sparkles className="w-3.5 h-3.5 text-cyan-300 animate-pulse shrink-0" />
+        <span className="truncate max-w-[85vw] sm:max-w-none"> Portal Oficial del Comercio, Turismo y Medios: ON MÁS </span>
+        <span className="hidden sm:inline-block opacity-85 shrink-0">• Impulsando la economía del Litoral</span>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-20 gap-4">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
+        <div className="flex items-center justify-between h-16 sm:h-20 gap-2 sm:gap-4">
           
           {/* Brand Logo Oficial */}
-          <Link href="/" className="flex items-center gap-3 shrink-0">
-            <div className="relative w-40 h-12 sm:w-48 sm:h-14">
+          <Link href="/" className="flex items-center gap-2 sm:gap-3 shrink-0">
+            <div className="relative w-36 h-10 sm:w-48 sm:h-14">
               <Image
                 src="/logo.png"
                 alt="ON MÁS Portal"
@@ -391,7 +391,7 @@ export function Header({ selectedCityId = 'all' }: HeaderProps) {
           {/* Mobile menu button */}
           <button
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            className="md:hidden p-2 rounded-xl bg-slate-100 text-[#0047BA] hover:bg-slate-200 focus:outline-hidden"
+            className="md:hidden p-2 rounded-xl bg-slate-100 text-[#0047BA] hover:bg-slate-200 focus:outline-hidden shrink-0 ml-auto cursor-pointer"
             aria-label="Toggle menu"
           >
             {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
