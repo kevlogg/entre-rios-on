@@ -3,11 +3,13 @@
 import React from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { PageBackground } from '@/components/common/PageBackground';
 
 export function ClientFooter() {
   return (
-    <footer className="bg-black/30 backdrop-blur-xl border-t border-white/15 pt-10 pb-0 overflow-hidden relative text-white">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-10">
+    <footer className="relative bg-gradient-on-mas border-t border-white/15 pt-10 pb-0 overflow-hidden text-white shadow-2xl">
+      <PageBackground />
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-10">
         <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-center justify-between">
           
           {/* Left Column: Brand Logo Card & Handwritten Slogan */}
@@ -79,7 +81,7 @@ export function ClientFooter() {
       </div>
 
       {/* Bottom River Wave Gradient Banner */}
-      <div className="w-full h-3 bg-gradient-to-r from-cyan-400 via-blue-500 to-[#002878]" />
+      <div className="w-full h-3 bg-gradient-on-mas relative z-10 border-t border-white/10" />
     </footer>
   );
 }

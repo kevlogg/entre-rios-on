@@ -226,45 +226,50 @@ export default function ComunidadPage() {
     ? events
     : events.filter((e) => e.category.toLowerCase().includes(selectedCategory.toLowerCase()));
 
+  const heroContent = (
+    <div className="space-y-4">
+      {/* Breadcrumb Glass Badge */}
+      <div className="bg-white/15 backdrop-blur-md border border-white/25 px-4 py-2 rounded-2xl w-fit flex items-center gap-2 text-xs font-extrabold text-white shadow-xs">
+        <Link href="/" className="hover:text-cyan-300 text-slate-100 flex items-center gap-1">
+          <ArrowLeft className="w-3.5 h-3.5" />
+          <span>Inicio</span>
+        </Link>
+        <span className="text-white/40">/</span>
+        <span className="text-cyan-300 font-black">Comunidad & Agenda Cultural</span>
+      </div>
+
+      {/* Hero Banner Card */}
+      <div className="bg-slate-950/70 backdrop-blur-xl border border-white/20 rounded-3xl p-8 sm:p-12 text-white shadow-2xl relative overflow-hidden flex flex-col md:flex-row md:items-center justify-between gap-6">
+        <div className="relative z-10 space-y-4 max-w-2xl">
+          <span className="inline-flex items-center gap-1.5 bg-white/20 text-[#00E5E8] text-xs font-extrabold px-3 py-1 rounded-full uppercase tracking-wider border border-white/20">
+            <Users className="w-3.5 h-3.5" />
+            Agenda Provincial Unificada
+          </span>
+          <h1 className="text-3xl sm:text-5xl font-black tracking-tight">
+            Comunidad, Eventos & Noticias ON
+          </h1>
+          <p className="text-sm sm:text-base text-slate-100 font-medium leading-relaxed">
+            Enterate de los festivales, eventos culturales, convocatorias comunitarias y novedades del desarrollo regional de nuestra provincia.
+          </p>
+        </div>
+
+        {/* CTA Botón Publicar Nota */}
+        <div className="relative z-10 shrink-0">
+          <button
+            onClick={handleOpenNoteModal}
+            className="w-full sm:w-auto bg-white hover:bg-slate-100 text-[#0047BA] font-black text-xs sm:text-sm px-6 py-4 rounded-2xl shadow-xl transition-transform active:scale-95 flex items-center justify-center gap-2.5 cursor-pointer border border-white/40"
+          >
+            <Plus className="w-5 h-5 text-[#00ADB5]" />
+            <span>Sumar / Publicar Nota en Comunidad</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+
   return (
-    <DynamicLayoutWrapper>
+    <DynamicLayoutWrapper heroContent={heroContent}>
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 w-full">
-        {/* Breadcrumb Glass Badge */}
-        <div className="bg-white/15 backdrop-blur-md border border-white/25 px-4 py-2 rounded-2xl w-fit flex items-center gap-2 text-xs font-extrabold text-white shadow-xs">
-          <Link href="/" className="hover:text-cyan-300 text-slate-100 flex items-center gap-1">
-            <ArrowLeft className="w-3.5 h-3.5" />
-            <span>Inicio</span>
-          </Link>
-          <span className="text-white/40">/</span>
-          <span className="text-cyan-300 font-black">Comunidad & Agenda Cultural</span>
-        </div>
-
-        {/* Hero Banner */}
-        <div className="bg-gradient-to-r from-[#0047BA] via-[#007C8A] to-[#00ADB5] rounded-3xl p-8 sm:p-12 text-white shadow-xl relative overflow-hidden flex flex-col md:flex-row md:items-center justify-between gap-6">
-          <div className="relative z-10 space-y-4 max-w-2xl">
-            <span className="inline-flex items-center gap-1.5 bg-white/20 text-[#00E5E8] text-xs font-extrabold px-3 py-1 rounded-full uppercase tracking-wider border border-white/20">
-              <Users className="w-3.5 h-3.5" />
-              Agenda Provincial Unificada
-            </span>
-            <h1 className="text-3xl sm:text-5xl font-black tracking-tight">
-              Comunidad, Eventos & Noticias ON
-            </h1>
-            <p className="text-sm sm:text-base text-slate-100 font-medium leading-relaxed">
-              Enterate de los festivales, eventos culturales, convocatorias comunitarias y novedades del desarrollo regional de nuestra provincia.
-            </p>
-          </div>
-
-          {/* CTA Botón Publicar Nota */}
-          <div className="relative z-10 shrink-0">
-            <button
-              onClick={handleOpenNoteModal}
-              className="w-full sm:w-auto bg-white hover:bg-slate-100 text-[#0047BA] font-black text-xs sm:text-sm px-6 py-4 rounded-2xl shadow-xl transition-transform active:scale-95 flex items-center justify-center gap-2.5 cursor-pointer border border-white/40"
-            >
-              <Plus className="w-5 h-5 text-[#00ADB5]" />
-              <span>Sumar / Publicar Nota en Comunidad</span>
-            </button>
-          </div>
-        </div>
 
         {/* Mensaje de Éxito / Notificación de Nota Pendiente */}
         {successMsg && (
