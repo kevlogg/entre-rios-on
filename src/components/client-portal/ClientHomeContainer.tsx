@@ -9,6 +9,7 @@ import { FeaturedOffersGrid } from '@/components/client-portal/FeaturedOffersGri
 import { CityExploreBar } from '@/components/client-portal/CityExploreBar';
 import { BentoRowTwo } from '@/components/client-portal/BentoRowTwo';
 import { AboutUsHomeSection } from '@/components/home/AboutUsHomeSection';
+import { PageBackground } from '@/components/common/PageBackground';
 import { getProvinceBySlug } from '@/lib/constants/locations';
 import { Product } from '@/types';
 
@@ -46,8 +47,11 @@ export function ClientHomeContainer({ provinceId, initialProducts = [] }: Client
   return (
     <div className="w-full">
       {/* 1. SECCIÓN HERO (Dentro del área con Degradé de Marca ON MÁS) */}
-      <div className="relative bg-gradient-on-mas pb-2 sm:pb-3 shadow-md">
-        <ClientHeroBanner provinceId={activeProvince} />
+      <div className="relative bg-gradient-on-mas pb-6 sm:pb-8 shadow-md">
+        <PageBackground />
+        <div className="relative z-10">
+          <ClientHeroBanner provinceId={activeProvince} />
+        </div>
       </div>
 
       {/* 2. ÁREA RESTANTE CON FONDO GRIS SUAVE LISO (#e9ecef) */}

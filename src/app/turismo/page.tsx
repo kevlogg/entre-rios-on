@@ -2,7 +2,7 @@ import { Metadata } from 'next';
 import React from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { Compass, ArrowLeft, MapPin, Sparkles, Sun, Waves, Hotel, ExternalLink, MessageCircle } from 'lucide-react';
+import { Compass, ArrowLeft, MapPin, Sun, Waves, Hotel, MessageCircle } from 'lucide-react';
 import { DynamicLayoutWrapper } from '@/components/layout/DynamicLayoutWrapper';
 import { getTourismServices } from '@/lib/dal/portal';
 
@@ -20,35 +20,39 @@ export const metadata: Metadata = {
 export default async function TurismoPage() {
   const servicios = await getTourismServices();
 
+  const heroContent = (
+    <div className="space-y-4">
+      {/* Breadcrumb Glass Badge */}
+      <div className="bg-white/15 backdrop-blur-md border border-white/25 px-4 py-2 rounded-2xl w-fit flex items-center gap-2 text-xs font-extrabold text-white shadow-xs">
+        <Link href="/" className="hover:text-cyan-300 text-slate-100 flex items-center gap-1">
+          <ArrowLeft className="w-3.5 h-3.5" />
+          <span>Inicio</span>
+        </Link>
+        <span className="text-white/40">/</span>
+        <span className="text-cyan-300 font-black">Turismo & Destinos ON</span>
+      </div>
+
+      {/* Hero Banner */}
+      <div className="bg-slate-950/70 backdrop-blur-xl border border-white/20 rounded-3xl p-8 sm:p-12 text-white shadow-2xl relative overflow-hidden">
+        <div className="relative z-10 space-y-4 max-w-2xl">
+          <span className="inline-flex items-center gap-1.5 bg-white/20 text-[#00E5E8] text-xs font-extrabold px-3 py-1 rounded-full uppercase tracking-wider border border-white/20">
+            <Compass className="w-3.5 h-3.5" />
+            Guía Turística Oficial del Litoral
+          </span>
+          <h1 className="text-3xl sm:text-5xl font-black tracking-tight">
+            Turismo & Posadas ON MÁS
+          </h1>
+          <p className="text-sm sm:text-base text-slate-100 font-medium leading-relaxed">
+            Descubrí complejos termales, playas de arena blanca, bodegas boutique, reservas naturales y alojamientos con reserva directa sin comisiones.
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+
   return (
-    <DynamicLayoutWrapper>
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 w-full">
-        {/* Breadcrumb Glass Badge */}
-        <div className="bg-white/15 backdrop-blur-md border border-white/25 px-4 py-2 rounded-2xl w-fit flex items-center gap-2 text-xs font-extrabold text-white shadow-xs">
-          <Link href="/" className="hover:text-cyan-300 text-slate-100 flex items-center gap-1">
-            <ArrowLeft className="w-3.5 h-3.5" />
-            <span>Inicio</span>
-          </Link>
-          <span className="text-white/40">/</span>
-          <span className="text-cyan-300 font-black">Turismo & Destinos ON</span>
-        </div>
-
-        {/* Hero Banner */}
-        <div className="bg-gradient-to-r from-[#002878] via-[#0047BA] to-[#00ADB5] rounded-3xl p-8 sm:p-12 text-white shadow-xl relative overflow-hidden">
-          <div className="relative z-10 space-y-4 max-w-2xl">
-            <span className="inline-flex items-center gap-1.5 bg-white/20 text-[#00E5E8] text-xs font-extrabold px-3 py-1 rounded-full uppercase tracking-wider border border-white/20">
-              <Compass className="w-3.5 h-3.5" />
-              Guía Turística Oficial del Litoral
-            </span>
-            <h1 className="text-3xl sm:text-5xl font-black tracking-tight">
-              Turismo & Posadas ON MÁS
-            </h1>
-            <p className="text-sm sm:text-base text-slate-100 font-medium leading-relaxed">
-              Descubrí complejos termales, playas de arena blanca, bodegas boutique, reservas naturales y alojamientos con reserva directa sin comisiones.
-            </p>
-          </div>
-        </div>
-
+    <DynamicLayoutWrapper heroContent={heroContent}>
+      <div className="space-y-8 w-full">
         {/* Tourist Circuits Pills */}
         <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none text-xs font-bold">
           <button className="bg-[#0047BA] text-white px-4 py-2 rounded-xl shrink-0 shadow-xs">Todos los Circuitos</button>
@@ -99,7 +103,6 @@ export default async function TurismoPage() {
                       </span>
                     </div>
 
-
                     <h3 className="text-base font-extrabold text-slate-900 leading-snug">{item.name}</h3>
                     <p className="text-xs text-slate-500 line-clamp-3 leading-relaxed">{item.description}</p>
                   </div>
@@ -121,7 +124,7 @@ export default async function TurismoPage() {
             ))}
           </div>
         </section>
-      </main>
+      </div>
     </DynamicLayoutWrapper>
   );
 }

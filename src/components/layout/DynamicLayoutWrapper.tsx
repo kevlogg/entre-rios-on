@@ -3,38 +3,51 @@
 import React, { Suspense } from 'react';
 import { ClientHeader } from '@/components/layout/ClientHeader';
 import { ClientFooter } from '@/components/layout/ClientFooter';
+import { PageBackground } from '@/components/common/PageBackground';
 
 interface DynamicLayoutWrapperProps {
   children: React.ReactNode;
+  heroContent?: React.ReactNode;
   selectedCityId?: string;
 }
 
-function DynamicLayoutContent({ children }: DynamicLayoutWrapperProps) {
+function DynamicLayoutContent({ children, heroContent }: DynamicLayoutWrapperProps) {
   return (
     <div className="min-h-screen flex flex-col bg-[#e9ecef]">
-      <div className="relative bg-gradient-on-mas">
+      {/* Top Header & Hero Area with ON MÁS Gradient Background */}
+      <div className="relative bg-gradient-on-mas pb-6 sm:pb-8 shadow-md">
+        <PageBackground />
         <ClientHeader />
+        {heroContent && (
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 sm:pt-6 relative z-10">
+            {heroContent}
+          </div>
+        )}
       </div>
-      <div className="flex-1 w-full bg-[#e9ecef] text-slate-900">
+
+      {/* Main Content Area in Gray #e9ecef */}
+      <main className="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 text-slate-900">
         {children}
-      </div>
+      </main>
+
       <ClientFooter />
     </div>
   );
 }
 
-export function DynamicLayoutWrapper({ children, selectedCityId }: DynamicLayoutWrapperProps) {
+export function DynamicLayoutWrapper({ children, heroContent, selectedCityId }: DynamicLayoutWrapperProps) {
   return (
     <Suspense fallback={
       <div className="min-h-screen flex flex-col bg-[#e9ecef]">
-        <div className="relative bg-gradient-on-mas">
+        <div className="relative bg-gradient-on-mas pb-6 sm:pb-8 shadow-md">
+          <PageBackground />
           <ClientHeader />
         </div>
-        <div className="flex-1 w-full bg-[#e9ecef] text-slate-900">{children}</div>
+        <main className="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 text-slate-900">{children}</main>
         <ClientFooter />
       </div>
     }>
-      <DynamicLayoutContent selectedCityId={selectedCityId}>
+      <DynamicLayoutContent heroContent={heroContent} selectedCityId={selectedCityId}>
         {children}
       </DynamicLayoutContent>
     </Suspense>

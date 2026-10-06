@@ -104,7 +104,6 @@ export default function RootLayout({
         />
       </head>
       <body className="min-h-screen flex flex-col text-white antialiased selection:bg-[#00C7B7] selection:text-white app-compact-scale">
-        <PageBackground />
         <main className="flex-1">
           {children}
         </main>

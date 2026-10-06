@@ -303,7 +303,7 @@ export function ClientHeader() {
   const navLinks: { name: string; href: string; slug: string }[] = [
     { name: 'Inicio', href: getGeoUrl(''), slug: '' },
     { name: 'Categorías', href: getGeoUrl('catalogo'), slug: 'catalogo' },
-    { name: 'Comercios Adheridos', href: getGeoUrl('comercios'), slug: 'comercios' },
+    { name: 'Comercios', href: getGeoUrl('comercios'), slug: 'comercios' },
     { name: 'Supermercado', href: getGeoUrl('supermercado'), slug: 'supermercado' },
     { name: 'Turismo', href: getGeoUrl('turismo'), slug: 'turismo' },
     { name: 'Comunidad', href: getGeoUrl('comunidad'), slug: 'comunidad' },
@@ -312,7 +312,7 @@ export function ClientHeader() {
     { name: 'Comercio Online', href: '/comercio-online', slug: 'comercio-online' },
     { name: 'Planes', href: '/planes', slug: 'planes' },
     { name: 'Ayuda', href: '/ayuda', slug: 'ayuda' },
-    { name: 'Sorteos ON MÁS', href: getGeoUrl('sorteos'), slug: 'sorteos' },
+    { name: 'Sorteos', href: getGeoUrl('sorteos'), slug: 'sorteos' },
   ];
 
   return (
@@ -631,9 +631,9 @@ export function ClientHeader() {
       </div>
 
       {/* Secondary Horizontal Navigation Bar - Floating Individual Badges */}
-      <nav className="hidden md:block py-2.5 bg-transparent relative z-10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <ul className="flex items-center justify-start gap-2 overflow-x-auto text-xs font-bold scrollbar-none py-0.5">
+      <nav className="hidden md:block py-2 bg-transparent relative z-10">
+        <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8">
+          <ul className="flex items-center justify-between gap-1 lg:gap-1.5 text-[11px] xl:text-xs font-bold scrollbar-none py-0.5">
             {navLinks.map((link) => {
               const isActive = pathname === link.href || (link.slug !== '' && pathname?.includes(`/${link.slug}`));
 
@@ -647,7 +647,7 @@ export function ClientHeader() {
                   >
                     <Link
                       href={link.href}
-                      className={`px-4 py-1.5 rounded-xl flex items-center gap-1.5 transition-all whitespace-nowrap ${
+                      className={`px-2.5 lg:px-3 py-1.5 rounded-xl flex items-center gap-1 transition-all whitespace-nowrap ${
                         isActive
                           ? 'bg-gradient-to-r from-cyan-300 to-cyan-400 text-slate-950 font-black shadow-lg border border-white/60 scale-[1.04]'
                           : 'bg-white/15 hover:bg-white/30 border border-white/25 text-white font-extrabold backdrop-blur-md shadow-xs hover:scale-[1.02] hover:shadow-md'
@@ -712,7 +712,7 @@ export function ClientHeader() {
                 <li key={link.name}>
                   <Link
                     href={link.href}
-                    className={`px-4 py-1.5 rounded-xl flex items-center gap-1.5 transition-all whitespace-nowrap ${
+                    className={`px-2.5 lg:px-3 py-1.5 rounded-xl flex items-center gap-1 transition-all whitespace-nowrap ${
                       isActive
                         ? 'bg-gradient-to-r from-cyan-300 to-cyan-400 text-slate-950 font-black shadow-lg border border-white/60 scale-[1.04]'
                         : 'bg-white/15 hover:bg-white/30 border border-white/25 text-white font-extrabold backdrop-blur-md shadow-xs hover:scale-[1.02] hover:shadow-md'
