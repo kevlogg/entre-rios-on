@@ -323,8 +323,8 @@ export function ClientHeader() {
           
           {/* Logo Oficial en Card de Fondo Blanco Brillante */}
           <Link href="/" className="flex items-center shrink-0">
-            <div className="h-12 flex flex-col items-center justify-center bg-white/95 hover:bg-white backdrop-blur-md border border-white/50 px-4 rounded-2xl shadow-xl transition-all group">
-              <div className="relative w-36 h-7 sm:w-44 sm:h-8">
+            <div className="h-10 sm:h-12 flex flex-col items-center justify-center bg-white/95 hover:bg-white backdrop-blur-md border border-white/50 px-3 sm:px-4 rounded-2xl shadow-xl transition-all group">
+              <div className="relative w-28 h-6 sm:w-44 sm:h-8">
                 <Image
                   src="/logo.png"
                   alt="ON MÁS - Portal Comercial & Regional"
@@ -333,7 +333,7 @@ export function ClientHeader() {
                   className="object-contain"
                 />
               </div>
-              <span className="text-[8px] font-black uppercase tracking-[0.3em] text-[#0047BA] group-hover:text-[#00ADB5] transition-colors -mt-0.5">
+              <span className="text-[7px] sm:text-[8px] font-black uppercase tracking-[0.25em] sm:tracking-[0.3em] text-[#0047BA] group-hover:text-[#00ADB5] transition-colors -mt-0.5">
                 PORTAL
               </span>
             </div>
@@ -576,24 +576,24 @@ export function ClientHeader() {
           </div>
 
           {/* User Actions */}
-          <div className="flex items-center gap-3 sm:gap-4 relative z-30">
+          <div className="flex items-center gap-2 sm:gap-4 relative z-30 shrink-0">
             {!currentUser ? (
               <Link 
                 href="/login" 
-                className="h-12 flex items-center gap-2 bg-white/15 hover:bg-white/25 text-white hover:text-cyan-200 border border-white/30 px-4 rounded-2xl text-xs font-extrabold transition-all shadow-md cursor-pointer shrink-0 backdrop-blur-md"
+                className="h-10 sm:h-12 flex items-center gap-1.5 sm:gap-2 bg-white/15 hover:bg-white/25 text-white hover:text-cyan-200 border border-white/30 px-3 sm:px-4 rounded-2xl text-xs font-extrabold transition-all shadow-md cursor-pointer shrink-0 backdrop-blur-md"
                 title="Ingresar o Registrarse"
               >
-                <User className="w-4 h-4 text-cyan-200" />
-                <span>Ingresar / Crear cuenta</span>
+                <User className="w-4 h-4 text-cyan-200 shrink-0" />
+                <span className="hidden sm:inline">Ingresar / Crear cuenta</span>
               </Link>
             ) : (
               <Link 
                 href="/admin" 
-                className="h-12 flex items-center gap-2.5 bg-white/15 hover:bg-white/25 border border-white/30 px-3 rounded-2xl transition-all shadow-md cursor-pointer group shrink-0 backdrop-blur-md"
+                className="h-10 sm:h-12 flex items-center gap-2.5 bg-white/15 hover:bg-white/25 border border-white/30 px-2.5 sm:px-3 rounded-2xl transition-all shadow-md cursor-pointer group shrink-0 backdrop-blur-md"
                 title={`Panel de Administración: ${userCommerce?.name || 'Mi Negocio'}`}
               >
                 {userCommerce?.logoUrl ? (
-                  <div className="relative w-8 h-8 rounded-xl overflow-hidden border border-white/30 group-hover:border-cyan-300 bg-white shrink-0 shadow-2xs">
+                  <div className="relative w-7 h-7 sm:w-8 sm:h-8 rounded-xl overflow-hidden border border-white/30 group-hover:border-cyan-300 bg-white shrink-0 shadow-2xs">
                     <Image
                       src={userCommerce.logoUrl}
                       alt={userCommerce.name}
@@ -602,7 +602,7 @@ export function ClientHeader() {
                     />
                   </div>
                 ) : (
-                  <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-cyan-300 to-blue-500 text-slate-950 flex items-center justify-center font-black text-sm shadow-md shrink-0">
+                  <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-gradient-to-tr from-cyan-300 to-blue-500 text-slate-950 flex items-center justify-center font-black text-xs sm:text-sm shadow-md shrink-0">
                     {userCommerce?.initial || 'M'}
                   </div>
                 )}
@@ -620,7 +620,7 @@ export function ClientHeader() {
             {/* Mobile Hamburger Toggle */}
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="md:hidden p-2 text-white hover:text-cyan-200 focus:outline-hidden"
+              className="md:hidden p-2 text-white hover:text-cyan-200 focus:outline-hidden shrink-0 cursor-pointer"
               aria-label="Toggle Navigation Menu"
             >
               {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
