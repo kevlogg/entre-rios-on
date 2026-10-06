@@ -13,9 +13,9 @@ interface DynamicLayoutWrapperProps {
 
 function DynamicLayoutContent({ children, heroContent }: DynamicLayoutWrapperProps) {
   return (
-    <div className="min-h-screen flex flex-col bg-[#e9ecef] w-full max-w-full overflow-x-hidden">
+    <div className="min-h-screen flex flex-col bg-[#e9ecef] w-full">
       {/* Top Header & Hero Area with ON MÁS Gradient Background */}
-      <div className="relative bg-gradient-on-mas pb-6 sm:pb-8 shadow-md w-full overflow-hidden">
+      <div className="relative bg-gradient-on-mas pb-6 sm:pb-8 shadow-md w-full">
         <PageBackground />
         <ClientHeader />
         {heroContent && (
@@ -26,7 +26,7 @@ function DynamicLayoutContent({ children, heroContent }: DynamicLayoutWrapperPro
       </div>
 
       {/* Main Content Area in Gray #e9ecef */}
-      <main className="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 text-slate-900 overflow-x-hidden">
+      <main className="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 text-slate-900">
         {children}
       </main>
 
@@ -38,12 +38,12 @@ function DynamicLayoutContent({ children, heroContent }: DynamicLayoutWrapperPro
 export function DynamicLayoutWrapper({ children, heroContent, selectedCityId }: DynamicLayoutWrapperProps) {
   return (
     <Suspense fallback={
-      <div className="min-h-screen flex flex-col bg-[#e9ecef] w-full max-w-full overflow-x-hidden">
-        <div className="relative bg-gradient-on-mas pb-6 sm:pb-8 shadow-md w-full overflow-hidden">
+      <div className="min-h-screen flex flex-col bg-[#e9ecef] w-full">
+        <div className="relative bg-gradient-on-mas pb-6 sm:pb-8 shadow-md w-full">
           <PageBackground />
           <ClientHeader />
         </div>
-        <main className="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 text-slate-900 overflow-x-hidden">{children}</main>
+        <main className="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 text-slate-900">{children}</main>
         <ClientFooter />
       </div>
     }>

@@ -211,9 +211,9 @@ export function Header({ selectedCityId = 'all' }: HeaderProps) {
   ];
 
   return (
-    <header className="sticky top-0 z-40 bg-black/20 backdrop-blur-xl border-b border-white/10 shadow-lg transition-all w-full max-w-full overflow-hidden">
+    <header className="sticky top-0 z-40 bg-black/20 backdrop-blur-xl border-b border-white/10 shadow-lg transition-all w-full">
       {/* Top Banner Ribbon */}
-      <div className="bg-gradient-to-r from-[#002878] via-[#0047BA] to-[#00ADB5] text-white text-[10px] sm:text-xs py-1.5 px-2 sm:px-4 text-center font-semibold flex items-center justify-center gap-1.5 sm:gap-2 overflow-hidden">
+      <div className="bg-gradient-to-r from-[#002878] via-[#0047BA] to-[#00ADB5] text-white text-[10px] sm:text-xs py-1.5 px-2 sm:px-4 text-center font-semibold flex items-center justify-center gap-1.5 sm:gap-2">
         <Sparkles className="w-3.5 h-3.5 text-cyan-300 animate-pulse shrink-0" />
         <span className="truncate max-w-[85vw] sm:max-w-none"> Portal Oficial del Comercio, Turismo y Medios: ON MÁS </span>
         <span className="hidden sm:inline-block opacity-85 shrink-0">• Impulsando la economía del Litoral</span>
