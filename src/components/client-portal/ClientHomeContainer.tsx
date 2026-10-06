@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { usePathname } from 'next/navigation';
+import { ClientHeader } from '@/components/layout/ClientHeader';
 import { ClientHeroBanner } from '@/components/client-portal/ClientHeroBanner';
 import { CategoryIconBar } from '@/components/client-portal/CategoryIconBar';
 import { BentoRowOne } from '@/components/client-portal/BentoRowOne';
@@ -46,10 +47,11 @@ export function ClientHomeContainer({ provinceId, initialProducts = [] }: Client
 
   return (
     <div className="w-full">
-      {/* 1. SECCIÓN HERO (Dentro del área con Degradé de Marca ON MÁS) */}
-      <div className="relative bg-gradient-on-mas pb-6 sm:pb-8 shadow-md">
+      {/* 1. SECCIÓN SUPERIOR UNIFICADA: Header + Hero (Mismo Contenedor y Degradé de Marca ON MÁS) */}
+      <div className="relative bg-gradient-on-mas pb-6 sm:pb-8 shadow-lg">
         <PageBackground />
-        <div className="relative z-10">
+        <div className="relative z-10 space-y-2 sm:space-y-4">
+          <ClientHeader />
           <ClientHeroBanner provinceId={activeProvince} />
         </div>
       </div>

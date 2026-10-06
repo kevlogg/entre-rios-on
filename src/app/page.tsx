@@ -26,11 +26,6 @@ export default async function ClientHomePage({ searchParams }: ClientHomePagePro
 
   return (
     <div className="min-h-screen flex flex-col bg-[#e9ecef]">
-      {/* Header oficial del cliente dentro del área con degradé de marca */}
-      <div className="relative bg-gradient-on-mas">
-        <ClientHeader />
-      </div>
-
       {/* Contenedor principal */}
       <main className="w-full flex-1 bg-[#e9ecef]">
         <ClientHomeContainer initialProducts={products} />

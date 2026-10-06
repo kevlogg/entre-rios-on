@@ -86,10 +86,12 @@ body {
   pointer-events: none;
   background: linear-gradient(
     115deg,
-    #00e5ff 0%,
-    #00c7b7 30%,
-    #0052ff 70%,
-    #002878 100%
+    #2563eb 0%,
+    #4f46e5 18%,
+    #7c3aed 36%,
+    #c026d3 58%,
+    #e11d48 80%,
+    #ff4500 100%
   );
 }
 
@@ -101,35 +103,35 @@ body {
   pointer-events: none;
 }
 
-/* TERCIO IZQUIERDO: Cian Turquesa — "ON" */
+/* TERCIO IZQUIERDO: Azul Eléctrico e Índigo */
 .glow-cyan {
   top: -15%;
   left: -15%;
   width: 75vw;
   height: 90vh;
-  background: radial-gradient(circle, #00f2fe 30%, #00c7b7 60%, transparent 80%);
+  background: radial-gradient(circle, #3b82f6 30%, #7c3aed 60%, transparent 80%);
   opacity: 0.95;
   animation: floatCyan 8s ease-in-out infinite alternate;
 }
 
-/* TERCIO CENTRAL: Azul Eléctrico — "MÁS" */
+/* TERCIO CENTRAL: Púrpura, Fucsia y Magenta */
 .glow-blue {
   top: -10%;
   left: 20%;
   width: 70vw;
   height: 95vh;
-  background: radial-gradient(circle, #0059ff 35%, #003cd6 65%, transparent 80%);
+  background: radial-gradient(circle, #d946ef 35%, #c026d3 65%, transparent 80%);
   opacity: 0.95;
   animation: floatBlue 9s ease-in-out infinite alternate;
 }
 
-/* TERCIO DERECHO: Azul Marino */
+/* TERCIO DERECHO: Rosa y Coral Naranja */
 .glow-navy {
   top: -15%;
   right: -15%;
   width: 75vw;
   height: 90vh;
-  background: radial-gradient(circle, #003cd6 30%, #001a52 60%, transparent 80%);
+  background: radial-gradient(circle, #ff4500 30%, #e11d48 60%, transparent 80%);
   opacity: 0.95;
   animation: floatNavy 8.5s ease-in-out infinite alternate;
 }
@@ -160,11 +162,11 @@ body {
 }
 
 .bg-gradient-brand {
-  background: linear-gradient(115deg, #00C7B7 0%, #0052FF 60%, #002878 100%);
+  background: linear-gradient(115deg, #2563eb 0%, #7c3aed 40%, #c026d3 70%, #ff4500 100%);
 }
 
 .bg-gradient-on-mas {
-  background: linear-gradient(115deg, #00E5FF 0%, #00C7B7 35%, #0052FF 70%, #002878 100%);
+  background: linear-gradient(115deg, #2563eb 0%, #4f46e5 18%, #7c3aed 36%, #c026d3 58%, #e11d48 80%, #ff4500 100%);
 }
 
 /* Compatibilidad con clases existentes en layout/páginas */
@@ -173,7 +175,7 @@ body {
 }
 
 .text-gradient-brand {
-  background: linear-gradient(115deg, #00E5FF 0%, #0059FF 60%, #002878 100%);
+  background: linear-gradient(115deg, #2563eb 0%, #c026d3 50%, #ff4500 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
