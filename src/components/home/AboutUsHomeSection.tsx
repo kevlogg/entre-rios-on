@@ -15,11 +15,13 @@ import {
   MapPin,
   Heart
 } from 'lucide-react';
+import { PageBackground } from '@/components/common/PageBackground';
 
 export function AboutUsHomeSection() {
   return (
     <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 w-full">
-      <div className="bg-gradient-to-r from-[#002878] via-[#0047BA] to-[#00ADB5] rounded-3xl p-8 sm:p-12 text-white shadow-2xl relative overflow-hidden flex flex-col lg:flex-row items-center justify-between gap-8 border border-white/20">
+      <div className="bg-gradient-on-mas rounded-3xl p-8 sm:p-12 text-white shadow-2xl relative overflow-hidden flex flex-col lg:flex-row items-center justify-between gap-8 border border-white/20">
+        <PageBackground />
         
         {/* Background Ambient Glows */}
         <div className="absolute -top-24 -left-24 w-80 h-80 bg-[#00E5E8]/20 rounded-full blur-3xl pointer-events-none" />
