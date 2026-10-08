@@ -322,14 +322,14 @@ export function ClientHeader({ withBackground = false }: ClientHeaderProps = {})
       {withBackground && <PageBackground />}
       {/* Top Header Main Row */}
       <div className="max-w-7xl lg:max-w-none mx-auto px-4 sm:px-6 lg:px-4 py-3 relative z-30">
-        <div className="grid grid-cols-8 gap-1.5 lg:gap-2 xl:gap-3 w-full items-center">
+        <div className="flex items-center justify-between md:grid md:grid-cols-8 gap-2 lg:gap-3 w-full">
           
-          {/* Grupo Izquierdo: Logo + Selector Provincia + Buscador (Ocupa exactamente de Columna 1 a Columna 5 hasta Comunidad) */}
-          <div className="col-span-8 md:col-span-5 flex items-center gap-2.5 sm:gap-3 lg:gap-4 w-full min-w-0">
+          {/* Grupo Izquierdo: Logo + Selector Provincia + Buscador */}
+          <div className="flex items-center gap-2.5 sm:gap-3 lg:gap-4 min-w-0 md:col-span-5">
             {/* Logo Oficial en Card de Fondo Blanco Brillante */}
             <Link href="/" className="flex items-center shrink-0">
-              <div className="h-13 sm:h-14 flex items-center justify-center bg-white hover:bg-white backdrop-blur-md border border-white/60 px-3.5 sm:px-5 rounded-2xl shadow-xl transition-all group">
-                <div className="relative w-40 h-10 sm:w-56 sm:h-12">
+              <div className="h-11 sm:h-13 lg:h-14 flex items-center justify-center bg-white hover:bg-white backdrop-blur-md border border-white/60 px-3.5 sm:px-5 rounded-2xl shadow-xl transition-all group">
+                <div className="relative w-32 h-8 sm:w-44 sm:h-10 lg:w-56 lg:h-12">
                   <Image
                     src="/logo1.png"
                     alt="ON MÁS - Portal Comercial & Regional"
@@ -342,7 +342,7 @@ export function ClientHeader({ withBackground = false }: ClientHeaderProps = {})
             </Link>
 
             {/* Location Selector - Province Only */}
-            <div className="hidden lg:flex items-center bg-white/20 backdrop-blur-md border border-white/35 rounded-2xl px-2.5 h-13 sm:h-14 shadow-lg relative z-30 shrink-0">
+            <div className="hidden lg:flex items-center bg-white/20 backdrop-blur-md border border-white/35 rounded-2xl px-2.5 h-11 sm:h-13 lg:h-14 shadow-lg relative z-30 shrink-0">
               
               {/* Selector de Provincia */}
               <div className="relative flex items-center">
@@ -382,9 +382,9 @@ export function ClientHeader({ withBackground = false }: ClientHeaderProps = {})
               </div>
             </div>
 
-            {/* Buscador Global Interactivo - Expande y termina alineado con el borde derecho de Comunidad (Columna 5) */}
+            {/* Buscador Global Interactivo */}
             <div ref={searchContainerRef} className="hidden md:block flex-1 min-w-0 w-full relative z-30">
-              <form onSubmit={handleSearchSubmit} className="relative flex items-center h-13 sm:h-14">
+              <form onSubmit={handleSearchSubmit} className="relative flex items-center h-11 sm:h-13 lg:h-14">
                 <input
                   type="text"
                   placeholder="Buscá productos, comercios, categorías, secciones..."
@@ -536,12 +536,12 @@ export function ClientHeader({ withBackground = false }: ClientHeaderProps = {})
             </div>
           </div>
 
-          {/* User Actions - Ocupa de Columna 6 a Columna 8 alineado al extremo derecho */}
-          <div className="col-span-8 md:col-span-3 flex items-center gap-2 sm:gap-4 relative z-30 shrink-0 justify-end ml-auto">
+          {/* Grupo Derecho: Acciones de Usuario + Toggle Menú Mobile */}
+          <div className="flex items-center gap-2 sm:gap-3 md:col-span-3 justify-end shrink-0">
             {!currentUser ? (
               <Link 
                 href="/login" 
-                className="h-13 sm:h-14 flex items-center gap-1.5 sm:gap-2 bg-white/15 hover:bg-white/25 text-white hover:text-cyan-200 border border-white/30 px-3 sm:px-4 rounded-2xl text-xs font-extrabold transition-all shadow-md cursor-pointer shrink-0 backdrop-blur-md"
+                className="h-11 sm:h-13 lg:h-14 flex items-center gap-1.5 sm:gap-2 bg-white/15 hover:bg-white/25 text-white hover:text-cyan-200 border border-white/30 px-3 sm:px-4 rounded-2xl text-xs font-extrabold transition-all shadow-md cursor-pointer shrink-0 backdrop-blur-md"
                 title="Ingresar o Registrarse"
               >
                 <User className="w-4 h-4 text-cyan-200 shrink-0" />
@@ -550,7 +550,7 @@ export function ClientHeader({ withBackground = false }: ClientHeaderProps = {})
             ) : (
               <Link 
                 href="/admin" 
-                className="h-13 sm:h-14 flex items-center gap-2.5 bg-white/15 hover:bg-white/25 border border-white/30 px-3 sm:px-4 rounded-2xl transition-all shadow-md cursor-pointer group shrink-0 backdrop-blur-md"
+                className="h-11 sm:h-13 lg:h-14 flex items-center gap-2.5 bg-white/15 hover:bg-white/25 border border-white/30 px-2.5 sm:px-3.5 rounded-2xl transition-all shadow-md cursor-pointer group shrink-0 backdrop-blur-md"
                 title={`Panel de Administración: ${userCommerce?.name || 'Mi Negocio'}`}
               >
                 {userCommerce?.logoUrl ? (
@@ -581,10 +581,10 @@ export function ClientHeader({ withBackground = false }: ClientHeaderProps = {})
             {/* Mobile Hamburger Toggle */}
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="md:hidden p-2 text-white hover:text-cyan-200 focus:outline-hidden shrink-0 cursor-pointer"
+              className="md:hidden h-11 w-11 flex items-center justify-center text-white hover:text-cyan-200 focus:outline-hidden shrink-0 cursor-pointer bg-white/15 hover:bg-white/25 border border-white/30 rounded-2xl transition-all shadow-md backdrop-blur-md"
               aria-label="Toggle Navigation Menu"
             >
-              {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+              {isMobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
             </button>
           </div>
 
