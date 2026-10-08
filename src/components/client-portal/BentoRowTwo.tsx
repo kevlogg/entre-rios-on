@@ -12,7 +12,7 @@ export function BentoRowTwo() {
   const rowTwoCards = cards.slice(half > 0 ? half : 4);
 
   return (
-    <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-3 pt-1 sm:pb-4 sm:pt-1">
+    <section className="hidden sm:block max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-3 pt-1 sm:pb-4 sm:pt-1">
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         {rowTwoCards.map((card) => (
           <div
