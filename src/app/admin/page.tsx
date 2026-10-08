@@ -132,8 +132,7 @@ export default function AdminPage() {
         setIsSubscriptionActive(Boolean(hasActiveSub));
 
         const rawTier = (targetCommerce?.subscription_tier || 'BRONCE').toUpperCase();
-        const mappedPlan: 'Gratis' | 'Bronce' | 'Plata' | 'Oro' =
-          rawTier.includes('GRATIS') ? 'Gratis' :
+        const mappedPlan: 'Bronce' | 'Plata' | 'Oro' =
           rawTier.includes('ORO') ? 'Oro' :
           rawTier.includes('PLATA') ? 'Plata' : 'Bronce';
 

@@ -49,7 +49,7 @@ export function AdminHeader({ commerceName, commerceSlug, cityName }: AdminHeade
             <Link href="/" className="flex items-center gap-3 shrink-0">
               <div className="relative w-44 h-12">
                 <Image
-                  src="/logo.png"
+                  src="/logo1.png"
                   alt="ON MÁS Portal"
                   fill
                   priority

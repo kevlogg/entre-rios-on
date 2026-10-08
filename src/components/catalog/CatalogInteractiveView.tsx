@@ -212,7 +212,7 @@ export function CatalogInteractiveView({ initialProducts }: CatalogInteractiveVi
             <span>¿Tenés un comercio y querés sumar tu catálogo?</span>
           </h3>
           <p className="text-xs text-slate-300 max-w-xl">
-            Publicá tus productos gratis y conectá directo con clientes de toda la provincia por WhatsApp sin comisiones por venta.
+            Publicá tus productos y conectá directo con clientes de toda la provincia por WhatsApp sin comisiones por venta.
           </p>
         </div>
         <Link

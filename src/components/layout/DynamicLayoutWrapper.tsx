@@ -5,6 +5,8 @@ import { ClientHeader } from '@/components/layout/ClientHeader';
 import { ClientFooter } from '@/components/layout/ClientFooter';
 import { PageBackground } from '@/components/common/PageBackground';
 
+import { StickySideBanners } from '@/components/client-portal/StickySideBanners';
+
 interface DynamicLayoutWrapperProps {
   children: React.ReactNode;
   heroContent?: React.ReactNode;
@@ -26,7 +28,8 @@ function DynamicLayoutContent({ children, heroContent }: DynamicLayoutWrapperPro
       </div>
 
       {/* Main Content Area in Gray #e9ecef */}
-      <main className="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 text-slate-900">
+      <main className="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 text-slate-900 relative">
+        <StickySideBanners />
         {children}
       </main>
 

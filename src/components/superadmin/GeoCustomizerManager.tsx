@@ -30,6 +30,8 @@ import { saveBannerSlidesAction } from '@/server/actions/superadmin';
 import { uploadImageToSupabase } from '@/lib/supabase/storage';
 import { getCitiesByProvince } from '@/lib/constants/locations';
 import { useSectionCards, saveSectionCards, SectionCardItem } from '@/lib/services/section-cards-store';
+import { useHeroBadgeStyle, saveHeroBadgeStyle, HeroBadgeStyle, hexToRgba } from '@/lib/services/hero-badge-store';
+import { useSideBanners, saveSideBanners, SideBannerItem } from '@/lib/services/side-banners-store';
 
 const MAX_PROVINCES = 5;
 
@@ -64,11 +66,31 @@ export function GeoCustomizerManager({ initialCities }: GeoCustomizerManagerProp
   const sectionCards = useSectionCards();
   const [localSectionCards, setLocalSectionCards] = useState<SectionCardItem[]>([]);
 
+  // Side Banners state
+  const sideBanners = useSideBanners();
+  const [localSideBanners, setLocalSideBanners] = useState<SideBannerItem[]>([]);
+
+  // Hero Badge state
+  const globalHeroBadgeStyle = useHeroBadgeStyle();
+  const [localBadgeStyle, setLocalBadgeStyle] = useState<HeroBadgeStyle>(globalHeroBadgeStyle);
+
+  useEffect(() => {
+    if (globalHeroBadgeStyle) {
+      setLocalBadgeStyle(globalHeroBadgeStyle);
+    }
+  }, [globalHeroBadgeStyle]);
+
   useEffect(() => {
     if (sectionCards && sectionCards.length > 0) {
       setLocalSectionCards(sectionCards);
     }
   }, [sectionCards]);
+
+  useEffect(() => {
+    if (sideBanners && sideBanners.length > 0) {
+      setLocalSideBanners(sideBanners);
+    }
+  }, [sideBanners]);
 
   // Cargar lista de provincias al montar
   useEffect(() => {
@@ -310,6 +332,16 @@ export function GeoCustomizerManager({ initialCities }: GeoCustomizerManagerProp
       setLocalSectionCards(updated);
       saveSectionCards(updated);
       setSuccessMsg(`Imagen de fondo actualizada para la card de sección.`);
+      setTimeout(() => setSuccessMsg(null), 3000);
+    });
+  };
+
+  const handleChangeSideBannerImage = (bannerId: string, e: React.ChangeEvent<HTMLInputElement>) => {
+    handleFileUpload(e, (url) => {
+      const updated = localSideBanners.map((b) => (b.id === bannerId ? { ...b, imageUrl: url } : b));
+      setLocalSideBanners(updated);
+      saveSideBanners(updated);
+      setSuccessMsg(`Imagen de publicidad lateral actualizada.`);
       setTimeout(() => setSuccessMsg(null), 3000);
     });
   };
@@ -908,16 +940,236 @@ export function GeoCustomizerManager({ initialCities }: GeoCustomizerManagerProp
         )}
       </div>
 
+      {/* BLOQUE 4.5: Personalización del Badge de Provincia sobre el Hero Banner */}
+      <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-sm space-y-6">
+        <div className="border-b border-slate-100 pb-3 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <span className="text-xs font-black uppercase tracking-widest text-[#0047BA] flex items-center gap-1.5">
+              <MapPin className="w-4 h-4 text-[#00ADB5]" />
+              Margen Inferior Izquierdo del Hero
+            </span>
+            <h3 className="text-base font-black text-slate-900 mt-1">
+              Diseño y Colores del Badge de Provincia
+            </h3>
+            <p className="text-xs text-slate-500 font-medium">
+              Personalizá los colores, la opacidad del fondo, el borde, la fuente y el ícono del cartel de la provincia ubicada en la esquina inferior izquierda del banner.
+            </p>
+          </div>
+
+          <button
+            type="button"
+            onClick={async () => {
+              const res = await saveHeroBadgeStyle(localBadgeStyle);
+              if (res.success) {
+                setSuccessMsg('¡Estilo del badge del hero guardado exitosamente!');
+              } else {
+                setSuccessMsg('Estilo guardado en memoria local.');
+              }
+              setTimeout(() => setSuccessMsg(null), 3500);
+            }}
+            className="inline-flex items-center gap-2 bg-[#0047BA] hover:bg-[#002878] text-white px-4 py-2.5 rounded-2xl text-xs font-black shadow-md transition-all active:scale-95 cursor-pointer shrink-0"
+          >
+            <Save className="w-4 h-4" />
+            <span>Guardar Diseño del Badge</span>
+          </button>
+        </div>
+
+        {/* Vista Previa en Vivo sobre Banner Oscuro */}
+        <div className="bg-slate-950 p-6 rounded-2xl border border-slate-800 space-y-3 relative overflow-hidden shadow-inner">
+          <span className="text-[10px] font-black uppercase tracking-widest text-cyan-400 block">
+            Vista Previa en Vivo (Esquina Inferior Izquierda del Banner)
+          </span>
+          <div className="pt-8 pb-4">
+            <div 
+              className="backdrop-blur-md inline-flex items-center gap-2 shadow-2xl transition-all rounded-2xl sm:rounded-3xl"
+              style={{
+                backgroundColor: hexToRgba(localBadgeStyle.backgroundColor, localBadgeStyle.backgroundOpacity),
+                borderColor: localBadgeStyle.borderColor,
+                borderWidth: `${localBadgeStyle.borderWidth}px`,
+                borderStyle: localBadgeStyle.borderWidth > 0 ? 'solid' : 'none',
+                padding: localBadgeStyle.size === 'sm' ? '6px 16px' : localBadgeStyle.size === 'lg' ? '14px 36px' : '10px 24px',
+              }}
+            >
+              {localBadgeStyle.showIcon && (
+                <MapPin 
+                  className={`shrink-0 animate-pulse ${
+                    localBadgeStyle.size === 'sm' ? 'w-4 h-4' : localBadgeStyle.size === 'lg' ? 'w-7 h-7' : 'w-5 h-5'
+                  }`}
+                  style={{ color: localBadgeStyle.iconColor }}
+                />
+              )}
+              <span 
+                className={`font-black tracking-wider ${
+                  localBadgeStyle.size === 'sm' ? 'text-xs' : localBadgeStyle.size === 'lg' ? 'text-2xl' : 'text-lg'
+                }`}
+                style={{ color: localBadgeStyle.textColor }}
+              >
+                {localBadgeStyle.uppercase ? (currentProv.name || 'SANTA FE').toUpperCase() : (currentProv.name || 'Santa Fe')}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* Formulario de Controles de Estilo */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 pt-2">
+          
+          {/* Color de Fondo */}
+          <div>
+            <label className="block text-xs font-bold text-slate-700 mb-1">Color de Fondo</label>
+            <div className="flex items-center gap-2">
+              <input
+                type="color"
+                value={localBadgeStyle.backgroundColor}
+                onChange={(e) => setLocalBadgeStyle({ ...localBadgeStyle, backgroundColor: e.target.value })}
+                className="w-9 h-9 rounded-xl border border-slate-300 cursor-pointer shrink-0"
+              />
+              <input
+                type="text"
+                value={localBadgeStyle.backgroundColor}
+                onChange={(e) => setLocalBadgeStyle({ ...localBadgeStyle, backgroundColor: e.target.value })}
+                className="w-full bg-slate-50 border border-slate-300 rounded-xl px-2.5 py-1.5 text-xs font-mono font-bold text-slate-800"
+              />
+            </div>
+          </div>
+
+          {/* Opacidad del Fondo */}
+          <div>
+            <label className="block text-xs font-bold text-slate-700 mb-1">
+              Opacidad Fondo: <span className="text-[#0047BA]">{localBadgeStyle.backgroundOpacity}%</span>
+            </label>
+            <input
+              type="range"
+              min="0"
+              max="100"
+              value={localBadgeStyle.backgroundOpacity}
+              onChange={(e) => setLocalBadgeStyle({ ...localBadgeStyle, backgroundOpacity: Number(e.target.value) })}
+              className="w-full accent-[#00ADB5] cursor-pointer mt-2"
+            />
+          </div>
+
+          {/* Color del Texto */}
+          <div>
+            <label className="block text-xs font-bold text-slate-700 mb-1">Color del Texto</label>
+            <div className="flex items-center gap-2">
+              <input
+                type="color"
+                value={localBadgeStyle.textColor}
+                onChange={(e) => setLocalBadgeStyle({ ...localBadgeStyle, textColor: e.target.value })}
+                className="w-9 h-9 rounded-xl border border-slate-300 cursor-pointer shrink-0"
+              />
+              <input
+                type="text"
+                value={localBadgeStyle.textColor}
+                onChange={(e) => setLocalBadgeStyle({ ...localBadgeStyle, textColor: e.target.value })}
+                className="w-full bg-slate-50 border border-slate-300 rounded-xl px-2.5 py-1.5 text-xs font-mono font-bold text-slate-800"
+              />
+            </div>
+          </div>
+
+          {/* Color del Borde */}
+          <div>
+            <label className="block text-xs font-bold text-slate-700 mb-1">Color del Borde</label>
+            <div className="flex items-center gap-2">
+              <input
+                type="color"
+                value={localBadgeStyle.borderColor}
+                onChange={(e) => setLocalBadgeStyle({ ...localBadgeStyle, borderColor: e.target.value })}
+                className="w-9 h-9 rounded-xl border border-slate-300 cursor-pointer shrink-0"
+              />
+              <input
+                type="text"
+                value={localBadgeStyle.borderColor}
+                onChange={(e) => setLocalBadgeStyle({ ...localBadgeStyle, borderColor: e.target.value })}
+                className="w-full bg-slate-50 border border-slate-300 rounded-xl px-2.5 py-1.5 text-xs font-mono font-bold text-slate-800"
+              />
+            </div>
+          </div>
+
+          {/* Grosor del Borde */}
+          <div>
+            <label className="block text-xs font-bold text-slate-700 mb-1">Grosor del Borde</label>
+            <select
+              value={localBadgeStyle.borderWidth}
+              onChange={(e) => setLocalBadgeStyle({ ...localBadgeStyle, borderWidth: Number(e.target.value) })}
+              className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs font-bold text-slate-800"
+            >
+              <option value={0}>Sin Borde (0px)</option>
+              <option value={1}>Fino (1px)</option>
+              <option value={2}>Mediano (2px)</option>
+              <option value={3}>Grueso (3px)</option>
+              <option value={4}>Muy Grueso (4px)</option>
+            </select>
+          </div>
+
+          {/* Tamaño del Cartel */}
+          <div>
+            <label className="block text-xs font-bold text-slate-700 mb-1">Tamaño del Cartel</label>
+            <select
+              value={localBadgeStyle.size}
+              onChange={(e) => setLocalBadgeStyle({ ...localBadgeStyle, size: e.target.value as any })}
+              className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs font-bold text-slate-800"
+            >
+              <option value="sm">Pequeño (Compacto)</option>
+              <option value="md">Mediano (Estándar)</option>
+              <option value="lg">Grande (Destacado)</option>
+            </select>
+          </div>
+
+          {/* Color del Ícono Pin */}
+          <div>
+            <label className="block text-xs font-bold text-slate-700 mb-1">Color del Ícono Pin</label>
+            <div className="flex items-center gap-2">
+              <input
+                type="color"
+                value={localBadgeStyle.iconColor}
+                onChange={(e) => setLocalBadgeStyle({ ...localBadgeStyle, iconColor: e.target.value })}
+                className="w-9 h-9 rounded-xl border border-slate-300 cursor-pointer shrink-0"
+              />
+              <input
+                type="text"
+                value={localBadgeStyle.iconColor}
+                onChange={(e) => setLocalBadgeStyle({ ...localBadgeStyle, iconColor: e.target.value })}
+                className="w-full bg-slate-50 border border-slate-300 rounded-xl px-2.5 py-1.5 text-xs font-mono font-bold text-slate-800"
+              />
+            </div>
+          </div>
+
+          {/* Opciones de Texto / Ícono */}
+          <div className="flex flex-col gap-2 justify-end">
+            <label className="flex items-center gap-2 cursor-pointer select-none text-xs font-bold text-slate-700">
+              <input
+                type="checkbox"
+                checked={localBadgeStyle.uppercase}
+                onChange={(e) => setLocalBadgeStyle({ ...localBadgeStyle, uppercase: e.target.checked })}
+                className="w-4 h-4 text-[#00ADB5] rounded focus:ring-[#00ADB5] cursor-pointer"
+              />
+              <span>MAYÚSCULAS</span>
+            </label>
+
+            <label className="flex items-center gap-2 cursor-pointer select-none text-xs font-bold text-slate-700">
+              <input
+                type="checkbox"
+                checked={localBadgeStyle.showIcon}
+                onChange={(e) => setLocalBadgeStyle({ ...localBadgeStyle, showIcon: e.target.checked })}
+                className="w-4 h-4 text-[#00ADB5] rounded focus:ring-[#00ADB5] cursor-pointer"
+              />
+              <span>Mostrar ícono Pin</span>
+            </label>
+          </div>
+
+        </div>
+      </div>
+
       {/* BLOQUE 5: Personalización de las 8 Cards de Secciones (Portada) */}
       <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-sm space-y-6">
         <div className="border-b border-slate-100 pb-3 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <h3 className="text-base font-black text-slate-900 flex items-center gap-2">
               <Sparkles className="w-5 h-5 text-[#00ADB5]" />
-              Imágenes y Contenido para Cards de Secciones (8 Cards en Portada)
+              Imágenes y Contenido para Cards de Secciones (Bento Cards en Portada)
             </h3>
             <p className="text-xs text-slate-500">
-              Personalizá las 8 cards principales que se muestran en el inicio. Podés cambiar la imagen subiendo un archivo, editar el título, la descripción, el botón y la URL a donde redirige al hacer clic.
+              Personalizá, agregá o eliminá las cards principales que se muestran en el inicio. Podés cambiar la imagen subiendo un archivo, editar el título, la descripción, el botón y la URL a donde redirige al hacer clic.
             </p>
             <div className="mt-2 inline-flex items-center gap-1.5 bg-cyan-50 border border-cyan-300 text-cyan-900 px-3 py-1 rounded-xl text-[11px] font-black shadow-2xs">
               <span>📐 Tamaño Recomendado de Imagen:</span>
@@ -925,32 +1177,77 @@ export function GeoCustomizerManager({ initialCities }: GeoCustomizerManagerProp
             </div>
           </div>
 
-          <button
-            type="button"
-            onClick={() => {
-              saveSectionCards(localSectionCards);
-              setSuccessMsg('Las 8 cards de secciones fueron guardadas exitosamente.');
-              setTimeout(() => setSuccessMsg(null), 3500);
-            }}
-            className="inline-flex items-center gap-2 bg-[#0047BA] hover:bg-[#002878] text-white px-4 py-2.5 rounded-2xl text-xs font-black shadow-md transition-all active:scale-95 cursor-pointer shrink-0"
-          >
-            <Save className="w-4 h-4" />
-            <span>Guardar Cards de Secciones ({localSectionCards.length})</span>
-          </button>
+          <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap">
+            <button
+              type="button"
+              onClick={() => {
+                const newCard: SectionCardItem = {
+                  id: `card-${Date.now()}`,
+                  title: 'NUEVA SECCIÓN DESTACADA',
+                  subtitle: 'Descripción breve de la nueva sección.',
+                  cta: 'Ver más',
+                  href: '/catalogo',
+                  image: '/images/bento-1.jpg',
+                  idealSize: '600 × 400 px (3:2 en HD)',
+                };
+                const updated = [...localSectionCards, newCard];
+                setLocalSectionCards(updated);
+                saveSectionCards(updated);
+                setSuccessMsg('Se ha agregado una nueva card exitosamente.');
+                setTimeout(() => setSuccessMsg(null), 3500);
+              }}
+              className="inline-flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-3.5 py-2.5 rounded-2xl text-xs font-black shadow-md transition-all active:scale-95 cursor-pointer shrink-0"
+            >
+              <Plus className="w-4 h-4" />
+              <span>+ Sumar Nueva Card</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                saveSectionCards(localSectionCards);
+                setSuccessMsg(`Se guardaron ${localSectionCards.length} cards de secciones exitosamente.`);
+                setTimeout(() => setSuccessMsg(null), 3500);
+              }}
+              className="inline-flex items-center gap-2 bg-[#0047BA] hover:bg-[#002878] text-white px-4 py-2.5 rounded-2xl text-xs font-black shadow-md transition-all active:scale-95 cursor-pointer shrink-0"
+            >
+              <Save className="w-4 h-4" />
+              <span>Guardar Todo ({localSectionCards.length})</span>
+            </button>
+          </div>
         </div>
 
-        {/* Grilla de las 8 Cards de Secciones con Live Preview */}
+        {/* Grilla de las Cards de Secciones con Live Preview */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {localSectionCards.map((card, index) => (
             <div key={card.id || index} className="bg-slate-50 p-5 rounded-2xl border border-slate-200 space-y-4 shadow-2xs">
               
               <div className="flex items-center justify-between border-b border-slate-200 pb-2">
-                <span className="text-xs font-black text-slate-900 uppercase tracking-wide">
+                <span className="text-xs font-black text-slate-900 uppercase tracking-wide truncate max-w-[200px]">
                   Card #{index + 1}: {card.title}
                 </span>
-                <span className="text-[10px] font-extrabold text-[#00ADB5] bg-cyan-100/80 border border-cyan-300 px-2.5 py-0.5 rounded-md">
-                  {card.idealSize || '600 × 400 px'}
-                </span>
+                <div className="flex items-center gap-2">
+                  <span className="text-[10px] font-extrabold text-[#00ADB5] bg-cyan-100/80 border border-cyan-300 px-2 py-0.5 rounded-md hidden sm:inline">
+                    {card.idealSize || '600 × 400 px'}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (confirm(`¿Estás seguro de eliminar la Card #${index + 1} "${card.title}"?`)) {
+                        const updated = localSectionCards.filter((_, idx) => idx !== index);
+                        setLocalSectionCards(updated);
+                        saveSectionCards(updated);
+                        setSuccessMsg('Card eliminada exitosamente.');
+                        setTimeout(() => setSuccessMsg(null), 3500);
+                      }
+                    }}
+                    className="p-1.5 rounded-lg bg-red-100 text-red-600 hover:bg-red-600 hover:text-white transition-colors cursor-pointer flex items-center gap-1 text-[11px] font-bold"
+                    title="Eliminar esta Card"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                    <span>Eliminar</span>
+                  </button>
+                </div>
               </div>
 
               {/* Vista Previa Fiel en Vivo de la Card */}
@@ -1053,6 +1350,184 @@ export function GeoCustomizerManager({ initialCities }: GeoCustomizerManagerProp
                     type="file"
                     accept="image/*"
                     onChange={(e) => handleChangeSectionCardImage(card.id, e)}
+                    className="w-full text-xs text-slate-600 file:mr-3 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-[#00ADB5] file:text-white cursor-pointer"
+                  />
+                </div>
+
+              </div>
+
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* BLOQUE 6: Banderas de Publicidad Lateral (Side Ads Sticky) */}
+      <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-sm space-y-6">
+        <div className="border-b border-slate-100 pb-3 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <h3 className="text-base font-black text-slate-900 flex items-center gap-2">
+              <Sparkles className="w-5 h-5 text-[#00ADB5]" />
+              <span>Bloque 6: Publicidad Lateral Fija (Sticky Side Banners)</span>
+            </h3>
+            <p className="text-xs text-slate-500">
+              Gestioná las cards dinámicas de publicidad que se muestran en los márgenes laterales en computadoras de escritorio. Se desplazan junto al usuario mientras realiza scroll.
+            </p>
+            <div className="mt-2 inline-flex items-center gap-1.5 bg-cyan-50 border border-cyan-300 text-cyan-900 px-3 py-1 rounded-xl text-[11px] font-black shadow-2xs">
+              <span>📐 Tamaño Recomendado de Imagen:</span>
+              <span className="text-[#0047BA]">160 × 600 px (Rascacielos / Vertical HD)</span>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap">
+            <button
+              type="button"
+              onClick={() => {
+                const newSideBanner: SideBannerItem = {
+                  id: `side-${Date.now()}`,
+                  title: 'NUEVA PUBLICIDAD LATERAL',
+                  imageUrl: 'https://images.unsplash.com/photo-1557804506-669a67965ba0?auto=format&fit=crop&w=400&q=80',
+                  href: '/planes',
+                  position: 'both',
+                  idealSize: '160 × 600 px (Rascacielos / Vertical HD)',
+                };
+                const updated = [...localSideBanners, newSideBanner];
+                setLocalSideBanners(updated);
+                saveSideBanners(updated);
+                setSuccessMsg('Se ha agregado un nuevo banner lateral de publicidad.');
+                setTimeout(() => setSuccessMsg(null), 3500);
+              }}
+              className="inline-flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-3.5 py-2.5 rounded-2xl text-xs font-black shadow-md transition-all active:scale-95 cursor-pointer shrink-0"
+            >
+              <Plus className="w-4 h-4" />
+              <span>+ Agregar Banner Lateral</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                saveSideBanners(localSideBanners);
+                setSuccessMsg(`Se guardaron ${localSideBanners.length} banners laterales exitosamente.`);
+                setTimeout(() => setSuccessMsg(null), 3500);
+              }}
+              className="inline-flex items-center gap-2 bg-[#0047BA] hover:bg-[#002878] text-white px-4 py-2.5 rounded-2xl text-xs font-black shadow-md transition-all active:scale-95 cursor-pointer shrink-0"
+            >
+              <Save className="w-4 h-4" />
+              <span>Guardar Banners ({localSideBanners.length})</span>
+            </button>
+          </div>
+        </div>
+
+        {/* Grilla de Banners Laterales */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {localSideBanners.map((banner, index) => (
+            <div key={banner.id || index} className="bg-slate-50 p-5 rounded-2xl border border-slate-200 space-y-4 shadow-2xs">
+              
+              <div className="flex items-center justify-between border-b border-slate-200 pb-2">
+                <span className="text-xs font-black text-slate-900 uppercase tracking-wide truncate max-w-[170px]">
+                  Banner #{index + 1}: {banner.title}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (confirm(`¿Estás seguro de eliminar el banner "${banner.title}"?`)) {
+                      const updated = localSideBanners.filter((_, idx) => idx !== index);
+                      setLocalSideBanners(updated);
+                      saveSideBanners(updated);
+                      setSuccessMsg('Banner lateral eliminado.');
+                      setTimeout(() => setSuccessMsg(null), 3500);
+                    }
+                  }}
+                  className="p-1.5 rounded-lg bg-red-100 text-red-600 hover:bg-red-600 hover:text-white transition-colors cursor-pointer flex items-center gap-1 text-[11px] font-bold"
+                  title="Eliminar este banner"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                  <span>Eliminar</span>
+                </button>
+              </div>
+
+              {/* Preview Vertical Fiel */}
+              <div className="group relative rounded-xl overflow-hidden shadow-md border border-slate-300 h-48 bg-slate-950 flex flex-col justify-end p-3">
+                <img
+                  src={banner.imageUrl}
+                  alt={banner.title}
+                  className="absolute inset-0 w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500 opacity-80"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/40 to-transparent" />
+                <div className="relative z-10 space-y-1">
+                  <span className="text-[9px] font-black uppercase text-cyan-300 bg-black/60 px-2 py-0.5 rounded-md border border-cyan-400/30">
+                    Posición: {banner.position === 'left' ? 'Izquierda' : banner.position === 'right' ? 'Derecha' : 'Ambos Lados'}
+                  </span>
+                  <h5 className="text-xs font-black text-white">{banner.title}</h5>
+                </div>
+              </div>
+
+              {/* Campos Editables */}
+              <div className="space-y-3 pt-1">
+                
+                {/* 1. Título */}
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-700 mb-1">Título del Anuncio:</label>
+                  <input
+                    type="text"
+                    value={banner.title}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      const updated = localSideBanners.map((b) => (b.id === banner.id ? { ...b, title: val } : b));
+                      setLocalSideBanners(updated);
+                      saveSideBanners(updated);
+                    }}
+                    className="w-full bg-white border border-slate-300 rounded-xl px-3 py-1.5 text-xs font-bold text-slate-800"
+                  />
+                </div>
+
+                {/* 2. Posición Lateral */}
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-700 mb-1">Ubicación en el Margen:</label>
+                  <select
+                    value={banner.position}
+                    onChange={(e) => {
+                      const val = e.target.value as any;
+                      const updated = localSideBanners.map((b) => (b.id === banner.id ? { ...b, position: val } : b));
+                      setLocalSideBanners(updated);
+                      saveSideBanners(updated);
+                    }}
+                    className="w-full bg-white border border-slate-300 rounded-xl px-3 py-1.5 text-xs font-bold text-slate-800"
+                  >
+                    <option value="left">Margen Izquierdo</option>
+                    <option value="right">Margen Derecho</option>
+                    <option value="both">Ambos Márgenes (Rotativo)</option>
+                  </select>
+                </div>
+
+                {/* 3. URL de Redirección */}
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-700 mb-1 flex items-center gap-1">
+                    <LinkIcon className="w-3.5 h-3.5 text-[#00ADB5]" />
+                    <span>URL o Enlace WhatsApp:</span>
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="Ej. /planes, /sorteos o https://..."
+                    value={banner.href}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      const updated = localSideBanners.map((b) => (b.id === banner.id ? { ...b, href: val } : b));
+                      setLocalSideBanners(updated);
+                      saveSideBanners(updated);
+                    }}
+                    className="w-full bg-white border border-slate-300 rounded-xl px-3 py-1.5 text-xs font-bold text-slate-800"
+                  />
+                </div>
+
+                {/* 4. Cargar Imagen (Ideal: 160x600 px) */}
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-700 mb-1">
+                    Cargar Imagen (Ideal: 160 × 600 px Vertical):
+                  </label>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => handleChangeSideBannerImage(banner.id, e)}
                     className="w-full text-xs text-slate-600 file:mr-3 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-[#00ADB5] file:text-white cursor-pointer"
                   />
                 </div>

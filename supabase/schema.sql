@@ -59,7 +59,7 @@ CREATE TABLE IF NOT EXISTS public.commerces (
   whatsapp_clicks_count BIGINT DEFAULT 0,
   is_verified BOOLEAN DEFAULT true,
   is_subscription_active BOOLEAN DEFAULT true,
-  subscription_tier TEXT DEFAULT 'BRONCE' CHECK (subscription_tier IN ('GRATIS', 'BRONCE', 'PLATA', 'ORO')),
+  subscription_tier TEXT DEFAULT 'BRONCE' CHECK (subscription_tier IN ('BRONCE', 'PLATA', 'ORO')),
   logo_url TEXT NOT NULL,
   cover_url TEXT NOT NULL,
   phone_whatsapp TEXT NOT NULL,

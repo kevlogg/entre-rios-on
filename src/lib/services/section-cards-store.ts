@@ -92,31 +92,21 @@ const SECTION_CARDS_STORAGE_KEY = 'onmas_section_cards_v1';
 let memoryStoreSectionCards: SectionCardItem[] | null = null;
 
 function mergeWithDefaults(stored: SectionCardItem[]): SectionCardItem[] {
-  if (!Array.isArray(stored)) return DEFAULT_SECTION_CARDS;
-
-  const storedMap = new Map<string, SectionCardItem>();
-  stored.forEach((item) => {
-    if (item && item.id) storedMap.set(item.id, item);
-  });
-
-  return DEFAULT_SECTION_CARDS.map((def) => {
-    const found = storedMap.get(def.id);
-    if (!found) return def;
-    return {
-      id: def.id,
-      title: found.title || def.title,
-      subtitle: found.subtitle || def.subtitle,
-      cta: found.cta || def.cta,
-      href: found.href || def.href,
-      image: found.image || def.image,
-      idealSize: found.idealSize || def.idealSize,
-    };
-  });
+  if (!Array.isArray(stored) || stored.length === 0) return DEFAULT_SECTION_CARDS;
+  return stored.map((item, idx) => ({
+    id: item.id || `custom-card-${idx}-${Date.now()}`,
+    title: item.title || 'NUEVA SECCIÓN',
+    subtitle: item.subtitle || 'Descripción de la sección',
+    cta: item.cta || 'Explorar',
+    href: item.href || '/',
+    image: item.image || '/images/bento-1.jpg',
+    idealSize: item.idealSize || '600 × 400 px (3:2 en HD)',
+  }));
 }
 
 export function getSectionCards(): SectionCardItem[] {
-  if (memoryStoreSectionCards && memoryStoreSectionCards.length > 0) {
-    return mergeWithDefaults(memoryStoreSectionCards);
+  if (memoryStoreSectionCards && Array.isArray(memoryStoreSectionCards)) {
+    return memoryStoreSectionCards;
   }
 
   if (typeof window !== 'undefined') {

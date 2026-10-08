@@ -8,7 +8,7 @@ import { Sparkles, ArrowLeft, Rocket } from 'lucide-react';
 
 export const metadata: Metadata = {
   title: 'Planes & Precios para Comercios | ON MÁS Portal',
-  description: 'Conocé los planes oficiales de suscripción para comercios y servicios. Publicá gratis tu comercio con 1 producto o contratá nuestros planes con catálogo ampliado.',
+  description: 'Conocé los planes oficiales de suscripción para comercios y servicios. Elegí el plan que mejor se adapte a tu negocio y publicá tu catálogo.',
 };
 
 export default function PlanesPublicPage() {
@@ -34,7 +34,7 @@ export default function PlanesPublicPage() {
             <div className="space-y-3 max-w-2xl relative z-10">
               <div className="inline-flex items-center gap-2 bg-white/10 border border-white/20 text-[#00E5E8] text-xs font-extrabold px-3.5 py-1.5 rounded-full">
                 <Rocket className="w-4 h-4 text-[#00E5E8]" />
-                <span>Propuesta Comercial • Plan Gratis Incluido</span>
+                <span>Propuesta Comercial • Planes ON MÁS</span>
               </div>
 
               <h1 className="text-3xl sm:text-4xl font-black tracking-tight">
@@ -42,7 +42,7 @@ export default function PlanesPublicPage() {
               </h1>
 
               <p className="text-sm text-slate-100 font-medium leading-relaxed">
-                Elegí la mejor alternativa para promocionar tu negocio. Comenzá sin costo con nuestro <strong>Plan Gratis</strong> (perfil + 1 producto) o escalá la visibilidad de tu marca con nuestros planes pagos.
+                Elegí la mejor alternativa para promocionar tu negocio y escalá la visibilidad de tu marca con nuestros planes Bronce, Plata y Oro.
               </p>
             </div>
           </div>

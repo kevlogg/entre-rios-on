@@ -7,11 +7,14 @@ import { ChevronLeft, ChevronRight, MapPin } from 'lucide-react';
 import { getBannersByProvince, fetchBannersFromSupabase, DEFAULT_PROVINCE_BANNERS, BannerItem, normalizeImageUrl } from '@/lib/services/banner-store';
 import { getProvinceById } from '@/lib/constants/locations';
 
+import { useHeroBadgeStyle, hexToRgba } from '@/lib/services/hero-badge-store';
+
 interface ClientHeroBannerProps {
   provinceId?: string;
 }
 
 export function ClientHeroBanner({ provinceId = 'santa-fe' }: ClientHeroBannerProps) {
+  const badgeStyle = useHeroBadgeStyle();
   const provinceObj = getProvinceById(provinceId);
   const provinceName = provinceObj ? provinceObj.name : (provinceId === 'santa-fe' ? 'Santa Fe' : 'Entre Ríos');
 
@@ -47,7 +50,6 @@ export function ClientHeroBanner({ provinceId = 'santa-fe' }: ClientHeroBannerPr
 
   const effectiveBanners = banners;
 
-
   const totalSlides = effectiveBanners.length;
 
   const safeCurrentIndex = (typeof currentIndex === 'number' && !isNaN(currentIndex) && currentIndex >= 0 && currentIndex < totalSlides)
@@ -77,12 +79,36 @@ export function ClientHeroBanner({ provinceId = 'santa-fe' }: ClientHeroBannerPr
 
   if (totalSlides === 0) return null;
 
+  // Sizing helpers for the editable badge
+  const isSm = badgeStyle.size === 'sm';
+  const isLg = badgeStyle.size === 'lg';
+
+  const badgePadding = isSm
+    ? 'px-2.5 py-1 sm:px-4 sm:py-2'
+    : isLg
+    ? 'px-4 py-2 sm:px-10 sm:py-4'
+    : 'px-3 py-1.5 sm:px-7 sm:py-3';
+
+  const badgeTextSize = isSm
+    ? 'text-[10px] sm:text-base md:text-lg font-extrabold'
+    : isLg
+    ? 'text-xs sm:text-2xl md:text-3xl font-black'
+    : 'text-xs sm:text-xl md:text-2xl font-black';
+
+  const badgeIconSize = isSm
+    ? 'w-3 h-3 sm:w-5 sm:h-5'
+    : isLg
+    ? 'w-4 h-4 sm:w-8 sm:h-8'
+    : 'w-3.5 h-3.5 sm:w-6 sm:h-6';
+
+  const displayedName = badgeStyle.uppercase ? provinceName.toUpperCase() : provinceName;
+
   return (
     <section 
       aria-label="Carrusel Destacado Regional"
       className="w-full relative py-2 sm:py-3"
     >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl lg:max-w-none mx-auto px-4 sm:px-6 lg:px-3">
         <div className="relative w-full h-[220px] sm:h-[300px] md:h-[360px] lg:h-[400px] rounded-2xl sm:rounded-3xl overflow-hidden group shadow-2xl border border-white/20 bg-slate-950">
           {/* Background Images with Fade Transition */}
           {effectiveBanners.map((slide: BannerItem, idx: number) => {
@@ -125,12 +151,28 @@ export function ClientHeroBanner({ provinceId = 'santa-fe' }: ClientHeroBannerPr
             );
           })}
 
-          {/* Selected Province Mention (Left on mobile, Centered on desktop to prevent overlap) */}
-          <div className="absolute bottom-3 left-3 sm:bottom-6 sm:left-1/2 sm:-translate-x-1/2 z-30 pointer-events-none">
-            <div className="bg-slate-950/90 backdrop-blur-md px-3 py-1.5 sm:px-9 sm:py-3.5 border border-cyan-400/80 sm:border-2 shadow-2xl flex items-center gap-1.5 sm:gap-3 text-center whitespace-nowrap">
-              <MapPin className="w-3.5 h-3.5 sm:w-7 sm:h-7 text-cyan-400 shrink-0 animate-pulse" />
-              <span className="text-cyan-400 text-xs sm:text-xl md:text-2xl font-black uppercase tracking-wider sm:tracking-[0.2em] drop-shadow-md">
-                {provinceName}
+          {/* Selected Province Mention (Bottom-left corner, customizable via SuperAdmin) */}
+          <div className="absolute bottom-3 left-3 sm:bottom-6 sm:left-6 z-30 pointer-events-none">
+            <div 
+              className={`backdrop-blur-md shadow-2xl flex items-center gap-1.5 sm:gap-3 text-center whitespace-nowrap rounded-2xl sm:rounded-3xl ${badgePadding}`}
+              style={{
+                backgroundColor: hexToRgba(badgeStyle.backgroundColor, badgeStyle.backgroundOpacity),
+                borderColor: badgeStyle.borderColor,
+                borderWidth: `${badgeStyle.borderWidth}px`,
+                borderStyle: badgeStyle.borderWidth > 0 ? 'solid' : 'none',
+              }}
+            >
+              {badgeStyle.showIcon && (
+                <MapPin 
+                  className={`${badgeIconSize} shrink-0 animate-pulse`} 
+                  style={{ color: badgeStyle.iconColor }}
+                />
+              )}
+              <span 
+                className={`${badgeTextSize} tracking-wider sm:tracking-[0.18em] drop-shadow-md`}
+                style={{ color: badgeStyle.textColor }}
+              >
+                {displayedName}
               </span>
             </div>
           </div>

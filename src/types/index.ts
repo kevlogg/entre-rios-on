@@ -39,7 +39,7 @@ export interface Commerce {
   email?: string;
   isDigitalOnly?: boolean;
   website?: string;
-  plan?: 'Gratis' | 'Bronce' | 'Plata' | 'Oro';
+  plan?: 'Bronce' | 'Plata' | 'Oro';
   viewsCount?: number;
   whatsappClicksCount?: number;
 }
@@ -76,7 +76,7 @@ export interface Product {
   description: string;
   phoneWhatsApp: string;
   whatsappMessageCustom?: string;
-  commercePlan?: 'Gratis' | 'Bronce' | 'Plata' | 'Oro';
+  commercePlan?: 'Bronce' | 'Plata' | 'Oro';
   condition?: 'Nuevo' | 'Usado' | 'Reacondicionado';
   salesCount?: number;
   stock?: number;

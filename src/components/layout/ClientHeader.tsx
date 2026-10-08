@@ -31,6 +31,7 @@ import { useActiveProvinces } from '@/lib/services/province-store';
 import { CATEGORIES_LIST } from '@/lib/constants/categories';
 import { getFeaturedProducts, getAllCommerces } from '@/lib/dal/portal';
 import { Product, Commerce } from '@/types';
+import { PageBackground } from '@/components/common/PageBackground';
 
 const SITE_PAGES = [
   { name: 'Categorías del Catálogo', href: '/catalogo', category: 'Sección del Sitio', icon: ShoppingBag, description: 'Explorá todas las categorías y productos regionales', keywords: ['catalogo', 'categoria', 'oferta', 'producto', 'descuento', 'compras', 'precio', 'articulo', 'tienda'] },
@@ -47,7 +48,12 @@ const SITE_PAGES = [
   { name: 'Mi Sitio Web Propio', href: '/mi-sitio-web', category: 'Sección del Sitio', icon: Globe, description: 'Solicitá tu sitio web para tu comercio', keywords: ['sitio web', 'pagina web', 'dominio', 'crear web', 'mi sitio', 'diseño web'] },
 ];
 
-export function ClientHeader() {
+interface ClientHeaderProps {
+  /** Si es true, el header dibuja su propio fondo degradé de marca (Home). */
+  withBackground?: boolean;
+}
+
+export function ClientHeader({ withBackground = false }: ClientHeaderProps = {}) {
   const pathname = usePathname();
   const router = useRouter();
 
@@ -303,284 +309,239 @@ export function ClientHeader() {
   const navLinks: { name: string; href: string; slug: string }[] = [
     { name: 'Inicio', href: getGeoUrl(''), slug: '' },
     { name: 'Categorías', href: getGeoUrl('catalogo'), slug: 'catalogo' },
-    { name: 'Comercios', href: getGeoUrl('comercios'), slug: 'comercios' },
-    { name: 'Supermercado', href: getGeoUrl('supermercado'), slug: 'supermercado' },
+    { name: 'Comercios & Pymes', href: getGeoUrl('comercios'), slug: 'comercios' },
     { name: 'Turismo', href: getGeoUrl('turismo'), slug: 'turismo' },
     { name: 'Comunidad', href: getGeoUrl('comunidad'), slug: 'comunidad' },
-    { name: 'Novedades', href: '/novedades', slug: 'novedades' },
-    { name: 'Oportunidades', href: '/oportunidades', slug: 'oportunidades' },
-    { name: 'Comercio Online', href: '/comercio-online', slug: 'comercio-online' },
+    { name: 'Oportunidades y Ofertas', href: '/oportunidades', slug: 'oportunidades' },
     { name: 'Planes', href: '/planes', slug: 'planes' },
     { name: 'Ayuda', href: '/ayuda', slug: 'ayuda' },
-    { name: 'Sorteos', href: getGeoUrl('sorteos'), slug: 'sorteos' },
   ];
 
   return (
-    <header className="bg-black/20 backdrop-blur-xl border-b border-white/10 sticky top-0 z-40 shadow-lg">
+    <header className={`${withBackground ? 'bg-gradient-on-mas' : 'bg-black/20'} backdrop-blur-xl border-b border-white/10 sticky top-0 z-40 shadow-lg`}>
+      {withBackground && <PageBackground />}
       {/* Top Header Main Row */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 relative z-30">
-        <div className="flex items-center justify-between gap-4">
+      <div className="max-w-7xl lg:max-w-none mx-auto px-4 sm:px-6 lg:px-4 py-3 relative z-30">
+        <div className="grid grid-cols-8 gap-1.5 lg:gap-2 xl:gap-3 w-full items-center">
           
-          {/* Logo Oficial en Card de Fondo Blanco Brillante */}
-          <Link href="/" className="flex items-center shrink-0">
-            <div className="h-10 sm:h-12 flex flex-col items-center justify-center bg-white/95 hover:bg-white backdrop-blur-md border border-white/50 px-3 sm:px-4 rounded-2xl shadow-xl transition-all group">
-              <div className="relative w-28 h-6 sm:w-44 sm:h-8">
-                <Image
-                  src="/logo.png"
-                  alt="ON MÁS - Portal Comercial & Regional"
-                  fill
-                  priority
-                  className="object-contain"
-                />
+          {/* Grupo Izquierdo: Logo + Selector Provincia + Buscador (Ocupa exactamente de Columna 1 a Columna 5 hasta Comunidad) */}
+          <div className="col-span-8 md:col-span-5 flex items-center gap-2.5 sm:gap-3 lg:gap-4 w-full min-w-0">
+            {/* Logo Oficial en Card de Fondo Blanco Brillante */}
+            <Link href="/" className="flex items-center shrink-0">
+              <div className="h-13 sm:h-14 flex items-center justify-center bg-white hover:bg-white backdrop-blur-md border border-white/60 px-3.5 sm:px-5 rounded-2xl shadow-xl transition-all group">
+                <div className="relative w-40 h-10 sm:w-56 sm:h-12">
+                  <Image
+                    src="/logo1.png"
+                    alt="ON MÁS - Portal Comercial & Regional"
+                    fill
+                    priority
+                    className="object-contain scale-105"
+                  />
+                </div>
               </div>
-              <span className="text-[7px] sm:text-[8px] font-black uppercase tracking-[0.25em] sm:tracking-[0.3em] text-[#0047BA] group-hover:text-[#00ADB5] transition-colors -mt-0.5">
-                PORTAL
-              </span>
-            </div>
-          </Link>
+            </Link>
 
-          {/* Location Selectors - CONSISTENT HEIGHT h-12 */}
-          <div className="hidden lg:flex items-center gap-2 bg-white/20 backdrop-blur-md border border-white/35 rounded-2xl px-2 h-12 shadow-lg relative z-30">
-            
-            {/* Selector de Provincia */}
-            <div className="relative flex items-center">
-              <button
-                onClick={() => setIsProvinceDropdownOpen(!isProvinceDropdownOpen)}
-                className="flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs sm:text-sm font-black text-white hover:bg-white/25 transition-all cursor-pointer"
-              >
-                <MapPin className="w-4 h-4 text-cyan-300 shrink-0" />
-                <span className="truncate max-w-[150px]">{currentProvinceObj.name}</span>
-                <ChevronDown className="w-3.5 h-3.5 text-cyan-200" />
-              </button>
+            {/* Location Selector - Province Only */}
+            <div className="hidden lg:flex items-center bg-white/20 backdrop-blur-md border border-white/35 rounded-2xl px-2.5 h-13 sm:h-14 shadow-lg relative z-30 shrink-0">
+              
+              {/* Selector de Provincia */}
+              <div className="relative flex items-center">
+                <button
+                  onClick={() => setIsProvinceDropdownOpen(!isProvinceDropdownOpen)}
+                  className="flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs sm:text-sm font-black text-white hover:bg-white/25 transition-all cursor-pointer"
+                >
+                  <MapPin className="w-4 h-4 text-cyan-300 shrink-0" />
+                  <span className="truncate max-w-[170px]">{currentProvinceObj.name}</span>
+                  <ChevronDown className="w-3.5 h-3.5 text-cyan-200" />
+                </button>
 
-              {isProvinceDropdownOpen && (
-                <div className="absolute top-full left-0 mt-2 w-60 bg-slate-900/95 backdrop-blur-xl border border-white/20 rounded-2xl shadow-2xl py-2.5 z-50 animate-in fade-in duration-100 space-y-1">
-                  <div className="px-4 py-1 text-[11px] font-black text-cyan-300 uppercase tracking-wider">
-                    Provincias Activas
+                {isProvinceDropdownOpen && (
+                  <div className="absolute top-full left-0 mt-2 w-60 bg-slate-900/95 backdrop-blur-xl border border-white/20 rounded-2xl shadow-2xl py-2.5 z-50 animate-in fade-in duration-100 space-y-1">
+                    <div className="px-4 py-1 text-[11px] font-black text-cyan-300 uppercase tracking-wider">
+                      Provincias Activas
+                    </div>
+                    {activeProvinces.map((prov) => (
+                      <button
+                        key={prov.id}
+                        type="button"
+                        onClick={() => handleProvinceSelect(prov.id)}
+                        className={`w-full text-left px-4 py-2 text-xs font-bold flex items-center justify-between hover:bg-white/10 transition-colors ${
+                          selectedProvince === prov.id || selectedProvince === prov.slug
+                            ? 'text-cyan-300 bg-white/10 font-black'
+                            : 'text-slate-200'
+                        }`}
+                      >
+                        <span>{prov.name}</span>
+                        {(selectedProvince === prov.id || selectedProvince === prov.slug) && (
+                          <span className="w-2 h-2 rounded-full bg-cyan-400" />
+                        )}
+                      </button>
+                    ))}
                   </div>
-                  {activeProvinces.map((prov) => (
-                    <button
-                      key={prov.id}
-                      type="button"
-                      onClick={() => handleProvinceSelect(prov.id)}
-                      className={`w-full text-left px-4 py-2 text-xs font-bold flex items-center justify-between hover:bg-white/10 transition-colors ${
-                        selectedProvince === prov.id || selectedProvince === prov.slug
-                          ? 'text-cyan-300 bg-white/10 font-black'
-                          : 'text-slate-200'
-                      }`}
-                    >
-                      <span>{prov.name}</span>
-                      {(selectedProvince === prov.id || selectedProvince === prov.slug) && (
-                        <span className="w-2 h-2 rounded-full bg-cyan-400" />
+                )}
+              </div>
+            </div>
+
+            {/* Buscador Global Interactivo - Expande y termina alineado con el borde derecho de Comunidad (Columna 5) */}
+            <div ref={searchContainerRef} className="hidden md:block flex-1 min-w-0 w-full relative z-30">
+              <form onSubmit={handleSearchSubmit} className="relative flex items-center h-13 sm:h-14">
+                <input
+                  type="text"
+                  placeholder="Buscá productos, comercios, categorías, secciones..."
+                  value={searchQuery}
+                  onFocus={() => setIsSearchFocused(true)}
+                  onChange={(e) => {
+                    setSearchQuery(e.target.value);
+                    setIsSearchFocused(true);
+                  }}
+                  className="w-full h-full bg-white border border-slate-200 rounded-2xl pl-4 pr-14 text-xs sm:text-sm font-extrabold text-slate-900 placeholder-slate-400 focus:outline-hidden focus:ring-2 focus:ring-[#00ADB5] focus:bg-white transition-all shadow-lg"
+                />
+                <button
+                  type="submit"
+                  className="absolute right-1 top-1 bottom-1 bg-gradient-to-r from-[#00ADB5] to-[#0047BA] hover:from-[#00E5E8] hover:to-[#00ADB5] text-white font-black px-4 rounded-xl flex items-center justify-center transition-all shadow-md cursor-pointer"
+                  aria-label="Buscar"
+                >
+                  <Search className="w-4 h-4 sm:w-5 sm:h-5" />
+                </button>
+              </form>
+
+              {/* Desplegable de Resultados de Búsqueda en Vivo */}
+              {isSearchFocused && liveSearchResults && (
+                <div className="absolute top-full left-0 right-0 mt-2 bg-slate-900/95 backdrop-blur-2xl border border-white/20 rounded-2xl shadow-2xl overflow-hidden z-50 max-h-[80vh] overflow-y-auto animate-in fade-in duration-150 text-white">
+                  {liveSearchResults.totalCount === 0 ? (
+                    <div className="p-6 text-center text-slate-300 space-y-2">
+                      <Search className="w-8 h-8 text-slate-400 mx-auto" />
+                      <p className="text-xs font-bold text-slate-100">No encontramos coincidencias exactas</p>
+                      <p className="text-[11px] text-slate-400">Presioná Enter para buscar &ldquo;{searchQuery}&rdquo; en el catálogo general.</p>
+                    </div>
+                  ) : (
+                    <div className="divide-y divide-white/10">
+                      
+                      {/* Secciones / Páginas */}
+                      {liveSearchResults.pages.length > 0 && (
+                        <div className="p-3 bg-white/5">
+                          <span className="text-[10px] font-black uppercase tracking-wider text-cyan-300 block mb-2">
+                            Secciones del Sitio
+                          </span>
+                          <div className="space-y-1">
+                            {liveSearchResults.pages.map((p) => {
+                              const IconComponent = p.icon;
+                              return (
+                                <Link
+                                  key={p.href}
+                                  href={p.href}
+                                  onClick={() => setIsSearchFocused(false)}
+                                  className="flex items-center justify-between p-2 rounded-xl hover:bg-white/10 transition-colors group cursor-pointer"
+                                >
+                                  <div className="flex items-center gap-2.5">
+                                    <div className="w-7 h-7 rounded-lg bg-cyan-400/20 text-cyan-300 flex items-center justify-center shrink-0">
+                                      <IconComponent className="w-4 h-4" />
+                                    </div>
+                                    <div>
+                                      <span className="text-xs font-extrabold text-white group-hover:text-cyan-300 block">
+                                        {p.name}
+                                      </span>
+                                      <span className="text-[10px] text-slate-300">{p.description}</span>
+                                    </div>
+                                  </div>
+                                  <ArrowRight className="w-3.5 h-3.5 text-slate-400 group-hover:text-cyan-300 group-hover:translate-x-0.5 transition-all" />
+                                </Link>
+                              );
+                            })}
+                          </div>
+                        </div>
                       )}
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
 
-            <span className="text-white/40 font-light">|</span>
-
-            {/* Selector de Ciudad */}
-            <div className="relative flex items-center">
-              <button
-                onClick={() => setIsCityDropdownOpen(!isCityDropdownOpen)}
-                className="flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs sm:text-sm font-black text-white hover:bg-white/25 transition-all cursor-pointer"
-              >
-                <Building2 className="w-4 h-4 text-cyan-300 shrink-0" />
-                <span className="truncate max-w-[170px]">{currentCityObj.name}</span>
-                <ChevronDown className="w-3.5 h-3.5 text-cyan-200" />
-              </button>
-
-              {isCityDropdownOpen && (
-                <div className="absolute top-full left-0 mt-2 w-60 max-h-64 overflow-y-auto bg-slate-900/95 backdrop-blur-xl border border-white/20 rounded-2xl shadow-2xl py-2 z-50 animate-in fade-in duration-100 scrollbar-none">
-                  <button
-                    type="button"
-                    onClick={() => handleCitySelect('all', 'Todas las ciudades')}
-                    className={`w-full text-left px-4 py-2 text-xs flex items-center justify-between hover:bg-white/10 transition-colors ${
-                      selectedCity === 'all' ? 'font-black text-cyan-300 bg-white/10' : 'text-slate-200'
-                    }`}
-                  >
-                    <span>Todas las ciudades</span>
-                    {selectedCity === 'all' && <span className="w-2 h-2 rounded-full bg-cyan-400" />}
-                  </button>
-                  {availableCities.map((city) => (
-                    <button
-                      key={city.id}
-                      type="button"
-                      onClick={() => handleCitySelect(city.id, city.name)}
-                      className={`w-full text-left px-4 py-2 text-xs flex items-center justify-between hover:bg-white/10 transition-colors ${
-                        selectedCity === city.id ? 'font-black text-cyan-300 bg-white/10' : 'text-slate-200'
-                      }`}
-                    >
-                      <span>{city.name}</span>
-                      {selectedCity === city.id && <span className="w-2 h-2 rounded-full bg-cyan-400" />}
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Buscador Global Interactivo (Desktop) - CONSISTENT HEIGHT h-12 */}
-          <div ref={searchContainerRef} className="hidden md:block flex-1 max-w-xl relative z-30">
-            <form onSubmit={handleSearchSubmit} className="relative flex items-center h-12">
-              <input
-                type="text"
-                placeholder="Buscá productos, comercios, categorías, secciones..."
-                value={searchQuery}
-                onFocus={() => setIsSearchFocused(true)}
-                onChange={(e) => {
-                  setSearchQuery(e.target.value);
-                  setIsSearchFocused(true);
-                }}
-                className="w-full h-full bg-white border border-slate-200 rounded-2xl pl-4 pr-14 text-xs sm:text-sm font-extrabold text-slate-900 placeholder-slate-400 focus:outline-hidden focus:ring-2 focus:ring-[#00ADB5] focus:bg-white transition-all shadow-lg"
-              />
-              <button
-                type="submit"
-                className="absolute right-1 top-1 bottom-1 bg-gradient-to-r from-[#00ADB5] to-[#0047BA] hover:from-[#00E5E8] hover:to-[#00ADB5] text-white font-black px-4 rounded-xl flex items-center justify-center transition-all shadow-md cursor-pointer"
-                aria-label="Buscar"
-              >
-                <Search className="w-4 h-4 sm:w-5 sm:h-5" />
-              </button>
-            </form>
-
-            {/* Desplegable de Resultados de Búsqueda en Vivo */}
-            {isSearchFocused && liveSearchResults && (
-              <div className="absolute top-full left-0 right-0 mt-2 bg-slate-900/95 backdrop-blur-2xl border border-white/20 rounded-2xl shadow-2xl overflow-hidden z-50 max-h-[80vh] overflow-y-auto animate-in fade-in duration-150 text-white">
-                {liveSearchResults.totalCount === 0 ? (
-                  <div className="p-6 text-center text-slate-300 space-y-2">
-                    <Search className="w-8 h-8 text-slate-400 mx-auto" />
-                    <p className="text-xs font-bold text-slate-100">No encontramos coincidencias exactas</p>
-                    <p className="text-[11px] text-slate-400">Presioná Enter para buscar &ldquo;{searchQuery}&rdquo; en el catálogo general.</p>
-                  </div>
-                ) : (
-                  <div className="divide-y divide-white/10">
-                    
-                    {/* Secciones / Páginas */}
-                    {liveSearchResults.pages.length > 0 && (
-                      <div className="p-3 bg-white/5">
-                        <span className="text-[10px] font-black uppercase tracking-wider text-cyan-300 block mb-2">
-                          Secciones del Sitio
-                        </span>
-                        <div className="space-y-1">
-                          {liveSearchResults.pages.map((p) => {
-                            const IconComponent = p.icon;
-                            return (
+                      {/* Comercios */}
+                      {liveSearchResults.commerces.length > 0 && (
+                        <div className="p-3">
+                          <span className="text-[10px] font-black uppercase tracking-wider text-cyan-300 block mb-2">
+                            Comercios & Locales ({liveSearchResults.commerces.length})
+                          </span>
+                          <div className="space-y-1">
+                            {liveSearchResults.commerces.map((c) => (
                               <Link
-                                key={p.href}
-                                href={p.href}
+                                key={c.id}
+                                href={`/comercio/${c.slug}`}
                                 onClick={() => setIsSearchFocused(false)}
                                 className="flex items-center justify-between p-2 rounded-xl hover:bg-white/10 transition-colors group cursor-pointer"
                               >
                                 <div className="flex items-center gap-2.5">
-                                  <div className="w-7 h-7 rounded-lg bg-cyan-400/20 text-cyan-300 flex items-center justify-center shrink-0">
-                                    <IconComponent className="w-4 h-4" />
+                                  <div className="relative w-8 h-8 rounded-lg overflow-hidden border border-white/20 bg-white shrink-0">
+                                    <img src={c.logoUrl} alt={c.name} className="w-full h-full object-cover" />
                                   </div>
                                   <div>
                                     <span className="text-xs font-extrabold text-white group-hover:text-cyan-300 block">
-                                      {p.name}
+                                      {c.name}
                                     </span>
-                                    <span className="text-[10px] text-slate-300">{p.description}</span>
+                                    <span className="text-[10px] text-slate-300">{c.category} • {c.cityName}</span>
                                   </div>
                                 </div>
-                                <ArrowRight className="w-3.5 h-3.5 text-slate-400 group-hover:text-cyan-300 group-hover:translate-x-0.5 transition-all" />
+                                <span className="text-[10px] font-bold text-cyan-300 bg-white/10 px-2 py-0.5 rounded-md">
+                                  Ver Perfil
+                                </span>
                               </Link>
-                            );
-                          })}
+                            ))}
+                          </div>
                         </div>
-                      </div>
-                    )}
+                      )}
 
-                    {/* Comercios */}
-                    {liveSearchResults.commerces.length > 0 && (
-                      <div className="p-3">
-                        <span className="text-[10px] font-black uppercase tracking-wider text-cyan-300 block mb-2">
-                          Comercios & Locales ({liveSearchResults.commerces.length})
-                        </span>
-                        <div className="space-y-1">
-                          {liveSearchResults.commerces.map((c) => (
-                            <Link
-                              key={c.id}
-                              href={`/comercio/${c.slug}`}
-                              onClick={() => setIsSearchFocused(false)}
-                              className="flex items-center justify-between p-2 rounded-xl hover:bg-white/10 transition-colors group cursor-pointer"
-                            >
-                              <div className="flex items-center gap-2.5">
-                                <div className="relative w-8 h-8 rounded-lg overflow-hidden border border-white/20 bg-white shrink-0">
-                                  <img src={c.logoUrl} alt={c.name} className="w-full h-full object-cover" />
+                      {/* Productos */}
+                      {liveSearchResults.products.length > 0 && (
+                        <div className="p-3">
+                          <span className="text-[10px] font-black uppercase tracking-wider text-emerald-400 block mb-2">
+                            Productos & Ofertas ({liveSearchResults.products.length})
+                          </span>
+                          <div className="space-y-1">
+                            {liveSearchResults.products.map((p) => (
+                              <Link
+                                key={p.id}
+                                href={`/producto/${p.slug}`}
+                                onClick={() => setIsSearchFocused(false)}
+                                className="flex items-center justify-between p-2 rounded-xl hover:bg-white/10 transition-colors group cursor-pointer"
+                              >
+                                <div className="flex items-center gap-2.5">
+                                  <div className="relative w-8 h-8 rounded-lg overflow-hidden border border-white/20 bg-white shrink-0">
+                                    <img src={p.imageUrl} alt={p.title} className="w-full h-full object-cover" />
+                                  </div>
+                                  <div className="truncate max-w-[200px] sm:max-w-[260px]">
+                                    <span className="text-xs font-bold text-white group-hover:text-cyan-300 block truncate">
+                                      {p.title}
+                                    </span>
+                                    <span className="text-[10px] text-slate-300">{p.commerceName}</span>
+                                  </div>
                                 </div>
-                                <div>
-                                  <span className="text-xs font-extrabold text-white group-hover:text-cyan-300 block">
-                                    {c.name}
-                                  </span>
-                                  <span className="text-[10px] text-slate-300">{c.category} • {c.cityName}</span>
-                                </div>
-                              </div>
-                              <span className="text-[10px] font-bold text-cyan-300 bg-white/10 px-2 py-0.5 rounded-md">
-                                Ver Perfil
-                              </span>
-                            </Link>
-                          ))}
+                                <span className="text-xs font-black text-emerald-300 bg-emerald-950/60 px-2 py-0.5 rounded-md shrink-0 border border-emerald-500/30">
+                                  {p.price ? `$${p.price.toLocaleString('es-AR')}` : 'Consultar'}
+                                </span>
+                              </Link>
+                            ))}
+                          </div>
                         </div>
-                      </div>
-                    )}
+                      )}
 
-                    {/* Productos */}
-                    {liveSearchResults.products.length > 0 && (
-                      <div className="p-3">
-                        <span className="text-[10px] font-black uppercase tracking-wider text-emerald-400 block mb-2">
-                          Productos & Ofertas ({liveSearchResults.products.length})
-                        </span>
-                        <div className="space-y-1">
-                          {liveSearchResults.products.map((p) => (
-                            <Link
-                              key={p.id}
-                              href={`/producto/${p.slug}`}
-                              onClick={() => setIsSearchFocused(false)}
-                              className="flex items-center justify-between p-2 rounded-xl hover:bg-white/10 transition-colors group cursor-pointer"
-                            >
-                              <div className="flex items-center gap-2.5">
-                                <div className="relative w-8 h-8 rounded-lg overflow-hidden border border-white/20 bg-white shrink-0">
-                                  <img src={p.imageUrl} alt={p.title} className="w-full h-full object-cover" />
-                                </div>
-                                <div className="truncate max-w-[200px] sm:max-w-[260px]">
-                                  <span className="text-xs font-bold text-white group-hover:text-cyan-300 block truncate">
-                                    {p.title}
-                                  </span>
-                                  <span className="text-[10px] text-slate-300">{p.commerceName}</span>
-                                </div>
-                              </div>
-                              <span className="text-xs font-black text-emerald-300 bg-emerald-950/60 px-2 py-0.5 rounded-md shrink-0 border border-emerald-500/30">
-                                {p.price ? `$${p.price.toLocaleString('es-AR')}` : 'Consultar'}
-                              </span>
-                            </Link>
-                          ))}
-                        </div>
-                      </div>
-                    )}
+                      {/* Footer Ver Todos en Catálogo */}
+                      <Link
+                        href={`/catalogo?q=${encodeURIComponent(searchQuery)}`}
+                        onClick={() => setIsSearchFocused(false)}
+                        className="block p-3 text-center bg-cyan-950/80 hover:bg-cyan-900/90 text-cyan-300 text-xs font-black transition-colors"
+                      >
+                        Ver todos los resultados para &ldquo;{searchQuery}&rdquo; en el Catálogo →
+                      </Link>
 
-                    {/* Footer Ver Todos en Catálogo */}
-                    <Link
-                      href={`/catalogo?q=${encodeURIComponent(searchQuery)}`}
-                      onClick={() => setIsSearchFocused(false)}
-                      className="block p-3 text-center bg-cyan-950/80 hover:bg-cyan-900/90 text-cyan-300 text-xs font-black transition-colors"
-                    >
-                      Ver todos los resultados para &ldquo;{searchQuery}&rdquo; en el Catálogo →
-                    </Link>
-
-                  </div>
-                )}
-              </div>
-            )}
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
           </div>
 
-          {/* User Actions */}
-          <div className="flex items-center gap-2 sm:gap-4 relative z-30 shrink-0">
+          {/* User Actions - Ocupa de Columna 6 a Columna 8 alineado al extremo derecho */}
+          <div className="col-span-8 md:col-span-3 flex items-center gap-2 sm:gap-4 relative z-30 shrink-0 justify-end ml-auto">
             {!currentUser ? (
               <Link 
                 href="/login" 
-                className="h-10 sm:h-12 flex items-center gap-1.5 sm:gap-2 bg-white/15 hover:bg-white/25 text-white hover:text-cyan-200 border border-white/30 px-3 sm:px-4 rounded-2xl text-xs font-extrabold transition-all shadow-md cursor-pointer shrink-0 backdrop-blur-md"
+                className="h-13 sm:h-14 flex items-center gap-1.5 sm:gap-2 bg-white/15 hover:bg-white/25 text-white hover:text-cyan-200 border border-white/30 px-3 sm:px-4 rounded-2xl text-xs font-extrabold transition-all shadow-md cursor-pointer shrink-0 backdrop-blur-md"
                 title="Ingresar o Registrarse"
               >
                 <User className="w-4 h-4 text-cyan-200 shrink-0" />
@@ -589,7 +550,7 @@ export function ClientHeader() {
             ) : (
               <Link 
                 href="/admin" 
-                className="h-10 sm:h-12 flex items-center gap-2.5 bg-white/15 hover:bg-white/25 border border-white/30 px-2.5 sm:px-3 rounded-2xl transition-all shadow-md cursor-pointer group shrink-0 backdrop-blur-md"
+                className="h-13 sm:h-14 flex items-center gap-2.5 bg-white/15 hover:bg-white/25 border border-white/30 px-3 sm:px-4 rounded-2xl transition-all shadow-md cursor-pointer group shrink-0 backdrop-blur-md"
                 title={`Panel de Administración: ${userCommerce?.name || 'Mi Negocio'}`}
               >
                 {userCommerce?.logoUrl ? (
@@ -631,9 +592,9 @@ export function ClientHeader() {
       </div>
 
       {/* Secondary Horizontal Navigation Bar - Floating Individual Badges */}
-      <nav className="hidden md:block py-2 bg-transparent relative z-10">
-        <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8">
-          <ul className="flex items-center justify-between gap-1 lg:gap-1.5 text-[11px] xl:text-xs font-bold scrollbar-none py-0.5">
+      <nav className="hidden md:block py-2.5 bg-transparent relative z-10">
+        <div className="max-w-7xl lg:max-w-none mx-auto px-4 sm:px-6 lg:px-4">
+          <ul className="grid grid-cols-8 gap-1.5 lg:gap-2 xl:gap-3 w-full items-center text-center">
             {navLinks.map((link) => {
               const isActive = pathname === link.href || (link.slug !== '' && pathname?.includes(`/${link.slug}`));
 
@@ -641,26 +602,26 @@ export function ClientHeader() {
                 return (
                   <li 
                     key={link.name}
-                    className="relative"
+                    className="relative w-full"
                     onMouseEnter={handleCategoriesMouseEnter}
                     onMouseLeave={handleCategoriesMouseLeave}
                   >
                     <Link
                       href={link.href}
-                      className={`px-2.5 lg:px-3 py-1.5 rounded-xl flex items-center gap-1 transition-all whitespace-nowrap ${
+                      className={`w-full h-11 xl:h-12 px-1 lg:px-2 xl:px-3 rounded-2xl flex items-center justify-center gap-1 transition-all text-xs lg:text-[13px] xl:text-sm 2xl:text-base font-black tracking-tight text-center leading-tight ${
                         isActive
-                          ? 'bg-gradient-to-r from-cyan-300 to-cyan-400 text-slate-950 font-black shadow-lg border border-white/60 scale-[1.04]'
-                          : 'bg-white/15 hover:bg-white/30 border border-white/25 text-white font-extrabold backdrop-blur-md shadow-xs hover:scale-[1.02] hover:shadow-md'
+                          ? 'bg-gradient-to-r from-cyan-300 to-cyan-400 text-slate-950 shadow-lg border border-white/60 scale-[1.03]'
+                          : 'bg-white/15 hover:bg-white/30 border border-white/25 text-white backdrop-blur-md shadow-xs hover:scale-[1.02] hover:shadow-md'
                       }`}
                     >
                       <span>{link.name}</span>
-                      <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${isCategoriesHovered ? 'rotate-180 text-cyan-300' : 'text-white/70'}`} />
+                      <ChevronDown className={`w-3.5 h-3.5 xl:w-4 xl:h-4 transition-transform duration-200 shrink-0 ${isCategoriesHovered ? 'rotate-180 text-cyan-300' : 'text-white/80'}`} />
                     </Link>
 
                     {/* Desplegable de Categorías al pasar el mouse */}
                     {isCategoriesHovered && (
                       <div 
-                        className="absolute top-full left-0 mt-2 w-[540px] bg-slate-950/95 backdrop-blur-2xl border border-white/20 rounded-3xl p-4 shadow-2xl z-50 animate-in fade-in slide-in-from-top-2 duration-150 grid grid-cols-2 gap-2 text-white"
+                        className="absolute top-full left-0 mt-2 w-[540px] bg-slate-950/95 backdrop-blur-2xl border border-white/20 rounded-3xl p-4 shadow-2xl z-50 animate-in fade-in slide-in-from-top-2 duration-150 grid grid-cols-2 gap-2 text-white text-left"
                         onMouseEnter={handleCategoriesMouseEnter}
                         onMouseLeave={handleCategoriesMouseLeave}
                       >
@@ -709,16 +670,15 @@ export function ClientHeader() {
               }
 
               return (
-                <li key={link.name}>
+                <li key={link.name} className="w-full">
                   <Link
                     href={link.href}
-                    className={`px-2.5 lg:px-3 py-1.5 rounded-xl flex items-center gap-1 transition-all whitespace-nowrap ${
+                    className={`w-full h-11 xl:h-12 px-1 lg:px-2 xl:px-3 rounded-2xl flex items-center justify-center gap-1 transition-all text-xs lg:text-[13px] xl:text-sm 2xl:text-base font-black tracking-tight text-center leading-tight ${
                       isActive
-                        ? 'bg-gradient-to-r from-cyan-300 to-cyan-400 text-slate-950 font-black shadow-lg border border-white/60 scale-[1.04]'
-                        : 'bg-white/15 hover:bg-white/30 border border-white/25 text-white font-extrabold backdrop-blur-md shadow-xs hover:scale-[1.02] hover:shadow-md'
+                        ? 'bg-gradient-to-r from-cyan-300 to-cyan-400 text-slate-950 shadow-lg border border-white/60 scale-[1.03]'
+                        : 'bg-white/15 hover:bg-white/30 border border-white/25 text-white backdrop-blur-md shadow-xs hover:scale-[1.02] hover:shadow-md'
                     }`}
                   >
-                    {link.name === 'Sorteos ON MÁS' && <Sparkles className={`w-3.5 h-3.5 ${isActive ? 'text-amber-600' : 'text-amber-300'}`} />}
                     <span>{link.name}</span>
                   </Link>
                 </li>
@@ -730,7 +690,7 @@ export function ClientHeader() {
 
       {/* Mobile Drawer Menu */}
       {isMobileMenuOpen && (
-        <div className="md:hidden bg-slate-900/95 backdrop-blur-2xl border-t border-white/10 px-4 pt-4 pb-6 space-y-4 animate-in fade-in duration-200 text-white">
+        <div className="md:hidden relative z-20 bg-slate-900/95 backdrop-blur-2xl border-t border-white/10 px-4 pt-4 pb-6 space-y-4 animate-in fade-in duration-200 text-white">
           
           {/* User Account Mobile CTA */}
           {!currentUser ? (
@@ -787,22 +747,6 @@ export function ClientHeader() {
             </div>
           </div>
 
-          <div className="space-y-2">
-            <label className="block text-xs font-bold text-slate-300">Ciudad</label>
-            <select
-              value={selectedCity}
-              onChange={(e) => setSelectedCity(e.target.value)}
-              className="w-full bg-slate-800 border border-white/20 rounded-xl px-3 py-2 text-xs text-white font-medium"
-            >
-              <option value="all">Todas las ciudades ({currentProvinceObj.name})</option>
-              {availableCities.map((city) => (
-                <option key={city.id} value={city.id}>
-                  {city.name}
-                </option>
-              ))}
-            </select>
-          </div>
-
           {/* Mobile Search Form */}
           <form onSubmit={handleSearchSubmit} className="relative">
             <input
@@ -817,15 +761,14 @@ export function ClientHeader() {
             </button>
           </form>
 
-          <div className="flex flex-col gap-1 pt-2 border-t border-white/10">
+          <div className="flex flex-col gap-1.5 pt-2 border-t border-white/10">
             {navLinks.map((link) => (
               <Link
                 key={link.name}
                 href={link.href}
                 onClick={() => setIsMobileMenuOpen(false)}
-                className="text-xs font-bold py-2 px-3 rounded-lg hover:bg-white/10 text-slate-100 hover:text-cyan-300 flex items-center gap-2"
+                className="text-sm font-black py-2.5 px-3.5 rounded-xl hover:bg-white/10 text-slate-100 hover:text-cyan-300 flex items-center gap-2"
               >
-                {link.name === 'Sorteos ON MÁS' && <Sparkles className="w-3.5 h-3.5 text-amber-300" />}
                 <span>{link.name}</span>
               </Link>
             ))}

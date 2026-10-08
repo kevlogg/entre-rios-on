@@ -16,18 +16,15 @@ export function Footer() {
           {/* Brand Col (2 cols) */}
           <div className="lg:col-span-2 space-y-4">
             <Link href="/" className="inline-block">
-              <div className="flex flex-col items-center justify-center bg-white/95 hover:bg-white backdrop-blur-md border border-white/50 px-5 py-2 rounded-2xl shadow-xl transition-all group">
-                <div className="relative w-44 h-11 sm:w-48 sm:h-12">
+              <div className="flex items-center justify-center bg-white/95 hover:bg-white backdrop-blur-md border border-white/50 px-5 py-2.5 rounded-2xl shadow-xl transition-all group">
+                <div className="relative w-48 h-12 sm:w-56 sm:h-14">
                   <Image
-                    src="/logo.png"
+                    src="/logo1.png"
                     alt="ON MÁS Portal"
                     fill
                     className="object-contain"
                   />
                 </div>
-                <span className="text-[9px] font-black uppercase tracking-[0.3em] text-[#0047BA] group-hover:text-[#00ADB5] transition-colors -mt-0.5">
-                  PORTAL
-                </span>
               </div>
             </Link>
 

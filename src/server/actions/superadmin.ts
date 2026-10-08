@@ -1120,63 +1120,6 @@ export async function approveCashPaymentAction(
   }
 }
 
-export async function activateFreePlanAction(
-  commerceId?: string,
-  commerceName?: string
-): Promise<{ success: boolean; message: string }> {
-  try {
-    const adminSupabase = getAdminClient();
-    const supabaseUserClient = await createClient();
-    const supabase = adminSupabase || supabaseUserClient;
-
-    const { data: { user } } = await supabaseUserClient.auth.getUser();
-
-    let targetId = commerceId;
-
-    if (!targetId && user) {
-      const { data: userComm } = await supabase
-        .from('commerces')
-        .select('id')
-        .eq('owner_id', user.id)
-        .order('created_at', { ascending: false })
-        .limit(1)
-        .maybeSingle();
-      if (userComm) {
-        targetId = userComm.id;
-      }
-    }
-
-    if (targetId) {
-      await supabase
-        .from('commerces')
-        .update({
-          is_subscription_active: true,
-          subscription_tier: 'GRATIS',
-          updated_at: new Date().toISOString(),
-        })
-        .eq('id', targetId);
-    } else if (commerceName) {
-      await supabase
-        .from('commerces')
-        .update({
-          is_subscription_active: true,
-          subscription_tier: 'GRATIS',
-          updated_at: new Date().toISOString(),
-        })
-        .ilike('name', `%${commerceName}%`);
-    } else {
-      return { success: false, message: 'No se encontró el comercio a activar.' };
-    }
-
-    revalidatePath('/admin');
-    revalidatePath('/superadmin');
-    revalidatePath('/comercios');
-    return { success: true, message: '¡Plan Gratis activado con éxito! Podés crear tu perfil y publicar 1 producto.' };
-  } catch (err) {
-    return { success: false, message: `Error activando Plan Gratis: ${(err as Error).message}` };
-  }
-}
-
 export async function deleteCashPaymentAction(
   paymentId: string
 ): Promise<{ success: boolean; message: string }> {
@@ -1597,3 +1540,87 @@ export async function saveSectionCardsAction(cards: any[]): Promise<{ success: b
 
 
 
+export async function getHeroBadgeAction(): Promise<{ success: boolean; data: any }> {
+  try {
+    const adminSupabase = getAdminClient();
+    const client = adminSupabase || (await createClient());
+
+    const { data, error } = await client.storage.from('commerces').download('config/hero_badge.json');
+    if (!error && data) {
+      const text = await data.text();
+      const parsed = JSON.parse(text);
+      if (parsed && typeof parsed === 'object') {
+        return { success: true, data: parsed };
+      }
+    }
+  } catch (err) {
+    console.warn('Error fetching hero badge config from Supabase storage:', err);
+  }
+  return { success: false, data: null };
+}
+
+export async function saveHeroBadgeAction(badgeStyle: any): Promise<{ success: boolean; message: string }> {
+  try {
+    const adminSupabase = getAdminClient();
+    const client = adminSupabase || (await createClient());
+
+    const buffer = Buffer.from(JSON.stringify(badgeStyle, null, 2));
+    const { error } = await client.storage.from('commerces').upload('config/hero_badge.json', buffer, {
+      contentType: 'application/json',
+      upsert: true,
+    });
+
+    if (error) {
+      return { success: false, message: `Error guardando badge del hero en Supabase: ${error.message}` };
+    }
+
+    revalidatePath('/');
+    revalidatePath('/superadmin');
+    return { success: true, message: 'Estilos del badge del hero guardados en Supabase.' };
+  } catch (err) {
+    return { success: false, message: `Error: ${(err as Error).message}` };
+  }
+}
+
+export async function getSideBannersAction(): Promise<{ success: boolean; data: any[] }> {
+  try {
+    const adminSupabase = getAdminClient();
+    const client = adminSupabase || (await createClient());
+
+    const { data, error } = await client.storage.from('commerces').download('config/side_banners.json');
+    if (!error && data) {
+      const text = await data.text();
+      const parsed = JSON.parse(text);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        return { success: true, data: parsed };
+      }
+    }
+  } catch (err) {
+    console.warn('Error fetching side banners config from Supabase storage:', err);
+  }
+  return { success: false, data: [] };
+}
+
+export async function saveSideBannersAction(banners: any[]): Promise<{ success: boolean; message: string }> {
+  try {
+    const adminSupabase = getAdminClient();
+    const client = adminSupabase || (await createClient());
+
+    const buffer = Buffer.from(JSON.stringify(banners, null, 2));
+    const { error } = await client.storage.from('commerces').upload('config/side_banners.json', buffer, {
+      contentType: 'application/json',
+      upsert: true,
+    });
+
+    if (error) {
+      return { success: false, message: `Error guardando publicidad lateral en Supabase: ${error.message}` };
+    }
+
+    revalidatePath('/');
+    revalidatePath('/inicio');
+    revalidatePath('/superadmin');
+    return { success: true, message: 'Banners de publicidad lateral guardados en Supabase.' };
+  } catch (err) {
+    return { success: false, message: `Error: ${(err as Error).message}` };
+  }
+}

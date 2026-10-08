@@ -34,22 +34,21 @@ export function CityExploreBar({ provinceId = 'santa-fe' }: CityExploreBarProps)
   };
 
   return (
-    <section id="ciudades" className="relative w-full bg-gradient-on-mas py-6 sm:py-10 my-4 shadow-xl overflow-hidden">
-      <PageBackground />
-      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-5">
+    <section id="ciudades" className="relative w-full py-4 sm:py-6 my-2">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-4">
         
         {/* Header Row: Clean responsive ordering for mobile */}
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 border-b border-white/20 pb-3 sm:pb-4">
-          <h2 className="text-xl sm:text-3xl font-black text-white flex items-center gap-2">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 border-b border-slate-300 pb-3">
+          <h2 className="text-xl sm:text-2xl font-black text-slate-900 flex items-center gap-2">
             <span>Explorá por ciudad</span>
-            <span className="text-cyan-300 font-black">• {currentProvince.name}</span>
+            <span className="text-[#0047BA] font-black">• {currentProvince.name}</span>
           </h2>
           <Link 
             href={`/${currentProvince.slug}`} 
-            className="text-xs sm:text-sm font-extrabold text-cyan-200 hover:text-white flex items-center gap-1 transition-colors self-start sm:self-auto"
+            className="text-xs sm:text-sm font-extrabold text-[#0047BA] hover:text-[#002878] flex items-center gap-1 transition-colors self-start sm:self-auto"
           >
             <span>Ver todas las ciudades de {currentProvince.name}</span>
-            <ArrowRight className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-cyan-300" />
+            <ArrowRight className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#0047BA]" />
           </Link>
         </div>
 

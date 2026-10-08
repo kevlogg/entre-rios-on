@@ -160,12 +160,11 @@ export function PlansManager() {
 
       {/* Plans Form */}
       <form onSubmit={handleSave} className="space-y-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 items-stretch">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 items-stretch">
           {(plans || []).map((plan) => {
             const isOro = plan.id === 'oro';
             const isPlata = plan.id === 'plata';
             const isBronce = plan.id === 'bronce';
-            const isGratis = plan.id === 'gratis';
 
             return (
               <div
@@ -175,8 +174,6 @@ export function PlansManager() {
                     ? 'border-amber-400 bg-gradient-to-b from-amber-50/30 to-white'
                     : isPlata
                     ? 'border-[#00ADB5] bg-gradient-to-b from-cyan-50/30 to-white'
-                    : isGratis
-                    ? 'border-emerald-400 bg-gradient-to-b from-emerald-50/30 to-white'
                     : 'border-slate-200 bg-white'
                 }`}
               >

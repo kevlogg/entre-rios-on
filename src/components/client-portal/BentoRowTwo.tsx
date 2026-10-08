@@ -8,7 +8,8 @@ import { useSectionCards } from '@/lib/services/section-cards-store';
 
 export function BentoRowTwo() {
   const cards = useSectionCards();
-  const rowTwoCards = cards.slice(4, 8);
+  const half = Math.ceil(cards.length / 2);
+  const rowTwoCards = cards.slice(half > 0 ? half : 4);
 
   return (
     <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-3 pt-1 sm:pb-4 sm:pt-1">
@@ -23,15 +24,14 @@ export function BentoRowTwo() {
               alt={card.title}
               fill
               sizes="(max-width: 1024px) 50vw, 25vw"
-              className="object-cover object-center group-hover:scale-105 transition-transform duration-700 opacity-65"
+              className="object-cover object-center group-hover:scale-105 transition-transform duration-700"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/60 to-transparent" />
 
             <div className="relative z-10 space-y-2">
-              <h3 className="text-lg font-extrabold text-white tracking-tight">
+              <h3 className="text-lg font-extrabold text-white tracking-tight [text-shadow:0_2px_8px_rgba(0,0,0,0.75)]">
                 {card.title}
               </h3>
-              <p className="text-xs text-slate-200 font-medium line-clamp-2">
+              <p className="text-xs text-white font-semibold line-clamp-2 [text-shadow:0_1px_6px_rgba(0,0,0,0.8)]">
                 {card.subtitle}
               </p>
 

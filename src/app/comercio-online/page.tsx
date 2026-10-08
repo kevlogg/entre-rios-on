@@ -63,9 +63,9 @@ export default function ComercioOnlinePage() {
               <div className="w-12 h-12 bg-cyan-50 text-[#00ADB5] rounded-2xl flex items-center justify-center mx-auto">
                 <Store className="w-6 h-6" />
               </div>
-              <h3 className="text-base font-black text-slate-900">1. Creá tu Perfil Gratis</h3>
+              <h3 className="text-base font-black text-slate-900">1. Creá tu Perfil</h3>
               <p className="text-xs text-slate-600 font-medium leading-relaxed">
-                Registrate sin costo, cargá los datos de tu comercio y publicá tu primer producto gratis.
+                Registrate, elegí tu plan, cargá los datos de tu comercio y publicá tus productos.
               </p>
             </div>
 

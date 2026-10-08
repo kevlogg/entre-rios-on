@@ -14,6 +14,8 @@ import { PageBackground } from '@/components/common/PageBackground';
 import { getProvinceBySlug } from '@/lib/constants/locations';
 import { Product } from '@/types';
 
+import { StickySideBanners } from '@/components/client-portal/StickySideBanners';
+
 interface ClientHomeContainerProps {
   provinceId?: string;
   initialProducts?: Product[];
@@ -47,24 +49,25 @@ export function ClientHomeContainer({ provinceId, initialProducts = [] }: Client
 
   return (
     <div className="w-full">
-      {/* 1. SECCIÓN SUPERIOR UNIFICADA: Header + Hero (Mismo Contenedor y Degradé de Marca ON MÁS) */}
-      <div className="relative bg-gradient-on-mas pb-6 sm:pb-8 shadow-lg w-full">
-        <PageBackground />
-        <div className="relative z-10 space-y-2 sm:space-y-4 w-full">
-          <ClientHeader />
-          <ClientHeroBanner provinceId={activeProvince} />
-        </div>
+      {/* 1. Header con fondo degradé de marca ON MÁS */}
+      <ClientHeader withBackground={true} />
+
+      {/* 2. Hero Banner (Sin fondo degradé, directamente sobre la página) */}
+      <div className="w-full py-2">
+        <ClientHeroBanner provinceId={activeProvince} />
       </div>
 
-      {/* 2. ÁREA RESTANTE CON FONDO GRIS SUAVE LISO (#e9ecef) */}
-      <div className="bg-[#e9ecef] w-full py-2 sm:py-4 space-y-2 text-slate-900">
+      {/* 3. ÁREA RESTANTE CON FONDO GRIS SUAVE LISO (#e9ecef) - Arranca justo en Explorá por Ciudad */}
+      <div className="bg-[#e9ecef] w-full py-2 sm:py-4 space-y-2 text-slate-900 relative">
+        {/* Dynamic Skyscraper Side Banners (Márgenes laterales arranca en Explorá por Ciudad y frena antes del Footer) */}
+        <StickySideBanners />
         
-        {/* A. Abajo del Hero: Las 8 Cards Grandes Cuadradas (BentoRowOne + BentoRowTwo) */}
+        {/* A. Debajo del Hero: Explorá por Ciudad (Sin fondo degradé) */}
+        <CityExploreBar provinceId={activeProvince} />
+
+        {/* B. Luego: Las 8 Cards Grandes (BentoRowOne + BentoRowTwo) */}
         <BentoRowOne />
         <BentoRowTwo />
-
-        {/* B. Por debajo: Explorá por Ciudad */}
-        <CityExploreBar provinceId={activeProvince} />
 
         {/* C. Abajo: Categorías (sobre el mismo gris de la página) */}
         <CategoryIconBar

@@ -59,7 +59,7 @@ export const metadata: Metadata = {
     siteName: 'ON MÁS Portal',
     images: [
       {
-        url: '/logo.png',
+        url: '/logo1.png',
         width: 1200,
         height: 630,
         alt: 'ON MÁS Logo Oficial',
@@ -70,7 +70,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'ON MÁS Portal | Comercio, Turismo y Medios',
     description: 'Directorio Comercial B2B, Catálogo directo a WhatsApp y Portal de Medios y Turismo.',
-    images: ['/logo.png'],
+    images: ['/logo1.png'],
   },
 };
 
@@ -84,7 +84,7 @@ export default function RootLayout({
     '@type': 'Organization',
     name: 'ON MÁS Portal',
     url: 'https://onmas.gob.ar',
-    logo: 'https://entreriosonmas.gob.ar/logo.png',
+    logo: 'https://entreriosonmas.gob.ar/logo1.png',
     sameAs: [
       'https://facebook.com',
       'https://instagram.com/onmasportal',

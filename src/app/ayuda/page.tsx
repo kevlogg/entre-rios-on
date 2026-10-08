@@ -12,8 +12,8 @@ export const metadata: Metadata = {
 
 const FAQS = [
   {
-    q: '¿Cómo puedo publicar mi comercio o negocio gratis?',
-    a: 'Podés registrarte creando una cuenta en el portal con el Plan Gratis, que te permite crear tu perfil completo de comercio y publicar 1 producto o servicio sin costo.',
+    q: '¿Cómo puedo publicar mi comercio o negocio?',
+    a: 'Podés registrarte creando una cuenta en el portal y contratando uno de nuestros planes (Bronce, Plata u Oro) para crear tu perfil completo de comercio y publicar tu catálogo de productos o servicios.',
   },
   {
     q: '¿Cómo se realizan las ventas y contactos?',

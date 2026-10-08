@@ -12,22 +12,6 @@ export interface PlanConfigItem {
 
 export const DEFAULT_SUBSCRIPTION_PLANS: PlanConfigItem[] = [
   {
-    id: 'gratis',
-    name: 'Plan Gratis',
-    price: 0,
-    period: 'siempre',
-    badge: 'Sin Costo',
-    catalogLimitText: 'Catálogo de 1 sólo producto / servicio',
-    description: 'Perfil de comercio verificado con la publicación de 1 sólo producto o servicio.',
-    targetAudience: 'Comercios que desean probar el portal regional sin costo',
-    features: [
-      'Creación de perfil de comercio',
-      'Publicación de 1 sólo producto / servicio',
-      'Botón directo a WhatsApp (sin comisiones)',
-      'Presencia en directorio ON MÁS',
-    ],
-  },
-  {
     id: 'bronce',
     name: 'Plan Bronce',
     price: 29000,
