@@ -56,6 +56,43 @@ export async function createProductAction(productData: Partial<Product>): Promis
               };
             }
           }
+        } else {
+          // Si el usuario no tiene perfil de comercio creado en commerces, crearlo automáticamente
+          const commName = targetCommerceName || user.user_metadata?.full_name || 'Comercio Adherido';
+          const rawSlug = commName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || `comercio-${Date.now()}`;
+          const newSlug = `${rawSlug}-${Date.now().toString().slice(-4)}`;
+
+          const { data: createdComm } = await supabase
+            .from('commerces')
+            .insert({
+              name: commName,
+              slug: newSlug,
+              category: productData.category || 'Comercio General',
+              province_id: targetProvinceId || 'santa-fe',
+              city_id: targetCityId || 'rosario',
+              city_name: targetCityName || 'Rosario',
+              description: `Perfil comercial de ${commName} en el portal ON MÁS.`,
+              phone_whatsapp: targetPhone || '',
+              address: `${targetCityName || 'Rosario'}, Argentina`,
+              logo_url: '/images/city-rosario.jpg',
+              cover_url: '/images/city-rosario.jpg',
+              is_verified: true,
+              is_subscription_active: true,
+              owner_id: user.id,
+              created_at: new Date().toISOString(),
+              updated_at: new Date().toISOString(),
+            })
+            .select()
+            .single();
+
+          if (createdComm) {
+            targetCommerceId = createdComm.id;
+            targetCommerceName = createdComm.name;
+            if (!targetCityId) targetCityId = createdComm.city_id;
+            if (!targetCityName) targetCityName = createdComm.city_name;
+            if (!targetProvinceId) targetProvinceId = createdComm.province_id;
+            if (!targetPhone) targetPhone = createdComm.phone_whatsapp;
+          }
         }
       }
 
@@ -70,7 +107,7 @@ export async function createProductAction(productData: Partial<Product>): Promis
 
         if (fallbackComm) {
           targetCommerceId = fallbackComm.id;
-          if (!targetCommerceName) targetCommerceName = fallbackComm.name;
+          targetCommerceName = fallbackComm.name;
           if (!targetCityId) targetCityId = fallbackComm.city_id;
           if (!targetCityName) targetCityName = fallbackComm.city_name;
           if (!targetProvinceId) targetProvinceId = fallbackComm.province_id;

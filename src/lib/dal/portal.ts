@@ -785,26 +785,36 @@ export async function getFeaturedProducts(cityId?: string, categoryId?: string, 
           return activeCommerceIds.has(cId) || activeCommerceSlugs.has(cId) || activeCommerceNames.has(cName);
         });
 
-        return activeProducts.map((p) => ({
-          id: p.id,
-          title: p.title,
-          slug: p.slug,
-          price: p.price ? Number(p.price) : undefined,
-          currency: p.currency || 'ARS',
-          commerceId: p.commerce_id,
-          commerceName: p.commerce_name,
-          cityId: p.city_id,
-          cityName: p.city_name,
-          provinceId: p.province_id,
-          provinceName: p.province_name,
-          imageUrl: p.image_url,
-          category: p.category,
-          categoryId: p.category_id,
-          isFeatured: p.is_featured,
-          description: p.description,
-          phoneWhatsApp: p.phone_whatsapp,
-          whatsappMessageCustom: p.whatsapp_message_custom,
-        }));
+        const commerceMap = new Map<string, Commerce>();
+        activeCommerces.forEach((c) => {
+          if (c.id) commerceMap.set(c.id.toLowerCase(), c);
+          if (c.slug) commerceMap.set(c.slug.toLowerCase(), c);
+          if (c.name) commerceMap.set(c.name.toLowerCase(), c);
+        });
+
+        return activeProducts.map((p) => {
+          const matchedCommerce = p.commerce_id ? commerceMap.get(p.commerce_id.toLowerCase()) : (p.commerce_name ? commerceMap.get(p.commerce_name.toLowerCase()) : undefined);
+          return {
+            id: p.id,
+            title: p.title,
+            slug: p.slug,
+            price: p.price ? Number(p.price) : undefined,
+            currency: p.currency || 'ARS',
+            commerceId: matchedCommerce ? matchedCommerce.id : p.commerce_id,
+            commerceName: matchedCommerce ? matchedCommerce.name : p.commerce_name,
+            cityId: p.city_id,
+            cityName: p.city_name,
+            provinceId: p.province_id,
+            provinceName: p.province_name,
+            imageUrl: p.image_url,
+            category: p.category,
+            categoryId: p.category_id,
+            isFeatured: p.is_featured,
+            description: p.description,
+            phoneWhatsApp: p.phone_whatsapp,
+            whatsappMessageCustom: p.whatsapp_message_custom,
+          };
+        });
       }
     } catch (e) {
       console.warn('Fallback to mock products:', e);
