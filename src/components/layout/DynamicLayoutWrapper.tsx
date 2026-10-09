@@ -27,11 +27,13 @@ function DynamicLayoutContent({ children, heroContent }: DynamicLayoutWrapperPro
         )}
       </div>
 
-      {/* Main Content Area in Gray #e9ecef */}
-      <main className="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 text-slate-900 relative">
+      {/* Main Content Area in Gray #e9ecef with Sticky Side Banners */}
+      <div className="flex-1 w-full bg-[#e9ecef] relative">
         <StickySideBanners />
-        {children}
-      </main>
+        <main className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 text-slate-900">
+          {children}
+        </main>
+      </div>
 
       <ClientFooter />
     </div>

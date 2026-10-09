@@ -44,7 +44,7 @@ export function StickySideBanners() {
       {!isLeftDismissed && activeLeft && (
         <aside 
           aria-label="Publicidad Lateral Izquierda"
-          className="hidden xl:block absolute top-[84px] bottom-0 z-20 w-40 2xl:w-56 min-[1920px]:w-64 pointer-events-none transition-all duration-300"
+          className="hidden xl:block absolute top-0 bottom-0 z-20 w-40 2xl:w-56 min-[1920px]:w-64 pointer-events-none transition-all duration-300"
           style={{
             left: 'max(12px, calc(25vw - 320px - 128px))'
           }}
@@ -103,7 +103,7 @@ export function StickySideBanners() {
       {!isRightDismissed && activeRight && (
         <aside 
           aria-label="Publicidad Lateral Derecha"
-          className="hidden xl:block absolute top-[84px] bottom-0 z-20 w-40 2xl:w-56 min-[1920px]:w-64 pointer-events-none transition-all duration-300"
+          className="hidden xl:block absolute top-0 bottom-0 z-20 w-40 2xl:w-56 min-[1920px]:w-64 pointer-events-none transition-all duration-300"
           style={{
             right: 'max(12px, calc(25vw - 320px - 128px))'
           }}
