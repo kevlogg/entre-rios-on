@@ -61,11 +61,23 @@ html {
    Patrón: Cian ("ON") | Azul Eléctrico ("MÁS") | Azul Marino
    ============================================= */
 body {
-  background-color: #e9ecef;
-  color: #0f172a;
+  background-color: #e9ecef !important;
+  color: #0f172a !important;
   font-family: var(--font-inter), system-ui, -apple-system, sans-serif;
   margin: 0;
   padding: 0;
+  forced-color-adjust: none; /* Previene inversión de colores en móviles */
+}
+
+/* Forzar modo claro incluso si el SO pide oscuro */
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: light;
+  }
+  body {
+    background-color: #e9ecef !important;
+    color: #0f172a !important;
+  }
 }
 
 /* Bloqueo de desplazamiento horizontal únicamente en pantallas móviles */

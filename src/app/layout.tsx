@@ -94,7 +94,9 @@ export default function RootLayout({
   return (
     <html lang="es" className={`${inter.variable} ${caveat.variable}`}>
       <head>
-        <meta name="color-scheme" content="light only" />
+        <meta name="color-scheme" content="light" />
+        <meta name="supported-color-schemes" content="light" />
+        <meta name="theme-color" content="#e9ecef" />
         <link rel="icon" href="/favicon.ico" sizes="any" />
         <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
         <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
