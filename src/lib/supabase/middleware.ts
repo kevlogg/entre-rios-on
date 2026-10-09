@@ -44,12 +44,24 @@ export async function updateSession(request: NextRequest) {
     return supabaseResponse;
   }
 
-  // 2. Protege las rutas de /admin (Comercios/B2B) si no hay usuario activo de Supabase
-  if (!user && pathname.startsWith('/admin')) {
-    const url = request.nextUrl.clone();
-    url.pathname = '/login';
-    url.searchParams.set('redirectTo', pathname);
-    return NextResponse.redirect(url);
+  // 2. Protege las rutas de /admin (Comercios/B2B)
+  if (pathname.startsWith('/admin')) {
+    if (!user) {
+      const url = request.nextUrl.clone();
+      url.pathname = '/login';
+      url.searchParams.set('redirectTo', pathname);
+      return NextResponse.redirect(url);
+    }
+    
+    // Bloquear a los usuarios "particular" (consumidores finales)
+    const userType = user.user_metadata?.user_type;
+    const role = user.user_metadata?.role;
+    if (userType === 'particular' || role === 'PUBLIC_USER') {
+      const url = request.nextUrl.clone();
+      url.pathname = '/inicio';
+      url.searchParams.set('alert', 'commerce_only');
+      return NextResponse.redirect(url);
+    }
   }
 
   return supabaseResponse;

@@ -58,63 +58,10 @@ export default function AdminPage() {
           targetCommerce = userCommerces[0];
         }
 
-        // 3. Si el usuario no tiene registro aún en commerces por owner_id, intentar buscar si existe uno sin owner_id o crearlo
-        if (!targetCommerce) {
-          const merchantName =
-            user.user_metadata?.commerce_name ||
-            user.user_metadata?.full_name ||
-            user.email?.split('@')[0] ||
-            'Mi Empresa Comercial';
-          const cleanSlug = merchantName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || 'comercio';
-
-          const { data: existingUnlinked } = await supabase
-            .from('commerces')
-            .select('*')
-            .or(`slug.eq.${cleanSlug},slug.ilike.${cleanSlug}-%`)
-            .is('owner_id', null)
-            .order('created_at', { ascending: false })
-            .limit(1)
-            .maybeSingle();
-
-          if (existingUnlinked) {
-            const { data: updatedUnlinked } = await supabase
-              .from('commerces')
-              .update({ owner_id: user.id })
-              .eq('id', existingUnlinked.id)
-              .select()
-              .single();
-
-            if (updatedUnlinked) {
-              targetCommerce = updatedUnlinked;
-            }
-          }
-
-          if (!targetCommerce) {
-            const { data: createdCommerce } = await supabase
-              .from('commerces')
-              .insert({
-                name: merchantName,
-                slug: cleanSlug,
-                category: rawType === 'negocio_automotor' ? (user.user_metadata?.business_category || 'Negocio Automotor') : (rawType === 'agencia' ? 'Agencia Automotriz' : 'Particular'),
-                province_id: user.user_metadata?.province_id || 'santa-fe',
-                city_id: user.user_metadata?.city_id || 'rosario',
-                city_name: user.user_metadata?.city_name || 'Rosario',
-                description: `Perfil registrado en el portal ON MÁS.`,
-                phone_whatsapp: user.user_metadata?.phone_whatsapp || '',
-                address: '',
-                logo_url: '/images/city-rosario.jpg',
-                cover_url: '/images/city-rosario.jpg',
-                is_verified: true,
-                is_subscription_active: false,
-                owner_id: user.id,
-              })
-              .select()
-              .single();
-
-            if (createdCommerce) {
-              targetCommerce = createdCommerce;
-            }
-          }
+        // Se elimina la lógica de auto-creación porque los perfiles comerciales
+        // deben crearse estrictamente durante el flujo de registro.
+        if (!targetCommerce && user.user_metadata?.user_type !== 'particular') {
+          console.warn('Usuario comercial sin perfil en tabla commerces (error de registro).');
         }
 
         // 4. Resolver objeto Commerce utilizando datos reales del usuario
@@ -327,13 +274,15 @@ export default function AdminPage() {
                     </p>
                   </div>
 
-                  <button
-                    onClick={() => setActiveTab('catalog')}
-                    className="bg-white hover:bg-slate-100 text-[#004b87] px-5 py-3 rounded-2xl font-extrabold text-xs flex items-center gap-2 shadow-lg shrink-0 transition-transform active:scale-95 cursor-pointer"
-                  >
-                    <Store className="w-4 h-4 text-[#00a859]" />
-                    <span>Publicar Oferta</span>
-                  </button>
+                  {isSubscriptionActive && (
+                    <button
+                      onClick={() => setActiveTab('catalog')}
+                      className="bg-white hover:bg-slate-100 text-[#004b87] px-5 py-3 rounded-2xl font-extrabold text-xs flex items-center gap-2 shadow-lg shrink-0 transition-transform active:scale-95 cursor-pointer"
+                    >
+                      <Store className="w-4 h-4 text-[#00a859]" />
+                      <span>Publicar Oferta</span>
+                    </button>
+                  )}
                 </div>
 
                 {/* KPI Cards Row con métricas reales */}
@@ -343,25 +292,45 @@ export default function AdminPage() {
                   profileViewsCount={viewsCount}
                 />
 
-                {/* Quick Catalog Preview */}
-                <CatalogManager
-                  commerce={commerce}
-                  products={products}
-                  onAddProduct={handleAddProduct}
-                  onDeleteProduct={handleDeleteProduct}
-                />
+                {/* Quick Catalog Preview - Solo visible si la suscripción está activa */}
+                {isSubscriptionActive && (
+                  <CatalogManager
+                    commerce={commerce}
+                    products={products}
+                    onAddProduct={handleAddProduct}
+                    onDeleteProduct={handleDeleteProduct}
+                  />
+                )}
               </div>
             )}
 
             {/* TAB 2: CATALOG MANAGER */}
             {activeTab === 'catalog' && (
               <div className="animate-in fade-in duration-200">
-                <CatalogManager
-                  commerce={commerce}
-                  products={products}
-                  onAddProduct={handleAddProduct}
-                  onDeleteProduct={handleDeleteProduct}
-                />
+                {isSubscriptionActive ? (
+                  <CatalogManager
+                    commerce={commerce}
+                    products={products}
+                    onAddProduct={handleAddProduct}
+                    onDeleteProduct={handleDeleteProduct}
+                  />
+                ) : (
+                  <div className="bg-white rounded-3xl p-8 sm:p-12 border border-slate-200 shadow-sm text-center flex flex-col items-center justify-center space-y-4">
+                    <div className="w-16 h-16 bg-slate-100 text-slate-400 rounded-full flex items-center justify-center mb-2">
+                      <ShieldCheck className="w-8 h-8" />
+                    </div>
+                    <h2 className="text-xl font-black text-slate-800">Catálogo Bloqueado</h2>
+                    <p className="text-sm text-slate-500 max-w-md mx-auto">
+                      Para agregar productos y ofertas a tu catálogo, debés tener un plan de suscripción activo. 
+                    </p>
+                    <button
+                      onClick={() => setActiveTab('subscription')}
+                      className="mt-4 bg-[#0047BA] hover:bg-[#002878] text-white px-6 py-3 rounded-xl font-bold text-sm shadow-md transition-all active:scale-95"
+                    >
+                      Activar Plan Ahora
+                    </button>
+                  </div>
+                )}
               </div>
             )}
 

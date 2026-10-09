@@ -22,96 +22,53 @@ export async function createProductAction(productData: Partial<Product>): Promis
       let targetProvinceId = productData.provinceId;
       let targetPhone = productData.phoneWhatsApp;
 
-      if (user) {
-        const { data: userComm } = await supabase
-          .from('commerces')
-          .select('id, name, city_id, city_name, province_id, phone_whatsapp, subscription_tier')
-          .eq('owner_id', user.id)
-          .order('created_at', { ascending: false })
-          .limit(1)
-          .maybeSingle();
-
-        if (userComm) {
-          targetCommerceId = userComm.id;
-          if (!targetCommerceName) targetCommerceName = userComm.name;
-          if (!targetCityId) targetCityId = userComm.city_id;
-          if (!targetCityName) targetCityName = userComm.city_name;
-          if (!targetProvinceId) targetProvinceId = userComm.province_id;
-          if (!targetPhone) targetPhone = userComm.phone_whatsapp;
-
-          // Validar límite del plan en el servidor
-          const rawTier = (userComm.subscription_tier || 'BRONCE').toUpperCase();
-          const maxAllowed = rawTier.includes('ORO') ? Infinity : rawTier.includes('PLATA') ? 20 : rawTier.includes('BRONCE') ? 5 : 1;
-
-          if (maxAllowed !== Infinity) {
-            const { count: currentCount } = await supabase
-              .from('products')
-              .select('id', { count: 'exact', head: true })
-              .eq('commerce_id', userComm.id);
-
-            if ((currentCount || 0) >= maxAllowed) {
-              return {
-                success: false,
-                message: `Límite alcanzado: Tu Plan ${rawTier.charAt(0) + rawTier.slice(1).toLowerCase()} permite hasta ${maxAllowed} productos. Podés mejorar tu plan para publicar más.`,
-              };
-            }
-          }
-        } else {
-          // Si el usuario no tiene perfil de comercio creado en commerces, crearlo automáticamente
-          const commName = targetCommerceName || user.user_metadata?.full_name || 'Comercio Adherido';
-          const rawSlug = commName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || `comercio-${Date.now()}`;
-          const newSlug = `${rawSlug}-${Date.now().toString().slice(-4)}`;
-
-          const { data: createdComm } = await supabase
-            .from('commerces')
-            .insert({
-              name: commName,
-              slug: newSlug,
-              category: productData.category || 'Comercio General',
-              province_id: targetProvinceId || 'santa-fe',
-              city_id: targetCityId || 'rosario',
-              city_name: targetCityName || 'Rosario',
-              description: `Perfil comercial de ${commName} en el portal ON MÁS.`,
-              phone_whatsapp: targetPhone || '',
-              address: `${targetCityName || 'Rosario'}, Argentina`,
-              logo_url: '/images/city-rosario.jpg',
-              cover_url: '/images/city-rosario.jpg',
-              is_verified: true,
-              is_subscription_active: true,
-              owner_id: user.id,
-              created_at: new Date().toISOString(),
-              updated_at: new Date().toISOString(),
-            })
-            .select()
-            .single();
-
-          if (createdComm) {
-            targetCommerceId = createdComm.id;
-            targetCommerceName = createdComm.name;
-            if (!targetCityId) targetCityId = createdComm.city_id;
-            if (!targetCityName) targetCityName = createdComm.city_name;
-            if (!targetProvinceId) targetProvinceId = createdComm.province_id;
-            if (!targetPhone) targetPhone = createdComm.phone_whatsapp;
-          }
-        }
+      if (!user) {
+        return { success: false, message: 'Usuario no autenticado.' };
       }
 
-      // Si aún no tenemos targetCommerceId de UUID válido, obtener el primer comercio disponible como fallback
-      const isUuid = targetCommerceId && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(targetCommerceId);
-      if (!isUuid) {
-        const { data: fallbackComm } = await supabase
-          .from('commerces')
-          .select('id, name, city_id, city_name, province_id, phone_whatsapp')
-          .limit(1)
-          .maybeSingle();
+      // Bloquear perfiles "particular"
+      if (user.user_metadata?.user_type === 'particular' || user.user_metadata?.role === 'PUBLIC_USER') {
+        return { success: false, message: 'Los usuarios particulares no tienen permiso para publicar productos.' };
+      }
 
-        if (fallbackComm) {
-          targetCommerceId = fallbackComm.id;
-          targetCommerceName = fallbackComm.name;
-          if (!targetCityId) targetCityId = fallbackComm.city_id;
-          if (!targetCityName) targetCityName = fallbackComm.city_name;
-          if (!targetProvinceId) targetProvinceId = fallbackComm.province_id;
-          if (!targetPhone) targetPhone = fallbackComm.phone_whatsapp;
+      const { data: userComm } = await supabase
+        .from('commerces')
+        .select('id, name, city_id, city_name, province_id, phone_whatsapp, subscription_tier, is_subscription_active')
+        .eq('owner_id', user.id)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      if (!userComm) {
+        return { success: false, message: 'Perfil comercial no encontrado. Completá tu registro como comercio primero.' };
+      }
+
+      if (!userComm.is_subscription_active) {
+        return { success: false, message: 'Tu suscripción no está activa. Debés contratar o renovar un plan para publicar.' };
+      }
+
+      targetCommerceId = userComm.id;
+      if (!targetCommerceName) targetCommerceName = userComm.name;
+      if (!targetCityId) targetCityId = userComm.city_id;
+      if (!targetCityName) targetCityName = userComm.city_name;
+      if (!targetProvinceId) targetProvinceId = userComm.province_id;
+      if (!targetPhone) targetPhone = userComm.phone_whatsapp;
+
+      // Validar límite del plan en el servidor
+      const rawTier = (userComm.subscription_tier || 'BRONCE').toUpperCase();
+      const maxAllowed = rawTier.includes('ORO') ? Infinity : rawTier.includes('PLATA') ? 20 : rawTier.includes('BRONCE') ? 5 : 1;
+
+      if (maxAllowed !== Infinity) {
+        const { count: currentCount } = await supabase
+          .from('products')
+          .select('id', { count: 'exact', head: true })
+          .eq('commerce_id', userComm.id);
+
+        if ((currentCount || 0) >= maxAllowed) {
+          return {
+            success: false,
+            message: `Límite alcanzado: Tu Plan ${rawTier.charAt(0) + rawTier.slice(1).toLowerCase()} permite hasta ${maxAllowed} productos. Podés mejorar tu plan para publicar más.`,
+          };
         }
       }
 
@@ -201,6 +158,15 @@ export async function deleteProductAction(productId: string): Promise<{ success:
       }
 
       const supabase = createAdminClient();
+
+      // Verify ownership
+      const { data: productToModify } = await supabase.from('products').select('commerce_id').eq('id', productId).single();
+      if (!productToModify) return { success: false, message: 'Producto no encontrado.' };
+
+      const { data: commerceOwner } = await supabase.from('commerces').select('owner_id').eq('id', productToModify.commerce_id).single();
+      if (!commerceOwner || commerceOwner.owner_id !== user.id) {
+        return { success: false, message: 'No autorizado. No tienes permiso para eliminar este producto.' };
+      }
       const { error } = await supabase.from('products').delete().eq('id', productId);
 
       if (error) {
@@ -241,6 +207,15 @@ export async function updateProductAction(
       }
 
       const supabase = createAdminClient();
+
+      // Verify ownership
+      const { data: productToModify } = await supabase.from('products').select('commerce_id').eq('id', productId).single();
+      if (!productToModify) return { success: false, message: 'Producto no encontrado.' };
+
+      const { data: commerceOwner } = await supabase.from('commerces').select('owner_id').eq('id', productToModify.commerce_id).single();
+      if (!commerceOwner || commerceOwner.owner_id !== user.id) {
+        return { success: false, message: 'No autorizado. No tienes permiso para editar este producto.' };
+      }
 
       const updatePayload: any = {
         updated_at: new Date().toISOString(),
