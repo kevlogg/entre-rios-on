@@ -36,6 +36,7 @@ export interface Commerce {
   coverUrl: string;
   phoneWhatsApp: string;
   address: string;
+  coordinates?: { lat: number; lng: number };
   email?: string;
   isDigitalOnly?: boolean;
   website?: string;
