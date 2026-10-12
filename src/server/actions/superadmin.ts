@@ -1527,6 +1527,9 @@ export async function saveSectionCardsAction(cards: any[]): Promise<{ success: b
 
     revalidatePath('/');
     revalidatePath('/inicio');
+    revalidatePath('/santa-fe');
+    revalidatePath('/entre-rios');
+    revalidatePath('/[provincia]', 'layout');
     revalidatePath('/superadmin');
     return { success: true, message: 'Imágenes de cards de secciones guardadas en Supabase.' };
   } catch (err) {
@@ -1618,6 +1621,9 @@ export async function saveSideBannersAction(banners: any[]): Promise<{ success: 
 
     revalidatePath('/');
     revalidatePath('/inicio');
+    revalidatePath('/santa-fe');
+    revalidatePath('/entre-rios');
+    revalidatePath('/[provincia]', 'layout');
     revalidatePath('/superadmin');
     return { success: true, message: 'Banners de publicidad lateral guardados en Supabase.' };
   } catch (err) {

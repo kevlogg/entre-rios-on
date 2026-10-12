@@ -70,18 +70,21 @@ export const DEFAULT_SECTION_CARDS: SectionCardItem[] = [
   },
 ];
 
-const SECTION_CARDS_STORAGE_KEY = 'onmas_section_cards_v1';
+const SECTION_CARDS_STORAGE_KEY = 'onmas_section_cards_v2';
 let memoryStoreSectionCards: SectionCardItem[] | null = null;
 
 function mergeWithDefaults(stored: SectionCardItem[]): SectionCardItem[] {
   if (!Array.isArray(stored) || stored.length === 0) return DEFAULT_SECTION_CARDS;
+  const isObsolete = stored.some((item) => item.id === 'comercio-digital' || item.id === 'catalogo-ofertas');
+  if (isObsolete) return DEFAULT_SECTION_CARDS;
+
   return stored.map((item, idx) => ({
     id: item.id || `custom-card-${idx}-${Date.now()}`,
     title: item.title || 'NUEVA SECCIÓN',
     subtitle: item.subtitle || 'Descripción de la sección',
     cta: item.cta || 'Explorar',
     href: item.href || '/',
-    image: item.image || '/images/bento-1.jpg',
+    image: item.image || '/images/section-turismo-regional.jpg',
     idealSize: item.idealSize || '600 × 400 px (3:2 en HD)',
   }));
 }

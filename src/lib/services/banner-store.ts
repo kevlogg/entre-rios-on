@@ -147,7 +147,7 @@ export const DEFAULT_PROVINCE_BANNERS: Record<string, BannerItem[]> = {
   ],
 };
 
-const STORAGE_KEY = 'onmas_province_banners_v2';
+const STORAGE_KEY = 'onmas_province_banners_v3';
 
 // In-memory store
 const memoryStore: Record<string, BannerItem[]> = {};
@@ -166,9 +166,16 @@ export function getBannersByProvince(provinceId: string): BannerItem[] {
         if (provinceId in parsed && Array.isArray(parsed[provinceId])) {
           const targetList = parsed[provinceId];
           const valid = targetList.filter((b) => b && typeof b.imageUrl === 'string' && b.imageUrl.trim().length > 0);
-          memoryStore[provinceId] = valid;
-          configuredProvinces.add(provinceId);
-          return valid;
+          if (valid.length > 0) {
+            // Ensure sf-bridge is included if santa-fe
+            if (provinceId === 'santa-fe' && !valid.some((b) => b.id === 'sf-bridge' || (b.imageUrl && b.imageUrl.includes('hero-santa-fe-bridge')))) {
+              const defaultBridge = DEFAULT_PROVINCE_BANNERS['santa-fe']?.[0];
+              if (defaultBridge) valid.unshift(defaultBridge);
+            }
+            memoryStore[provinceId] = valid;
+            configuredProvinces.add(provinceId);
+            return valid;
+          }
         }
       }
     } catch (e) {

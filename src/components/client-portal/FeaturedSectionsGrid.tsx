@@ -1,8 +1,10 @@
 'use client';
 
-import React from 'react';
+import React, { useRef } from 'react';
 import Link from 'next/link';
 import { 
+  ChevronLeft,
+  ChevronRight,
   Palmtree, 
   Building2, 
   Percent, 
@@ -24,20 +26,59 @@ function getCardIcon(id: string = '', title: string = '') {
 
 export function FeaturedSectionsGrid() {
   const cards = useSectionCards();
+  const scrollRef = useRef<HTMLDivElement>(null);
 
   if (!cards || cards.length === 0) return null;
 
+  const scrollPrev = () => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollBy({ left: -220, behavior: 'smooth' });
+    }
+  };
+
+  const scrollNext = () => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollBy({ left: 220, behavior: 'smooth' });
+    }
+  };
+
   return (
     <section id="secciones-destacadas" className="w-full pt-1 pb-3">
-      {/* Title matching mockup: Descubrí todo lo que podés hacer en ON+ */}
-      <div className="flex items-center justify-between mb-2.5">
-        <h2 className="text-sm sm:text-base lg:text-lg font-black text-slate-900">
+      {/* Title with Left/Right Navigation Arrows */}
+      <div className="flex items-center justify-between mb-2 sm:mb-2.5">
+        <h2 className="text-sm sm:text-base lg:text-lg font-black text-slate-900 tracking-tight">
           Descubrí todo lo que podés hacer en ON+
         </h2>
+
+        {/* Scroll Controls */}
+        <div className="flex items-center gap-1.5 shrink-0">
+          <button
+            type="button"
+            onClick={scrollPrev}
+            className="w-7 h-7 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 flex items-center justify-center transition-colors cursor-pointer border border-slate-200/90 active:scale-95"
+            aria-label="Desplazar a la izquierda"
+            title="Ver anteriores"
+          >
+            <ChevronLeft className="w-3.5 h-3.5" />
+          </button>
+          <button
+            type="button"
+            onClick={scrollNext}
+            className="w-7 h-7 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 flex items-center justify-center transition-colors cursor-pointer border border-slate-200/90 active:scale-95"
+            aria-label="Desplazar a la derecha"
+            title="Ver siguientes"
+          >
+            <ChevronRight className="w-3.5 h-3.5" />
+          </button>
+        </div>
       </div>
 
-      {/* Dynamic Visual Cards Grid loaded from SuperAdmin */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5 sm:gap-3">
+      {/* Línea única continua con scroll horizontal (sin salto de fila) */}
+      <div
+        ref={scrollRef}
+        className="flex items-stretch gap-2.5 sm:gap-3 overflow-x-auto scrollbar-none scroll-smooth snap-x snap-mandatory py-1 -mx-0.5 px-0.5"
+        style={{ WebkitOverflowScrolling: 'touch' }}
+      >
         {cards.map((card, index) => {
           const IconComp = getCardIcon(card.id, card.title);
 
@@ -45,7 +86,7 @@ export function FeaturedSectionsGrid() {
             <Link
               key={card.id || `section-card-${index}`}
               href={card.href || '/'}
-              className="group relative flex flex-col justify-end h-32 sm:h-36 lg:h-40 rounded-xl overflow-hidden shadow-2xs hover:shadow-lg transition-all border border-slate-200 cursor-pointer bg-slate-900"
+              className="group relative flex flex-col justify-end h-32 sm:h-36 lg:h-38 w-[140px] min-[400px]:w-[155px] sm:w-[170px] md:w-[185px] lg:w-[195px] shrink-0 snap-start rounded-xl overflow-hidden shadow-2xs hover:shadow-lg transition-all border border-slate-200 cursor-pointer bg-slate-900"
             >
               {/* Background Photo from SuperAdmin */}
               <img

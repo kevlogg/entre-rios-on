@@ -47,15 +47,18 @@ export const DEFAULT_SIDE_BANNERS: SideBannerItem[] = [
   },
 ];
 
-const SIDE_BANNERS_STORAGE_KEY = 'onmas_side_banners_v1';
+const SIDE_BANNERS_STORAGE_KEY = 'onmas_side_banners_v2';
 let memoryStoreSideBanners: SideBannerItem[] | null = null;
 
 function normalizeSideBanners(stored: SideBannerItem[]): SideBannerItem[] {
   if (!Array.isArray(stored) || stored.length === 0) return DEFAULT_SIDE_BANNERS;
+  const isObsolete = stored.some((item) => typeof item.imageUrl === 'string' && item.imageUrl.includes('images.unsplash.com'));
+  if (isObsolete) return DEFAULT_SIDE_BANNERS;
+
   return stored.map((item, idx) => ({
     id: item.id || `side-banner-${idx}-${Date.now()}`,
     title: item.title || 'Anuncio Publicitario',
-    imageUrl: item.imageUrl || 'https://images.unsplash.com/photo-1557804506-669a67965ba0?auto=format&fit=crop&w=400&q=80',
+    imageUrl: item.imageUrl || '/banners/side-sorteo-del-mes.jpg',
     href: item.href || '/planes',
     position: item.position || (idx % 2 === 0 ? 'left' : 'right'),
     idealSize: item.idealSize || '160 × 600 px (Rascacielos / Vertical HD)',
