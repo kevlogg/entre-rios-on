@@ -97,7 +97,7 @@ export default function RootLayout({
       <head>
         <meta name="color-scheme" content="light" />
         <meta name="supported-color-schemes" content="light" />
-        <meta name="theme-color" content="#e9ecef" />
+        <meta name="theme-color" content="#ffffff" />
         <link rel="icon" href="/favicon.ico" sizes="any" />
         <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
         <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
@@ -107,7 +107,7 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, '\\u003c') }}
         />
       </head>
-      <body className="min-h-screen flex flex-col text-white antialiased selection:bg-[#00C7B7] selection:text-white app-compact-scale">
+      <body className="min-h-screen flex flex-col text-slate-900 bg-white antialiased selection:bg-[#00C7B7] selection:text-white app-compact-scale">
         <main className="flex-1">
           {children}
         </main>

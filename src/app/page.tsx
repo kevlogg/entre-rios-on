@@ -1,5 +1,4 @@
 import React from 'react';
-import { ClientHeader } from '@/components/layout/ClientHeader';
 import { ClientHomeContainer } from '@/components/client-portal/ClientHomeContainer';
 import { ClientFooter } from '@/components/layout/ClientFooter';
 import { ComingSoonView } from '@/components/common/ComingSoonView';
@@ -25,9 +24,9 @@ export default async function ClientHomePage({ searchParams }: ClientHomePagePro
   const products = await getFeaturedProducts();
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#e9ecef]">
+    <div className="min-h-screen flex flex-col bg-white">
       {/* Contenedor principal */}
-      <main className="w-full flex-1 bg-[#e9ecef]">
+      <main className="w-full flex-1 bg-white">
         <ClientHomeContainer initialProducts={products} />
       </main>
 
@@ -36,5 +35,3 @@ export default async function ClientHomePage({ searchParams }: ClientHomePagePro
     </div>
   );
 }
-
-
