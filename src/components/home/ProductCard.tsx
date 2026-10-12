@@ -44,15 +44,15 @@ export function ProductCard({ product }: ProductCardProps) {
     : 'citrus-dulces-del-uruguay';
 
   return (
-    <article className="group bg-white hover:bg-white backdrop-blur-md rounded-2xl overflow-hidden border border-slate-200/90 hover:border-cyan-400 shadow-sm sm:shadow-lg hover:shadow-xl transition-all duration-300 flex flex-row sm:flex-col justify-between hover:-translate-y-0.5 relative text-slate-900 p-2.5 sm:p-0">
+    <article className="group bg-white hover:bg-white backdrop-blur-md rounded-2xl overflow-hidden border border-slate-200/90 hover:border-cyan-400 shadow-sm sm:shadow-lg hover:shadow-xl transition-all duration-300 flex flex-row sm:flex-col justify-between hover:-translate-y-0.5 relative text-slate-900 p-2 min-[360px]:p-2.5 sm:p-0">
       {/* Product Image Container (Left on mobile, Top on desktop) */}
-      <div className="relative w-28 min-[360px]:w-32 min-[400px]:w-36 h-28 min-[360px]:h-32 sm:h-44 sm:w-full shrink-0 overflow-hidden rounded-xl sm:rounded-none bg-slate-100">
+      <div className="relative w-24 min-[360px]:w-28 min-[400px]:w-32 h-24 min-[360px]:h-28 sm:h-44 sm:w-full shrink-0 overflow-hidden rounded-xl sm:rounded-none bg-slate-100">
         <Link href={`/producto/${product.slug}`} className="block w-full h-full">
           <Image
             src={product.imageUrl}
             alt={product.title}
             fill
-            sizes="(max-width: 640px) 150px, (max-width: 1024px) 33vw, 25vw"
+            sizes="(max-width: 640px) 130px, (max-width: 1024px) 33vw, 25vw"
             className="object-cover object-center group-hover:scale-105 transition-transform duration-500 rounded-xl sm:rounded-none"
           />
         </Link>
@@ -78,7 +78,7 @@ export function ProductCard({ product }: ProductCardProps) {
       </div>
 
       {/* Content & Details (Right on mobile, Bottom on desktop) */}
-      <div className="flex-1 min-w-0 pl-2.5 min-[360px]:pl-3 sm:pl-0 flex flex-col justify-between sm:justify-start h-auto">
+      <div className="flex-1 min-w-0 pl-2 min-[360px]:pl-2.5 sm:pl-0 flex flex-col justify-between sm:justify-start h-auto">
         {/* Content Details */}
         <div className="sm:p-3.5 space-y-1 sm:space-y-2">
           {/* Commerce Header Info + Mobile Favorite Button */}
@@ -111,22 +111,22 @@ export function ProductCard({ product }: ProductCardProps) {
         </div>
 
         {/* Footer Price & WhatsApp CTA */}
-        <div className="pt-2 sm:p-3.5 sm:pt-0 space-y-2">
-          <div className="flex items-center justify-between sm:pt-2 sm:border-t sm:border-slate-100 gap-2">
-            <div className="flex items-baseline gap-1.5 sm:justify-between sm:w-full">
-              <span className="text-[9px] min-[360px]:text-[10px] text-slate-400 font-bold uppercase tracking-wider">
+        <div className="pt-1.5 sm:p-3.5 sm:pt-0 space-y-2">
+          <div className="flex items-center justify-between sm:pt-2 sm:border-t sm:border-slate-100 gap-1.5 min-[360px]:gap-2">
+            <div className="flex flex-col justify-center min-w-0 shrink sm:flex-row sm:items-baseline sm:justify-between sm:w-full">
+              <span className="text-[8px] min-[360px]:text-[9px] text-slate-400 font-bold uppercase tracking-wider leading-none">
                 PRECIO
               </span>
-              <span className="text-xs min-[360px]:text-sm sm:text-base font-black text-emerald-700">
+              <span className="text-xs min-[360px]:text-sm sm:text-base font-black text-emerald-700 leading-tight truncate">
                 {formatPrice(product.price, product.currency)}
               </span>
             </div>
 
-            {/* Mobile WhatsApp Button (Single Row on Right) */}
+            {/* Mobile WhatsApp Button (Single Row on Right - perfectly fitted) */}
             <button
               onClick={handleWhatsAppClick}
               data-whatsapp-cta="true"
-              className="sm:hidden h-8 min-[360px]:h-9 bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white px-2.5 min-[360px]:px-3 rounded-xl font-black text-[11px] min-[360px]:text-xs flex items-center justify-center gap-1.5 shadow-xs transition-all transform active:scale-95 cursor-pointer whitespace-nowrap shrink-0"
+              className="sm:hidden h-8 bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white px-2 min-[360px]:px-2.5 rounded-lg font-black text-[10px] min-[360px]:text-[11px] flex items-center justify-center gap-1 shadow-xs transition-all transform active:scale-95 cursor-pointer whitespace-nowrap shrink-0"
               aria-label={`Pedir por WhatsApp ${product.title}`}
             >
               <MessageCircle className="w-3.5 h-3.5 fill-current shrink-0" />

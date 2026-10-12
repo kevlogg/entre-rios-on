@@ -15,9 +15,11 @@ import {
   Store,
   Navigation,
   FileText,
-  ShoppingBag
+  ShoppingBag,
+  Star
 } from 'lucide-react';
 import { Product, Commerce } from '@/types';
+import { ProductRatingWidget } from '@/components/product/ProductRatingWidget';
 
 interface ProductDetailViewProps {
   product: Product;
@@ -195,10 +197,28 @@ export function ProductDetailView({ product, commerce, relatedProducts = [] }: P
 
         {/* B. INFORMACIÓN PRINCIPAL (Centro) */}
         <div className="lg:w-[35%] p-6 lg:p-10 flex flex-col justify-center border-t lg:border-t-0 border-slate-100">
-          <div className="space-y-5">
-            <h1 className="text-[28px] font-black text-[#1e293b] leading-tight tracking-tight">
-              {product.title}
-            </h1>
+          <div className="space-y-4">
+            <div>
+              <h1 className="text-[28px] font-black text-[#1e293b] leading-tight tracking-tight">
+                {product.title}
+              </h1>
+              
+              <a
+                href="#calificaciones"
+                className="inline-flex items-center gap-2 mt-2 group text-xs font-bold text-slate-500 hover:text-[#0047BA] transition-colors"
+              >
+                <div className="flex items-center text-amber-400">
+                  {[1, 2, 3, 4, 5].map((s) => (
+                    <Star key={s} className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
+                  ))}
+                </div>
+                <span className="font-black text-slate-800">4.9</span>
+                <span className="text-slate-400 font-medium">|</span>
+                <span className="underline decoration-slate-300 group-hover:decoration-[#0047BA] font-semibold">
+                  Calificaciones de usuarios
+                </span>
+              </a>
+            </div>
             
             {price ? (
               <div className="text-[32px] font-black text-[#002878] flex items-baseline gap-2 tracking-tight">
@@ -367,6 +387,12 @@ export function ProductDetailView({ product, commerce, relatedProducts = [] }: P
           </div>
         </div>
       )}
+
+      {/* 7b. CALIFICACIONES Y OPINIONES DEL PRODUCTO (1 A 5 ESTRELLAS) */}
+      <ProductRatingWidget
+        productId={product.id || product.slug}
+        productTitle={product.title}
+      />
 
       {/* 8. PRODUCTOS RELACIONADOS */}
       {relatedProducts.length > 0 && (
