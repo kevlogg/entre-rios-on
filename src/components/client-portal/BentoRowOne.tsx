@@ -13,12 +13,12 @@ export function BentoRowOne() {
 
   return (
     <section className="max-w-7xl mx-auto px-3 min-[360px]:px-4 sm:px-6 lg:px-8 py-2 sm:py-4">
-      {/* Vista Mobile: Scroll Horizontal con cards de 270px de alto, la siguiente asoma entre 8% y 12% */}
-      <div className="flex sm:hidden overflow-x-auto snap-x snap-mandatory scroll-smooth scrollbar-none gap-3.5 -mx-3 min-[360px]:-mx-4 px-3 min-[360px]:px-4 pb-2">
+      {/* Vista Mobile: Scroll Horizontal con cards de 270px de alto, la siguiente asoma a la derecha */}
+      <div className="flex sm:hidden overflow-x-auto snap-x snap-mandatory scroll-smooth scrollbar-none gap-3.5 pb-2">
         {cards.map((card) => (
           <div
             key={card.id}
-            className="group relative rounded-2xl overflow-hidden shadow-md border border-slate-200 h-[270px] w-[88vw] max-w-[340px] shrink-0 snap-start flex flex-col justify-end p-5 bg-slate-900"
+            className="group relative rounded-2xl overflow-hidden shadow-md border border-slate-200 h-[270px] w-[82vw] max-w-[320px] shrink-0 snap-start flex flex-col justify-end p-5 bg-slate-900"
           >
             <Image
               src={card.image}

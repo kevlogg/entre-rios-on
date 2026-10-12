@@ -52,14 +52,14 @@ export function CityExploreBar({ provinceId = 'santa-fe' }: CityExploreBarProps)
           </Link>
         </div>
 
-        {/* 1-Row Horizontal Touch Scroll on Mobile (showing 2.0 to 2.2 cards) / Standard Grid on Desktop */}
-        <div className="flex overflow-x-auto snap-x snap-mandatory scroll-smooth scrollbar-none gap-3.5 pb-2 -mx-3 min-[360px]:-mx-4 px-3 min-[360px]:px-4 sm:mx-0 sm:px-0 sm:grid sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 sm:gap-4 sm:pb-0">
+        {/* 1-Row Horizontal Touch Scroll on Mobile / Standard Grid on Desktop */}
+        <div className="flex overflow-x-auto snap-x snap-mandatory scroll-smooth scrollbar-none gap-3.5 pb-2 sm:grid sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 sm:gap-4 sm:pb-0">
           {cities.map((city) => (
             <Link
               key={city.id}
               href={`/${currentProvince.slug}/${city.slug || city.id}`}
               onClick={() => handleSelect(city.id, city.name)}
-              className="snap-start shrink-0 w-[calc((100vw-32px-14px)/2.15)] min-w-[140px] max-w-[170px] sm:w-auto group flex flex-col items-center rounded-2xl overflow-hidden border border-white/30 bg-white/95 hover:bg-white hover:border-cyan-400 hover:shadow-xl transition-all text-center shadow-md cursor-pointer"
+              className="snap-start shrink-0 w-[calc((100vw-32px-14px)/2.15)] min-w-[125px] max-w-[170px] sm:w-auto group flex flex-col items-center rounded-2xl overflow-hidden border border-white/30 bg-white/95 hover:bg-white hover:border-cyan-400 hover:shadow-xl transition-all text-center shadow-md cursor-pointer"
             >
               <div className="relative h-20 sm:h-24 w-full bg-slate-900 overflow-hidden">
                 <Image
