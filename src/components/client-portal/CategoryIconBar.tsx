@@ -120,7 +120,7 @@ export function CategoryIconBar({
         }`}
       >
         {/* Top Image: Uniform Aspect Ratio */}
-        <div className="relative w-full h-24 min-[360px]:h-28 sm:h-36 md:h-44 bg-slate-950 overflow-hidden shrink-0">
+        <div className="relative w-full h-14 min-[360px]:h-16 sm:h-36 md:h-44 bg-slate-950 overflow-hidden shrink-0">
           <img
             src={cat.imageUrl}
             alt={cat.label}
@@ -130,8 +130,8 @@ export function CategoryIconBar({
         </div>
 
         {/* Bottom Footer: Centered Title */}
-        <div className="p-2 sm:p-3.5 w-full bg-white flex items-center justify-center text-center min-h-[46px] sm:min-h-[56px]">
-          <span className={`font-black text-[11px] min-[400px]:text-xs sm:text-sm leading-tight line-clamp-2 block ${
+        <div className="p-1.5 min-[360px]:p-2 sm:p-3.5 w-full bg-white flex items-center justify-center text-center min-h-[36px] min-[360px]:min-h-[40px] sm:min-h-[56px]">
+          <span className={`font-black text-[10px] min-[360px]:text-[11px] sm:text-sm leading-tight line-clamp-2 block ${
             isSelected ? 'text-[#0047BA]' : 'text-slate-900 group-hover:text-[#0047BA]'
           }`}>
             {cat.label}
@@ -225,7 +225,7 @@ export function CategoryIconBar({
           {mobileChunks.map((chunk, chunkIdx) => (
             <div
               key={chunkIdx}
-              className="w-full shrink-0 snap-start grid grid-cols-2 gap-3 min-[360px]:gap-[14px]"
+              className="w-full shrink-0 snap-start grid grid-cols-2 gap-2.5 min-[360px]:gap-3"
             >
               {chunk.map(renderCard)}
             </div>
