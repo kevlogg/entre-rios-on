@@ -74,8 +74,7 @@ export function HeroSlider({ slides, featuredCommerce, weekendEvent }: HeroSlide
         
         {/* Left/Center: Editorial Hero Banner Slider (8 Cols) */}
         <div 
-          className="lg:col-span-8 relative rounded-3xl overflow-hidden shadow-xl border border-white/20 flex flex-col justify-between group focus:outline-hidden"
-          style={{ minHeight: '380px', height: '420px', position: 'relative' }}
+          className="lg:col-span-8 relative rounded-2xl lg:rounded-3xl overflow-hidden shadow-md lg:shadow-xl border border-white/20 flex flex-col justify-between group focus:outline-hidden aspect-[4/3] sm:aspect-[16/10] lg:aspect-auto lg:h-[420px] w-full"
           onMouseEnter={() => setIsPlaying(false)}
           onMouseLeave={() => setIsPlaying(true)}
           onKeyDown={handleKeyDown}
@@ -116,7 +115,7 @@ export function HeroSlider({ slides, featuredCommerce, weekendEvent }: HeroSlide
                   style={{
                     width: '100%',
                     height: '100%',
-                    objectFit: 'fill',
+                    objectFit: 'cover',
                     objectPosition: 'center',
                     display: 'block',
                   }}

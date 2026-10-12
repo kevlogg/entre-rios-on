@@ -76,10 +76,10 @@ export function CityFilterBar({
       </div>
 
       {/* Cities Pills Row */}
-      <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
+      <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none snap-x snap-mandatory">
         <button
           onClick={() => handleSelect('all', 'Todas las ciudades')}
-          className={`px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all flex items-center gap-1.5 ${
+          className={`snap-start px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all flex items-center gap-1.5 shrink-0 ${
             selectedCity === 'all'
               ? 'bg-[#0047BA] text-white shadow-md'
               : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
@@ -95,7 +95,7 @@ export function CityFilterBar({
             <button
               key={city.id}
               onClick={() => handleSelect(city.id, city.name)}
-              className={`px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all flex items-center gap-1.5 ${
+              className={`snap-start px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all flex items-center gap-1.5 shrink-0 ${
                 isSelected
                   ? 'bg-[#00ADB5] text-white shadow-md'
                   : 'bg-slate-100 text-slate-700 hover:bg-slate-200'

@@ -82,7 +82,7 @@ export function HomeClientView({
   }, [selectedProvince, selectedCity, selectedCategory, initialProducts, events]);
 
   return (
-    <div className="space-y-12 pt-8 sm:pt-12 pb-16">
+    <div className="space-y-8 sm:space-y-12 pt-4 sm:pt-12 pb-12 sm:pb-16">
       {/* 1. Hero Section Híbrida Editorial */}
       <HeroSlider
         slides={slides}
@@ -91,7 +91,7 @@ export function HomeClientView({
       />
 
       {/* Main Container */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8 sm:space-y-12">
         
         {/* 2. Persistent City & Category Filter Bars */}
         <div className="space-y-4">
@@ -139,7 +139,7 @@ export function HomeClientView({
 
           {/* Compact Store Grid (4 columns) */}
           {filteredProducts.length > 0 ? (
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 min-[430px]:grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
               {filteredProducts.map((product) => (
                 <ProductCard key={product.id} product={product} />
               ))}
@@ -164,8 +164,8 @@ export function HomeClientView({
         </section>
 
         {/* 4. B2B Subscription CTA Banner en colores del logo ON MAS */}
-        <section id="sumar-comercio" className="relative rounded-3xl overflow-hidden bg-gradient-to-r from-[#002878] via-[#0047BA] to-[#00ADB5] text-white p-8 sm:p-12 shadow-xl">
-          <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+        <section id="sumar-comercio" className="relative rounded-2xl lg:rounded-3xl overflow-hidden bg-gradient-to-r from-[#002878] via-[#0047BA] to-[#00ADB5] text-white p-6 sm:p-12 shadow-xl">
+          <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 items-center">
             <div className="lg:col-span-8 space-y-4">
               <div className="inline-flex items-center gap-2 bg-white/10 border border-white/20 text-[#00E5E8] text-xs font-extrabold px-3 py-1.5 rounded-full">
                 <Sparkles className="w-3.5 h-3.5" />
@@ -194,14 +194,14 @@ export function HomeClientView({
               </div>
             </div>
 
-            <div className="lg:col-span-4 flex justify-start lg:justify-end">
+            <div className="lg:col-span-4 flex justify-start lg:justify-end mt-2 lg:mt-0">
               <Link
                 href="/login?mode=signup&type=negocio_automotor"
-                className="w-full sm:w-auto bg-gradient-to-r from-[#00ADB5] to-[#007C8A] hover:from-[#00E5E8] hover:to-[#00ADB5] text-white px-8 py-4 rounded-2xl font-extrabold text-base shadow-xl flex items-center justify-center gap-3 transition-transform active:scale-95 text-center cursor-pointer"
+                className="w-full sm:w-auto bg-gradient-to-r from-[#00ADB5] to-[#007C8A] hover:from-[#00E5E8] hover:to-[#00ADB5] text-white px-6 py-3 sm:px-8 sm:py-4 rounded-xl sm:rounded-2xl font-extrabold text-sm sm:text-base shadow-xl flex items-center justify-center gap-2 sm:gap-3 transition-transform active:scale-95 text-center cursor-pointer"
               >
-                <Store className="w-5 h-5" />
+                <Store className="w-4 h-4 sm:w-5 sm:h-5" />
                 <span>Sumar Mi Negocio Ahora</span>
-                <ArrowRight className="w-5 h-5" />
+                <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5" />
               </Link>
             </div>
           </div>

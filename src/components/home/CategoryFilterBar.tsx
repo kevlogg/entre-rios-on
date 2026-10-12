@@ -107,7 +107,7 @@ export function CategoryFilterBar({
 
       {/* 2 Rows x 4 Columns Marketplace Grid */}
       <div className="relative">
-        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-3.5">
+        <div className="grid grid-cols-1 min-[350px]:grid-cols-2 md:grid-cols-4 gap-[14px]">
           {visibleCategories.map((cat) => {
             const isSelected = selectedCat === cat.id;
 
@@ -115,24 +115,24 @@ export function CategoryFilterBar({
               <button
                 key={cat.id}
                 onClick={() => handleCategoryClick(cat.id)}
-                className={`group flex items-center rounded-2xl border transition-all text-left overflow-hidden h-20 sm:h-24 cursor-pointer ${
+                className={`group flex flex-col rounded-2xl border transition-all text-center overflow-hidden h-36 sm:h-40 cursor-pointer w-full min-w-0 ${
                   isSelected
                     ? 'bg-gradient-to-r from-[#00ADB5] to-[#007C8A] text-white border-[#00ADB5] shadow-md ring-2 ring-[#00ADB5]'
                     : 'bg-white text-slate-800 border-slate-200/90 hover:border-[#00ADB5] hover:shadow-md'
                 }`}
               >
-                {/* Left Box: Product Image Asset */}
-                <div className="w-1/3 h-full bg-[#f4f4f5] border-r border-slate-200/60 shrink-0 relative overflow-hidden flex items-center justify-center p-1.5">
+                {/* Top Box: Product Image Asset */}
+                <div className="w-full h-24 sm:h-28 bg-[#f4f4f5] border-b border-slate-200/60 shrink-0 relative overflow-hidden flex items-center justify-center p-1.5">
                   <img
                     src={cat.imageUrl}
                     alt={cat.label}
-                    className="w-full h-full object-cover rounded-xl group-hover:scale-108 transition-transform duration-300"
+                    className="w-full h-full object-cover rounded-xl group-hover:scale-105 transition-transform duration-300"
                   />
                 </div>
 
-                {/* Right Box: Bold Category Label */}
-                <div className="w-2/3 p-3.5">
-                  <span className={`font-extrabold text-xs sm:text-sm leading-snug line-clamp-2 block ${
+                {/* Bottom Box: Bold Category Label */}
+                <div className="w-full p-2 flex items-center justify-center flex-1">
+                  <span className={`font-extrabold text-[11px] sm:text-xs leading-tight line-clamp-2 block ${
                     isSelected ? 'text-white' : 'text-slate-800 group-hover:text-[#0047BA]'
                   }`}>
                     {cat.label}
@@ -143,11 +143,11 @@ export function CategoryFilterBar({
           })}
         </div>
 
-        {/* Floating Side Arrows */}
+        {/* Floating Side Arrows - Desktop Only */}
         <button
           onClick={handleNextPage}
           title="Pasar a las próximas 8 categorías"
-          className="absolute -right-3 top-1/2 -translate-y-1/2 z-20 w-10 h-10 rounded-full bg-white text-[#0047BA] border border-slate-300 shadow-xl flex items-center justify-center hover:bg-[#0047BA] hover:text-white hover:border-[#0047BA] transition-all cursor-pointer active:scale-95"
+          className="hidden md:flex absolute -right-3 top-1/2 -translate-y-1/2 z-20 w-10 h-10 rounded-full bg-white text-[#0047BA] border border-slate-300 shadow-xl items-center justify-center hover:bg-[#0047BA] hover:text-white hover:border-[#0047BA] transition-all cursor-pointer active:scale-95"
         >
           <ChevronRight className="w-5 h-5 stroke-[3]" />
         </button>
@@ -156,7 +156,7 @@ export function CategoryFilterBar({
           <button
             onClick={handlePrevPage}
             title="Volver a las 8 categorías anteriores"
-            className="absolute -left-3 top-1/2 -translate-y-1/2 z-20 w-10 h-10 rounded-full bg-white text-[#0047BA] border border-slate-300 shadow-xl flex items-center justify-center hover:bg-[#0047BA] hover:text-white hover:border-[#0047BA] transition-all cursor-pointer active:scale-95"
+            className="hidden md:flex absolute -left-3 top-1/2 -translate-y-1/2 z-20 w-10 h-10 rounded-full bg-white text-[#0047BA] border border-slate-300 shadow-xl items-center justify-center hover:bg-[#0047BA] hover:text-white hover:border-[#0047BA] transition-all cursor-pointer active:scale-95"
           >
             <ChevronLeft className="w-5 h-5 stroke-[3]" />
           </button>

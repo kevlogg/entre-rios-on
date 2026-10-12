@@ -321,34 +321,37 @@ export function ClientHeader({ withBackground = false }: ClientHeaderProps = {})
     <header className={`${withBackground ? 'bg-gradient-on-mas' : 'bg-black/20'} backdrop-blur-xl border-b border-white/10 sticky top-0 z-40 shadow-lg`}>
       {withBackground && <PageBackground />}
       {/* Top Header Main Row */}
-      <div className="max-w-7xl lg:max-w-none mx-auto px-4 sm:px-6 lg:px-4 py-3 relative z-30">
-        <div className="flex items-center justify-between md:grid md:grid-cols-8 gap-2 lg:gap-3 w-full">
+      <div className="max-w-7xl lg:max-w-none mx-auto px-4 sm:px-6 lg:px-4 py-3 relative z-30 min-h-[72px] flex items-center">
+        <div className="flex items-center justify-between w-full">
           
-          {/* Grupo Izquierdo: Logo + Selector Provincia + Buscador */}
-          <div className="flex items-center gap-2.5 sm:gap-3 lg:gap-4 min-w-0 md:col-span-5">
+          {/* Grupo Izquierdo: Logo */}
+          <div className="flex items-center min-w-0">
             {/* Logo Oficial en Card de Fondo Blanco Brillante */}
             <Link href="/" className="flex items-center shrink-0">
-              <div className="h-11 sm:h-13 lg:h-14 flex items-center justify-center bg-white hover:bg-white backdrop-blur-md border border-white/60 px-3.5 sm:px-5 rounded-2xl shadow-xl transition-all group">
-                <div className="relative w-32 h-8 sm:w-44 sm:h-10 lg:w-56 lg:h-12">
+              <div className="h-10 sm:h-13 lg:h-14 flex items-center justify-center bg-white/95 hover:bg-white backdrop-blur-md border border-white/60 px-2.5 sm:px-5 rounded-xl sm:rounded-2xl shadow-lg transition-all group">
+                <div className="relative w-28 h-7 sm:w-44 sm:h-10 lg:w-56 lg:h-12">
                   <Image
                     src="/logo1.png"
                     alt="ON MÁS - Portal Comercial & Regional"
                     fill
                     priority
-                    className="object-contain scale-105"
+                    className="object-contain"
                   />
                 </div>
               </div>
             </Link>
 
+          </div>
+
+          {/* Desktop Only: Selector de Provincia y Buscador central */}
+          <div className="hidden lg:flex items-center gap-4 flex-1 px-4">
             {/* Location Selector - Province Only */}
-            <div className="hidden lg:flex items-center bg-white/20 backdrop-blur-md border border-white/35 rounded-2xl px-2.5 h-11 sm:h-13 lg:h-14 shadow-lg relative z-30 shrink-0">
-              
+            <div className="flex items-center bg-white/20 backdrop-blur-md border border-white/35 rounded-2xl px-2.5 h-14 shadow-lg relative z-30 shrink-0">
               {/* Selector de Provincia */}
               <div className="relative flex items-center">
                 <button
                   onClick={() => setIsProvinceDropdownOpen(!isProvinceDropdownOpen)}
-                  className="flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs sm:text-sm font-black text-white hover:bg-white/25 transition-all cursor-pointer"
+                  className="flex items-center gap-2 px-3 py-1.5 rounded-xl text-sm font-black text-white hover:bg-white/25 transition-all cursor-pointer"
                 >
                   <MapPin className="w-4 h-4 text-cyan-300 shrink-0" />
                   <span className="truncate max-w-[170px]">{currentProvinceObj.name}</span>
@@ -382,9 +385,8 @@ export function ClientHeader({ withBackground = false }: ClientHeaderProps = {})
               </div>
             </div>
 
-            {/* Buscador Global Interactivo */}
-            <div ref={searchContainerRef} className="hidden md:block flex-1 min-w-0 w-full relative z-30">
-              <form onSubmit={handleSearchSubmit} className="relative flex items-center h-11 sm:h-13 lg:h-14">
+            <div ref={searchContainerRef} className="hidden lg:block flex-1 min-w-0 w-full relative z-30">
+              <form onSubmit={handleSearchSubmit} className="relative flex items-center h-14">
                 <input
                   type="text"
                   placeholder="Buscá productos, comercios, categorías, secciones..."
@@ -394,14 +396,14 @@ export function ClientHeader({ withBackground = false }: ClientHeaderProps = {})
                     setSearchQuery(e.target.value);
                     setIsSearchFocused(true);
                   }}
-                  className="w-full h-full bg-white border border-slate-200 rounded-2xl pl-4 pr-14 text-xs sm:text-sm font-extrabold text-slate-900 placeholder-slate-400 focus:outline-hidden focus:ring-2 focus:ring-[#00ADB5] focus:bg-white transition-all shadow-lg"
+                  className="w-full h-full bg-white border border-slate-200 rounded-2xl pl-4 pr-14 text-sm font-extrabold text-slate-900 placeholder-slate-400 focus:outline-hidden focus:ring-2 focus:ring-[#00ADB5] focus:bg-white transition-all shadow-lg"
                 />
                 <button
                   type="submit"
                   className="absolute right-1 top-1 bottom-1 bg-gradient-to-r from-[#00ADB5] to-[#0047BA] hover:from-[#00E5E8] hover:to-[#00ADB5] text-white font-black px-4 rounded-xl flex items-center justify-center transition-all shadow-md cursor-pointer"
                   aria-label="Buscar"
                 >
-                  <Search className="w-4 h-4 sm:w-5 sm:h-5" />
+                  <Search className="w-5 h-5" />
                 </button>
               </form>
 
@@ -537,24 +539,24 @@ export function ClientHeader({ withBackground = false }: ClientHeaderProps = {})
           </div>
 
           {/* Grupo Derecho: Acciones de Usuario + Toggle Menú Mobile */}
-          <div className="flex items-center gap-2 sm:gap-3 md:col-span-3 justify-end shrink-0">
+          <div className="flex items-center gap-2 shrink-0">
             {!currentUser ? (
               <Link 
                 href="/login" 
-                className="h-11 sm:h-13 lg:h-14 flex items-center gap-1.5 sm:gap-2 bg-white/15 hover:bg-white/25 text-white hover:text-cyan-200 border border-white/30 px-3 sm:px-4 rounded-2xl text-xs font-extrabold transition-all shadow-md cursor-pointer shrink-0 backdrop-blur-md"
+                className="h-9 w-9 lg:h-11 lg:w-auto flex items-center justify-center lg:px-4 gap-2 bg-white/15 hover:bg-white/25 text-white hover:text-cyan-200 border border-white/30 rounded-xl lg:rounded-2xl text-xs font-extrabold transition-all shadow-md cursor-pointer shrink-0 backdrop-blur-md"
                 title="Ingresar o Registrarse"
               >
-                <User className="w-4 h-4 text-cyan-200 shrink-0" />
-                <span className="hidden sm:inline">Ingresar / Crear cuenta</span>
+                <User className="w-4 h-4 lg:text-cyan-200 shrink-0" />
+                <span className="hidden lg:inline">Ingresar / Crear cuenta</span>
               </Link>
             ) : (
               <Link 
                 href="/admin" 
-                className="h-11 sm:h-13 lg:h-14 flex items-center gap-2.5 bg-white/15 hover:bg-white/25 border border-white/30 px-2.5 sm:px-3.5 rounded-2xl transition-all shadow-md cursor-pointer group shrink-0 backdrop-blur-md"
+                className="h-9 lg:h-11 flex items-center lg:gap-2.5 lg:bg-white/15 hover:bg-white/25 lg:border border-white/30 lg:px-3.5 rounded-xl lg:rounded-2xl transition-all shadow-md cursor-pointer group shrink-0 backdrop-blur-md"
                 title={`Panel de Administración: ${userCommerce?.name || 'Mi Negocio'}`}
               >
                 {userCommerce?.logoUrl ? (
-                  <div className="relative w-7 h-7 sm:w-8 sm:h-8 rounded-xl overflow-hidden border border-white/30 group-hover:border-cyan-300 bg-white shrink-0 shadow-2xs">
+                  <div className="relative w-9 h-9 lg:w-7 lg:h-7 rounded-xl overflow-hidden border border-white/30 group-hover:border-cyan-300 bg-white shrink-0 shadow-2xs">
                     <Image
                       src={userCommerce.logoUrl}
                       alt={userCommerce.name}
@@ -563,11 +565,11 @@ export function ClientHeader({ withBackground = false }: ClientHeaderProps = {})
                     />
                   </div>
                 ) : (
-                  <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-gradient-to-tr from-cyan-300 to-blue-500 text-slate-950 flex items-center justify-center font-black text-xs sm:text-sm shadow-md shrink-0">
+                  <div className="w-9 h-9 lg:w-7 lg:h-7 rounded-xl bg-gradient-to-tr from-cyan-300 to-blue-500 text-slate-950 flex items-center justify-center font-black text-sm shadow-md shrink-0">
                     {userCommerce?.initial || 'M'}
                   </div>
                 )}
-                <div className="hidden sm:flex flex-col text-left">
+                <div className="hidden lg:flex flex-col text-left">
                   <span className="text-[11px] font-black text-white group-hover:text-cyan-200 leading-tight truncate max-w-[120px]">
                     {userCommerce?.name || 'Mi Comercio'}
                   </span>
@@ -581,7 +583,7 @@ export function ClientHeader({ withBackground = false }: ClientHeaderProps = {})
             {/* Mobile Hamburger Toggle */}
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="md:hidden h-11 w-11 flex items-center justify-center text-white hover:text-cyan-200 focus:outline-hidden shrink-0 cursor-pointer bg-white/15 hover:bg-white/25 border border-white/30 rounded-2xl transition-all shadow-md backdrop-blur-md"
+              className="lg:hidden h-9 w-9 flex items-center justify-center text-white hover:text-cyan-200 focus:outline-hidden shrink-0 cursor-pointer bg-white/15 hover:bg-white/25 border border-white/30 rounded-xl transition-all shadow-md backdrop-blur-md"
               aria-label="Toggle Navigation Menu"
             >
               {isMobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}

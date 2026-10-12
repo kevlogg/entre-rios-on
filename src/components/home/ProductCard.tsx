@@ -120,11 +120,12 @@ export function ProductCard({ product }: ProductCardProps) {
         {/* Key WhatsApp Direct CTA */}
         <button
           onClick={handleWhatsAppClick}
-          className="w-full bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-500 hover:to-emerald-600 active:from-emerald-700 text-white py-2 px-3 rounded-xl font-black text-xs flex items-center justify-center gap-1.5 shadow-md transition-all transform active:scale-98 cursor-pointer"
+          className="w-full h-12 bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-500 hover:to-emerald-600 active:from-emerald-700 text-white px-2 sm:px-3 rounded-xl font-black text-[15px] sm:text-base flex items-center justify-center gap-1.5 shadow-md transition-all transform active:scale-98 cursor-pointer"
           aria-label={`Pedir por WhatsApp ${product.title}`}
         >
-          <MessageCircle className="w-3.5 h-3.5 fill-current" />
-          <span>Pedir por WhatsApp</span>
+          <MessageCircle className="w-4 h-4 sm:w-5 sm:h-5 fill-current shrink-0" />
+          <span className="truncate sm:hidden">WhatsApp</span>
+          <span className="truncate hidden sm:inline">Pedir por WhatsApp</span>
         </button>
       </div>
     </article>
