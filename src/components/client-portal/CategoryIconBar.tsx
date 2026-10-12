@@ -57,7 +57,7 @@ export function CategoryIconBar({
   };
 
   return (
-    <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-5">
+    <section className="max-w-7xl mx-auto px-3 min-[360px]:px-4 sm:px-6 lg:px-8 py-4 sm:py-6 space-y-4 sm:space-y-5">
       {/* Header Row: Title on Left, Link & Arrows on Right */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
         <div>
@@ -105,49 +105,9 @@ export function CategoryIconBar({
         </div>
       </div>
 
-      {/* Categories Cards Grid - Large Vertical Format */}
-      <div className="relative group/carousel">
-        
-        {/* Mobile: 2-Row Touch Horizontal Carousel for all categories */}
-        <div className="grid sm:hidden grid-rows-2 grid-flow-col auto-cols-[180px] gap-3.5 overflow-x-auto snap-x snap-mandatory scrollbar-none pb-2">
-          {CATEGORIES_LIST.map((cat) => {
-            const isSelected = selectedCat === cat.id;
-
-            return (
-              <button
-                key={cat.id}
-                onClick={() => handleCategoryClick(cat.id)}
-                className={`snap-start group flex flex-col rounded-2xl border overflow-hidden transition-all duration-300 text-left cursor-pointer shadow-md bg-white ${
-                  isSelected
-                    ? 'border-[#0047BA] ring-4 ring-[#00ADB5]/30 shadow-xl scale-[1.02]'
-                    : 'border-slate-200 hover:border-[#00ADB5] hover:shadow-xl'
-                }`}
-              >
-                {/* Top Image: Large & Covers Aspect Ratio */}
-                <div className="relative w-full h-28 bg-slate-950 overflow-hidden shrink-0">
-                  <img
-                    src={cat.imageUrl}
-                    alt={cat.label}
-                    className="w-full h-full object-cover object-center group-hover:scale-108 transition-transform duration-500"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-slate-950/40 via-transparent to-transparent opacity-60" />
-                </div>
-
-                {/* Bottom Footer: Category Label */}
-                <div className="p-3 w-full bg-white flex items-center justify-center text-center">
-                  <span className={`font-black text-xs leading-tight line-clamp-2 ${
-                    isSelected ? 'text-[#0047BA]' : 'text-slate-900 group-hover:text-[#0047BA]'
-                  }`}>
-                    {cat.label}
-                  </span>
-                </div>
-              </button>
-            );
-          })}
-        </div>
-
-        {/* Desktop & Tablet: Large 8-Item Vertical Grid (2 Rows x 4 Columns) */}
-        <div className="hidden sm:grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-5 transition-all duration-300">
+      {/* Categories Cards Grid - Responsive Grid (2 columns on mobile, 1 col <350px, 4 cols on desktop) */}
+      <div className="relative">
+        <div className="grid grid-cols-1 min-[350px]:grid-cols-2 md:grid-cols-4 gap-[14px]">
           {visibleCategories.map((cat) => {
             const isSelected = selectedCat === cat.id;
 
@@ -155,25 +115,25 @@ export function CategoryIconBar({
               <button
                 key={cat.id}
                 onClick={() => handleCategoryClick(cat.id)}
-                className={`group flex flex-col rounded-2xl sm:rounded-3xl border overflow-hidden transition-all duration-300 text-left cursor-pointer shadow-md bg-white hover:-translate-y-1 ${
+                className={`group flex flex-col rounded-2xl border overflow-hidden transition-all duration-300 text-center cursor-pointer shadow-sm bg-white w-full min-w-0 ${
                   isSelected
-                    ? 'border-[#0047BA] ring-4 ring-[#00ADB5]/40 shadow-2xl scale-[1.02]'
-                    : 'border-slate-200/90 hover:border-[#00ADB5] hover:shadow-2xl'
+                    ? 'border-[#0047BA] ring-3 ring-[#00ADB5]/40 shadow-lg scale-[1.01]'
+                    : 'border-slate-200/90 hover:border-[#00ADB5] hover:shadow-md'
                 }`}
               >
-                {/* Top Image Box: Large Banner Display */}
-                <div className="relative w-full h-36 sm:h-44 md:h-48 bg-slate-950 overflow-hidden shrink-0">
+                {/* Top Image: Relación de aspecto uniforme */}
+                <div className="relative w-full h-28 sm:h-36 md:h-44 bg-slate-950 overflow-hidden shrink-0">
                   <img
                     src={cat.imageUrl}
                     alt={cat.label}
-                    className="w-full h-full object-cover object-center group-hover:scale-108 transition-transform duration-700"
+                    className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-slate-950/50 via-transparent to-transparent opacity-40 group-hover:opacity-20 transition-opacity" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-slate-950/40 via-transparent to-transparent opacity-40 group-hover:opacity-20 transition-opacity" />
                 </div>
 
-                {/* Bottom Footer Box: Centered Bold Label */}
-                <div className="p-3.5 sm:p-4 w-full bg-white flex items-center justify-center text-center min-h-[56px]">
-                  <span className={`font-black text-xs sm:text-sm leading-snug line-clamp-2 ${
+                {/* Bottom Footer: Título centrado con altura uniforme */}
+                <div className="p-2.5 sm:p-3.5 w-full bg-white flex items-center justify-center text-center min-h-[50px] sm:min-h-[56px]">
+                  <span className={`font-black text-[11px] min-[400px]:text-xs sm:text-sm leading-tight line-clamp-2 block ${
                     isSelected ? 'text-[#0047BA]' : 'text-slate-900 group-hover:text-[#0047BA]'
                   }`}>
                     {cat.label}
@@ -183,40 +143,40 @@ export function CategoryIconBar({
             );
           })}
         </div>
-
-        {/* Floating Side Arrows for Next / Prev */}
-        <button
-          onClick={handleNextPage}
-          title="Pasar a las próximas 8 categorías"
-          className="hidden sm:flex absolute -right-4 top-1/2 -translate-y-1/2 z-20 w-11 h-11 rounded-full bg-white text-[#0047BA] border border-slate-200 shadow-2xl items-center justify-center hover:bg-[#00ADB5] hover:text-white hover:border-[#00ADB5] transition-all cursor-pointer active:scale-95"
-        >
-          <ChevronRight className="w-6 h-6 stroke-[3]" />
-        </button>
-
-        {currentPage > 0 && (
-          <button
-            onClick={handlePrevPage}
-            title="Volver a las 8 categorías anteriores"
-            className="hidden sm:flex absolute -left-4 top-1/2 -translate-y-1/2 z-20 w-11 h-11 rounded-full bg-white text-[#0047BA] border border-slate-200 shadow-2xl items-center justify-center hover:bg-[#00ADB5] hover:text-white hover:border-[#00ADB5] transition-all cursor-pointer active:scale-95"
-          >
-            <ChevronLeft className="w-6 h-6 stroke-[3]" />
-          </button>
-        )}
-
       </div>
 
-      {/* Carousel Pagination Dots */}
-      <div className="flex items-center justify-center gap-2 pt-1">
-        {Array.from({ length: totalPages }).map((_, idx) => (
-          <button
-            key={idx}
-            onClick={() => setCurrentPage(idx)}
-            className={`h-2.5 rounded-full transition-all cursor-pointer ${
-              currentPage === idx ? 'w-8 bg-[#0047BA]' : 'w-2.5 bg-slate-300 hover:bg-slate-500'
-            }`}
-            aria-label={`Ir a la página ${idx + 1}`}
-          />
-        ))}
+      {/* Carousel Pagination Controls Centered Below Cards */}
+      <div className="flex items-center justify-center gap-3 pt-2">
+        <button
+          onClick={handlePrevPage}
+          disabled={currentPage === 0}
+          aria-label="Ver 8 categorías anteriores"
+          className="p-1.5 rounded-xl bg-white border border-slate-200 text-slate-700 hover:bg-[#0047BA] hover:text-white disabled:opacity-40 disabled:pointer-events-none transition-colors shadow-2xs cursor-pointer"
+        >
+          <ChevronLeft className="w-4 h-4 stroke-[2.5]" />
+        </button>
+
+        <div className="flex items-center gap-1.5">
+          {Array.from({ length: totalPages }).map((_, idx) => (
+            <button
+              key={idx}
+              onClick={() => setCurrentPage(idx)}
+              className={`h-2 sm:h-2.5 rounded-full transition-all cursor-pointer ${
+                currentPage === idx ? 'w-6 sm:w-8 bg-[#0047BA]' : 'w-2 sm:w-2.5 bg-slate-300 hover:bg-slate-400'
+              }`}
+              aria-label={`Ir a la página ${idx + 1}`}
+            />
+          ))}
+        </div>
+
+        <button
+          onClick={handleNextPage}
+          disabled={currentPage === totalPages - 1}
+          aria-label="Ver siguientes 8 categorías"
+          className="p-1.5 rounded-xl bg-white border border-slate-200 text-slate-700 hover:bg-[#0047BA] hover:text-white disabled:opacity-40 disabled:pointer-events-none transition-colors shadow-2xs cursor-pointer"
+        >
+          <ChevronRight className="w-4 h-4 stroke-[2.5]" />
+        </button>
       </div>
     </section>
   );

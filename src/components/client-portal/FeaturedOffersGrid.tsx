@@ -55,7 +55,7 @@ export function FeaturedOffersGrid({
   }, [productsList, selectedCategory]);
 
   return (
-    <section id="ofertas-destacadas" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+    <section id="ofertas-destacadas" className="max-w-7xl mx-auto px-3 min-[360px]:px-4 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-5 sm:space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-300/70 pb-4">
         <div>
           <h2 className="text-xl sm:text-2xl font-black text-slate-900 flex items-center gap-2">
@@ -84,7 +84,7 @@ export function FeaturedOffersGrid({
       </div>
 
       {displayedProducts.length > 0 ? (
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 min-[430px]:grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
           {displayedProducts.map((product) => (
             <ProductCard key={product.id} product={product} />
           ))}

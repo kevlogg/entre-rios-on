@@ -80,12 +80,18 @@ body {
   }
 }
 
-/* Bloqueo de desplazamiento horizontal únicamente en pantallas móviles */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+/* Bloqueo de desplazamiento horizontal estricto en pantallas móviles */
 @media (max-width: 1023px) {
   html, body {
-    overflow-x: hidden;
-    width: 100%;
-    max-width: 100%;
+    overflow-x: hidden !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    position: relative;
+    box-sizing: border-box;
   }
 }
 
@@ -97,8 +103,10 @@ body {
   position: absolute;
   inset: 0;
   width: 100%;
+  max-width: 100vw;
   height: 100%;
   overflow: hidden;
+  contain: paint;
   z-index: 0;
   pointer-events: none;
   background: linear-gradient(

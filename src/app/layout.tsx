@@ -3,6 +3,7 @@ import { Inter, Caveat } from 'next/font/google';
 import './globals.css';
 import { DesignSwitcherBar } from '@/components/layout/DesignSwitcherBar';
 import { FloatingWhatsAppButton } from '@/components/common/FloatingWhatsAppButton';
+import { ScrollToTopButton } from '@/components/common/ScrollToTopButton';
 import { PageBackground } from '@/components/common/PageBackground';
 import { PwaInstallPrompt } from '@/components/pwa/PwaInstallPrompt';
 
@@ -111,6 +112,7 @@ export default function RootLayout({
           {children}
         </main>
         <FloatingWhatsAppButton />
+        <ScrollToTopButton />
         <PwaInstallPrompt />
       </body>
     </html>

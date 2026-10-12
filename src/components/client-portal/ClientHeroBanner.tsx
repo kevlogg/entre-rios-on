@@ -108,8 +108,8 @@ export function ClientHeroBanner({ provinceId = 'santa-fe' }: ClientHeroBannerPr
       aria-label="Carrusel Destacado Regional"
       className="w-full relative py-2 sm:py-3"
     >
-      <div className="max-w-7xl lg:max-w-none mx-auto px-4 sm:px-6 lg:px-3">
-        <div className="relative w-full h-[220px] sm:h-[300px] md:h-[360px] lg:h-[400px] rounded-2xl sm:rounded-3xl overflow-hidden group shadow-2xl border border-white/20 bg-slate-950">
+      <div className="max-w-7xl lg:max-w-none mx-auto px-3 min-[360px]:px-4 sm:px-6 lg:px-3">
+        <div className="relative w-full aspect-[4/3] sm:aspect-[16/10] md:h-[360px] lg:h-[400px] rounded-2xl lg:rounded-3xl overflow-hidden group shadow-md lg:shadow-2xl border border-white/20 bg-slate-950">
           {/* Background Images with Fade Transition */}
           {effectiveBanners.map((slide: BannerItem, idx: number) => {
             const imgSrc = normalizeImageUrl(slide.imageUrl);

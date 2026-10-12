@@ -58,7 +58,7 @@ export function ClientHomeContainer({ provinceId, initialProducts = [] }: Client
       </div>
 
       {/* 3. ÁREA RESTANTE CON FONDO GRIS SUAVE LISO (#e9ecef) - Arranca justo en Explorá por Ciudad */}
-      <div className="bg-[#e9ecef] w-full py-2 sm:py-4 space-y-2 text-slate-900 relative">
+      <div className="bg-[#e9ecef] w-full py-2 sm:py-4 space-y-4 sm:space-y-6 text-slate-900 relative">
         {/* Dynamic Skyscraper Side Banners (Márgenes laterales arranca en Explorá por Ciudad y frena antes del Footer) */}
         <StickySideBanners />
         

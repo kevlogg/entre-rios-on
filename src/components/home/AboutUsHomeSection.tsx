@@ -19,8 +19,8 @@ import { PageBackground } from '@/components/common/PageBackground';
 
 export function AboutUsHomeSection() {
   return (
-    <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 w-full">
-      <div className="bg-gradient-on-mas rounded-3xl p-8 sm:p-12 text-white shadow-2xl relative overflow-hidden flex flex-col lg:flex-row items-center justify-between gap-8 border border-white/20">
+    <section className="max-w-7xl mx-auto px-3 min-[360px]:px-4 sm:px-6 lg:px-8 py-6 sm:py-10 w-full">
+      <div className="bg-gradient-on-mas rounded-2xl sm:rounded-3xl p-6 sm:p-12 text-white shadow-xl sm:shadow-2xl relative overflow-hidden flex flex-col lg:flex-row items-center justify-between gap-8 border border-white/20">
         <PageBackground />
         
         {/* Background Ambient Glows */}

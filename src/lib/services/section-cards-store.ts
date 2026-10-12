@@ -16,10 +16,10 @@ export interface SectionCardItem {
 export const DEFAULT_SECTION_CARDS: SectionCardItem[] = [
   {
     id: 'comercio-digital',
-    title: 'COMERCIOS ADHERIDOS',
-    subtitle: 'Directorio unificado de locales, marcas y empresas.',
-    cta: 'Explorar comercios',
-    href: '/comercios',
+    title: 'COMERCIOS E INDUSTRIAS',
+    subtitle: 'Directorio unificado de comercios, marcas y pymes regionales.',
+    cta: 'ADHERIRME',
+    href: '/login?mode=signup',
     image: '/images/bento-1.jpg',
     idealSize: '600 × 400 px (3:2 en HD)',
   },

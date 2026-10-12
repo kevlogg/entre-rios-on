@@ -9,19 +9,19 @@ export function ClientFooter() {
   return (
     <footer className="relative bg-gradient-on-mas border-t border-white/15 pt-10 pb-0 overflow-hidden text-white shadow-2xl">
       <PageBackground />
-      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-10">
+      <div className="relative z-10 max-w-7xl mx-auto px-3 min-[360px]:px-4 sm:px-6 lg:px-8 pb-10">
         <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-center justify-between">
           
           {/* Left Column: Brand Logo Card & Handwritten Slogan */}
           <div className="md:col-span-4 space-y-3 flex flex-col items-center text-center md:items-start md:text-left">
-            <Link href="/" className="inline-block">
-              <div className="flex items-center justify-center bg-white hover:bg-white backdrop-blur-md border border-white/60 px-6 py-3 rounded-2xl shadow-2xl transition-all group">
-                <div className="relative w-56 h-14 sm:w-72 sm:h-16">
+            <Link href="/" className="inline-block max-w-full">
+              <div className="flex items-center justify-center bg-white hover:bg-white backdrop-blur-md border border-white/60 px-4 sm:px-6 py-2.5 sm:py-3 rounded-2xl shadow-2xl transition-all group max-w-full">
+                <div className="relative w-48 h-12 sm:w-72 sm:h-16 max-w-full">
                   <Image
                     src="/logo1.png"
                     alt="ON MÁS Portal"
                     fill
-                    className="object-contain scale-110"
+                    className="object-contain"
                   />
                 </div>
               </div>

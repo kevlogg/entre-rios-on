@@ -63,6 +63,7 @@ export function ClientHeader({ withBackground = false }: ClientHeaderProps = {})
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false);
   const [isProvinceDropdownOpen, setIsProvinceDropdownOpen] = useState(false);
   const [isCityDropdownOpen, setIsCityDropdownOpen] = useState(false);
   const [isCategoriesHovered, setIsCategoriesHovered] = useState(false);
@@ -321,15 +322,15 @@ export function ClientHeader({ withBackground = false }: ClientHeaderProps = {})
     <header className={`${withBackground ? 'bg-gradient-on-mas' : 'bg-black/20'} backdrop-blur-xl border-b border-white/10 sticky top-0 z-40 shadow-lg`}>
       {withBackground && <PageBackground />}
       {/* Top Header Main Row */}
-      <div className="max-w-7xl lg:max-w-none mx-auto px-4 sm:px-6 lg:px-4 py-3 relative z-30 min-h-[72px] flex items-center">
+      <div className="max-w-7xl lg:max-w-none mx-auto px-3 min-[360px]:px-4 sm:px-6 lg:px-4 py-2 sm:py-3 relative z-30 min-h-[72px] max-h-[80px] h-[74px] flex items-center">
         <div className="flex items-center justify-between w-full">
           
           {/* Grupo Izquierdo: Logo */}
           <div className="flex items-center min-w-0">
             {/* Logo Oficial en Card de Fondo Blanco Brillante */}
             <Link href="/" className="flex items-center shrink-0">
-              <div className="h-10 sm:h-13 lg:h-14 flex items-center justify-center bg-white/95 hover:bg-white backdrop-blur-md border border-white/60 px-2.5 sm:px-5 rounded-xl sm:rounded-2xl shadow-lg transition-all group">
-                <div className="relative w-28 h-7 sm:w-44 sm:h-10 lg:w-56 lg:h-12">
+              <div className="h-11 sm:h-13 lg:h-14 flex items-center justify-center bg-white/95 hover:bg-white backdrop-blur-md border border-white/60 px-3 sm:px-5 py-1 rounded-xl sm:rounded-2xl shadow-lg transition-all group">
+                <div className="relative w-32 h-8 sm:w-44 sm:h-10 lg:w-56 lg:h-12">
                   <Image
                     src="/logo1.png"
                     alt="ON MÁS - Portal Comercial & Regional"
@@ -540,6 +541,17 @@ export function ClientHeader({ withBackground = false }: ClientHeaderProps = {})
 
           {/* Grupo Derecho: Acciones de Usuario + Toggle Menú Mobile */}
           <div className="flex items-center gap-2 shrink-0">
+            {/* Mobile Search Toggle Icon */}
+            <button
+              type="button"
+              onClick={() => setIsMobileSearchOpen(!isMobileSearchOpen)}
+              className="lg:hidden h-9 w-9 flex items-center justify-center text-white hover:text-cyan-200 focus:outline-hidden shrink-0 cursor-pointer bg-white/15 hover:bg-white/25 border border-white/30 rounded-xl transition-all shadow-md backdrop-blur-md"
+              aria-label="Buscar productos y comercios"
+              title="Buscar"
+            >
+              <Search className="w-4 h-4 text-cyan-200" />
+            </button>
+
             {!currentUser ? (
               <Link 
                 href="/login" 
@@ -592,6 +604,35 @@ export function ClientHeader({ withBackground = false }: ClientHeaderProps = {})
 
         </div>
       </div>
+
+      {/* Mobile Search Expandable Bar */}
+      {isMobileSearchOpen && (
+        <div className="lg:hidden px-4 py-2.5 bg-slate-900/95 border-t border-white/15 backdrop-blur-2xl animate-in slide-in-from-top-2 duration-150 relative z-30">
+          <form 
+            onSubmit={(e) => { 
+              handleSearchSubmit(e); 
+              setIsMobileSearchOpen(false); 
+            }} 
+            className="relative flex items-center h-10"
+          >
+            <input
+              type="text"
+              placeholder="Buscá productos, comercios, ofertas..."
+              value={searchQuery}
+              autoFocus
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full h-full bg-white border border-slate-200 rounded-xl pl-3.5 pr-11 text-xs font-bold text-slate-900 placeholder-slate-400 focus:outline-hidden focus:ring-2 focus:ring-[#00ADB5]"
+            />
+            <button
+              type="submit"
+              className="absolute right-1 top-1 bottom-1 bg-gradient-to-r from-[#00ADB5] to-[#0047BA] text-white px-2.5 rounded-lg flex items-center justify-center cursor-pointer"
+              aria-label="Buscar"
+            >
+              <Search className="w-3.5 h-3.5" />
+            </button>
+          </form>
+        </div>
+      )}
 
       {/* Secondary Horizontal Navigation Bar - Floating Individual Badges */}
       <nav className="hidden md:block py-2.5 bg-transparent relative z-10">

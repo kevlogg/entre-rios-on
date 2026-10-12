@@ -13,13 +13,9 @@ interface ProductCardProps {
 }
 
 export function ProductCard({ product }: ProductCardProps) {
-  const formatPrice = (price?: number, currency: string = 'ARS') => {
-    if (!price) return 'Consultar precio';
-    return new Intl.NumberFormat('es-AR', {
-      style: 'currency',
-      currency: currency,
-      maximumFractionDigits: 0,
-    }).format(price);
+  const formatPrice = (price?: number | null, _currency: string = 'ARS') => {
+    if (!price || isNaN(price) || price <= 0) return 'Consultar precio';
+    return `$${new Intl.NumberFormat('es-AR').format(price)}`;
   };
 
   const handleWhatsAppClick = (e: React.MouseEvent) => {
@@ -120,12 +116,12 @@ export function ProductCard({ product }: ProductCardProps) {
         {/* Key WhatsApp Direct CTA */}
         <button
           onClick={handleWhatsAppClick}
-          className="w-full h-12 bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-500 hover:to-emerald-600 active:from-emerald-700 text-white px-2 sm:px-3 rounded-xl font-black text-[15px] sm:text-base flex items-center justify-center gap-1.5 shadow-md transition-all transform active:scale-98 cursor-pointer"
+          data-whatsapp-cta="true"
+          className="w-full h-12 bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-500 hover:to-emerald-600 active:from-emerald-700 text-white px-3 rounded-xl font-black text-[15px] sm:text-base flex items-center justify-center gap-2 shadow-md transition-all transform active:scale-98 cursor-pointer whitespace-nowrap"
           aria-label={`Pedir por WhatsApp ${product.title}`}
         >
           <MessageCircle className="w-4 h-4 sm:w-5 sm:h-5 fill-current shrink-0" />
-          <span className="truncate sm:hidden">WhatsApp</span>
-          <span className="truncate hidden sm:inline">Pedir por WhatsApp</span>
+          <span className="truncate">Pedir por WhatsApp</span>
         </button>
       </div>
     </article>
