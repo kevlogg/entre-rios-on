@@ -85,6 +85,18 @@ export const DEFAULT_PROVINCE_BANNERS: Record<string, BannerItem[]> = {
   ],
   'santa-fe': [
     {
+      id: 'sf-bridge',
+      provinceId: 'santa-fe',
+      imageUrl: '/images/hero-santa-fe-bridge.jpg',
+      device: 'all',
+      location: 'Puente Colgante de Santa Fe',
+      titleLine1: 'SANTA FE ESTÁ ON MÁS',
+      titleLine2: 'ON+ conectando la Región',
+      subtitle: 'Comercio, Industria y Oportunidades',
+      ctaText: 'Explorar Santa Fe',
+      ctaHref: '/santa-fe',
+    },
+    {
       id: 'sf-1',
       provinceId: 'santa-fe',
       imageUrl: '/images/hero-rosario.jpg',

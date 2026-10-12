@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { ClientHeader } from '@/components/layout/ClientHeader';
@@ -12,6 +11,7 @@ import { FeaturedOffersGrid } from '@/components/client-portal/FeaturedOffersGri
 import { FeaturedSectionsGrid } from '@/components/client-portal/FeaturedSectionsGrid';
 import { AboutUsHomeSection } from '@/components/home/AboutUsHomeSection';
 import { getProvinceBySlug } from '@/lib/constants/locations';
+import { useSideBanners } from '@/lib/services/side-banners-store';
 import { Product } from '@/types';
 
 interface ClientHomeContainerProps {
@@ -23,6 +23,21 @@ export function ClientHomeContainer({ provinceId, initialProducts = [] }: Client
   const pathname = usePathname();
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [activeProvince, setActiveProvince] = useState<string>(provinceId || 'santa-fe');
+
+  // Dynamic Side Banners loaded from SuperAdmin / Supabase
+  const sideBanners = useSideBanners();
+
+  // Partition banners by position or fallbacks
+  const leftBanners = sideBanners.filter((b) => b.position === 'left' || b.position === 'both');
+  const rightBanners = sideBanners.filter((b) => b.position === 'right' || b.position === 'both');
+
+  const leftTopBanner = leftBanners[0] || sideBanners[0];
+  const leftBottomBanner = leftBanners[1] || sideBanners[1] || leftBanners[0];
+
+  const rightTopBanner = rightBanners[0] || sideBanners[2] || sideBanners[0];
+  const rightBottomBanner = rightBanners[1] || sideBanners[3] || rightBanners[0];
+
+  const mobileBanners = sideBanners.slice(0, 4);
 
   useEffect(() => {
     if (provinceId) {
@@ -48,108 +63,63 @@ export function ClientHomeContainer({ provinceId, initialProducts = [] }: Client
       {/* 1. Header Oficial (Top Bar Blanca + Subnav Degradé ON+) */}
       <ClientHeader />
 
-      {/* 2. Main Content Container (3 Columnas en Desktop: Banner Izquierdo, Contenido Central, Banner Derecho) */}
+      {/* 2. Main Content Container */}
       <div className="w-full max-w-[1480px] mx-auto px-2 min-[360px]:px-3 sm:px-4 lg:px-6 py-2 sm:py-3 flex-1">
         
-        {/* Mobile Promotional Banners Carousel (Below Hero on mobile, in-flow side columns on desktop) */}
+        {/* ========================================================================= */}
+        {/* MOBILE VIEW (< lg): Hero Banner + Ads Dinámicos de SuperAdmin + Contenido */}
+        {/* ========================================================================= */}
         <div className="lg:hidden w-full mb-3">
           <ClientHeroBanner provinceId={activeProvince} />
 
-          {/* Mobile Ads: Clean 2x2 grid or horizontal scroll */}
-          <div className="mt-2.5 grid grid-cols-2 gap-2">
-            <Link
-              href="/sorteos"
-              className="block rounded-xl overflow-hidden border border-slate-200/90 relative aspect-[4/5] bg-blue-600"
-            >
-              <Image
-                src="/banners/side-sorteo-del-mes.jpg"
-                alt="Sorteo del Mes"
-                fill
-                sizes="50vw"
-                className="object-cover"
-              />
-            </Link>
-
-            <Link
-              href="/planes"
-              className="block rounded-xl overflow-hidden border border-slate-200/90 relative aspect-[4/5] bg-blue-700"
-            >
-              <Image
-                src="/banners/side-comercio-onmas.jpg"
-                alt="Tu Comercio en ON MÁS"
-                fill
-                sizes="50vw"
-                className="object-cover"
-              />
-            </Link>
-
-            <Link
-              href="/turismo"
-              className="block rounded-xl overflow-hidden border border-slate-200/90 relative aspect-[16/9] bg-sky-600"
-            >
-              <Image
-                src="/banners/side-descubri-santa-fe.jpg"
-                alt="Descubrí Santa Fe"
-                fill
-                sizes="50vw"
-                className="object-cover"
-              />
-            </Link>
-
-            <Link
-              href="/turismo"
-              className="block rounded-xl overflow-hidden border border-slate-200/90 relative aspect-[16/9] bg-orange-500"
-            >
-              <Image
-                src="/banners/side-costa-santafesina.jpg"
-                alt="Viví la Costa Santafesina"
-                fill
-                sizes="50vw"
-                className="object-cover"
-              />
-            </Link>
-          </div>
+          {/* Banners publicitarios dinámicos desde SuperAdmin en celular */}
+          {mobileBanners.length > 0 && (
+            <div className="mt-2.5 grid grid-cols-2 gap-2">
+              {mobileBanners.map((banner) => (
+                <Link
+                  key={banner.id}
+                  href={banner.href || '/planes'}
+                  className="block rounded-xl overflow-hidden border border-slate-200/90 relative aspect-[16/10] bg-slate-900 group cursor-pointer"
+                  title={banner.title}
+                >
+                  <img
+                    src={banner.imageUrl}
+                    alt={banner.title}
+                    className="w-full h-full object-cover group-hover:scale-102 transition-transform duration-500"
+                  />
+                </Link>
+              ))}
+            </div>
+          )}
         </div>
 
-        {/* Desktop 3-Column Layout */}
-        <div className="hidden lg:grid lg:grid-cols-[180px_1fr_180px] xl:grid-cols-[200px_1fr_200px] 2xl:grid-cols-[220px_1fr_220px] gap-3.5 xl:gap-4.5 items-start">
+        {/* ========================================================================= */}
+        {/* DESKTOP BLOQUE 1 (SUPERIOR):                                              */}
+        {/* Desde el Hero Banner principal hasta "Productos y oportunidades"          */}
+        {/* Los primeros banners laterales llegan EXACTAMENTE hasta Productos         */}
+        {/* ========================================================================= */}
+        <div className="hidden lg:grid lg:grid-cols-[180px_1fr_180px] xl:grid-cols-[200px_1fr_200px] 2xl:grid-cols-[220px_1fr_220px] gap-3.5 xl:gap-4.5 items-stretch">
           
-          {/* COLUMNA IZQUIERDA: Banners Publicitarios (100% clickeables, sin sombra, sin etiquetas, sin botones) */}
-          <aside className="w-full space-y-3 shrink-0 flex flex-col">
-            {/* Banner 1 Superior Izquierdo: Sorteo del Mes */}
-            <Link
-              href="/sorteos"
-              className="block w-full rounded-2xl overflow-hidden border border-slate-200/80 hover:border-blue-400 transition-colors relative aspect-[156/404] bg-blue-600 group cursor-pointer"
-              title="Sorteo del Mes ON+"
-            >
-              <Image
-                src="/banners/side-sorteo-del-mes.jpg"
-                alt="Sorteo del Mes ON+"
-                fill
-                sizes="(max-width: 1440px) 200px, 220px"
-                className="object-cover group-hover:scale-102 transition-transform duration-500"
-              />
-            </Link>
-
-            {/* Banner 2 Inferior Izquierdo: Descubrí Santa Fe */}
-            <Link
-              href="/turismo"
-              className="block w-full rounded-2xl overflow-hidden border border-slate-200/80 hover:border-blue-400 transition-colors relative aspect-[156/198] bg-sky-600 group cursor-pointer"
-              title="Descubrí Santa Fe - Turismo Todo el Año"
-            >
-              <Image
-                src="/banners/side-descubri-santa-fe.jpg"
-                alt="Descubrí Santa Fe"
-                fill
-                sizes="(max-width: 1440px) 200px, 220px"
-                className="object-cover group-hover:scale-102 transition-transform duration-500"
-              />
-            </Link>
+          {/* COLUMNA IZQUIERDA SUPERIOR: Banner 1 (llega hasta la sección Productos) */}
+          <aside className="w-full h-full flex flex-col">
+            {leftTopBanner && (
+              <Link
+                href={leftTopBanner.href || '/sorteos'}
+                className="block w-full h-full min-h-[520px] rounded-2xl overflow-hidden border border-slate-200/80 hover:border-blue-400 transition-colors relative bg-slate-900 group cursor-pointer"
+                title={leftTopBanner.title}
+              >
+                <img
+                  src={leftTopBanner.imageUrl}
+                  alt={leftTopBanner.title}
+                  className="w-full h-full object-cover group-hover:scale-102 transition-transform duration-500"
+                />
+              </Link>
+            )}
           </aside>
 
-          {/* COLUMNA CENTRAL: Todo el Flujo Principal */}
+          {/* COLUMNA CENTRAL SUPERIOR: Hero + Ciudades + Categorías + Productos */}
           <main className="w-full min-w-0 space-y-2 sm:space-y-3">
-            {/* 1. Banner Principal de Santa Fe */}
+            {/* 1. Banner Principal de Santa Fe (Cargado dinámicamente desde SuperAdmin) */}
             <ClientHeroBanner provinceId={activeProvince} />
 
             {/* 2. Explorá por Ciudad · Santa Fe (8 Ciudades) */}
@@ -166,50 +136,82 @@ export function ClientHomeContainer({ provinceId, initialProducts = [] }: Client
               products={initialProducts}
               selectedCategory={selectedCategory}
             />
-
-            {/* 5. Descubrí todo lo que podés hacer en ON+ (6 Secciones Destacadas) */}
-            <FeaturedSectionsGrid />
-
-            {/* 6. Quiénes Somos (Card Blanco con Tipografía Azul Oscuro y Turquesa) */}
-            <AboutUsHomeSection />
           </main>
 
-          {/* COLUMNA DERECHA: Banners Publicitarios (100% clickeables, sin sombra, sin etiquetas, sin botones) */}
-          <aside className="w-full space-y-3 shrink-0 flex flex-col">
-            {/* Banner 1 Superior Derecho: Tu Comercio en ON MÁS */}
-            <Link
-              href="/planes"
-              className="block w-full rounded-2xl overflow-hidden border border-slate-200/80 hover:border-blue-400 transition-colors relative aspect-[156/404] bg-blue-700 group cursor-pointer"
-              title="Tu Comercio en ON MÁS"
-            >
-              <Image
-                src="/banners/side-comercio-onmas.jpg"
-                alt="Tu Comercio en ON MÁS"
-                fill
-                sizes="(max-width: 1440px) 200px, 220px"
-                className="object-cover group-hover:scale-102 transition-transform duration-500"
-              />
-            </Link>
-
-            {/* Banner 2 Inferior Derecho: Viví la Costa Santafesina */}
-            <Link
-              href="/turismo"
-              className="block w-full rounded-2xl overflow-hidden border border-slate-200/80 hover:border-blue-400 transition-colors relative aspect-[156/198] bg-orange-600 group cursor-pointer"
-              title="Viví la Costa Santafesina"
-            >
-              <Image
-                src="/banners/side-costa-santafesina.jpg"
-                alt="Viví la Costa Santafesina"
-                fill
-                sizes="(max-width: 1440px) 200px, 220px"
-                className="object-cover group-hover:scale-102 transition-transform duration-500"
-              />
-            </Link>
+          {/* COLUMNA DERECHA SUPERIOR: Banner 1 (llega hasta la sección Productos) */}
+          <aside className="w-full h-full flex flex-col">
+            {rightTopBanner && (
+              <Link
+                href={rightTopBanner.href || '/planes'}
+                className="block w-full h-full min-h-[520px] rounded-2xl overflow-hidden border border-slate-200/80 hover:border-blue-400 transition-colors relative bg-slate-900 group cursor-pointer"
+                title={rightTopBanner.title}
+              >
+                <img
+                  src={rightTopBanner.imageUrl}
+                  alt={rightTopBanner.title}
+                  className="w-full h-full object-cover group-hover:scale-102 transition-transform duration-500"
+                />
+              </Link>
+            )}
           </aside>
 
         </div>
 
-        {/* Mobile Remaining Flow */}
+        {/* ========================================================================= */}
+        {/* DESKTOP BLOQUE 2 (INFERIOR):                                              */}
+        {/* Debajo de Productos: Cards de Secciones de SuperAdmin + Quiénes Somos      */}
+        {/* Los segundos banners laterales se ubican abajo de cada lado               */}
+        {/* ========================================================================= */}
+        <div className="hidden lg:grid lg:grid-cols-[180px_1fr_180px] xl:grid-cols-[200px_1fr_200px] 2xl:grid-cols-[220px_1fr_220px] gap-3.5 xl:gap-4.5 items-stretch mt-3 sm:mt-4">
+          
+          {/* COLUMNA IZQUIERDA INFERIOR: Banner 2 (debajo del primer banner) */}
+          <aside className="w-full h-full flex flex-col">
+            {leftBottomBanner && (
+              <Link
+                href={leftBottomBanner.href || '/turismo'}
+                className="block w-full h-full min-h-[220px] rounded-2xl overflow-hidden border border-slate-200/80 hover:border-blue-400 transition-colors relative bg-slate-900 group cursor-pointer"
+                title={leftBottomBanner.title}
+              >
+                <img
+                  src={leftBottomBanner.imageUrl}
+                  alt={leftBottomBanner.title}
+                  className="w-full h-full object-cover group-hover:scale-102 transition-transform duration-500"
+                />
+              </Link>
+            )}
+          </aside>
+
+          {/* COLUMNA CENTRAL INFERIOR: Secciones Destacadas + Quiénes Somos */}
+          <div className="w-full min-w-0 space-y-2 sm:space-y-3">
+            {/* 5. Descubrí todo lo que podés hacer en ON+ (Cards desde SuperAdmin) */}
+            <FeaturedSectionsGrid />
+
+            {/* 6. Quiénes Somos (Card Blanco con Tipografía Azul Oscuro y Turquesa) */}
+            <AboutUsHomeSection />
+          </div>
+
+          {/* COLUMNA DERECHA INFERIOR: Banner 2 (debajo del primer banner) */}
+          <aside className="w-full h-full flex flex-col">
+            {rightBottomBanner && (
+              <Link
+                href={rightBottomBanner.href || '/turismo'}
+                className="block w-full h-full min-h-[220px] rounded-2xl overflow-hidden border border-slate-200/80 hover:border-blue-400 transition-colors relative bg-slate-900 group cursor-pointer"
+                title={rightBottomBanner.title}
+              >
+                <img
+                  src={rightBottomBanner.imageUrl}
+                  alt={rightBottomBanner.title}
+                  className="w-full h-full object-cover group-hover:scale-102 transition-transform duration-500"
+                />
+              </Link>
+            )}
+          </aside>
+
+        </div>
+
+        {/* ========================================================================= */}
+        {/* MOBILE CONTINUACIÓN (< lg): Resto de secciones en flujo continuo          */}
+        {/* ========================================================================= */}
         <div className="lg:hidden w-full space-y-2 mt-2">
           {/* Explorá por Ciudad */}
           <CityExploreBar provinceId={activeProvince} />
@@ -226,7 +228,7 @@ export function ClientHomeContainer({ provinceId, initialProducts = [] }: Client
             selectedCategory={selectedCategory}
           />
 
-          {/* Secciones Destacadas */}
+          {/* Secciones Destacadas (desde SuperAdmin) */}
           <FeaturedSectionsGrid />
 
           {/* Quiénes Somos */}
