@@ -30,12 +30,12 @@ export function AboutUsHomeSection() {
 
         {/* Right Column: Logo & Pillars */}
         <div className="lg:w-1/4 flex flex-col items-center lg:items-end justify-center text-center lg:text-right shrink-0">
-          <div className="relative w-36 sm:w-40 h-10 mb-1">
+          <div className="relative w-12 h-12 sm:w-14 sm:h-14 mb-1.5">
             <Image
               src="/logo1.png"
               alt="ON+ PORTAL COMERCIAL"
               fill
-              className="object-contain object-center lg:object-right"
+              className="object-contain"
             />
           </div>
           <p className="text-[10px] sm:text-[11px] font-bold text-slate-500 leading-tight">

@@ -91,7 +91,7 @@ export function PwaInstallPrompt() {
 
         <div className="flex items-start justify-between gap-3 relative z-10">
           <div className="flex items-center gap-3">
-            <div className="w-11 h-11 bg-white p-1 shadow-md shrink-0 flex items-center justify-center border border-cyan-400/40">
+            <div className="w-11 h-11 bg-white p-1 rounded-xl shadow-md shrink-0 flex items-center justify-center border border-cyan-400/40">
               <Image
                 src="/logo.png"
                 alt="ON MÁS App"

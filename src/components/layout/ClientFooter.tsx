@@ -15,12 +15,12 @@ export function ClientFooter() {
           {/* Brand Column */}
           <div className="col-span-2 md:col-span-3 lg:col-span-1 space-y-3">
             <Link href="/" className="inline-block">
-              <div className="relative w-36 h-10">
+              <div className="relative w-12 h-12 sm:w-14 sm:h-14">
                 <Image
                   src="/logo1.png"
                   alt="ON+ PORTAL COMERCIAL"
                   fill
-                  className="object-contain object-left"
+                  className="object-contain"
                 />
               </div>
             </Link>

@@ -43,14 +43,14 @@ export default function LinkLandingPage() {
         
         {/* Profile Card Header */}
         <div className="text-center space-y-4">
-          <div className="inline-block bg-white/95 backdrop-blur-md px-6 py-3.5 rounded-2xl shadow-2xl border border-white/60 transform hover:scale-105 transition-transform duration-300">
-            <div className="relative w-48 h-12 sm:w-56 sm:h-14 mx-auto">
+          <div className="inline-block bg-white/95 backdrop-blur-md p-2.5 rounded-3xl shadow-2xl border border-white/60 transform hover:scale-105 transition-transform duration-300">
+            <div className="relative w-20 h-20 mx-auto">
               <Image
                 src="/logo.png"
                 alt="ON MÁS Portal"
                 fill
                 priority
-                className="object-contain p-0.5"
+                className="object-contain"
               />
             </div>
           </div>

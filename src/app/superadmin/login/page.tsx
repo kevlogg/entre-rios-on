@@ -111,7 +111,7 @@ export default function SuperAdminLoginPage() {
         {/* Header Logo & Crown */}
         <div className="text-center space-y-3">
           <Link href="/" className="inline-block">
-            <div className="relative w-44 h-12 mx-auto">
+            <div className="relative w-16 h-16 mx-auto mb-1">
               <Image
                 src="/logo.png"
                 alt="ON MÁS Portal"
