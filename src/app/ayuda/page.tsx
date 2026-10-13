@@ -42,7 +42,7 @@ export default function AyudaPage() {
       </div>
 
       {/* Hero Section */}
-      <div className="bg-slate-950/70 backdrop-blur-xl border border-white/20 rounded-3xl p-8 sm:p-10 text-white shadow-2xl flex flex-col md:flex-row md:items-center justify-between gap-6 relative overflow-hidden">
+      <div className="rounded-3xl p-8 sm:p-10 text-white relative overflow-hidden flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div className="space-y-3 max-w-2xl relative z-10">
           <div className="inline-flex items-center gap-2 bg-white/10 border border-white/20 text-[#00E5E8] text-xs font-extrabold px-3.5 py-1.5 rounded-full">
             <HelpCircle className="w-4 h-4 text-[#00E5E8]" />
@@ -94,7 +94,7 @@ export default function AyudaPage() {
               <p className="text-xs text-slate-600 font-medium">Nuestro equipo de soporte comercial te asesora sin compromiso.</p>
             </div>
             <a
-              href="https://wa.me/5493410000000?text=Hola!%20Tengo%20una%20consulta%20sobre%20el%20portal%20ON%20M%C3%81S"
+              href="https://wa.me/5493426514889?text=Hola!%20Tengo%20una%20consulta%20sobre%20el%20portal%20ON%20M%C3%81S"
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs px-6 py-3.5 rounded-xl shadow-md transition-all shrink-0 cursor-pointer"

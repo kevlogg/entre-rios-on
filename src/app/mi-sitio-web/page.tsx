@@ -57,7 +57,7 @@ export default function MiSitioWebPage() {
 
     // Also open WhatsApp prefilled
     const waMsg = `Hola equipo ON MÁS! Solicito la creación de Mi Sitio Web Propio para mi comercio "${businessName}". Contacto: ${contactName} (${phone}). Dominio deseado: ${desiredDomain || 'A definir'}.`;
-    window.open(`https://wa.me/5493434567890?text=${encodeURIComponent(waMsg)}`, '_blank');
+    window.open(`https://wa.me/5493426514889?text=${encodeURIComponent(waMsg)}`, '_blank');
   };
 
 

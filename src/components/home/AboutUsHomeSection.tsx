@@ -30,7 +30,7 @@ export function AboutUsHomeSection() {
 
         {/* Right Column: Logo & Pillars */}
         <div className="lg:w-1/4 flex flex-col items-center lg:items-end justify-center text-center lg:text-right shrink-0">
-          <div className="relative w-12 h-12 sm:w-14 sm:h-14 mb-1.5">
+          <div className="relative w-[104px] h-[60px] sm:w-[121px] sm:h-[70px] mb-1.5">
             <Image
               src="/logo1.png"
               alt="ON+ PORTAL COMERCIAL"

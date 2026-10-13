@@ -105,8 +105,8 @@ export function QrGeneratorManager({ commerces = [] }: QrGeneratorManagerProps) 
   };
 
   const resolution = 1024;
-  const logoWidth = Math.round(resolution * 0.38); // 389 px ancho
-  const logoHeight = Math.round(logoWidth / 3.0);  // 130 px alto (Proporcional al logo completo ON MÁS)
+  const logoWidth = Math.round(resolution * 0.30); // 307 px ancho
+  const logoHeight = Math.round(logoWidth * 379 / 657);  // 177 px alto (Proporcional al logo completo ON+ 657x379)
 
   return (
     <div className="max-w-xl mx-auto space-y-4">

@@ -17,7 +17,7 @@ export function Footer() {
           <div className="lg:col-span-2 space-y-4">
             <Link href="/" className="inline-block">
               <div className="flex items-center justify-center bg-white/95 hover:bg-white backdrop-blur-md border border-white/50 p-2.5 rounded-3xl shadow-xl transition-all group">
-                <div className="relative w-14 h-14">
+                <div className="relative w-[121px] h-[70px]">
                   <Image
                     src="/logo1.png"
                     alt="ON MÁS Portal"

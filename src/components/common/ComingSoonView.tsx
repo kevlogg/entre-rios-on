@@ -75,7 +75,7 @@ export function ComingSoonView() {
         
         {/* Logo Box */}
         <div className="inline-block bg-white/95 backdrop-blur-md px-8 py-4 rounded-3xl shadow-2xl border border-white/60 transform hover:scale-105 transition-transform duration-300">
-          <div className="relative w-52 h-14 sm:w-64 sm:h-16 mx-auto">
+          <div className="relative w-44 h-[102px] sm:w-56 sm:h-[130px] mx-auto">
             <Image
               src="/logo.png"
               alt="ON MÁS Portal"

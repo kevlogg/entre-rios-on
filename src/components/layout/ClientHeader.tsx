@@ -244,7 +244,7 @@ export function ClientHeader({ withBackground = false }: ClientHeaderProps = {})
           {/* Left: Logo ON+ Portal Comercial + Province Selector */}
           <div className="flex items-center gap-3 sm:gap-4 shrink-0">
             <Link href="/" className="flex items-center group">
-              <div className="relative w-12 h-12 sm:w-14 sm:h-14 lg:w-15 lg:h-15 flex items-center">
+              <div className="relative w-[76px] h-11 sm:w-[96px] sm:h-14 lg:w-[116px] lg:h-[67px] flex items-center">
                 <Image
                   src="/logo1.png"
                   alt="ON+ PORTAL COMERCIAL"

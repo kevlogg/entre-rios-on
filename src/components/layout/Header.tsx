@@ -224,7 +224,7 @@ export function Header({ selectedCityId = 'all' }: HeaderProps) {
           
           {/* Brand Logo Oficial */}
           <Link href="/" className="flex items-center gap-2 sm:gap-3 shrink-0">
-            <div className="relative w-12 h-12 sm:w-14 sm:h-14">
+            <div className="relative w-[76px] h-11 sm:w-[96px] sm:h-14">
               <Image
                 src="/logo1.png"
                 alt="ON MÁS Portal"

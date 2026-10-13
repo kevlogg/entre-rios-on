@@ -33,7 +33,7 @@ export default async function TurismoPage() {
       </div>
 
       {/* Hero Banner */}
-      <div className="bg-slate-950/70 backdrop-blur-xl border border-white/20 rounded-3xl p-8 sm:p-12 text-white shadow-2xl relative overflow-hidden">
+      <div className="rounded-3xl p-8 sm:p-12 text-white relative overflow-hidden">
         <div className="relative z-10 space-y-4 max-w-2xl">
           <span className="inline-flex items-center gap-1.5 bg-white/20 text-[#00E5E8] text-xs font-extrabold px-3 py-1 rounded-full uppercase tracking-wider border border-white/20">
             <Compass className="w-3.5 h-3.5" />

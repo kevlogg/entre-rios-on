@@ -36,7 +36,7 @@ export default async function ComerciosPage() {
       </div>
 
       {/* Page Hero Banner */}
-      <div className="bg-slate-950/70 backdrop-blur-xl border border-white/20 rounded-3xl p-8 sm:p-12 text-white shadow-2xl relative overflow-hidden space-y-4">
+      <div className="rounded-3xl p-8 sm:p-12 text-white relative overflow-hidden space-y-4">
         <div className="inline-flex items-center gap-2 bg-white/15 border border-white/20 text-[#00E5E8] text-xs font-extrabold px-3.5 py-1.5 rounded-full backdrop-blur-md">
           <Store className="w-4 h-4 text-[#00E5E8]" />
           <span>Directorio Provincial de Comercios, Pymes & Empresas</span>

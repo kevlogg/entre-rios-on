@@ -24,7 +24,7 @@ export default function PlanesPublicPage() {
       </div>
 
       {/* Hero Section */}
-      <div className="bg-slate-950/70 backdrop-blur-xl border border-white/20 rounded-3xl p-8 sm:p-10 text-white shadow-2xl flex flex-col md:flex-row md:items-center justify-between gap-6 relative overflow-hidden">
+      <div className="rounded-3xl p-8 sm:p-10 text-white relative overflow-hidden flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div className="space-y-3 max-w-2xl relative z-10">
           <div className="inline-flex items-center gap-2 bg-white/10 border border-white/20 text-[#00E5E8] text-xs font-extrabold px-3.5 py-1.5 rounded-full">
             <Rocket className="w-4 h-4 text-[#00E5E8]" />

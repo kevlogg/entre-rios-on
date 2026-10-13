@@ -101,7 +101,7 @@ export default function SorteosPage() {
     setIsSubmitting(true);
 
     const textMsg = `Hola ON MÁS, quiero comprar un ticket (${ticketPrice}) para participar en el "${raffleTitle}".\n\n📌 Datos de Participante:\n- Nombre: ${formData.name}\n- Localidad: ${formData.city}\n- WhatsApp: ${formData.phone}`;
-    const generatedWspUrl = `https://wa.me/5493434001122?text=${encodeURIComponent(textMsg)}`;
+    const generatedWspUrl = `https://wa.me/5493426514889?text=${encodeURIComponent(textMsg)}`;
     setWhatsAppUrl(generatedWspUrl);
 
     try {
