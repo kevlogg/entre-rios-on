@@ -363,6 +363,8 @@ export default function AdminPage() {
                 cityName={commerce.cityName}
                 phoneWhatsApp={commerce.phoneWhatsApp}
                 userType={userType}
+                isAuthenticated={true}
+                showHistory={true}
                 onPlanActivated={(planName) => {
                   setCommerce({ ...commerce, isSubscriptionActive: true });
                   setIsSubscriptionActive(true);

@@ -67,30 +67,10 @@ export function ClientHomeContainer({ provinceId, initialProducts = [] }: Client
       <div className="w-full max-w-[1480px] mx-auto px-2 min-[360px]:px-3 sm:px-4 lg:px-6 py-2 sm:py-3 flex-1">
         
         {/* ========================================================================= */}
-        {/* MOBILE VIEW (< lg): Hero Banner + Ads Dinámicos de SuperAdmin + Contenido */}
+        {/* MOBILE VIEW (< lg): Hero Banner Principal                                 */}
         {/* ========================================================================= */}
-        <div className="lg:hidden w-full mb-3">
+        <div className="lg:hidden w-full mb-2.5">
           <ClientHeroBanner provinceId={activeProvince} />
-
-          {/* Banners publicitarios dinámicos desde SuperAdmin en celular */}
-          {mobileBanners.length > 0 && (
-            <div className="mt-2.5 grid grid-cols-2 gap-2">
-              {mobileBanners.map((banner) => (
-                <Link
-                  key={banner.id}
-                  href={banner.href || '/planes'}
-                  className="block rounded-xl overflow-hidden border border-slate-200/90 relative aspect-[16/10] bg-slate-900 group cursor-pointer"
-                  title={banner.title}
-                >
-                  <img
-                    src={banner.imageUrl}
-                    alt={banner.title}
-                    className="w-full h-full object-cover group-hover:scale-102 transition-transform duration-500"
-                  />
-                </Link>
-              ))}
-            </div>
-          )}
         </div>
 
         {/* ========================================================================= */}

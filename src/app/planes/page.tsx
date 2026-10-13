@@ -4,13 +4,49 @@ import Link from 'next/link';
 import { DynamicLayoutWrapper } from '@/components/layout/DynamicLayoutWrapper';
 import { SubscriptionPlans } from '@/components/admin/SubscriptionPlans';
 import { Sparkles, ArrowLeft, Rocket } from 'lucide-react';
+import { createClient } from '@/lib/supabase/server';
 
 export const metadata: Metadata = {
   title: 'Planes & Precios para Comercios | ON MÁS Portal',
   description: 'Conocé los planes oficiales de suscripción para comercios y servicios. Elegí el plan que mejor se adapte a tu negocio y publicá tu catálogo.',
 };
 
-export default function PlanesPublicPage() {
+export default async function PlanesPublicPage() {
+  let isAuthenticated = false;
+  let commerceData: { id: string; name: string; cityName: string; phoneWhatsApp: string } | null = null;
+
+  try {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    isAuthenticated = !!user;
+
+    if (user) {
+      const { data: comm } = await supabase
+        .from('commerces')
+        .select('id, name, city_name, phone_whatsapp')
+        .eq('user_id', user.id)
+        .maybeSingle();
+
+      if (comm) {
+        commerceData = {
+          id: comm.id,
+          name: comm.name,
+          cityName: comm.city_name,
+          phoneWhatsApp: comm.phone_whatsapp,
+        };
+      } else {
+        commerceData = {
+          id: `comm-${user.id}`,
+          name: user.user_metadata?.commerce_name || user.user_metadata?.full_name || 'Comercio Adherido',
+          cityName: user.user_metadata?.city_name || 'Rosario',
+          phoneWhatsApp: user.user_metadata?.phone_whatsapp || '',
+        };
+      }
+    }
+  } catch (err) {
+    console.warn('Error al verificar sesión en /planes:', err);
+  }
+
   const heroContent = (
     <div className="space-y-4">
       {/* Breadcrumb */}
@@ -55,7 +91,15 @@ export default function PlanesPublicPage() {
             <span className="text-xs font-bold text-slate-500">Sin comisiones por venta</span>
           </div>
 
-          <SubscriptionPlans userType="comercio" />
+          <SubscriptionPlans
+            userType="comercio"
+            isAuthenticated={isAuthenticated}
+            commerceId={commerceData?.id}
+            commerceName={commerceData?.name}
+            cityName={commerceData?.cityName}
+            phoneWhatsApp={commerceData?.phoneWhatsApp}
+            showHistory={false}
+          />
         </div>
       </div>
     </DynamicLayoutWrapper>
