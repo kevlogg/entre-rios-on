@@ -23,21 +23,19 @@ export default function OportunidadesPage() {
       </div>
 
       {/* Hero Section */}
-      <div className="rounded-3xl p-8 sm:p-10 text-white relative overflow-hidden flex flex-col md:flex-row md:items-center justify-between gap-6">
-        <div className="space-y-3 max-w-2xl relative z-10">
-          <div className="inline-flex items-center gap-2 bg-white/10 border border-white/20 text-[#00E5E8] text-xs font-extrabold px-3.5 py-1.5 rounded-full">
-            <Tag className="w-4 h-4 text-[#00E5E8]" />
-            <span>Oportunidades & Descuentos • ON MÁS</span>
-          </div>
-
-          <h1 className="text-3xl sm:text-4xl font-black tracking-tight">
-            Oportunidades Comerciales
-          </h1>
-
-          <p className="text-sm text-slate-100 font-medium leading-relaxed">
-            Descubrí ofertas exclusivas, promociones de liquidación y beneficios para la comunidad comercial regional.
-          </p>
+      <div className="space-y-3 text-white">
+        <div className="inline-flex items-center gap-2 bg-white/10 border border-white/20 text-[#00E5E8] text-xs font-extrabold px-3.5 py-1.5 rounded-full">
+          <Tag className="w-4 h-4 text-[#00E5E8]" />
+          <span>Oportunidades & Descuentos • ON MÁS</span>
         </div>
+
+        <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black tracking-tight">
+          Oportunidades Comerciales
+        </h1>
+
+        <p className="text-xs sm:text-sm text-slate-100 font-medium leading-relaxed max-w-2xl">
+          Descubrí ofertas exclusivas, promociones de liquidación y beneficios para la comunidad comercial regional.
+        </p>
       </div>
     </div>
   );

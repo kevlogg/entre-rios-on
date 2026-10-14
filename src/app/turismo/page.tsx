@@ -33,19 +33,17 @@ export default async function TurismoPage() {
       </div>
 
       {/* Hero Banner */}
-      <div className="rounded-3xl p-8 sm:p-12 text-white relative overflow-hidden">
-        <div className="relative z-10 space-y-4 max-w-2xl">
-          <span className="inline-flex items-center gap-1.5 bg-white/20 text-[#00E5E8] text-xs font-extrabold px-3 py-1 rounded-full uppercase tracking-wider border border-white/20">
-            <Compass className="w-3.5 h-3.5" />
-            Guía Turística Oficial del Litoral
-          </span>
-          <h1 className="text-3xl sm:text-5xl font-black tracking-tight">
-            Turismo & Posadas ON MÁS
-          </h1>
-          <p className="text-sm sm:text-base text-slate-100 font-medium leading-relaxed">
-            Descubrí complejos termales, playas de arena blanca, bodegas boutique, reservas naturales y alojamientos con reserva directa sin comisiones.
-          </p>
-        </div>
+      <div className="space-y-3 text-white">
+        <span className="inline-flex items-center gap-1.5 bg-white/20 text-[#00E5E8] text-xs font-extrabold px-3 py-1 rounded-full uppercase tracking-wider border border-white/20">
+          <Compass className="w-3.5 h-3.5" />
+          Guía Turística Oficial del Litoral
+        </span>
+        <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black tracking-tight">
+          Turismo & Posadas ON MÁS
+        </h1>
+        <p className="text-xs sm:text-sm text-slate-100 font-medium leading-relaxed max-w-2xl">
+          Descubrí complejos termales, playas de arena blanca, bodegas boutique, reservas naturales y alojamientos con reserva directa sin comisiones.
+        </p>
       </div>
     </div>
   );

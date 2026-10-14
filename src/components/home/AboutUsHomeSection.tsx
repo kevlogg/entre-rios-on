@@ -2,6 +2,7 @@
 
 import React from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
 
 export function AboutUsHomeSection() {
   return (
@@ -28,19 +29,26 @@ export function AboutUsHomeSection() {
           </p>
         </div>
 
-        {/* Right Column: Logo & Pillars */}
+        {/* Right Column: Logo & Pillars (Acceso secreto a SuperAdmin al tocar el logo o el punto final) */}
         <div className="lg:w-1/4 flex flex-col items-center lg:items-end justify-center text-center lg:text-right shrink-0">
-          <div className="relative w-[104px] h-[60px] sm:w-[121px] sm:h-[70px] mb-1.5">
+          <Link
+            href="/superadmin"
+            className="relative w-[104px] h-[60px] sm:w-[121px] sm:h-[70px] mb-1.5 block cursor-pointer transition-transform active:scale-95 group"
+            title="SuperAdmin"
+          >
             <Image
               src="/logo1.png"
               alt="ON+ PORTAL COMERCIAL"
               fill
-              className="object-contain"
+              className="object-contain group-hover:opacity-90 transition-opacity"
             />
-          </div>
+          </Link>
           <p className="text-[10px] sm:text-[11px] font-bold text-slate-500 leading-tight">
             Comercio. Industria.<br className="hidden lg:inline" /> Turismo. Comunidad.<br />
-            <span className="text-[#0047BA] font-black">Siempre ON.</span>
+            <span className="text-[#0047BA] font-black">
+              Siempre ON
+              <Link href="/superadmin" className="cursor-default select-none hover:text-cyan-400">.</Link>
+            </span>
           </p>
         </div>
 

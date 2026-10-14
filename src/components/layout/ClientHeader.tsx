@@ -14,7 +14,8 @@ import {
   MapPin, 
   ShoppingBag, 
   ArrowRight,
-  LayoutGrid
+  LayoutGrid,
+  ChevronRight
 } from 'lucide-react';
 import { trackSearchQuery, trackCitySelect } from '@/lib/analytics/events';
 import { PROVINCES, getCitiesByProvince, getProvinceBySlug } from '@/lib/constants/locations';
@@ -52,6 +53,20 @@ export function ClientHeader({ withBackground = false }: ClientHeaderProps = {})
   const [allCommerces, setAllCommerces] = useState<Commerce[]>([]);
 
   const searchContainerRef = useRef<HTMLDivElement>(null);
+  const subnavScrollRef = useRef<HTMLDivElement>(null);
+  const [canScrollRight, setCanScrollRight] = useState(true);
+
+  const checkSubnavScroll = () => {
+    if (!subnavScrollRef.current) return;
+    const { scrollLeft, scrollWidth, clientWidth } = subnavScrollRef.current;
+    setCanScrollRight(scrollLeft + clientWidth < scrollWidth - 10);
+  };
+
+  useEffect(() => {
+    checkSubnavScroll();
+    window.addEventListener('resize', checkSubnavScroll);
+    return () => window.removeEventListener('resize', checkSubnavScroll);
+  }, []);
 
   // Load search index on mount
   useEffect(() => {
@@ -509,7 +524,11 @@ export function ClientHeader({ withBackground = false }: ClientHeaderProps = {})
       {/* 2. SUB-NAVBAR CON DEGRADÉ OFICIAL ON+ (Inicio, Categorías, Comercios & Pymes, Turismo, Vender ON+, Ayuda, Novedades, Oportunidades) */}
       <nav className="bg-gradient-to-r from-[#0047BA] via-[#6C1CD1] to-[#E5007D] text-white shadow-xs relative z-40 overflow-visible">
         <div className="max-w-[1480px] mx-auto px-2 sm:px-4 lg:px-8 relative overflow-visible">
-          <div className="flex items-center justify-between overflow-x-auto lg:overflow-visible scrollbar-none h-10 sm:h-11 gap-1 sm:gap-2">
+          <div 
+            ref={subnavScrollRef}
+            onScroll={checkSubnavScroll}
+            className="flex items-center justify-between overflow-x-auto lg:overflow-visible scrollbar-none h-10 sm:h-11 gap-1 sm:gap-2 pr-8 lg:pr-0"
+          >
             {subNavLinks.map((item) => {
               const isActive = pathname === item.href;
 
@@ -596,6 +615,24 @@ export function ClientHeader({ withBackground = false }: ClientHeaderProps = {})
               );
             })}
           </div>
+
+          {/* Mobile Scroll Indicator (indicio visible de que hay más opciones al scrollear a la derecha) */}
+          {canScrollRight && (
+            <button
+              type="button"
+              onClick={() => {
+                if (subnavScrollRef.current) {
+                  subnavScrollRef.current.scrollBy({ left: 160, behavior: 'smooth' });
+                }
+              }}
+              className="lg:hidden absolute right-0 top-0 bottom-0 w-12 bg-gradient-to-l from-[#E5007D] via-[#E5007D]/90 to-transparent flex items-center justify-end pr-1.5 z-20 pointer-events-auto cursor-pointer"
+              aria-label="Ver más opciones"
+            >
+              <div className="flex items-center text-white/95 animate-pulse">
+                <ChevronRight className="w-4 h-4 text-white drop-shadow-sm" />
+              </div>
+            </button>
+          )}
         </div>
       </nav>
 

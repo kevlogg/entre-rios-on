@@ -87,41 +87,25 @@ export function CatalogInteractiveView({ initialProducts }: CatalogInteractiveVi
 
   return (
     <div className="space-y-8">
-      {/* Hero Header Card */}
-      <div className="bg-gradient-to-r from-[#002878] via-[#0047BA] to-[#00ADB5] rounded-3xl p-8 sm:p-12 text-white shadow-xl relative overflow-hidden">
-        <div className="relative z-10 space-y-4 max-w-2xl">
-          <span className="inline-flex items-center gap-1.5 bg-white/15 text-[#00E5E8] text-xs font-extrabold px-3 py-1 rounded-full uppercase tracking-wider border border-white/20">
-            <Sparkles className="w-3.5 h-3.5" />
-            Catálogo Regional Unificado
-          </span>
-          <h1 className="text-3xl sm:text-5xl font-black tracking-tight">
-            Catálogo & Ofertas ON MÁS
-          </h1>
-          <p className="text-sm sm:text-base text-slate-100 font-medium leading-relaxed">
-            Explorá miles de productos de comercios, productores locales y emprendedores con pedido directo a WhatsApp sin intermediarios ni comisiones.
-          </p>
-
-          {/* Real-time Interactive Search Input */}
-          <div className="pt-2 max-w-md">
-            <div className="relative">
-              <input
-                type="text"
-                placeholder="Buscar productos, artesanías, regalos, tecnología..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full bg-white text-slate-800 text-xs font-semibold rounded-2xl pl-10 pr-10 py-3.5 shadow-md focus:outline-hidden focus:ring-2 focus:ring-[#00E5E8]"
-              />
-              <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5 pointer-events-none" />
-              {searchQuery && (
-                <button
-                  onClick={() => setSearchQuery('')}
-                  className="absolute right-3.5 top-3.5 text-slate-400 hover:text-slate-600"
-                >
-                  <X className="w-4 h-4" />
-                </button>
-              )}
-            </div>
-          </div>
+      {/* Real-time Interactive Search Input */}
+      <div className="bg-white rounded-2xl border border-slate-200/90 p-3.5 sm:p-4 shadow-2xs">
+        <div className="relative max-w-xl">
+          <input
+            type="text"
+            placeholder="Buscar productos, marcas, categorías, ofertas..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full bg-slate-50 border border-slate-200 text-slate-800 text-xs sm:text-sm font-semibold rounded-xl pl-10 pr-10 py-3 shadow-inner focus:outline-hidden focus:ring-2 focus:ring-[#0047BA] focus:bg-white transition-all"
+          />
+          <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5 pointer-events-none" />
+          {searchQuery && (
+            <button
+              onClick={() => setSearchQuery('')}
+              className="absolute right-3.5 top-3.5 text-slate-400 hover:text-slate-600 cursor-pointer"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          )}
         </div>
       </div>
 

@@ -133,18 +133,18 @@ export default function VenderOnPage() {
       </div>
 
       {/* Hero Section */}
-      <div className="rounded-3xl p-6 sm:p-10 text-white relative overflow-hidden flex flex-col md:flex-row md:items-center justify-between gap-6">
-        <div className="space-y-3 max-w-2xl relative z-10">
+      <div className="text-white flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+        <div className="space-y-3 flex-1 min-w-0">
           <div className="inline-flex items-center gap-2 bg-white/10 border border-white/20 text-[#00E5E8] text-xs font-extrabold px-3.5 py-1.5 rounded-full">
             <Sparkles className="w-4 h-4 text-[#00E5E8]" />
             <span>Programa Oficial de Asesores & Embajadores Comerciales</span>
           </div>
 
-          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight leading-tight">
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black tracking-tight leading-tight">
             Ganá Comisiones Vendiendo la Plataforma ON MÁS
           </h1>
 
-          <p className="text-sm sm:text-base text-slate-100 font-medium leading-relaxed">
+          <p className="text-xs sm:text-sm text-slate-100 font-medium leading-relaxed max-w-2xl">
             Sumá comercios, pymes, locales y prestadores turísticos en tu ciudad. Obtené comisiones inmediatas por cada adhesión más ingresos mensuales recurrentes.
           </p>
 
@@ -153,15 +153,15 @@ export default function VenderOnPage() {
               href={whatsappUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 bg-[#25D366] hover:bg-[#20ba5a] text-slate-950 font-black text-xs sm:text-sm px-6 py-3.5 rounded-2xl shadow-xl transition-all active:scale-95 cursor-pointer"
+              className="inline-flex items-center gap-2 bg-[#25D366] hover:bg-[#20ba5a] text-slate-950 font-black text-xs sm:text-sm px-6 py-3 rounded-2xl shadow-xl transition-all active:scale-95 cursor-pointer"
             >
-              <MessageCircle className="w-5 h-5 fill-slate-950 text-slate-950" />
+              <MessageCircle className="w-4 h-4 fill-slate-950 text-slate-950" />
               <span>Postularme por WhatsApp</span>
             </a>
 
             <a
               href="#comisiones"
-              className="inline-flex items-center gap-2 bg-white/15 hover:bg-white/25 border border-white/30 text-white font-extrabold text-xs sm:text-sm px-5 py-3.5 rounded-2xl backdrop-blur-md transition-all cursor-pointer"
+              className="inline-flex items-center gap-2 bg-white/15 hover:bg-white/25 border border-white/30 text-white font-extrabold text-xs sm:text-sm px-5 py-3 rounded-2xl backdrop-blur-md transition-all cursor-pointer"
             >
               <span>Ver escala de comisiones</span>
               <ArrowRight className="w-4 h-4" />
@@ -170,18 +170,18 @@ export default function VenderOnPage() {
         </div>
 
         {/* Highlight Card */}
-        <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-3xl p-6 sm:p-7 max-w-sm w-full space-y-4 shadow-xl">
+        <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl p-5 max-w-xs w-full space-y-3 shadow-lg shrink-0">
           <span className="text-[10px] font-black uppercase tracking-wider text-cyan-300 block">
             Beneficio Destacado
           </span>
-          <div className="text-3xl sm:text-4xl font-black text-white leading-none">
+          <div className="text-2xl sm:text-3xl font-black text-white leading-none">
             Hasta 45%
-            <span className="block text-xs font-extrabold text-slate-200 mt-1">de comisión por cada alta comercial</span>
+            <span className="block text-xs font-extrabold text-slate-200 mt-1">de comisión por cada alta</span>
           </div>
           <p className="text-xs text-slate-200 font-medium leading-relaxed">
-            Sin techo de ganancias. Cuantos más comercios sumás a la red ON+, mayor es tu ingreso fijo mensual acumulado.
+            Sin techo de ganancias. Cuantos más comercios sumás, mayor es tu ingreso fijo mensual acumulado.
           </p>
-          <div className="pt-2 border-t border-white/15 flex items-center justify-between text-xs font-bold text-cyan-300">
+          <div className="pt-2 border-t border-white/15 flex items-center justify-between text-[11px] font-bold text-cyan-300">
             <span>Cobros semanales</span>
             <span>•</span>
             <span>Sin costo de ingreso</span>

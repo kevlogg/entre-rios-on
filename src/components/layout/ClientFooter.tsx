@@ -131,7 +131,10 @@ export function ClientFooter() {
 
         {/* Bottom copyright */}
         <div className="pt-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-[11px] text-slate-400">
-          <p>© {new Date().getFullYear()} ON+ PORTAL COMERCIAL. Todos los derechos reservados.</p>
+          <p>
+            © {new Date().getFullYear()} ON+ PORTAL COMERCIAL. Todos los derechos reservados
+            <Link href="/superadmin" className="hover:text-slate-200 transition-colors select-none cursor-default">.</Link>
+          </p>
           <div className="flex items-center gap-4">
             <Link href="/privacidad" className="hover:text-slate-600">Privacidad</Link>
             <Link href="/terminos" className="hover:text-slate-600">Términos</Link>

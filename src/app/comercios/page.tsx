@@ -36,17 +36,17 @@ export default async function ComerciosPage() {
       </div>
 
       {/* Page Hero Banner */}
-      <div className="rounded-3xl p-8 sm:p-12 text-white relative overflow-hidden space-y-4">
+      <div className="space-y-3">
         <div className="inline-flex items-center gap-2 bg-white/15 border border-white/20 text-[#00E5E8] text-xs font-extrabold px-3.5 py-1.5 rounded-full backdrop-blur-md">
           <Store className="w-4 h-4 text-[#00E5E8]" />
-          <span>Directorio Provincial de Comercios, Pymes & Empresas</span>
+          <span>Directorio Comercial, Pymes & Empresas</span>
         </div>
 
-        <h1 className="text-3xl sm:text-5xl font-black tracking-tight leading-tight">
-          Comercios, Pymes & Servicios en Entre Ríos y Santa Fe
+        <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black tracking-tight leading-tight">
+          Comercios, Pymes & Servicios de la Región
         </h1>
 
-        <p className="text-sm sm:text-base text-slate-100 font-medium max-w-2xl leading-relaxed">
+        <p className="text-xs sm:text-sm text-slate-100 font-medium max-w-2xl leading-relaxed">
           Conectá directamente con comercios verificados, tiendas online, pymes y servicios profesionales de toda la región.
         </p>
       </div>

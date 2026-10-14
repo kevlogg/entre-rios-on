@@ -78,11 +78,11 @@ export function ClientHomeContainer({ provinceId, initialProducts = [] }: Client
         {/* Los 4 banners laterales (2 a la izquierda y 2 a la derecha) tienen       */}
         {/* EXACTAMENTE la misma altura (50% de la columna cada uno).                */}
         {/* ========================================================================= */}
-        <div className="hidden lg:grid lg:grid-cols-[165px_1fr_165px] xl:grid-cols-[185px_1fr_185px] 2xl:grid-cols-[205px_1fr_205px] gap-3.5 xl:gap-4.5 items-stretch">
+        <div className="hidden lg:grid lg:grid-cols-[165px_1fr_165px] xl:grid-cols-[185px_1fr_185px] 2xl:grid-cols-[205px_1fr_205px] gap-3.5 xl:gap-4.5 items-start">
           
-          {/* COLUMNA IZQUIERDA: 2 Banners con EXACTAMENTE la misma altura */}
-          <aside className="w-full h-full flex flex-col gap-3.5">
-            <div className="flex-1 min-h-0 flex flex-col">
+          {/* COLUMNA IZQUIERDA: 2 Banners con proporción áurea fija (evita estiramiento) */}
+          <aside className="w-full self-start sticky top-3 flex flex-col gap-3.5">
+            <div className="w-full aspect-[1/2.7] max-h-[560px] rounded-2xl overflow-hidden flex flex-col">
               {leftTopBanner && (
                 <Link
                   href={leftTopBanner.href || '/sorteos'}
@@ -92,13 +92,13 @@ export function ClientHomeContainer({ provinceId, initialProducts = [] }: Client
                   <img
                     src={leftTopBanner.imageUrl}
                     alt={leftTopBanner.title}
-                    className="w-full h-full object-cover group-hover:scale-102 transition-transform duration-500"
+                    className="w-full h-full object-cover object-center group-hover:scale-102 transition-transform duration-500"
                   />
                 </Link>
               )}
             </div>
 
-            <div className="flex-1 min-h-0 flex flex-col">
+            <div className="w-full aspect-[1/2.7] max-h-[560px] rounded-2xl overflow-hidden flex flex-col">
               {leftBottomBanner && (
                 <Link
                   href={leftBottomBanner.href || '/turismo'}
@@ -108,7 +108,7 @@ export function ClientHomeContainer({ provinceId, initialProducts = [] }: Client
                   <img
                     src={leftBottomBanner.imageUrl}
                     alt={leftBottomBanner.title}
-                    className="w-full h-full object-cover group-hover:scale-102 transition-transform duration-500"
+                    className="w-full h-full object-cover object-center group-hover:scale-102 transition-transform duration-500"
                   />
                 </Link>
               )}
@@ -142,9 +142,9 @@ export function ClientHomeContainer({ provinceId, initialProducts = [] }: Client
             <AboutUsHomeSection />
           </main>
 
-          {/* COLUMNA DERECHA: 2 Banners con EXACTAMENTE la misma altura */}
-          <aside className="w-full h-full flex flex-col gap-3.5">
-            <div className="flex-1 min-h-0 flex flex-col">
+          {/* COLUMNA DERECHA: 2 Banners con proporción áurea fija */}
+          <aside className="w-full self-start sticky top-3 flex flex-col gap-3.5">
+            <div className="w-full aspect-[1/2.7] max-h-[560px] rounded-2xl overflow-hidden flex flex-col">
               {rightTopBanner && (
                 <Link
                   href={rightTopBanner.href || '/planes'}
@@ -154,13 +154,13 @@ export function ClientHomeContainer({ provinceId, initialProducts = [] }: Client
                   <img
                     src={rightTopBanner.imageUrl}
                     alt={rightTopBanner.title}
-                    className="w-full h-full object-cover group-hover:scale-102 transition-transform duration-500"
+                    className="w-full h-full object-cover object-center group-hover:scale-102 transition-transform duration-500"
                   />
                 </Link>
               )}
             </div>
 
-            <div className="flex-1 min-h-0 flex flex-col">
+            <div className="w-full aspect-[1/2.7] max-h-[560px] rounded-2xl overflow-hidden flex flex-col">
               {rightBottomBanner && (
                 <Link
                   href={rightBottomBanner.href || '/turismo'}
@@ -170,7 +170,7 @@ export function ClientHomeContainer({ provinceId, initialProducts = [] }: Client
                   <img
                     src={rightBottomBanner.imageUrl}
                     alt={rightBottomBanner.title}
-                    className="w-full h-full object-cover group-hover:scale-102 transition-transform duration-500"
+                    className="w-full h-full object-cover object-center group-hover:scale-102 transition-transform duration-500"
                   />
                 </Link>
               )}

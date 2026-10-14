@@ -33,17 +33,17 @@ export default async function CatalogoPage() {
       </div>
 
       {/* Hero Banner Card */}
-      <div className="rounded-3xl p-8 sm:p-12 text-white relative overflow-hidden space-y-3">
+      <div className="space-y-3 text-white">
         <div className="inline-flex items-center gap-2 bg-white/15 border border-white/20 text-[#00E5E8] text-xs font-extrabold px-3.5 py-1.5 rounded-full backdrop-blur-md">
           <ShoppingBag className="w-4 h-4 text-[#00E5E8]" />
           <span>Catálogo Unificado & Ofertas • ON MÁS</span>
         </div>
 
-        <h1 className="text-3xl sm:text-5xl font-black tracking-tight leading-tight">
+        <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black tracking-tight leading-tight">
           Catálogo General de Productos y Ofertas
         </h1>
 
-        <p className="text-sm sm:text-base text-slate-100 font-medium max-w-2xl leading-relaxed">
+        <p className="text-xs sm:text-sm text-slate-100 font-medium max-w-2xl leading-relaxed">
           Explorá promociones exclusivas, productos destacados y artículos regionales con compra y consulta directa a WhatsApp de cada comercio.
         </p>
       </div>
@@ -52,10 +52,10 @@ export default async function CatalogoPage() {
 
   return (
     <DynamicLayoutWrapper heroContent={heroContent}>
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 w-full">
+      <div className="space-y-6 w-full">
         {/* Vista interactiva de catálogo con búsqueda y filtro dinámico */}
         <CatalogInteractiveView initialProducts={products} />
-      </main>
+      </div>
     </DynamicLayoutWrapper>
   );
 }
