@@ -412,14 +412,19 @@ export function TourismManager({ commerces: initialCommerces = [] }: TourismMana
 
           {/* Carga de Imagen a Supabase Storage */}
           <div className="space-y-2 pt-2 border-t border-slate-100">
-            <label className="block text-xs font-bold text-slate-700 flex items-center justify-between">
-              <span>Fotografía / Portada del Servicio * (Almacenada en Supabase Storage)</span>
-              {isUploadingImage && (
-                <span className="text-[11px] text-[#00ADB5] font-extrabold flex items-center gap-1 animate-pulse">
-                  <Sparkles className="w-3.5 h-3.5 animate-spin" /> Subiendo a Supabase Storage...
-                </span>
-              )}
-            </label>
+            <div className="flex items-center justify-between gap-2 flex-wrap">
+              <label className="block text-xs font-bold text-slate-700">
+                Fotografía / Portada del Servicio * (Almacenada en Supabase Storage)
+              </label>
+              <span className="text-[10px] font-extrabold text-[#00ADB5] bg-cyan-100/80 border border-cyan-300 px-2.5 py-0.5 rounded-md">
+                📐 Ideal: 800 × 500 px (16:10 / 4:3 en HD)
+              </span>
+            </div>
+            {isUploadingImage && (
+              <span className="text-[11px] text-[#00ADB5] font-extrabold flex items-center gap-1 animate-pulse">
+                <Sparkles className="w-3.5 h-3.5 animate-spin" /> Subiendo a Supabase Storage...
+              </span>
+            )}
 
             {imagePreview ? (
               <div className="relative h-44 w-full sm:w-80 rounded-2xl overflow-hidden border border-slate-300 group shadow-xs">

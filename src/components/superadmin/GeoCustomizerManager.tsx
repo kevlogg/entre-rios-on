@@ -1420,15 +1420,15 @@ export function GeoCustomizerManager({ initialCities }: GeoCustomizerManagerProp
         {/* Grilla de Banners Laterales */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {localSideBanners.map((banner, index) => {
-            // Banners 1 y 2 (index 0,1) son los SUPERIORES (más altos: ~520px display)
-            // Banners 3 y 4 (index 2,3) son los INFERIORES (más cortos: ~220px display)
-            const isTopBanner = index < 2;
-            const idealSizeLabel = isTopBanner
-              ? '160 × 600 px (Banner Superior — Alto)'
-              : '160 × 220 px (Banner Inferior — Corto)';
-            const positionLabel = isTopBanner
-              ? `Banner Superior ${index === 0 ? 'Izquierdo' : 'Derecho'}`
-              : `Banner Inferior ${index === 2 ? 'Izquierdo' : 'Derecho'}`;
+            // Los 4 banners laterales tienen EXACTAMENTE la misma altura (50% de la columna lateral en desktop)
+            const idealSizeLabel = '160 × 600 px (Rascacielos / Vertical HD)';
+            let positionLabel = 'Banner Lateral';
+            if (index === 0) positionLabel = 'Lateral Izquierdo (Superior)';
+            else if (index === 1) positionLabel = 'Lateral Izquierdo (Inferior)';
+            else if (index === 2) positionLabel = 'Lateral Derecho (Superior)';
+            else if (index === 3) positionLabel = 'Lateral Derecho (Inferior)';
+            else positionLabel = `Banner Lateral #${index + 1}`;
+
             return (
             <div key={banner.id || index} className="bg-slate-50 p-5 rounded-2xl border border-slate-200 space-y-4 shadow-2xs">
               
@@ -1437,11 +1437,7 @@ export function GeoCustomizerManager({ initialCities }: GeoCustomizerManagerProp
                   <span className="text-xs font-black text-slate-900 uppercase tracking-wide truncate max-w-[170px] block">
                     Banner #{index + 1}: {banner.title}
                   </span>
-                  <span className={`text-[10px] font-extrabold px-2 py-0.5 rounded-md mt-0.5 inline-block ${
-                    isTopBanner 
-                      ? 'text-[#00ADB5] bg-cyan-100/80 border border-cyan-300' 
-                      : 'text-amber-700 bg-amber-100/80 border border-amber-300'
-                  }`}>
+                  <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-md mt-0.5 inline-block text-[#00ADB5] bg-cyan-100/80 border border-cyan-300">
                     {positionLabel}
                   </span>
                 </div>
@@ -1464,8 +1460,8 @@ export function GeoCustomizerManager({ initialCities }: GeoCustomizerManagerProp
                 </button>
               </div>
 
-              {/* Preview Vertical Fiel */}
-              <div className={`group relative rounded-xl overflow-hidden shadow-md border border-slate-300 bg-slate-950 flex flex-col justify-end p-3 ${isTopBanner ? 'h-48' : 'h-28'}`}>
+              {/* Preview Vertical Fiel (Todos con la misma altura) */}
+              <div className="group relative rounded-xl overflow-hidden shadow-md border border-slate-300 bg-slate-950 flex flex-col justify-end p-3 h-48">
                 <img
                   src={banner.imageUrl}
                   alt={banner.title}
@@ -1538,10 +1534,10 @@ export function GeoCustomizerManager({ initialCities }: GeoCustomizerManagerProp
                   />
                 </div>
 
-                {/* 4. Cargar Imagen con tamaño diferenciado */}
+                {/* 4. Cargar Imagen */}
                 <div>
                   <label className="block text-[11px] font-bold text-slate-700 mb-1">
-                    Cargar Imagen (Ideal: <span className={`font-black ${isTopBanner ? 'text-[#00ADB5]' : 'text-amber-600'}`}>{idealSizeLabel}</span>):
+                    Cargar Imagen (Ideal: <span className="font-black text-[#00ADB5]">{idealSizeLabel}</span>):
                   </label>
                   <input
                     type="file"

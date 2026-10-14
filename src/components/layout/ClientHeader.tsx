@@ -221,18 +221,16 @@ export function ClientHeader({ withBackground = false }: ClientHeaderProps = {})
     }, 200);
   };
 
-  // 10 sections requested in prompt: Inicio, Categorías, Comercios, Industrias, Turismo, Supermercado, Ayuda, Novedades, Oportunidades, Planes
+  // Enlaces de la barra superior: Inicio, Categorías, Comercios & Pymes, Turismo, Vender ON+, Ayuda, Novedades, Oportunidades
   const subNavLinks = [
     { name: 'INICIO', href: '/', isCategory: false },
     { name: 'CATEGORÍAS', href: '/catalogo', isCategory: true },
-    { name: 'COMERCIOS', href: '/comercios', isCategory: false },
-    { name: 'INDUSTRIAS', href: '/catalogo?categoria=industria', isCategory: false },
+    { name: 'COMERCIOS & PYMES', href: '/comercios', isCategory: false },
     { name: 'TURISMO', href: '/turismo', isCategory: false },
-    { name: 'SUPERMERCADO', href: '/supermercado', isCategory: false },
+    { name: 'VENDER ON+', href: '/vender-on', isCategory: false },
     { name: 'AYUDA', href: '/ayuda', isCategory: false },
     { name: 'NOVEDADES', href: '/novedades', isCategory: false },
     { name: 'OPORTUNIDADES', href: '/oportunidades', isCategory: false },
-    { name: 'PLANES', href: '/planes', isCategory: false },
   ];
 
   return (
@@ -508,10 +506,10 @@ export function ClientHeader({ withBackground = false }: ClientHeaderProps = {})
         </div>
       )}
 
-      {/* 2. SUB-NAVBAR CON DEGRADÉ OFICIAL ON+ (Inicio, Categorías, Comercios, Industrias, Turismo, Supermercado, Ayuda, Novedades, Oportunidades, Planes) */}
-      <nav className="bg-gradient-to-r from-[#0047BA] via-[#6C1CD1] to-[#E5007D] text-white shadow-xs">
-        <div className="max-w-[1480px] mx-auto px-2 sm:px-4 lg:px-8">
-          <div className="flex items-center justify-between overflow-x-auto scrollbar-none h-10 sm:h-11 gap-1 sm:gap-2">
+      {/* 2. SUB-NAVBAR CON DEGRADÉ OFICIAL ON+ (Inicio, Categorías, Comercios & Pymes, Turismo, Vender ON+, Ayuda, Novedades, Oportunidades) */}
+      <nav className="bg-gradient-to-r from-[#0047BA] via-[#6C1CD1] to-[#E5007D] text-white shadow-xs relative z-40 overflow-visible">
+        <div className="max-w-[1480px] mx-auto px-2 sm:px-4 lg:px-8 relative overflow-visible">
+          <div className="flex items-center justify-between overflow-x-auto lg:overflow-visible scrollbar-none h-10 sm:h-11 gap-1 sm:gap-2">
             {subNavLinks.map((item) => {
               const isActive = pathname === item.href;
 

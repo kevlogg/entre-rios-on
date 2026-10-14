@@ -113,18 +113,18 @@ export function CategoryIconBar({
             : 'border-slate-200/90 hover:border-[#0047BA]/50'
         }`}
       >
-        <div className={`relative w-full bg-slate-100 overflow-hidden ${isMobile ? 'h-16 min-[380px]:h-20' : 'h-12 sm:h-13 lg:h-15'}`}>
+        <div className={`relative w-full bg-slate-100 overflow-hidden ${isMobile ? 'h-16 min-[380px]:h-20' : 'h-16 sm:h-18 lg:h-22 xl:h-24'}`}>
           <Image
             src={cat.imageUrl}
             alt={cat.name}
             fill
-            sizes="(max-width: 640px) 50vw, 12vw"
+            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 25vw, 12vw"
             className="object-cover group-hover:scale-106 transition-transform duration-500"
           />
         </div>
 
-        <div className="p-1 sm:p-1.5 w-full bg-white text-center">
-          <span className={`text-[11px] sm:text-[11px] font-bold line-clamp-1 transition-colors ${
+        <div className="p-1.5 sm:p-2 lg:p-2.5 w-full bg-white text-center">
+          <span className={`text-[11px] sm:text-xs lg:text-[12.5px] font-bold line-clamp-1 transition-colors ${
             isSelected ? 'text-[#0047BA]' : 'text-slate-800 group-hover:text-[#0047BA]'
           }`}>
             {cat.name}
@@ -194,8 +194,8 @@ export function CategoryIconBar({
         />
       </div>
 
-      {/* DESKTOP (>= sm): 8 Cards en 1 sola fila */}
-      <div className="hidden sm:grid sm:grid-cols-8 gap-2 sm:gap-2.5 lg:gap-3">
+      {/* DESKTOP (>= sm): Cards agrandadas con más alto y ancho */}
+      <div className="hidden sm:grid sm:grid-cols-4 lg:grid-cols-8 gap-2 sm:gap-2.5 lg:gap-2.5 xl:gap-3">
         {MAIN_CATEGORIES.map((cat) => renderCategoryCard(cat, false))}
       </div>
     </section>

@@ -64,7 +64,7 @@ export function ClientHomeContainer({ provinceId, initialProducts = [] }: Client
       <ClientHeader />
 
       {/* 2. Main Content Container */}
-      <div className="w-full max-w-[1480px] mx-auto px-2 min-[360px]:px-3 sm:px-4 lg:px-6 py-2 sm:py-3 flex-1">
+      <div className="w-full max-w-[1540px] mx-auto px-2 min-[360px]:px-3 sm:px-4 lg:px-6 py-2 sm:py-3 flex-1">
         
         {/* ========================================================================= */}
         {/* MOBILE VIEW (< lg): Hero Banner Principal                                 */}
@@ -74,31 +74,49 @@ export function ClientHomeContainer({ provinceId, initialProducts = [] }: Client
         </div>
 
         {/* ========================================================================= */}
-        {/* DESKTOP BLOQUE 1 (SUPERIOR):                                              */}
-        {/* Desde el Hero Banner principal hasta "Productos y oportunidades"          */}
-        {/* Los primeros banners laterales llegan EXACTAMENTE hasta Productos         */}
+        {/* DESKTOP (>= lg): Grilla unificada de 3 columnas                           */}
+        {/* Los 4 banners laterales (2 a la izquierda y 2 a la derecha) tienen       */}
+        {/* EXACTAMENTE la misma altura (50% de la columna cada uno).                */}
         {/* ========================================================================= */}
-        <div className="hidden lg:grid lg:grid-cols-[180px_1fr_180px] xl:grid-cols-[200px_1fr_200px] 2xl:grid-cols-[220px_1fr_220px] gap-3.5 xl:gap-4.5 items-stretch">
+        <div className="hidden lg:grid lg:grid-cols-[165px_1fr_165px] xl:grid-cols-[185px_1fr_185px] 2xl:grid-cols-[205px_1fr_205px] gap-3.5 xl:gap-4.5 items-stretch">
           
-          {/* COLUMNA IZQUIERDA SUPERIOR: Banner 1 (llega hasta la sección Productos) */}
-          <aside className="w-full h-full flex flex-col">
-            {leftTopBanner && (
-              <Link
-                href={leftTopBanner.href || '/sorteos'}
-                className="block w-full h-full min-h-[520px] rounded-2xl overflow-hidden border border-slate-200/80 hover:border-blue-400 transition-colors relative bg-slate-900 group cursor-pointer"
-                title={leftTopBanner.title}
-              >
-                <img
-                  src={leftTopBanner.imageUrl}
-                  alt={leftTopBanner.title}
-                  className="w-full h-full object-cover group-hover:scale-102 transition-transform duration-500"
-                />
-              </Link>
-            )}
+          {/* COLUMNA IZQUIERDA: 2 Banners con EXACTAMENTE la misma altura */}
+          <aside className="w-full h-full flex flex-col gap-3.5">
+            <div className="flex-1 min-h-0 flex flex-col">
+              {leftTopBanner && (
+                <Link
+                  href={leftTopBanner.href || '/sorteos'}
+                  className="block w-full h-full rounded-2xl overflow-hidden border border-slate-200/80 hover:border-blue-400 transition-colors relative bg-slate-900 group cursor-pointer shadow-2xs hover:shadow-md"
+                  title={leftTopBanner.title}
+                >
+                  <img
+                    src={leftTopBanner.imageUrl}
+                    alt={leftTopBanner.title}
+                    className="w-full h-full object-cover group-hover:scale-102 transition-transform duration-500"
+                  />
+                </Link>
+              )}
+            </div>
+
+            <div className="flex-1 min-h-0 flex flex-col">
+              {leftBottomBanner && (
+                <Link
+                  href={leftBottomBanner.href || '/turismo'}
+                  className="block w-full h-full rounded-2xl overflow-hidden border border-slate-200/80 hover:border-blue-400 transition-colors relative bg-slate-900 group cursor-pointer shadow-2xs hover:shadow-md"
+                  title={leftBottomBanner.title}
+                >
+                  <img
+                    src={leftBottomBanner.imageUrl}
+                    alt={leftBottomBanner.title}
+                    className="w-full h-full object-cover group-hover:scale-102 transition-transform duration-500"
+                  />
+                </Link>
+              )}
+            </div>
           </aside>
 
-          {/* COLUMNA CENTRAL SUPERIOR: Hero + Ciudades + Categorías + Productos */}
-          <main className="w-full min-w-0 space-y-2 sm:space-y-3">
+          {/* COLUMNA CENTRAL: Hero + Ciudades + Categorías + Productos + Secciones Destacadas + Quiénes Somos */}
+          <main className="w-full min-w-0 space-y-3 sm:space-y-4">
             {/* 1. Banner Principal de Santa Fe (Cargado dinámicamente desde SuperAdmin) */}
             <ClientHeroBanner provinceId={activeProvince} />
 
@@ -116,75 +134,47 @@ export function ClientHomeContainer({ provinceId, initialProducts = [] }: Client
               products={initialProducts}
               selectedCategory={selectedCategory}
             />
-          </main>
 
-          {/* COLUMNA DERECHA SUPERIOR: Banner 1 (llega hasta la sección Productos) */}
-          <aside className="w-full h-full flex flex-col">
-            {rightTopBanner && (
-              <Link
-                href={rightTopBanner.href || '/planes'}
-                className="block w-full h-full min-h-[520px] rounded-2xl overflow-hidden border border-slate-200/80 hover:border-blue-400 transition-colors relative bg-slate-900 group cursor-pointer"
-                title={rightTopBanner.title}
-              >
-                <img
-                  src={rightTopBanner.imageUrl}
-                  alt={rightTopBanner.title}
-                  className="w-full h-full object-cover group-hover:scale-102 transition-transform duration-500"
-                />
-              </Link>
-            )}
-          </aside>
-
-        </div>
-
-        {/* ========================================================================= */}
-        {/* DESKTOP BLOQUE 2 (INFERIOR):                                              */}
-        {/* Debajo de Productos: Cards de Secciones de SuperAdmin + Quiénes Somos      */}
-        {/* Los segundos banners laterales se ubican abajo de cada lado               */}
-        {/* ========================================================================= */}
-        <div className="hidden lg:grid lg:grid-cols-[180px_1fr_180px] xl:grid-cols-[200px_1fr_200px] 2xl:grid-cols-[220px_1fr_220px] gap-3.5 xl:gap-4.5 items-stretch mt-3 sm:mt-4">
-          
-          {/* COLUMNA IZQUIERDA INFERIOR: Banner 2 (debajo del primer banner) */}
-          <aside className="w-full h-full flex flex-col">
-            {leftBottomBanner && (
-              <Link
-                href={leftBottomBanner.href || '/turismo'}
-                className="block w-full h-full min-h-[220px] rounded-2xl overflow-hidden border border-slate-200/80 hover:border-blue-400 transition-colors relative bg-slate-900 group cursor-pointer"
-                title={leftBottomBanner.title}
-              >
-                <img
-                  src={leftBottomBanner.imageUrl}
-                  alt={leftBottomBanner.title}
-                  className="w-full h-full object-cover group-hover:scale-102 transition-transform duration-500"
-                />
-              </Link>
-            )}
-          </aside>
-
-          {/* COLUMNA CENTRAL INFERIOR: Secciones Destacadas + Quiénes Somos */}
-          <div className="w-full min-w-0 space-y-2 sm:space-y-3">
             {/* 5. Descubrí todo lo que podés hacer en ON+ (Cards desde SuperAdmin) */}
             <FeaturedSectionsGrid />
 
             {/* 6. Quiénes Somos (Card Blanco con Tipografía Azul Oscuro y Turquesa) */}
             <AboutUsHomeSection />
-          </div>
+          </main>
 
-          {/* COLUMNA DERECHA INFERIOR: Banner 2 (debajo del primer banner) */}
-          <aside className="w-full h-full flex flex-col">
-            {rightBottomBanner && (
-              <Link
-                href={rightBottomBanner.href || '/turismo'}
-                className="block w-full h-full min-h-[220px] rounded-2xl overflow-hidden border border-slate-200/80 hover:border-blue-400 transition-colors relative bg-slate-900 group cursor-pointer"
-                title={rightBottomBanner.title}
-              >
-                <img
-                  src={rightBottomBanner.imageUrl}
-                  alt={rightBottomBanner.title}
-                  className="w-full h-full object-cover group-hover:scale-102 transition-transform duration-500"
-                />
-              </Link>
-            )}
+          {/* COLUMNA DERECHA: 2 Banners con EXACTAMENTE la misma altura */}
+          <aside className="w-full h-full flex flex-col gap-3.5">
+            <div className="flex-1 min-h-0 flex flex-col">
+              {rightTopBanner && (
+                <Link
+                  href={rightTopBanner.href || '/planes'}
+                  className="block w-full h-full rounded-2xl overflow-hidden border border-slate-200/80 hover:border-blue-400 transition-colors relative bg-slate-900 group cursor-pointer shadow-2xs hover:shadow-md"
+                  title={rightTopBanner.title}
+                >
+                  <img
+                    src={rightTopBanner.imageUrl}
+                    alt={rightTopBanner.title}
+                    className="w-full h-full object-cover group-hover:scale-102 transition-transform duration-500"
+                  />
+                </Link>
+              )}
+            </div>
+
+            <div className="flex-1 min-h-0 flex flex-col">
+              {rightBottomBanner && (
+                <Link
+                  href={rightBottomBanner.href || '/turismo'}
+                  className="block w-full h-full rounded-2xl overflow-hidden border border-slate-200/80 hover:border-blue-400 transition-colors relative bg-slate-900 group cursor-pointer shadow-2xs hover:shadow-md"
+                  title={rightBottomBanner.title}
+                >
+                  <img
+                    src={rightBottomBanner.imageUrl}
+                    alt={rightBottomBanner.title}
+                    className="w-full h-full object-cover group-hover:scale-102 transition-transform duration-500"
+                  />
+                </Link>
+              )}
+            </div>
           </aside>
 
         </div>

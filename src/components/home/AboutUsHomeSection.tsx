@@ -14,14 +14,14 @@ export function AboutUsHomeSection() {
             Quiénes somos
           </span>
           <h2 className="text-lg sm:text-xl font-black text-[#002878] leading-tight">
-            El portal comercial<br className="hidden sm:inline" /> de Santa Fe
+            El portal comercial<br className="hidden sm:inline" /> de la Región Centro
           </h2>
         </div>
 
         {/* Center Column: Description & Slogan */}
         <div className="lg:w-1/2 text-center lg:text-left space-y-1.5">
           <p className="text-xs sm:text-[13px] text-slate-600 leading-relaxed">
-            ON+ es el ecosistema comercial regional que conecta el comercio local, la industria, el turismo y las comunidades de toda la provincia de Santa Fe. Impulsamos el crecimiento de los negocios, acercamos oportunidades y fortalecemos la economía regional a través de la tecnología.
+            ON+ es el ecosistema comercial regional que conecta el comercio local, las pymes, el turismo y las comunidades de toda la Región Centro. Impulsamos el crecimiento de los negocios, acercamos oportunidades y fortalecemos la economía regional a través de la tecnología.
           </p>
           <p className="text-xs sm:text-[13px] font-black text-[#00ADB5]">
             Muchas oportunidades, una sola red.

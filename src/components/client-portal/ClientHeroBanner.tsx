@@ -57,7 +57,6 @@ export function ClientHeroBanner({ provinceId = 'santa-fe' }: ClientHeroBannerPr
         {banners.map((slide: BannerItem, idx: number) => {
           const isCurrent = idx === currentIndex;
           const imgSrc = normalizeImageUrl(slide.imageUrl);
-          const hasEmbeddedText = imgSrc.includes('hero-santa-fe-bridge.jpg');
 
           return (
             <Link
@@ -72,22 +71,6 @@ export function ClientHeroBanner({ provinceId = 'santa-fe' }: ClientHeroBannerPr
                 alt={slide.titleLine1 || 'Banner Publicitario'}
                 className="w-full h-full object-cover object-center"
               />
-
-              {/* Overlay with titles if not already baked into the image */}
-              {!hasEmbeddedText && (slide.titleLine1 || slide.subtitle) && (
-                <div className="absolute inset-0 bg-gradient-to-r from-slate-950/80 via-slate-950/40 to-transparent flex items-center p-4 sm:p-6 lg:p-8">
-                  <div className="max-w-md text-white space-y-1">
-                    <h2 className="text-lg sm:text-2xl lg:text-3xl font-black tracking-tight leading-tight drop-shadow-md">
-                      {slide.titleLine1} {slide.titleLine2 || ''}
-                    </h2>
-                    {slide.subtitle && (
-                      <p className="text-xs sm:text-sm font-semibold text-cyan-300 drop-shadow-sm">
-                        {slide.subtitle}
-                      </p>
-                    )}
-                  </div>
-                </div>
-              )}
             </Link>
           );
         })}

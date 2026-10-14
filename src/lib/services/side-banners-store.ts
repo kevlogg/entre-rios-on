@@ -27,7 +27,7 @@ export const DEFAULT_SIDE_BANNERS: SideBannerItem[] = [
     imageUrl: '/banners/side-descubri-santa-fe.jpg',
     href: '/turismo',
     position: 'left',
-    idealSize: '160 × 240 px',
+    idealSize: '160 × 600 px (Rascacielos / Vertical HD)',
   },
   {
     id: 'side-right-1',
@@ -43,7 +43,7 @@ export const DEFAULT_SIDE_BANNERS: SideBannerItem[] = [
     imageUrl: '/banners/side-costa-santafesina.jpg',
     href: '/turismo',
     position: 'right',
-    idealSize: '160 × 240 px',
+    idealSize: '160 × 600 px (Rascacielos / Vertical HD)',
   },
 ];
 

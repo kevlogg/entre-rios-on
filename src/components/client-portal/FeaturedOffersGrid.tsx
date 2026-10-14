@@ -163,17 +163,17 @@ export function FeaturedOffersGrid({
         {itemsToDisplay.map((item) => (
           <div
             key={item.id}
-            className="group relative flex flex-row sm:flex-col justify-between rounded-2xl sm:rounded-xl overflow-hidden bg-white border border-slate-200/90 hover:border-[#0047BA]/50 hover:shadow-md transition-all shadow-xs p-2 min-[360px]:p-2.5 sm:p-0"
+            className="group relative flex flex-row sm:flex-col justify-between rounded-2xl overflow-hidden bg-white border border-slate-200/90 hover:border-[#0047BA]/50 hover:shadow-md transition-all shadow-xs p-2 min-[360px]:p-2.5 sm:p-2.5 lg:p-3"
           >
-            {/* Image Container (Left on mobile, Top on desktop) */}
-            <div className="relative w-28 min-[360px]:w-32 min-[400px]:w-36 h-28 min-[360px]:h-32 min-[400px]:h-36 sm:w-full sm:h-auto sm:aspect-4/3 shrink-0 rounded-xl sm:rounded-none overflow-hidden bg-slate-100">
+            {/* Image Container (Left on mobile, Top on desktop con bordes redondeados) */}
+            <div className="relative w-28 min-[360px]:w-32 min-[400px]:w-36 h-28 min-[360px]:h-32 min-[400px]:h-36 sm:w-full sm:h-auto sm:aspect-4/3 shrink-0 rounded-xl overflow-hidden bg-slate-100">
               <Link href={`/producto/${item.slug}`} className="block w-full h-full">
                 <Image
                   src={item.imageUrl}
                   alt={item.title}
                   fill
                   sizes="(max-width: 640px) 140px, (max-width: 1024px) 33vw, 16vw"
-                  className="object-cover group-hover:scale-105 transition-transform duration-500 rounded-xl sm:rounded-none"
+                  className="object-cover group-hover:scale-105 transition-transform duration-500 rounded-xl"
                 />
               </Link>
 
@@ -196,8 +196,8 @@ export function FeaturedOffersGrid({
               </div>
             </div>
 
-            {/* Content & Details (Right on mobile, Bottom on desktop) */}
-            <div className="flex-1 min-w-0 pl-2.5 min-[360px]:pl-3 sm:pl-0 sm:p-2.5 flex flex-col justify-between">
+            {/* Content & Details (Right on mobile, Bottom on desktop con márgenes interiores) */}
+            <div className="flex-1 min-w-0 pl-2.5 min-[360px]:pl-3 sm:pl-0 sm:pt-2 sm:px-1 flex flex-col justify-between">
               <div>
                 {/* Mobile Top Header: Commerce Name & Mobile Favorite Button */}
                 <div className="flex items-center justify-between gap-1 mb-0.5">
@@ -249,15 +249,15 @@ export function FeaturedOffersGrid({
                   </span>
                 </div>
 
-                {/* WhatsApp Button on mobile */}
+                {/* WhatsApp Button on mobile (reducido y más compacto) */}
                 <button
                   type="button"
                   onClick={(e) => handleWhatsAppClick(e, item)}
-                  className="sm:hidden h-7 min-[360px]:h-8 bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white px-2 min-[360px]:px-2.5 rounded-lg font-black text-[10px] min-[360px]:text-[11px] flex items-center justify-center gap-1 shadow-2xs transition-all active:scale-95 cursor-pointer whitespace-nowrap shrink-0"
-                  aria-label={`Pedir por WhatsApp ${item.title}`}
+                  className="sm:hidden h-6 min-[360px]:h-6.5 bg-[#25D366] hover:bg-emerald-600 active:bg-emerald-700 text-white px-2 rounded-lg font-black text-[10px] flex items-center justify-center gap-1 shadow-2xs transition-all active:scale-95 cursor-pointer whitespace-nowrap shrink-0"
+                  aria-label={`WhatsApp ${item.title}`}
                 >
-                  <MessageCircle className="w-3.5 h-3.5 fill-current shrink-0" />
-                  <span>Pedir por WhatsApp</span>
+                  <MessageCircle className="w-3 h-3 fill-current shrink-0" />
+                  <span>WhatsApp</span>
                 </button>
               </div>
             </div>

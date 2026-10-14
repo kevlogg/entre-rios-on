@@ -50,8 +50,8 @@ export function CityExploreBar({ provinceId = 'santa-fe' }: CityExploreBarProps)
         </Link>
       </div>
 
-      {/* 8 City Cards: 1 fila con scroll horizontal en mobile (~2.3 cards visibles), grilla de 8 en desktop */}
-      <div className="flex sm:grid overflow-x-auto sm:overflow-visible pb-1.5 sm:pb-0 sm:grid-cols-8 gap-2.5 sm:gap-2.5 lg:gap-3 scrollbar-none snap-x snap-mandatory">
+      {/* 8 City Cards: 1 fila con scroll horizontal en mobile (~2.3 cards visibles), grilla con más alto y ancho en desktop */}
+      <div className="flex sm:grid overflow-x-auto sm:overflow-visible pb-1.5 sm:pb-0 sm:grid-cols-4 lg:grid-cols-8 gap-2 sm:gap-2.5 lg:gap-2.5 xl:gap-3 scrollbar-none snap-x snap-mandatory">
         {cities.map((city) => (
           <Link
             key={city.id}
@@ -59,18 +59,18 @@ export function CityExploreBar({ provinceId = 'santa-fe' }: CityExploreBarProps)
             onClick={() => handleSelect(city.id, city.name)}
             className="w-[calc((100%-16px)/2.3)] sm:w-auto shrink-0 sm:shrink snap-start group flex flex-col items-center rounded-xl lg:rounded-2xl overflow-hidden bg-white hover:bg-slate-50 border border-slate-200/90 hover:border-[#0047BA]/50 transition-all shadow-2xs hover:shadow-md cursor-pointer text-center"
           >
-            <div className="relative h-16 sm:h-16 lg:h-20 w-full bg-slate-100 overflow-hidden">
+            <div className="relative h-16 sm:h-20 lg:h-24 xl:h-28 w-full bg-slate-100 overflow-hidden">
               <Image
                 src={city.imageUrl || '/images/city-rosario.jpg'}
                 alt={city.name}
                 fill
-                sizes="(max-width: 640px) 45vw, 12vw"
+                sizes="(max-width: 640px) 45vw, (max-width: 1024px) 25vw, 12vw"
                 className="object-cover group-hover:scale-106 transition-transform duration-500"
               />
             </div>
 
-            <div className="p-1.5 sm:p-2 w-full bg-white text-center">
-              <span className="text-[11px] sm:text-xs font-bold text-slate-800 line-clamp-1 group-hover:text-[#0047BA] transition-colors">
+            <div className="p-2 sm:p-2.5 lg:p-3 w-full bg-white text-center">
+              <span className="text-xs sm:text-xs lg:text-[13px] font-black text-slate-800 line-clamp-1 group-hover:text-[#0047BA] transition-colors">
                 {city.name}
               </span>
             </div>
