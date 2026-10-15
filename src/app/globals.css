@@ -45,43 +45,50 @@
 }
 
 :root {
-  color-scheme: light;
-  --background: #0052ff;
-  --foreground: #ffffff;
+  color-scheme: light only !important;
+  supported-color-schemes: light;
+  --background: #ffffff;
+  --foreground: #0f172a;
 }
 
-
 html {
+  color-scheme: light only !important;
+  forced-color-adjust: none !important;
   scroll-behavior: smooth;
   scroll-padding-top: 140px;
 }
 
 /* =============================================
    FONDO BASE — Identidad de Marca ON MÁS
-   Patrón: Cian ("ON") | Azul Eléctrico ("MÁS") | Azul Marino
+   Forzar modo claro total e impedir inversión automática en móviles
    ============================================= */
 body {
-  background-color: #e9ecef !important;
+  color-scheme: light only !important;
+  background-color: #ffffff !important;
   color: #0f172a !important;
   font-family: var(--font-inter), system-ui, -apple-system, sans-serif;
   margin: 0;
   padding: 0;
-  forced-color-adjust: none; /* Previene inversión de colores en móviles */
-}
-
-/* Forzar modo claro incluso si el SO pide oscuro */
-@media (prefers-color-scheme: dark) {
-  :root {
-    color-scheme: light;
-  }
-  body {
-    background-color: #e9ecef !important;
-    color: #0f172a !important;
-  }
+  forced-color-adjust: none !important;
+  -webkit-text-size-adjust: 100%;
 }
 
 *, *::before, *::after {
   box-sizing: border-box;
+  forced-color-adjust: none !important;
+}
+
+/* Bloqueo estricto contra modo oscuro forzado del sistema / navegadores móviles (Android Chrome, Samsung, Xiaomi) */
+@media (prefers-color-scheme: dark) {
+  :root, html, body {
+    color-scheme: light only !important;
+    forced-color-adjust: none !important;
+    background-color: #ffffff !important;
+    color: #0f172a !important;
+  }
+  *, *::before, *::after {
+    forced-color-adjust: none !important;
+  }
 }
 
 /* Bloqueo de desplazamiento horizontal estricto en pantallas móviles */

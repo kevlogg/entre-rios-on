@@ -1,4 +1,4 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import { Inter, Caveat } from 'next/font/google';
 import './globals.css';
 import { DesignSwitcherBar } from '@/components/layout/DesignSwitcherBar';
@@ -6,6 +6,16 @@ import { FloatingWhatsAppButton } from '@/components/common/FloatingWhatsAppButt
 import { ScrollToTopButton } from '@/components/common/ScrollToTopButton';
 import { PageBackground } from '@/components/common/PageBackground';
 import { PwaInstallPrompt } from '@/components/pwa/PwaInstallPrompt';
+
+export const viewport: Viewport = {
+  themeColor: [
+    { media: '(prefers-color-scheme: light)', color: '#0047BA' },
+    { media: '(prefers-color-scheme: dark)', color: '#0047BA' },
+  ],
+  colorScheme: 'light',
+  width: 'device-width',
+  initialScale: 1,
+};
 
 const inter = Inter({
   subsets: ['latin'],
@@ -93,11 +103,14 @@ export default function RootLayout({
   };
 
   return (
-    <html lang="es" className={`${inter.variable} ${caveat.variable}`}>
+    <html lang="es" className={`${inter.variable} ${caveat.variable}`} style={{ colorScheme: 'light' }}>
       <head>
-        <meta name="color-scheme" content="light" />
+        <meta name="color-scheme" content="light only" />
         <meta name="supported-color-schemes" content="light" />
         <meta name="theme-color" content="#0047BA" />
+        <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#0047BA" />
+        <meta name="theme-color" media="(prefers-color-scheme: light)" content="#0047BA" />
+        <meta name="forced-colors" content="none" />
         <link rel="icon" href="/favicon.ico" sizes="any" />
         <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
         <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
@@ -107,7 +120,10 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, '\\u003c') }}
         />
       </head>
-      <body className="min-h-screen flex flex-col text-slate-900 bg-white antialiased selection:bg-[#00C7B7] selection:text-white app-compact-scale">
+      <body 
+        className="min-h-screen flex flex-col text-slate-900 bg-white antialiased selection:bg-[#00C7B7] selection:text-white app-compact-scale"
+        style={{ colorScheme: 'light' }}
+      >
         <main className="flex-1">
           {children}
         </main>
