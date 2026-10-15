@@ -94,80 +94,80 @@ export function CommerceDirectoryClient({ initialCommerces }: CommerceDirectoryC
     <div className="space-y-8">
       
       {/* Search & Filter Control Panel */}
-      <div className="bg-slate-900/90 backdrop-blur-2xl border border-white/20 rounded-3xl p-5 sm:p-7 shadow-2xl text-white space-y-6">
+      <div className="bg-white rounded-3xl p-5 sm:p-7 border border-slate-200/90 shadow-sm space-y-6 text-slate-800">
         
         {/* Header Title + Stats */}
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border-b border-white/10 pb-4">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border-b border-slate-100 pb-4">
           <div className="flex items-center gap-2.5">
-            <div className="w-10 h-10 rounded-2xl bg-cyan-500/20 border border-cyan-400/40 text-cyan-300 flex items-center justify-center shrink-0 shadow-md">
+            <div className="w-10 h-10 rounded-2xl bg-blue-50 border border-blue-100 text-[#0047BA] flex items-center justify-center shrink-0 shadow-xs">
               <Filter className="w-5 h-5" />
             </div>
             <div>
-              <h2 className="text-lg sm:text-xl font-black text-white tracking-tight">Filtros de Búsqueda Comercial</h2>
-              <p className="text-xs text-slate-300">Encontrá el comercio, servicio o pyme que buscás en toda la región.</p>
+              <h2 className="text-lg sm:text-xl font-black text-[#002878] tracking-tight">Filtros de Búsqueda Comercial</h2>
+              <p className="text-xs text-slate-500 font-medium">Encontrá el comercio, servicio o pyme que buscás en toda la región.</p>
             </div>
           </div>
 
-          <div className="bg-white/10 border border-white/20 px-3.5 py-1.5 rounded-2xl text-xs font-black text-cyan-300 shrink-0">
+          <div className="bg-blue-50 border border-blue-200/80 px-3.5 py-1.5 rounded-2xl text-xs font-black text-[#0047BA] shrink-0">
             {filteredCommerces.length} {filteredCommerces.length === 1 ? 'comercio encontrado' : 'comercios encontrados'}
           </div>
         </div>
 
         {/* 1. Main Type Filter Tabs (Verificados, Comercio Online, Pymes) */}
         <div className="space-y-2">
-          <label className="block text-xs font-black uppercase tracking-wider text-cyan-300">
+          <label className="block text-xs font-black uppercase tracking-wider text-[#0047BA]">
             Tipo de Comercio / Empresa:
           </label>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
             <button
               type="button"
               onClick={() => setTypeFilter('all')}
-              className={`py-3 px-4 rounded-2xl text-xs sm:text-sm font-black transition-all flex items-center justify-center gap-2 border ${
+              className={`py-3 px-4 rounded-2xl text-xs sm:text-sm font-black transition-all flex items-center justify-center gap-2 border cursor-pointer ${
                 typeFilter === 'all'
-                  ? 'bg-gradient-to-r from-cyan-400 to-blue-500 text-slate-950 border-white/50 shadow-lg scale-[1.02]'
-                  : 'bg-white/10 hover:bg-white/20 text-slate-200 border-white/15'
+                  ? 'bg-gradient-to-r from-[#0047BA] to-[#00ADB5] text-white border-transparent shadow-md scale-[1.01]'
+                  : 'bg-slate-50 hover:bg-slate-100 text-slate-700 border-slate-200/90 hover:border-slate-300'
               }`}
             >
-              <Store className="w-4 h-4 shrink-0" />
+              <Store className={`w-4 h-4 shrink-0 ${typeFilter === 'all' ? 'text-white' : 'text-[#00ADB5]'}`} />
               <span>Todos ({initialCommerces.length})</span>
             </button>
 
             <button
               type="button"
               onClick={() => setTypeFilter('verified')}
-              className={`py-3 px-4 rounded-2xl text-xs sm:text-sm font-black transition-all flex items-center justify-center gap-2 border ${
+              className={`py-3 px-4 rounded-2xl text-xs sm:text-sm font-black transition-all flex items-center justify-center gap-2 border cursor-pointer ${
                 typeFilter === 'verified'
-                  ? 'bg-gradient-to-r from-emerald-400 to-teal-500 text-slate-950 border-white/50 shadow-lg scale-[1.02]'
-                  : 'bg-white/10 hover:bg-white/20 text-slate-200 border-white/15'
+                  ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white border-transparent shadow-md scale-[1.01]'
+                  : 'bg-slate-50 hover:bg-slate-100 text-slate-700 border-slate-200/90 hover:border-slate-300'
               }`}
             >
-              <ShieldCheck className="w-4 h-4 shrink-0 text-emerald-300" />
+              <ShieldCheck className={`w-4 h-4 shrink-0 ${typeFilter === 'verified' ? 'text-white' : 'text-emerald-600'}`} />
               <span>Comercios Verificados</span>
             </button>
 
             <button
               type="button"
               onClick={() => setTypeFilter('online')}
-              className={`py-3 px-4 rounded-2xl text-xs sm:text-sm font-black transition-all flex items-center justify-center gap-2 border ${
+              className={`py-3 px-4 rounded-2xl text-xs sm:text-sm font-black transition-all flex items-center justify-center gap-2 border cursor-pointer ${
                 typeFilter === 'online'
-                  ? 'bg-gradient-to-r from-cyan-300 to-blue-600 text-slate-950 border-white/50 shadow-lg scale-[1.02]'
-                  : 'bg-white/10 hover:bg-white/20 text-slate-200 border-white/15'
+                  ? 'bg-gradient-to-r from-cyan-600 to-blue-600 text-white border-transparent shadow-md scale-[1.01]'
+                  : 'bg-slate-50 hover:bg-slate-100 text-slate-700 border-slate-200/90 hover:border-slate-300'
               }`}
             >
-              <Globe className="w-4 h-4 shrink-0 text-cyan-300" />
+              <Globe className={`w-4 h-4 shrink-0 ${typeFilter === 'online' ? 'text-white' : 'text-cyan-600'}`} />
               <span>Comercio Online</span>
             </button>
 
             <button
               type="button"
               onClick={() => setTypeFilter('pymes')}
-              className={`py-3 px-4 rounded-2xl text-xs sm:text-sm font-black transition-all flex items-center justify-center gap-2 border ${
+              className={`py-3 px-4 rounded-2xl text-xs sm:text-sm font-black transition-all flex items-center justify-center gap-2 border cursor-pointer ${
                 typeFilter === 'pymes'
-                  ? 'bg-gradient-to-r from-amber-400 to-orange-500 text-slate-950 border-white/50 shadow-lg scale-[1.02]'
-                  : 'bg-white/10 hover:bg-white/20 text-slate-200 border-white/15'
+                  ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-white border-transparent shadow-md scale-[1.01]'
+                  : 'bg-slate-50 hover:bg-slate-100 text-slate-700 border-slate-200/90 hover:border-slate-300'
               }`}
             >
-              <Building2 className="w-4 h-4 shrink-0 text-amber-300" />
+              <Building2 className={`w-4 h-4 shrink-0 ${typeFilter === 'pymes' ? 'text-white' : 'text-amber-500'}`} />
               <span>Pymes & Empresas</span>
             </button>
           </div>
@@ -183,13 +183,14 @@ export function CommerceDirectoryClient({ initialCommerces }: CommerceDirectoryC
               placeholder="Buscá por nombre, producto o palabra clave..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-white/15 border border-white/25 rounded-2xl pl-4 pr-10 py-3 text-xs sm:text-sm font-bold text-white placeholder-slate-400 focus:outline-hidden focus:ring-2 focus:ring-cyan-400 focus:bg-slate-900/90 transition-all shadow-inner"
+              className="w-full bg-slate-50 hover:bg-white focus:bg-white border border-slate-200 focus:border-[#00ADB5] rounded-2xl pl-4 pr-10 py-3 text-xs sm:text-sm font-semibold text-slate-800 placeholder-slate-400 focus:outline-hidden focus:ring-2 focus:ring-[#00ADB5]/20 transition-all shadow-xs"
             />
             {searchQuery ? (
               <button
                 type="button"
                 onClick={() => setSearchQuery('')}
-                className="absolute right-3 text-slate-400 hover:text-white cursor-pointer"
+                className="absolute right-3 text-slate-400 hover:text-slate-600 cursor-pointer"
+                aria-label="Limpiar búsqueda"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -203,11 +204,11 @@ export function CommerceDirectoryClient({ initialCommerces }: CommerceDirectoryC
             <select
               value={selectedCategory}
               onChange={(e) => setSelectedCategory(e.target.value)}
-              className="w-full bg-white/15 border border-white/25 rounded-2xl px-4 py-3 text-xs sm:text-sm font-bold text-white focus:outline-hidden focus:ring-2 focus:ring-cyan-400 cursor-pointer"
+              className="w-full bg-slate-50 hover:bg-white focus:bg-white border border-slate-200 focus:border-[#00ADB5] rounded-2xl px-4 py-3 text-xs sm:text-sm font-semibold text-slate-800 focus:outline-hidden focus:ring-2 focus:ring-[#00ADB5]/20 cursor-pointer transition-all shadow-xs"
             >
-              <option value="all" className="bg-slate-900 text-white">Todas las categorías</option>
+              <option value="all">Todas las categorías</option>
               {CATEGORIES_LIST.map((cat) => (
-                <option key={cat.id} value={cat.id} className="bg-slate-900 text-white">
+                <option key={cat.id} value={cat.id}>
                   {cat.label}
                 </option>
               ))}
@@ -219,11 +220,11 @@ export function CommerceDirectoryClient({ initialCommerces }: CommerceDirectoryC
             <select
               value={selectedProvince}
               onChange={(e) => setSelectedProvince(e.target.value)}
-              className="w-full bg-white/15 border border-white/25 rounded-2xl px-4 py-3 text-xs sm:text-sm font-bold text-white focus:outline-hidden focus:ring-2 focus:ring-cyan-400 cursor-pointer"
+              className="w-full bg-slate-50 hover:bg-white focus:bg-white border border-slate-200 focus:border-[#00ADB5] rounded-2xl px-4 py-3 text-xs sm:text-sm font-semibold text-slate-800 focus:outline-hidden focus:ring-2 focus:ring-[#00ADB5]/20 cursor-pointer transition-all shadow-xs"
             >
-              <option value="all" className="bg-slate-900 text-white">Todas las provincias</option>
+              <option value="all">Todas las provincias</option>
               {PROVINCES.map((prov) => (
-                <option key={prov.id} value={prov.id} className="bg-slate-900 text-white">
+                <option key={prov.id} value={prov.id}>
                   {prov.name}
                 </option>
               ))}
@@ -234,14 +235,14 @@ export function CommerceDirectoryClient({ initialCommerces }: CommerceDirectoryC
 
         {/* Clear Filters CTA */}
         {hasActiveFilters && (
-          <div className="flex items-center justify-between pt-2 border-t border-white/10">
-            <span className="text-xs font-bold text-cyan-300">
+          <div className="flex items-center justify-between pt-3 border-t border-slate-100">
+            <span className="text-xs font-bold text-slate-600">
               Filtros activos aplicados
             </span>
             <button
               type="button"
               onClick={resetFilters}
-              className="text-xs font-black text-rose-300 hover:text-rose-100 flex items-center gap-1.5 bg-rose-500/20 border border-rose-500/40 px-3 py-1.5 rounded-xl transition-colors cursor-pointer"
+              className="text-xs font-black text-rose-600 hover:text-rose-700 flex items-center gap-1.5 bg-rose-50 hover:bg-rose-100 border border-rose-200 px-3 py-1.5 rounded-xl transition-colors cursor-pointer shadow-2xs"
             >
               <X className="w-3.5 h-3.5" />
               <span>Limpiar Filtros</span>
