@@ -67,7 +67,10 @@ export function CatalogManager({
     setCategory(prod.categoryId || 'gastronomia');
     setCityId(prod.cityId || 'rosario');
     setDescription(prod.description || '');
-    setImages(prod.imageUrl ? [prod.imageUrl] : []);
+    const initialImages = (prod.galleryImages && prod.galleryImages.length > 0)
+      ? prod.galleryImages
+      : (prod.imageUrl ? [prod.imageUrl] : []);
+    setImages(initialImages);
     setIsModalOpen(true);
   };
 
@@ -84,6 +87,7 @@ export function CatalogManager({
     const selectedCatObj = CATEGORIES_LIST.find((c) => c.id === category);
     const selectedCity = ALL_CITIES.find((c) => c.id === cityId) || ALL_CITIES[0];
     const primaryImage = images[0] || '/images/city-rosario.jpg';
+    const galleryImages = images.length > 0 ? images : [primaryImage];
 
     if (editingProduct) {
       const updatedFields: Partial<Product> = {
@@ -95,6 +99,7 @@ export function CatalogManager({
         cityName: selectedCity.name,
         description,
         imageUrl: primaryImage,
+        galleryImages,
       };
 
       try {
@@ -129,6 +134,7 @@ export function CatalogManager({
         cityName: commerce?.cityName || selectedCity.name,
         provinceId: commerce?.provinceId || selectedCity.provinceId,
         imageUrl: primaryImage,
+        galleryImages,
         category: selectedCatObj ? selectedCatObj.label : 'Productos',
         categoryId: category,
         isFeatured: true,

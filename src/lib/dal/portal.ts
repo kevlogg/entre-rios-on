@@ -14,6 +14,7 @@ import {
 } from '@/types';
 
 import { ALL_CITIES } from '@/lib/constants/locations';
+import { parseProductGallery } from '@/lib/utils/product-gallery';
 
 // Mock Cities Data
 const CITIES_MOCK: City[] = ALL_CITIES;
@@ -794,6 +795,7 @@ export async function getFeaturedProducts(cityId?: string, categoryId?: string, 
 
         return activeProducts.map((p) => {
           const matchedCommerce = p.commerce_id ? commerceMap.get(p.commerce_id.toLowerCase()) : (p.commerce_name ? commerceMap.get(p.commerce_name.toLowerCase()) : undefined);
+          const { description: cleanDesc, galleryImages } = parseProductGallery(p.description, p.image_url, (p as any).gallery_images);
           return {
             id: p.id,
             title: p.title,
@@ -807,10 +809,11 @@ export async function getFeaturedProducts(cityId?: string, categoryId?: string, 
             provinceId: p.province_id,
             provinceName: p.province_name,
             imageUrl: p.image_url,
+            galleryImages,
             category: p.category,
             categoryId: p.category_id,
             isFeatured: p.is_featured,
-            description: p.description,
+            description: cleanDesc,
             phoneWhatsApp: p.phone_whatsapp,
             whatsappMessageCustom: p.whatsapp_message_custom,
           };
@@ -894,6 +897,12 @@ export async function getProductBySlug(slug: string): Promise<Product | undefine
           }
         }
 
+        const { description: cleanDesc, galleryImages } = parseProductGallery(
+          data.description,
+          data.image_url,
+          (data as any).gallery_images
+        );
+
         return {
           id: data.id,
           title: data.title,
@@ -908,10 +917,11 @@ export async function getProductBySlug(slug: string): Promise<Product | undefine
           cityId: data.city_id,
           cityName: data.city_name,
           imageUrl: data.image_url,
+          galleryImages,
           category: data.category,
           categoryId: data.category_id,
           isFeatured: data.is_featured,
-          description: data.description,
+          description: cleanDesc,
           phoneWhatsApp: data.phone_whatsapp,
           whatsappMessageCustom: data.whatsapp_message_custom,
         };

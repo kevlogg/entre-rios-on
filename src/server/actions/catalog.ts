@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache';
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { Product } from '@/types';
+import { parseProductGallery, encodeProductGallery } from '@/lib/utils/product-gallery';
 
 export async function createProductAction(productData: Partial<Product>): Promise<{ success: boolean; message: string; data?: Product }> {
   try {
@@ -72,6 +73,12 @@ export async function createProductAction(productData: Partial<Product>): Promis
         }
       }
 
+      const rawGallery = productData.galleryImages && productData.galleryImages.length > 0
+        ? productData.galleryImages
+        : (productData.imageUrl ? [productData.imageUrl] : ['/images/city-rosario.jpg']);
+      const primaryImage = rawGallery[0] || productData.imageUrl || '/images/city-rosario.jpg';
+      const encodedDesc = encodeProductGallery(productData.description, rawGallery);
+
       const insertPayload: any = {
         title: productData.title,
         slug: productData.slug || productData.title?.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || `prod-${Date.now()}`,
@@ -82,11 +89,11 @@ export async function createProductAction(productData: Partial<Product>): Promis
         province_id: targetProvinceId || 'santa-fe',
         city_id: targetCityId || 'rosario',
         city_name: targetCityName || 'Rosario',
-        image_url: productData.imageUrl || '/images/city-rosario.jpg',
+        image_url: primaryImage,
         category: productData.category || 'Generales',
         category_id: productData.categoryId || 'hogar',
         is_featured: productData.isFeatured ?? true,
-        description: productData.description || '',
+        description: encodedDesc,
         phone_whatsapp: targetPhone || '5493415550199',
         whatsapp_message_custom: productData.whatsappMessageCustom,
       };
@@ -106,6 +113,12 @@ export async function createProductAction(productData: Partial<Product>): Promis
         console.warn('revalidatePath note:', revErr);
       }
 
+      const { description: cleanDesc, galleryImages: parsedGallery } = parseProductGallery(
+        data.description,
+        data.image_url,
+        (data as any).gallery_images
+      );
+
       return {
         success: true,
         message: '¡Producto publicado exitosamente!',
@@ -121,10 +134,11 @@ export async function createProductAction(productData: Partial<Product>): Promis
           cityName: data.city_name,
           provinceId: data.province_id,
           imageUrl: data.image_url,
+          galleryImages: parsedGallery.length > 0 ? parsedGallery : rawGallery,
           category: data.category,
           categoryId: data.category_id,
           isFeatured: data.is_featured,
-          description: data.description,
+          description: cleanDesc,
           phoneWhatsApp: data.phone_whatsapp,
           whatsappMessageCustom: data.whatsapp_message_custom,
         }
@@ -136,9 +150,24 @@ export async function createProductAction(productData: Partial<Product>): Promis
       revalidatePath('/');
     } catch {}
 
+    const rawGallery = productData.galleryImages && productData.galleryImages.length > 0
+      ? productData.galleryImages
+      : (productData.imageUrl ? [productData.imageUrl] : ['/images/city-rosario.jpg']);
+
     return {
       success: true,
       message: '¡Producto publicado en modo demostración!',
+      data: {
+        id: `p-new-${Date.now()}`,
+        title: productData.title || 'Producto',
+        slug: productData.title?.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || `prod-${Date.now()}`,
+        price: productData.price,
+        imageUrl: rawGallery[0] || '/images/city-rosario.jpg',
+        galleryImages: rawGallery,
+        category: productData.category || 'Generales',
+        description: productData.description || '',
+        ...productData,
+      } as Product,
     };
   } catch (err) {
     return { success: false, message: `Error inesperado: ${(err as Error).message}` };
@@ -243,9 +272,23 @@ export async function updateProductAction(
       if (productData.category) updatePayload.category = productData.category;
       if (productData.categoryId) updatePayload.category_id = productData.categoryId;
       if (productData.cityId) updatePayload.city_id = productData.cityId;
-      if (productData.cityName) updatePayload.city_name = productData.cityName;
-      if (productData.imageUrl) updatePayload.image_url = productData.imageUrl;
-      if (productData.description !== undefined) updatePayload.description = productData.description;
+      const rawGallery = productData.galleryImages && productData.galleryImages.length > 0
+        ? productData.galleryImages
+        : (productData.imageUrl ? [productData.imageUrl] : undefined);
+
+      if (rawGallery && rawGallery[0]) {
+        updatePayload.image_url = rawGallery[0];
+      } else if (productData.imageUrl) {
+        updatePayload.image_url = productData.imageUrl;
+      }
+
+      if (productData.description !== undefined || rawGallery !== undefined) {
+        const baseDesc = productData.description !== undefined 
+          ? productData.description 
+          : ((productToModify as any).description || '');
+        updatePayload.description = encodeProductGallery(baseDesc, rawGallery);
+      }
+
       if (productData.phoneWhatsApp) updatePayload.phone_whatsapp = productData.phoneWhatsApp;
 
       const { data, error } = await supabase
@@ -264,6 +307,12 @@ export async function updateProductAction(
         revalidatePath('/');
       } catch {}
 
+      const { description: cleanDesc, galleryImages: parsedGallery } = parseProductGallery(
+        data.description,
+        data.image_url,
+        (data as any).gallery_images
+      );
+
       return {
         success: true,
         message: '¡Producto actualizado exitosamente!',
@@ -279,10 +328,11 @@ export async function updateProductAction(
           cityName: data.city_name,
           provinceId: data.province_id,
           imageUrl: data.image_url,
+          galleryImages: (rawGallery && rawGallery.length > 0) ? rawGallery : (parsedGallery.length > 0 ? parsedGallery : [data.image_url]),
           category: data.category,
           categoryId: data.category_id,
           isFeatured: data.is_featured,
-          description: data.description,
+          description: cleanDesc,
           phoneWhatsApp: data.phone_whatsapp,
           whatsappMessageCustom: data.whatsapp_message_custom,
         }
@@ -293,6 +343,10 @@ export async function updateProductAction(
       revalidatePath('/admin');
     } catch {}
 
+    const rawGallery = productData.galleryImages && productData.galleryImages.length > 0
+      ? productData.galleryImages
+      : (productData.imageUrl ? [productData.imageUrl] : ['/images/city-rosario.jpg']);
+
     return { 
       success: true, 
       message: '¡Producto actualizado en modo demostración!',
@@ -301,7 +355,8 @@ export async function updateProductAction(
         title: productData.title || 'Producto',
         slug: productData.title?.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || `prod-${productId}`,
         price: productData.price,
-        imageUrl: productData.imageUrl || '/images/city-rosario.jpg',
+        imageUrl: rawGallery[0] || '/images/city-rosario.jpg',
+        galleryImages: rawGallery,
         category: productData.category || 'General',
         categoryId: productData.categoryId || 'hogar',
         cityId: productData.cityId || 'rosario',

@@ -12,6 +12,7 @@ import { CatalogManager } from '@/components/admin/CatalogManager';
 import { ProfileEditor } from '@/components/admin/ProfileEditor';
 import { SubscriptionPlans } from '@/components/admin/SubscriptionPlans';
 import { MessageCircle, ShieldCheck, Zap, Sparkles, ExternalLink, ArrowRight, Store, Gift } from 'lucide-react';
+import { parseProductGallery } from '@/lib/utils/product-gallery';
 
 export default function AdminPage() {
   const router = useRouter();
@@ -123,8 +124,6 @@ export default function AdminPage() {
             .select('*', { count: 'exact', head: true })
             .eq('commerce_id', targetCommerce.id);
 
-          // Usar el máximo entre el contador acumulado en commerces y el conteo de eventos
-          // (por si la columna no se actualizó en algún momento)
           const totalWaClicks = Math.max(
             waEventCount || 0,
             Number(targetCommerce.whatsapp_clicks_count || 0)
@@ -146,25 +145,29 @@ export default function AdminPage() {
 
           if (prodsData && prodsData.length > 0) {
             setProducts(
-              prodsData.map((p) => ({
-                id: p.id,
-                title: p.title,
-                slug: p.slug,
-                price: p.price ? Number(p.price) : undefined,
-                currency: p.currency || 'ARS',
-                commerceId: p.commerce_id,
-                commerceName: p.commerce_name,
-                cityId: p.city_id,
-                cityName: p.city_name,
-                provinceId: p.province_id,
-                imageUrl: p.image_url,
-                category: p.category,
-                categoryId: p.category_id,
-                isFeatured: p.is_featured,
-                description: p.description,
-                phoneWhatsApp: p.phone_whatsapp,
-                whatsappMessageCustom: p.whatsapp_message_custom,
-              }))
+              prodsData.map((p) => {
+                const { description: cleanDesc, galleryImages } = parseProductGallery(p.description, p.image_url, p.gallery_images);
+                return {
+                  id: p.id,
+                  title: p.title,
+                  slug: p.slug,
+                  price: p.price ? Number(p.price) : undefined,
+                  currency: p.currency || 'ARS',
+                  commerceId: p.commerce_id,
+                  commerceName: p.commerce_name,
+                  cityId: p.city_id,
+                  cityName: p.city_name,
+                  provinceId: p.province_id,
+                  imageUrl: p.image_url,
+                  galleryImages,
+                  category: p.category,
+                  categoryId: p.category_id,
+                  isFeatured: p.is_featured,
+                  description: cleanDesc,
+                  phoneWhatsApp: p.phone_whatsapp,
+                  whatsappMessageCustom: p.whatsapp_message_custom,
+                };
+              })
             );
           } else {
             setProducts([]);
