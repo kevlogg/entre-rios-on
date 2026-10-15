@@ -298,10 +298,14 @@ export function ProfileEditor({ commerce, onUpdateCommerce }: ProfileEditorProps
       <form onSubmit={handleSubmit} className="space-y-5">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label className="block text-xs font-bold text-slate-700 mb-1">Nombre Comercial del Negocio *</label>
+            <label className="block text-xs font-bold text-slate-700 mb-1">
+              Nombre Comercial del Negocio *
+              <span className="text-[11px] font-normal text-slate-500 block mt-0.5">El nombre de marca o fantasía que tus clientes reconocen (ej: Empanadas Agus, Muebles Bulevar)</span>
+            </label>
             <input
               type="text"
               required
+              placeholder="Ej: Empanadas Agus"
               value={formData.name}
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
               className="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-2.5 text-sm text-slate-800 focus:ring-2 focus:ring-[#00ADB5]"

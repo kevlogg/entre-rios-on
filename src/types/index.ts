@@ -43,6 +43,8 @@ export interface Commerce {
   plan?: 'Bronce' | 'Plata' | 'Oro';
   viewsCount?: number;
   whatsappClicksCount?: number;
+  legalName?: string;
+  ownerId?: string;
 }
 
 export interface ProductSpecItem {
@@ -62,6 +64,8 @@ export interface Product {
   slug: string;
   price?: number;
   originalPrice?: number;
+  priceUnit?: string;
+  dozenPrice?: number;
   currency: string;
   commerceId: string;
   commerceName: string;

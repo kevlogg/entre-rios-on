@@ -876,14 +876,35 @@ export async function getProductBySlug(slug: string): Promise<Product | undefine
             }
           }
         }
+        let resolvedCommerceName = data.commerce_name;
+        if (data.commerce_id) {
+          const { data: commData } = await supabase.from('commerces').select('id, name').eq('id', data.commerce_id).maybeSingle();
+          if (commData?.name) {
+            resolvedCommerceName = commData.name;
+          }
+        }
+
+        const desc = data.description || '';
+        let parsedDozenPrice = (data as any).dozen_price ? Number((data as any).dozen_price) : undefined;
+        if (!parsedDozenPrice) {
+          const match = desc.match(/docena[:\s]+\$?([\d\.]+)/i);
+          if (match) {
+            const val = parseInt(match[1].replace(/\./g, ''), 10);
+            if (!isNaN(val) && val > 0) parsedDozenPrice = val;
+          }
+        }
+
         return {
           id: data.id,
           title: data.title,
           slug: data.slug,
           price: data.price ? Number(data.price) : undefined,
+          originalPrice: (data as any).original_price ? Number((data as any).original_price) : undefined,
+          priceUnit: (data as any).price_unit || (data.price ? 'unidad' : undefined),
+          dozenPrice: parsedDozenPrice,
           currency: data.currency || 'ARS',
           commerceId: data.commerce_id,
-          commerceName: data.commerce_name,
+          commerceName: resolvedCommerceName || data.commerce_name,
           cityId: data.city_id,
           cityName: data.city_name,
           imageUrl: data.image_url,
@@ -981,6 +1002,16 @@ export async function getCommerceBySlug(slug: string): Promise<Commerce | undefi
       if (!error) {
         if (!data || data.length === 0) return undefined;
         const item = data[0];
+        let resolvedLegalName = (item as any).legal_name || undefined;
+        if (!resolvedLegalName && item.owner_id) {
+          try {
+            const { data: prof } = await supabase.from('profiles').select('full_name').eq('id', item.owner_id).maybeSingle();
+            if (prof?.full_name && prof.full_name.trim().toLowerCase() !== item.name.trim().toLowerCase()) {
+              resolvedLegalName = prof.full_name.trim();
+            }
+          } catch (e) {}
+        }
+
         return {
           id: item.id,
           name: item.name,
@@ -1002,6 +1033,8 @@ export async function getCommerceBySlug(slug: string): Promise<Commerce | undefi
           website: item.website || '',
           email: item.email || '',
           isDigitalOnly: item.is_digital_only ?? false,
+          legalName: resolvedLegalName,
+          ownerId: item.owner_id || undefined,
         };
       }
     } catch (e) {
