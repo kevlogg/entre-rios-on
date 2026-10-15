@@ -189,6 +189,12 @@ export default function AdminPage() {
     setProducts((prev) => [newProd, ...prev]);
   };
 
+  const handleUpdateProduct = (updatedProd: Product) => {
+    setProducts((prev) =>
+      prev.map((p) => (p.id === updatedProd.id ? { ...p, ...updatedProd } : p))
+    );
+  };
+
   const handleDeleteProduct = (id: string) => {
     setProducts((prev) => prev.filter((p) => p.id !== id));
   };
@@ -298,6 +304,7 @@ export default function AdminPage() {
                     commerce={commerce}
                     products={products}
                     onAddProduct={handleAddProduct}
+                    onUpdateProduct={handleUpdateProduct}
                     onDeleteProduct={handleDeleteProduct}
                   />
                 )}
@@ -312,6 +319,7 @@ export default function AdminPage() {
                     commerce={commerce}
                     products={products}
                     onAddProduct={handleAddProduct}
+                    onUpdateProduct={handleUpdateProduct}
                     onDeleteProduct={handleDeleteProduct}
                   />
                 ) : (

@@ -159,7 +159,7 @@ export const CATEGORIES_LIST: CategoryDef[] = [
     label: 'Agro, Campo y Alimentos', 
     icon: Wheat,
     description: 'Citrus, miel, agronomía, insumos agrícolas y alimentos de campo.',
-    imageUrl: 'https://images.unsplash.com/photo-1587049352847-4a222e784d38?auto=format&fit=crop&w=400&q=80',
+    imageUrl: 'https://images.unsplash.com/photo-1500937386664-56d1dfef3854?auto=format&fit=crop&w=400&q=80',
     iconBg: 'bg-yellow-500/15 border-yellow-200',
     iconColor: 'text-yellow-600',
     activeBg: 'from-yellow-600 to-amber-800'
@@ -189,7 +189,7 @@ export const CATEGORIES_LIST: CategoryDef[] = [
     label: 'Más categorías', 
     icon: LayoutGrid,
     description: 'Sorteos, agronomía, servicios educativos y rubros adicionales.',
-    imageUrl: 'https://images.unsplash.com/photo-1513885535751-8b9238bd345a?auto=format&fit=crop&w=400&q=80',
+    imageUrl: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?auto=format&fit=crop&w=400&q=80',
     iconBg: 'bg-violet-500/15 border-violet-200',
     iconColor: 'text-violet-600',
     activeBg: 'from-violet-600 to-purple-800'

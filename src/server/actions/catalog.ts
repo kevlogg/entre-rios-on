@@ -164,7 +164,14 @@ export async function deleteProductAction(productId: string): Promise<{ success:
       if (!productToModify) return { success: false, message: 'Producto no encontrado.' };
 
       const { data: commerceOwner } = await supabase.from('commerces').select('owner_id').eq('id', productToModify.commerce_id).single();
-      if (!commerceOwner || commerceOwner.owner_id !== user.id) {
+      const isSuperAdmin = 
+        user.user_metadata?.role === 'SUPERADMIN' ||
+        user.user_metadata?.role === 'superadmin' ||
+        user.email === 'admin@onmas.com' ||
+        user.email?.includes('superadmin') ||
+        user.email === 'superadmin@onmas.com';
+
+      if (!isSuperAdmin && (!commerceOwner || commerceOwner.owner_id !== user.id)) {
         return { success: false, message: 'No autorizado. No tienes permiso para eliminar este producto.' };
       }
       const { error } = await supabase.from('products').delete().eq('id', productId);
@@ -213,7 +220,14 @@ export async function updateProductAction(
       if (!productToModify) return { success: false, message: 'Producto no encontrado.' };
 
       const { data: commerceOwner } = await supabase.from('commerces').select('owner_id').eq('id', productToModify.commerce_id).single();
-      if (!commerceOwner || commerceOwner.owner_id !== user.id) {
+      const isSuperAdmin = 
+        user.user_metadata?.role === 'SUPERADMIN' ||
+        user.user_metadata?.role === 'superadmin' ||
+        user.email === 'admin@onmas.com' ||
+        user.email?.includes('superadmin') ||
+        user.email === 'superadmin@onmas.com';
+
+      if (!isSuperAdmin && (!commerceOwner || commerceOwner.owner_id !== user.id)) {
         return { success: false, message: 'No autorizado. No tienes permiso para editar este producto.' };
       }
 
@@ -221,7 +235,10 @@ export async function updateProductAction(
         updated_at: new Date().toISOString(),
       };
 
-      if (productData.title) updatePayload.title = productData.title;
+      if (productData.title) {
+        updatePayload.title = productData.title;
+        updatePayload.slug = productData.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+      }
       if (productData.price !== undefined) updatePayload.price = productData.price;
       if (productData.category) updatePayload.category = productData.category;
       if (productData.categoryId) updatePayload.category_id = productData.categoryId;
@@ -276,7 +293,24 @@ export async function updateProductAction(
       revalidatePath('/admin');
     } catch {}
 
-    return { success: true, message: '¡Producto actualizado en modo demostración!' };
+    return { 
+      success: true, 
+      message: '¡Producto actualizado en modo demostración!',
+      data: {
+        id: productId,
+        title: productData.title || 'Producto',
+        slug: productData.title?.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || `prod-${productId}`,
+        price: productData.price,
+        imageUrl: productData.imageUrl || '/images/city-rosario.jpg',
+        category: productData.category || 'General',
+        categoryId: productData.categoryId || 'hogar',
+        cityId: productData.cityId || 'rosario',
+        cityName: productData.cityName || 'Rosario',
+        description: productData.description || '',
+        phoneWhatsApp: productData.phoneWhatsApp || '',
+        ...productData,
+      } as Product
+    };
   } catch (err) {
     return { success: false, message: `Error inesperado: ${(err as Error).message}` };
   }

@@ -13,10 +13,17 @@ interface CatalogManagerProps {
   commerce?: Commerce | null;
   products: Product[];
   onAddProduct: (newProd: Product) => void;
+  onUpdateProduct?: (updatedProd: Product) => void;
   onDeleteProduct: (id: string) => void;
 }
 
-export function CatalogManager({ commerce, products, onAddProduct, onDeleteProduct }: CatalogManagerProps) {
+export function CatalogManager({ 
+  commerce, 
+  products, 
+  onAddProduct, 
+  onUpdateProduct, 
+  onDeleteProduct 
+}: CatalogManagerProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -55,7 +62,7 @@ export function CatalogManager({ commerce, products, onAddProduct, onDeleteProdu
 
   const handleOpenEditModal = (prod: Product) => {
     setEditingProduct(prod);
-    setTitle(prod.title);
+    setTitle(prod.title || '');
     setPrice(prod.price ? prod.price.toString() : '');
     setCategory(prod.categoryId || 'gastronomia');
     setCityId(prod.cityId || 'rosario');
@@ -92,14 +99,22 @@ export function CatalogManager({ commerce, products, onAddProduct, onDeleteProdu
 
       try {
         const res = await updateProductAction(editingProduct.id, updatedFields);
-        if (res && res.data) {
-          onAddProduct(res.data);
-        } else {
-          onAddProduct({ ...editingProduct, ...updatedFields });
+        if (res && !res.success) {
+          alert(res.message || 'Error al actualizar el producto');
+          setIsSubmitting(false);
+          return;
+        }
+
+        const updatedProd: Product = res?.data || { ...editingProduct, ...updatedFields };
+        if (onUpdateProduct) {
+          onUpdateProduct(updatedProd);
         }
       } catch (err) {
         console.warn('Update product fallback:', err);
-        onAddProduct({ ...editingProduct, ...updatedFields });
+        const fallbackProd: Product = { ...editingProduct, ...updatedFields };
+        if (onUpdateProduct) {
+          onUpdateProduct(fallbackProd);
+        }
       }
     } else {
       const newProd: Product = {

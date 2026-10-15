@@ -126,6 +126,12 @@ export function CategoryFilterBar({
                   <img
                     src={cat.imageUrl}
                     alt={cat.label}
+                    onError={(e) => {
+                      const target = e.currentTarget;
+                      if (!target.src.includes('hero-artesania.jpg')) {
+                        target.src = '/images/hero-artesania.jpg';
+                      }
+                    }}
                     className="w-full h-full object-cover rounded-xl group-hover:scale-105 transition-transform duration-300"
                   />
                 </div>

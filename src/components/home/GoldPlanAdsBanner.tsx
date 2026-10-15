@@ -23,7 +23,7 @@ export function GoldPlanAdsBanner() {
       subtitle: 'Pack Regalo Dulces Orgánicos & Miel Pura de Azahar',
       description: 'Productos artesanales 100% autóctonos directos del productor a tu mesa.',
       city: 'Concepción del Uruguay',
-      image: 'https://images.unsplash.com/photo-1587049352847-4a222e784d38?auto=format&fit=crop&w=600&q=80',
+      image: '/images/commerce-citrus.jpg',
       badge: 'Sponsor Oficial Plan Oro',
       phone: '5493442567890',
     }
