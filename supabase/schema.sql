@@ -96,6 +96,7 @@ CREATE TABLE IF NOT EXISTS public.products (
   city_id TEXT NOT NULL REFERENCES public.cities(id) ON DELETE CASCADE,
   city_name TEXT NOT NULL,
   image_url TEXT NOT NULL,
+  gallery_images TEXT[],
   category TEXT NOT NULL,
   category_id TEXT,
   is_featured BOOLEAN DEFAULT false,
@@ -105,6 +106,9 @@ CREATE TABLE IF NOT EXISTS public.products (
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+
+-- Migración: agregar columna gallery_images si la tabla products ya existe
+ALTER TABLE public.products ADD COLUMN IF NOT EXISTS gallery_images TEXT[];
 
 -- 5. TABLA DE NOTICIAS Y AGENDA CULTURAL REGIONAL
 CREATE TABLE IF NOT EXISTS public.community_events (

@@ -1106,24 +1106,32 @@ export async function getProductsByCommerce(commerceId: string): Promise<Product
       const supabase = createPublicClient();
       const { data, error } = await supabase.from('products').select('*').eq('commerce_id', commerceId);
       if (!error && Array.isArray(data)) {
-        return data.map((p) => ({
-          id: p.id,
-          title: p.title,
-          slug: p.slug,
-          price: p.price ? Number(p.price) : undefined,
-          currency: p.currency || 'ARS',
-          commerceId: p.commerce_id,
-          commerceName: p.commerce_name,
-          cityId: p.city_id,
-          cityName: p.city_name,
-          imageUrl: p.image_url,
-          category: p.category,
-          categoryId: p.category_id,
-          isFeatured: p.is_featured,
-          description: p.description,
-          phoneWhatsApp: p.phone_whatsapp,
-          whatsappMessageCustom: p.whatsapp_message_custom,
-        }));
+        return data.map((p) => {
+          const { description: cleanDesc, galleryImages } = parseProductGallery(
+            p.description,
+            p.image_url,
+            (p as any).gallery_images
+          );
+          return {
+            id: p.id,
+            title: p.title,
+            slug: p.slug,
+            price: p.price ? Number(p.price) : undefined,
+            currency: p.currency || 'ARS',
+            commerceId: p.commerce_id,
+            commerceName: p.commerce_name,
+            cityId: p.city_id,
+            cityName: p.city_name,
+            imageUrl: p.image_url,
+            galleryImages,
+            category: p.category,
+            categoryId: p.category_id,
+            isFeatured: p.is_featured,
+            description: cleanDesc,
+            phoneWhatsApp: p.phone_whatsapp,
+            whatsappMessageCustom: p.whatsapp_message_custom,
+          };
+        });
       }
     } catch (e) {
       console.warn('Fallback to mock products by commerce:', e);

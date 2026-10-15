@@ -98,7 +98,22 @@ export async function createProductAction(productData: Partial<Product>): Promis
         whatsapp_message_custom: productData.whatsappMessageCustom,
       };
 
-      const { data, error } = await supabase.from('products').insert(insertPayload).select().single();
+      let insertRes = await supabase
+        .from('products')
+        .insert({ ...insertPayload, gallery_images: rawGallery })
+        .select()
+        .single();
+
+      if (insertRes.error && (insertRes.error.code === '42703' || insertRes.error.message?.includes('gallery_images'))) {
+        insertRes = await supabase
+          .from('products')
+          .insert(insertPayload)
+          .select()
+          .single();
+      }
+
+      const data = insertRes.data;
+      const error = insertRes.error;
 
       if (error) {
         console.error('Error al insertar producto en Supabase:', error.message);
@@ -291,12 +306,24 @@ export async function updateProductAction(
 
       if (productData.phoneWhatsApp) updatePayload.phone_whatsapp = productData.phoneWhatsApp;
 
-      const { data, error } = await supabase
+      let updateRes = await supabase
         .from('products')
-        .update(updatePayload)
+        .update(rawGallery ? { ...updatePayload, gallery_images: rawGallery } : updatePayload)
         .eq('id', productId)
         .select()
         .single();
+
+      if (updateRes.error && (updateRes.error.code === '42703' || updateRes.error.message?.includes('gallery_images'))) {
+        updateRes = await supabase
+          .from('products')
+          .update(updatePayload)
+          .eq('id', productId)
+          .select()
+          .single();
+      }
+
+      const data = updateRes.data;
+      const error = updateRes.error;
 
       if (error) {
         return { success: false, message: `Error editando producto: ${error.message}` };
