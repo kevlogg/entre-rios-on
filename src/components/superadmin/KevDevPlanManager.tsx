@@ -28,7 +28,11 @@ interface PaymentRecord {
   invoiceRef: string;
 }
 
-export function KevDevPlanManager() {
+interface KevDevPlanManagerProps {
+  onPaymentsLoaded?: (payments: PaymentRecord[]) => void;
+}
+
+export function KevDevPlanManager({ onPaymentsLoaded }: KevDevPlanManagerProps = {}) {
   const [activeTab, setActiveTab] = useState<'status' | 'matrix' | 'payments' | 'tech'>('status');
   const [payments, setPayments] = useState<PaymentRecord[]>([
     {
@@ -75,6 +79,9 @@ export function KevDevPlanManager() {
           setPayments(data.payments);
           setIsSynced(Boolean(data.synced));
           if (data.estadoPago) setPaymentStatus(data.estadoPago);
+          if (onPaymentsLoaded) {
+            onPaymentsLoaded(data.payments);
+          }
         }
       }
     } catch (err) {
