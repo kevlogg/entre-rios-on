@@ -6,11 +6,11 @@ import Link from 'next/link';
 
 export function ClientFooter() {
   return (
-    <footer className="w-full bg-white border-t border-slate-200 pt-10 pb-8 text-slate-700">
+    <footer className="w-full bg-[#cbd5e1] border-t border-slate-300 pt-10 pb-8 text-slate-700">
       <div className="max-w-[1480px] mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Main Grid matching mockup */}
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-8 pb-8 border-b border-slate-200/80">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-8 pb-8 border-b border-slate-300/80">
           
           {/* Brand Column */}
           <div className="col-span-2 md:col-span-3 lg:col-span-1 space-y-3">
@@ -24,18 +24,18 @@ export function ClientFooter() {
                 />
               </div>
             </Link>
-            <p className="text-xs text-slate-500 leading-tight">
+            <p className="text-xs text-slate-600 font-medium leading-tight">
               Tu negocio, más cerca<br />de más personas.
             </p>
             
             {/* Social media icons (SVG) */}
-            <div className="flex items-center gap-2 pt-1 text-slate-500">
+            <div className="flex items-center gap-2 pt-1 text-slate-600">
               {/* Instagram */}
               <a 
                 href="https://instagram.com/onmasportal" 
                 target="_blank" 
                 rel="noopener noreferrer"
-                className="w-7 h-7 rounded-full bg-slate-100 hover:bg-[#E0008F] hover:text-white flex items-center justify-center transition-colors"
+                className="w-7 h-7 rounded-full bg-slate-200/90 hover:bg-[#E0008F] hover:text-white flex items-center justify-center transition-colors border border-slate-300"
                 title="Instagram"
               >
                 <svg className="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24">
@@ -47,7 +47,7 @@ export function ClientFooter() {
                 href="https://wa.me/5493426514889?text=Hola%20ON%2B!%20Quisiera%20recibir%20informaci%C3%B3n%20sobre%20el%20portal." 
                 target="_blank" 
                 rel="noopener noreferrer"
-                className="w-7 h-7 rounded-full bg-slate-100 hover:bg-emerald-600 hover:text-white flex items-center justify-center transition-colors"
+                className="w-7 h-7 rounded-full bg-slate-200/90 hover:bg-emerald-600 hover:text-white flex items-center justify-center transition-colors border border-slate-300"
                 title="WhatsApp"
               >
                 <svg className="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24">
@@ -62,7 +62,7 @@ export function ClientFooter() {
             <h4 className="text-xs font-black text-slate-900 tracking-wider">
               Explorar
             </h4>
-            <ul className="space-y-1.5 text-xs text-slate-600 font-medium">
+            <ul className="space-y-1.5 text-xs text-slate-700 font-semibold">
               <li><Link href="/" className="hover:text-[#0047BA] transition-colors">Inicio</Link></li>
               <li><Link href="/catalogo" className="hover:text-[#0047BA] transition-colors">Categorías</Link></li>
               <li><Link href="/comercios" className="hover:text-[#0047BA] transition-colors">Comercios</Link></li>
@@ -77,7 +77,7 @@ export function ClientFooter() {
             <h4 className="text-xs font-black text-slate-900 tracking-wider">
               Para comercios
             </h4>
-            <ul className="space-y-1.5 text-xs text-slate-600 font-medium">
+            <ul className="space-y-1.5 text-xs text-slate-700 font-semibold">
               <li><Link href="/planes" className="hover:text-[#0047BA] transition-colors">Publicá tu negocio</Link></li>
               <li><Link href="/planes" className="hover:text-[#0047BA] transition-colors">Planes</Link></li>
               <li><Link href="/oportunidades" className="hover:text-[#0047BA] transition-colors">Oportunidades</Link></li>
@@ -91,7 +91,7 @@ export function ClientFooter() {
             <h4 className="text-xs font-black text-slate-900 tracking-wider">
               Comunidad
             </h4>
-            <ul className="space-y-1.5 text-xs text-slate-600 font-medium">
+            <ul className="space-y-1.5 text-xs text-slate-700 font-semibold">
               <li><Link href="/clasificados" className="hover:text-[#0047BA] transition-colors">Empleos y avisos</Link></li>
               <li><Link href="/comunidad" className="hover:text-[#0047BA] transition-colors">Eventos</Link></li>
               <li><Link href="/oportunidades" className="hover:text-[#0047BA] transition-colors">Ofertas y descuentos</Link></li>
@@ -105,7 +105,7 @@ export function ClientFooter() {
             <h4 className="text-xs font-black text-slate-900 tracking-wider">
               Sobre ON+
             </h4>
-            <ul className="space-y-1.5 text-xs text-slate-600 font-medium">
+            <ul className="space-y-1.5 text-xs text-slate-700 font-semibold">
               <li><Link href="/quienes-somos" className="hover:text-[#0047BA] transition-colors">Quiénes somos</Link></li>
               <li><Link href="/comunidad" className="hover:text-[#0047BA] transition-colors">Nuestro impacto</Link></li>
               <li><Link href="/terminos" className="hover:text-[#0047BA] transition-colors">Términos y condiciones</Link></li>
@@ -116,13 +116,13 @@ export function ClientFooter() {
 
           {/* Col 5: Pertenece a ON PORTAL & MEDIA */}
           <div className="space-y-2">
-            <span className="text-[11px] font-bold text-slate-400 block">
+            <span className="text-[11px] font-bold text-slate-600 block">
               Pertenece a
             </span>
             <h4 className="text-sm font-black text-slate-900 tracking-tight leading-tight">
               ON<br />PORTAL & MEDIA
             </h4>
-            <p className="text-[11px] text-slate-500 leading-snug pt-1">
+            <p className="text-[11px] text-slate-600 leading-snug pt-1">
               Medios, tecnología y soluciones, para el desarrollo regional.
             </p>
           </div>
@@ -130,14 +130,14 @@ export function ClientFooter() {
         </div>
 
         {/* Bottom copyright */}
-        <div className="pt-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-[11px] text-slate-400">
+        <div className="pt-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-[11px] text-slate-600 font-medium">
           <p>
             © {new Date().getFullYear()} ON+ PORTAL COMERCIAL. Todos los derechos reservados
-            <Link href="/superadmin" className="hover:text-slate-200 transition-colors select-none cursor-default">.</Link>
+            <Link href="/superadmin" className="hover:text-slate-400 transition-colors select-none cursor-default">.</Link>
           </p>
           <div className="flex items-center gap-4">
-            <Link href="/privacidad" className="hover:text-slate-600">Privacidad</Link>
-            <Link href="/terminos" className="hover:text-slate-600">Términos</Link>
+            <Link href="/privacidad" className="hover:text-slate-900 transition-colors">Privacidad</Link>
+            <Link href="/terminos" className="hover:text-slate-900 transition-colors">Términos</Link>
           </div>
         </div>
 

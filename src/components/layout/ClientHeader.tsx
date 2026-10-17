@@ -326,9 +326,9 @@ export function ClientHeader({ withBackground = false }: ClientHeaderProps = {})
   ];
 
   return (
-    <header className="sticky top-0 z-50 shadow-sm bg-white">
-      {/* 1. TOP BAR BLANCA CON LOGO, SELECTOR DE PROVINCIA, BUSCADOR CENTRADO Y ACCESOS */}
-      <div className="bg-white border-b border-slate-200">
+    <header className="sticky top-0 z-50 shadow-sm bg-[#cbd5e1]">
+      {/* 1. TOP BAR GRIS PLOMO CON LOGO, SELECTOR DE PROVINCIA, BUSCADOR CENTRADO Y ACCESOS */}
+      <div className="bg-[#cbd5e1] border-b border-slate-300">
         <div className="max-w-[1480px] mx-auto px-3 min-[360px]:px-4 sm:px-6 lg:px-8 h-18 sm:h-20 flex items-center justify-between gap-4">
           
           {/* Left: Logo ON+ Portal Comercial + Province Selector */}
@@ -423,7 +423,7 @@ export function ClientHeader({ withBackground = false }: ClientHeaderProps = {})
                   setSearchQuery(e.target.value);
                   setIsSearchFocused(true);
                 }}
-                className="w-full h-full bg-slate-50 hover:bg-white focus:bg-white border border-slate-300 focus:border-[#0070F3] rounded-lg pl-3.5 pr-11 text-xs sm:text-sm font-medium text-slate-800 placeholder-slate-400 focus:outline-hidden transition-all shadow-2xs"
+                className="w-full h-full bg-white border border-slate-400/60 focus:border-[#0070F3] rounded-lg pl-3.5 pr-11 text-xs sm:text-sm font-medium text-slate-800 placeholder-slate-500 focus:outline-hidden transition-all shadow-xs"
               />
               <button
                 type="submit"
@@ -540,9 +540,9 @@ export function ClientHeader({ withBackground = false }: ClientHeaderProps = {})
             {/* Publicá tu negocio */}
             <Link
               href="/planes"
-              className="hidden sm:flex items-center gap-1.5 text-xs font-bold text-slate-700 hover:text-[#0047BA] transition-colors py-1.5 px-2 rounded-lg hover:bg-slate-100"
+              className="hidden sm:flex items-center gap-1.5 text-xs font-bold text-slate-800 hover:text-[#0047BA] transition-colors py-1.5 px-2 rounded-lg hover:bg-slate-200/80"
             >
-              <Store className="w-4 h-4 text-slate-600" />
+              <Store className="w-4 h-4 text-slate-700" />
               <span>Publicá tu negocio</span>
             </Link>
 
@@ -550,18 +550,18 @@ export function ClientHeader({ withBackground = false }: ClientHeaderProps = {})
             {!currentUser ? (
               <Link
                 href="/login"
-                className="flex items-center gap-1.5 text-xs font-bold text-slate-700 hover:text-[#0047BA] transition-colors py-1.5 px-2 rounded-lg hover:bg-slate-100"
+                className="flex items-center gap-1.5 text-xs font-bold text-slate-800 hover:text-[#0047BA] transition-colors py-1.5 px-2 rounded-lg hover:bg-slate-200/80"
               >
-                <User className="w-4 h-4 text-slate-600" />
+                <User className="w-4 h-4 text-slate-700" />
                 <span className="hidden sm:inline">Mi cuenta</span>
               </Link>
             ) : (
               <Link
                 href="/admin"
-                className="flex items-center gap-2 text-xs font-bold text-slate-700 hover:text-[#0047BA] transition-colors py-1 px-2 rounded-lg hover:bg-slate-100"
+                className="flex items-center gap-2 text-xs font-bold text-slate-800 hover:text-[#0047BA] transition-colors py-1 px-2 rounded-lg hover:bg-slate-200/80"
               >
                 {userCommerce?.logoUrl ? (
-                  <div className="relative w-6 h-6 rounded-md overflow-hidden border border-slate-200 bg-white shrink-0">
+                  <div className="relative w-6 h-6 rounded-md overflow-hidden border border-slate-300 bg-white shrink-0">
                     <Image src={userCommerce.logoUrl} alt={userCommerce.name} fill className="object-cover" />
                   </div>
                 ) : (
@@ -576,16 +576,16 @@ export function ClientHeader({ withBackground = false }: ClientHeaderProps = {})
             {/* Carrito / Bolsa */}
             <Link
               href="/catalogo"
-              className="p-2 text-slate-700 hover:text-[#0047BA] hover:bg-slate-100 rounded-lg transition-colors cursor-pointer"
+              className="p-2 text-slate-800 hover:text-[#0047BA] hover:bg-slate-200/80 rounded-lg transition-colors cursor-pointer"
               title="Catálogo & Pedidos"
             >
-              <ShoppingBag className="w-5 h-5 text-slate-700" />
+              <ShoppingBag className="w-5 h-5 text-slate-800" />
             </Link>
 
             {/* Mobile Menu Toggle */}
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="lg:hidden p-2 text-slate-700 hover:text-[#0047BA] transition-colors"
+              className="lg:hidden p-2 text-slate-800 hover:text-[#0047BA] hover:bg-slate-200/80 rounded-lg transition-colors"
               aria-label="Abrir Menú"
             >
               {isMobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
@@ -597,7 +597,7 @@ export function ClientHeader({ withBackground = false }: ClientHeaderProps = {})
 
       {/* Mobile Search Expandable */}
       {isMobileSearchOpen && (
-        <div className="lg:hidden px-4 py-2.5 bg-white border-b border-slate-200 animate-in slide-in-from-top-2 duration-150">
+        <div className="lg:hidden px-4 py-2.5 bg-[#cbd5e1] border-b border-slate-300 animate-in slide-in-from-top-2 duration-150">
           <form 
             onSubmit={(e) => { 
               handleSearchSubmit(e); 
@@ -611,7 +611,7 @@ export function ClientHeader({ withBackground = false }: ClientHeaderProps = {})
               value={searchQuery}
               autoFocus
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full h-full bg-slate-50 border border-slate-200 rounded-lg pl-3 pr-10 text-xs font-medium text-slate-800 placeholder-slate-400 focus:outline-hidden focus:ring-1 focus:ring-[#0070F3]"
+              className="w-full h-full bg-white border border-slate-300 rounded-lg pl-3 pr-10 text-xs font-medium text-slate-800 placeholder-slate-500 focus:outline-hidden focus:ring-1 focus:ring-[#0070F3]"
             />
             <button
               type="submit"
@@ -741,9 +741,9 @@ export function ClientHeader({ withBackground = false }: ClientHeaderProps = {})
 
       {/* Mobile Drawer Menu */}
       {isMobileMenuOpen && (
-        <div className="lg:hidden bg-white border-b border-slate-200 px-4 pt-3 pb-5 space-y-3 animate-in fade-in duration-200 text-slate-800">
-          <div className="flex flex-col gap-1.5 border-b border-slate-100 pb-3">
-            <label className="text-[10px] font-black uppercase tracking-wider text-slate-400">Provincia</label>
+        <div className="lg:hidden bg-[#cbd5e1] border-b border-slate-300 px-4 pt-3 pb-5 space-y-3 animate-in fade-in duration-200 text-slate-800">
+          <div className="flex flex-col gap-1.5 border-b border-slate-300/80 pb-3">
+            <label className="text-[10px] font-black uppercase tracking-wider text-slate-600">Provincia</label>
             <div className="flex flex-wrap gap-2">
               {activeProvinces.map((prov) => {
                 const theme = PROVINCE_THEMES[prov.id] || PROVINCE_THEMES['santa-fe'];
@@ -755,7 +755,7 @@ export function ClientHeader({ withBackground = false }: ClientHeaderProps = {})
                     className={`px-3 py-2 rounded-xl text-xs font-bold border flex items-center gap-2 transition-all cursor-pointer ${
                       isSelected
                         ? `${theme.gradientClass} text-white border-transparent shadow-xs`
-                        : 'border-slate-200 text-slate-700 bg-slate-50 hover:bg-slate-100'
+                        : 'border-slate-300 text-slate-700 bg-slate-100 hover:bg-slate-200'
                     }`}
                   >
                     <span
@@ -775,18 +775,18 @@ export function ClientHeader({ withBackground = false }: ClientHeaderProps = {})
                 key={item.name}
                 href={item.href}
                 onClick={() => setIsMobileMenuOpen(false)}
-                className="py-2 px-3 rounded-lg text-xs font-bold text-slate-700 hover:bg-slate-50 hover:text-[#0047BA]"
+                className="py-2 px-3 rounded-lg text-xs font-bold text-slate-800 hover:bg-slate-200/80 hover:text-[#0047BA]"
               >
                 {item.name}
               </Link>
             ))}
           </div>
 
-          <div className="pt-2 border-t border-slate-100 flex gap-2">
+          <div className="pt-2 border-t border-slate-300/80 flex gap-2">
             <Link
               href="/planes"
               onClick={() => setIsMobileMenuOpen(false)}
-              className="flex-1 text-center py-2 bg-[#0047BA] text-white text-xs font-bold rounded-lg"
+              className="flex-1 text-center py-2 bg-[#0047BA] text-white text-xs font-bold rounded-lg shadow-sm"
             >
               Publicá tu negocio
             </Link>
