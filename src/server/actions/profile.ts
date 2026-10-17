@@ -306,31 +306,38 @@ export async function registerUserOnSignUpAction(data: {
 
         const isOnline = Boolean(data.isOnlineOnly || data.provinceId === 'online');
 
-        const { error: insertErr } = await supabase.from('commerces').insert({
-          name: data.businessName,
-          slug: finalSlug,
-          category: commerceCategory,
-          province_id: isOnline ? 'online' : data.provinceId,
-          city_id: isOnline ? 'online' : data.cityId,
-          city_name: isOnline ? 'Venta Online / Cobertura Nacional' : data.cityName,
-          description: isOnline
-            ? `${data.businessName} - ${commerceCategory} (Negocio 100% Online / Cobertura Nacional).`
-            : `${data.businessName} - ${commerceCategory} en ${data.cityName} (${data.provinceId === 'santa-fe' ? 'Santa Fe' : 'Entre Ríos'}).`,
-          phone_whatsapp: data.phoneWhatsApp || '',
-          address: isOnline ? 'Atención Online / Todo el País' : `${data.cityName}, Argentina`,
-          logo_url: '/images/city-rosario.jpg',
-          cover_url: '/images/city-rosario.jpg',
-          is_verified: true,
-          is_subscription_active: false,
-          is_digital_only: isOnline,
-          owner_id: data.userId,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-        });
+        const { data: insertedCommerce, error: insertErr } = await supabase
+          .from('commerces')
+          .insert({
+            name: data.businessName,
+            slug: finalSlug,
+            category: commerceCategory,
+            province_id: isOnline ? 'online' : data.provinceId,
+            city_id: isOnline ? 'online' : data.cityId,
+            city_name: isOnline ? 'Venta Online / Cobertura Nacional' : data.cityName,
+            description: isOnline
+              ? `${data.businessName} - ${commerceCategory} (Negocio 100% Online / Cobertura Nacional).`
+              : `${data.businessName} - ${commerceCategory} en ${data.cityName} (${data.provinceId === 'santa-fe' ? 'Santa Fe' : 'Entre Ríos'}).`,
+            phone_whatsapp: data.phoneWhatsApp || '',
+            address: isOnline ? 'Atención Online / Todo el País' : `${data.cityName}, Argentina`,
+            logo_url: '/images/city-rosario.jpg',
+            cover_url: '/images/city-rosario.jpg',
+            is_verified: true,
+            is_subscription_active: false,
+            owner_id: data.userId,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+          })
+          .select('id')
+          .single();
 
         if (insertErr) {
           console.warn('Error registrando commerce en Supabase:', insertErr);
           return { success: false, message: insertErr.message };
+        }
+
+        if (insertedCommerce?.id) {
+          await supabase.from('profiles').update({ commerce_id: insertedCommerce.id }).eq('id', data.userId);
         }
 
         try {
@@ -395,7 +402,6 @@ export async function registerMerchantFallbackAction(data: {
           cover_url: '/images/city-rosario.jpg',
           is_verified: true,
           is_subscription_active: false,
-          is_digital_only: isOnline,
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
         })

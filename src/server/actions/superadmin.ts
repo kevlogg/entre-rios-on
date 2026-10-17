@@ -33,7 +33,7 @@ export async function toggleCommerceVerificationAction(
 export async function toggleCommerceSubscriptionAction(
   commerceId: string,
   currentStatus: boolean
-): Promise<{ success: boolean; message: string }> {
+): Promise<{ success: boolean; message: string; newStatus?: boolean }> {
   try {
     const adminSupabase = getAdminClient();
     const client = adminSupabase || (await createClient());
@@ -41,7 +41,10 @@ export async function toggleCommerceSubscriptionAction(
 
     const { error } = await client
       .from('commerces')
-      .update({ is_subscription_active: newStatus })
+      .update({ 
+        is_subscription_active: newStatus,
+        updated_at: new Date().toISOString()
+      })
       .eq('id', commerceId);
 
     if (error) {
@@ -52,11 +55,13 @@ export async function toggleCommerceSubscriptionAction(
     revalidatePath('/catalogo');
     revalidatePath('/turismo');
     revalidatePath('/superadmin');
+    revalidatePath('/admin');
     return {
       success: true,
       message: newStatus
         ? 'Plan activado exitosamente. El comercio y sus productos ahora se muestran públicamente.'
         : 'Plan desactivado. El comercio y sus productos fueron ocultados.',
+      newStatus,
     };
   } catch (err) {
     return { success: false, message: `Error inesperado: ${(err as Error).message}` };
@@ -1060,6 +1065,7 @@ export async function cancelCashPaymentAction(
   }
 }
 
+
 export async function approveCashPaymentAction(
   paymentId: string,
   commerceName?: string,
@@ -1071,15 +1077,17 @@ export async function approveCashPaymentAction(
       return { success: false, message: 'No se pudo conectar a Supabase.' };
     }
 
+    // 1. Obtener la solicitud de pago completa
     const { data: payment } = await adminSupabase
       .from('cash_payments')
-      .select('plan_name')
+      .select('*')
       .eq('id', paymentId)
       .maybeSingle();
 
     const planName = (payment?.plan_name || 'BRONCE').toUpperCase();
     const resolvedTier = planName.includes('ORO') ? 'ORO' : planName.includes('PLATA') ? 'PLATA' : 'BRONCE';
 
+    // 2. Marcar pago como APPROVED
     const { error: payErr } = await adminSupabase
       .from('cash_payments')
       .update({ status: 'APPROVED' })
@@ -1089,7 +1097,49 @@ export async function approveCashPaymentAction(
       return { success: false, message: `Error al aprobar pago: ${payErr.message}` };
     }
 
+    const effectiveName = (commerceName || payment?.commerce_name || '').trim();
+    const effectivePhone = (payment?.phone_whatsapp || '').trim();
+
+    // 3. Buscar el comercio existente
+    let targetCommerce: any = null;
+
     if (commerceId) {
+      const { data: cById } = await adminSupabase
+        .from('commerces')
+        .select('*')
+        .eq('id', commerceId)
+        .maybeSingle();
+      targetCommerce = cById;
+    }
+
+    if (!targetCommerce && effectiveName) {
+      const cleanSlugPart = effectiveName.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+      const { data: cByName } = await adminSupabase
+        .from('commerces')
+        .select('*')
+        .or(`name.ilike.%${effectiveName}%,slug.ilike.%${cleanSlugPart}%`)
+        .limit(1);
+      if (cByName && cByName[0]) {
+        targetCommerce = cByName[0];
+      }
+    }
+
+    if (!targetCommerce && effectivePhone) {
+      const cleanPhone = effectivePhone.replace(/[^\d]/g, '');
+      if (cleanPhone.length >= 6) {
+        const { data: cByPhone } = await adminSupabase
+          .from('commerces')
+          .select('*')
+          .ilike('phone_whatsapp', `%${cleanPhone.slice(-8)}%`)
+          .limit(1);
+        if (cByPhone && cByPhone[0]) {
+          targetCommerce = cByPhone[0];
+        }
+      }
+    }
+
+    if (targetCommerce) {
+      // Comercio existe: activarlo y renovarlo
       await adminSupabase
         .from('commerces')
         .update({ 
@@ -1098,23 +1148,74 @@ export async function approveCashPaymentAction(
           subscription_tier: resolvedTier,
           updated_at: new Date().toISOString()
         })
-        .eq('id', commerceId);
-    } else if (commerceName) {
-      await adminSupabase
+        .eq('id', targetCommerce.id);
+
+      // Vincular comercio al perfil del dueño si no estuviera vinculado
+      if (targetCommerce.owner_id) {
+        await adminSupabase
+          .from('profiles')
+          .update({ commerce_id: targetCommerce.id })
+          .eq('id', targetCommerce.owner_id);
+      }
+    } else {
+      // El comercio no existía en commerces: buscar perfil del dueño o crearlo directamente
+      let ownerId: string | null = null;
+      if (effectivePhone || effectiveName) {
+        const cleanPhone = effectivePhone.replace(/[^\d]/g, '');
+        let profQuery = adminSupabase.from('profiles').select('id, full_name, phone_whatsapp, province_id, city_name');
+        if (cleanPhone.length >= 6 && effectiveName) {
+          profQuery = profQuery.or(`phone_whatsapp.ilike.%${cleanPhone.slice(-8)}%,full_name.ilike.%${effectiveName}%`);
+        } else if (cleanPhone.length >= 6) {
+          profQuery = profQuery.ilike('phone_whatsapp', `%${cleanPhone.slice(-8)}%`);
+        } else if (effectiveName) {
+          profQuery = profQuery.ilike('full_name', `%${effectiveName}%`);
+        }
+        const { data: foundProfile } = await profQuery.limit(1);
+        if (foundProfile && foundProfile[0]) {
+          ownerId = foundProfile[0].id;
+        }
+      }
+
+      const rawCityName = payment?.city_name || 'Venta Online / Cobertura Nacional';
+      const isOnline = rawCityName.toLowerCase().includes('online') || rawCityName.toLowerCase().includes('nacional');
+      const cleanSlug = effectiveName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || `comercio-${Date.now()}`;
+
+      const { data: newComm, error: newCommErr } = await adminSupabase
         .from('commerces')
-        .update({ 
-          is_subscription_active: true, 
+        .insert({
+          name: effectiveName || 'Comercio Adherido',
+          slug: cleanSlug,
+          category: 'Comercio General',
+          province_id: isOnline ? 'online' : 'entre-rios',
+          city_id: isOnline ? 'online' : 'parana',
+          city_name: rawCityName,
+          description: `${effectiveName} - Comercio adherido al portal ON MÁS.`,
+          phone_whatsapp: effectivePhone || '',
+          address: isOnline ? 'Atención Online / Todo el País' : `${rawCityName}, Argentina`,
+          logo_url: '/images/city-rosario.jpg',
+          cover_url: '/images/city-rosario.jpg',
           is_verified: true,
+          is_subscription_active: true,
           subscription_tier: resolvedTier,
+          owner_id: ownerId,
+          created_at: new Date().toISOString(),
           updated_at: new Date().toISOString()
         })
-        .ilike('name', `%${commerceName}%`);
+        .select('id')
+        .single();
+
+      if (!newCommErr && newComm?.id && ownerId) {
+        await adminSupabase
+          .from('profiles')
+          .update({ commerce_id: newComm.id })
+          .eq('id', ownerId);
+      }
     }
 
     revalidatePath('/superadmin');
     revalidatePath('/admin');
     revalidatePath('/comercios');
-    return { success: true, message: 'Pago de cuota mensual aprobado exitosamente. El comercio ha sido renovado en el portal.' };
+    return { success: true, message: 'Pago de cuota mensual aprobado exitosamente. El comercio ha sido activado y renovado en el portal.' };
   } catch (err) {
     return { success: false, message: `Error: ${(err as Error).message}` };
   }

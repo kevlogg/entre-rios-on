@@ -450,7 +450,9 @@ VALUES
   ('concepcion-del-uruguay', 'Concepción del Uruguay', 'concepcion-del-uruguay', 'entre-rios', 'Entre Ríos', 'Uruguay', 'Ciudad histórica con puerto y polo universitario.', '/images/city-concepcion.jpg', false, 160),
   ('federacion', 'Federación', 'federacion', 'entre-rios', 'Entre Ríos', 'Federación', 'Ciudad termal pionera a orillas del lago Salto Grande.', '/images/city-federacion.jpg', false, 120),
   ('villa-elisa', 'Villa Elisa', 'villa-elisa', 'entre-rios', 'Entre Ríos', 'Colón', 'Jardín de Entre Ríos con complejo termal.', '/images/city-villaelisa.jpg', false, 90),
-  ('chajari', 'Chajarí', 'chajari', 'entre-rios', 'Entre Ríos', 'Federación', 'Polo citrícola y termal del noreste entrerriano.', '/images/city-chajari.jpg', false, 105)
+  ('chajari', 'Chajarí', 'chajari', 'entre-rios', 'Entre Ríos', 'Federación', 'Polo citrícola y termal del noreste entrerriano.', '/images/city-chajari.jpg', false, 105),
+  -- Venta Online Nacional
+  ('online', 'Venta Online / Cobertura Nacional', 'online', 'online', 'Venta Online', 'Nacional', 'Comercios y emprendimientos con venta online y envíos a todo el país.', '/images/city-rosario.jpg', true, 0)
 ON CONFLICT (id) DO UPDATE SET
   name = EXCLUDED.name,
   province_id = EXCLUDED.province_id,

@@ -25,6 +25,7 @@ import {
 } from 'lucide-react';
 import { 
   toggleCommerceVerificationAction, 
+  toggleCommerceSubscriptionAction,
   getCommercePaymentHistoryAction,
   deleteCommerceAction
 } from '@/server/actions/superadmin';
@@ -65,6 +66,25 @@ export function CommerceApprovalTable({ commerces: initialCommerces }: CommerceA
     setCommerces((prev) =>
       prev.map((c) => (c.id === id ? { ...c, isVerified: !c.isVerified } : c))
     );
+  };
+
+  const toggleSubscription = async (id: string) => {
+    const target = commerces.find((c) => c.id === id);
+    if (!target) return;
+
+    try {
+      await toggleCommerceSubscriptionAction(id, target.isSubscriptionActive);
+    } catch (err) {
+      console.warn('Subscription Server Action fallback:', err);
+    }
+
+    const nextState = !target.isSubscriptionActive;
+    setCommerces((prev) =>
+      prev.map((c) => (c.id === id ? { ...c, isSubscriptionActive: nextState } : c))
+    );
+    if (selectedCommerce && selectedCommerce.id === id) {
+      setSelectedCommerce({ ...selectedCommerce, isSubscriptionActive: nextState });
+    }
   };
 
   const handleOpenDetailModal = async (comm: Commerce) => {
@@ -272,18 +292,19 @@ export function CommerceApprovalTable({ commerces: initialCommerces }: CommerceA
                     </button>
                   </td>
 
-                  {/* Estado del Plan READ-ONLY */}
+                  {/* Estado del Plan con Botón de Toggle Directo */}
                   <td className="py-3.5 px-3 text-center">
-                    <span
-                      className={`inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-[11px] font-black ${
+                    <button
+                      onClick={() => toggleSubscription(comm.id)}
+                      className={`inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-[11px] font-black cursor-pointer transition-all hover:scale-105 active:scale-95 shadow-2xs ${
                         comm.isSubscriptionActive
-                          ? 'bg-emerald-100 text-emerald-800 border border-emerald-300'
-                          : 'bg-rose-100 text-rose-800 border border-rose-300'
+                          ? 'bg-emerald-100 hover:bg-emerald-200 text-emerald-800 border border-emerald-300'
+                          : 'bg-rose-100 hover:bg-rose-200 text-rose-800 border border-rose-300'
                       }`}
-                      title="Estado automático determinado por pagos validados o pasarela MercadoPago"
+                      title={comm.isSubscriptionActive ? "Click para Pausar el comercio en el portal" : "Click para Activar el comercio en el portal"}
                     >
-                      <span>{comm.isSubscriptionActive ? '✓ Plan Activo' : '⚠ Inactivo (Sin Plan)'}</span>
-                    </span>
+                      <span>{comm.isSubscriptionActive ? '✓ Plan Activo' : '⚠ Inactivo (Click para Activar)'}</span>
+                    </button>
                   </td>
 
                   <td className="py-3.5 px-3 text-right">
@@ -344,11 +365,17 @@ export function CommerceApprovalTable({ commerces: initialCommerces }: CommerceA
               <div className="space-y-1">
                 <div className="flex flex-wrap items-center gap-2">
                   <h3 className="text-xl font-black text-slate-900">{selectedCommerce.name}</h3>
-                  <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-black ${
-                    selectedCommerce.isSubscriptionActive ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'
-                  }`}>
-                    {selectedCommerce.isSubscriptionActive ? '✓ Suscripción Activa' : '⚠ Inactivo'}
-                  </span>
+                  <button
+                    onClick={() => toggleSubscription(selectedCommerce.id)}
+                    className={`px-2.5 py-0.5 rounded-full text-[10px] font-black cursor-pointer transition-colors border ${
+                      selectedCommerce.isSubscriptionActive
+                        ? 'bg-emerald-100 hover:bg-emerald-200 text-emerald-800 border-emerald-300'
+                        : 'bg-rose-100 hover:bg-rose-200 text-rose-800 border-rose-300'
+                    }`}
+                    title="Click para alternar estado activo/inactivo"
+                  >
+                    {selectedCommerce.isSubscriptionActive ? '✓ Suscripción Activa (Pausar)' : '⚠ Inactivo (Activar Ahora)'}
+                  </button>
                   {selectedCommerce.isVerified && (
                     <span className="bg-amber-100 text-amber-900 text-[10px] font-black px-2 py-0.5 rounded-full flex items-center gap-1 border border-amber-300">
                       <ShieldCheck className="w-3 h-3 text-amber-600" /> Verificado
