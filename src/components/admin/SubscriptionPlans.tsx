@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
-import { ShieldCheck, Check, Sparkles, Star, ArrowRight, Building2, Zap, DollarSign, Award, XCircle, X, Clock, Send, CheckCircle2, History } from 'lucide-react';
+import { ShieldCheck, Check, Sparkles, Star, ArrowRight, Building2, Zap, DollarSign, Award, XCircle, X, Clock, Send, CheckCircle2, History, User, Store, Palmtree } from 'lucide-react';
 import { createSubscriptionPreferenceAction } from '@/server/actions/subscription';
 import { 
   createCashPaymentAction, 
@@ -27,31 +27,54 @@ interface SubscriptionPlansProps {
   onPlanActivated?: (planName: string) => void;
 }
 
-const BASE_FEATURES = [
-  { id: 1, text: 'Presencia local en directorio ON MÁS' },
-  { id: 2, text: 'Botón directo a WhatsApp (sin comisiones)' },
+import { convertUserToMerchantAction } from '@/server/actions/profile';
+
+const COMMERCE_FEATURES = [
+  { id: 1, text: 'Presencia en Directorio Comercial ON MÁS' },
+  { id: 2, text: 'Botón directo a WhatsApp para ventas (0% comisiones)' },
   { id: 3, catalog: true, text: '' },
-  { id: 4, text: 'Posicionamiento destacado en guía local y categoría' },
-  { id: 5, text: 'Métricas en tiempo real (visitas y clics a WhatsApp)' },
+  { id: 4, text: 'Posicionamiento destacado en categoría y guía comercial' },
+  { id: 5, text: 'Métricas en tiempo real (visitas y clics de compradores)' },
   { id: 6, text: 'Insignia Comercio Verificado Plata' },
   { id: 7, text: 'Destacado TOP en portada provincial' },
   { id: 8, text: 'Cobertura especial y notas de prensa / editoriales' },
   { id: 9, text: 'Insignia Gold / Comercio Verificado Oro' },
   { id: 10, text: 'Soporte prioritario 24/7 y asesoramiento comercial' },
-  { id: 11, text: 'Publicidad y visibilidad exclusiva dentro del sitio web y en redes sociales' },
+  { id: 11, text: 'Publicidad y visibilidad exclusiva en sitio web y redes sociales' },
 ];
 
-const getFeaturesForPlan = (cardType: 'bronce' | 'plata' | 'oro') => {
-  const catalogText = 
-    cardType === 'bronce'
-      ? 'Catálogo de hasta 5 productos / servicios'
-      : cardType === 'plata'
-      ? 'Catálogo de hasta 20 productos / servicios'
-      : 'Catálogo ILIMITADO de productos y servicios';
+const TURISM_FEATURES = [
+  { id: 1, text: 'Presencia en Guía de Turismo & Alojamientos Regional' },
+  { id: 2, text: 'Botón directo a WhatsApp para reservas directas (0% comisiones)' },
+  { id: 3, catalog: true, text: '' },
+  { id: 4, text: 'Posicionamiento preferencial en sección Turismo de la provincia' },
+  { id: 5, text: 'Métricas en tiempo real (consultas de viajeros y reservas)' },
+  { id: 6, text: 'Insignia Prestador Turístico Verificado Plata' },
+  { id: 7, text: 'Destacado TOP en Portada Provincial y sección Turismo' },
+  { id: 8, text: 'Cobertura especial de temporada, vacaciones y escapadas' },
+  { id: 9, text: 'Insignia Gold / Prestador Turístico VIP Oro' },
+  { id: 10, text: 'Soporte prioritario 24/7 y asesoramiento de visibilidad turística' },
+  { id: 11, text: 'Campañas de difusión turística en redes sociales y portal' },
+];
+
+const getFeaturesForPlan = (cardType: 'bronce' | 'plata' | 'oro', track: 'comercio' | 'turismo' = 'comercio') => {
+  const isTurismo = track === 'turismo';
+  const catalogText = isTurismo
+    ? (cardType === 'bronce'
+        ? 'Hasta 5 servicios o tipos de alojamiento / cabañas'
+        : cardType === 'plata'
+        ? 'Hasta 20 servicios o tipos de alojamiento / paquetes'
+        : 'Servicios y alojamientos ILIMITADOS')
+    : (cardType === 'bronce'
+        ? 'Catálogo de hasta 5 productos / servicios'
+        : cardType === 'plata'
+        ? 'Catálogo de hasta 20 productos / servicios'
+        : 'Catálogo ILIMITADO de productos y servicios');
 
   const maxIncluded = cardType === 'bronce' ? 3 : cardType === 'plata' ? 6 : 11;
+  const sourceFeatures = isTurismo ? TURISM_FEATURES : COMMERCE_FEATURES;
 
-  return BASE_FEATURES.map((item, index) => {
+  return sourceFeatures.map((item, index) => {
     const itemNum = index + 1;
     const isIncluded = itemNum <= maxIncluded;
     const text = item.catalog ? catalogText : item.text;
@@ -76,6 +99,21 @@ export function SubscriptionPlans({
   const [activatedSuccess, setActivatedSuccess] = useState<string | null>(null);
   const [pendingPayment, setPendingPayment] = useState<{ id: string; planName: string; amount: number; notes?: string } | null>(null);
   const [history, setHistory] = useState<Array<{ id: string; planName: string; amount: number; status: string; createdAt: string; notes?: string }>>([]);
+
+  const isParticular = userType === 'particular';
+  // If user is registered as turismo, track is strictly turismo. If comercio, strictly comercio.
+  // If particular (vecino), allow toggling between Comercio and Turismo to choose what to create.
+  const [selectedTrack, setSelectedTrack] = useState<'comercio' | 'turismo'>(
+    userType === 'turismo' ? 'turismo' : 'comercio'
+  );
+
+  useEffect(() => {
+    if (userType === 'turismo') {
+      setSelectedTrack('turismo');
+    } else if (userType === 'comercio') {
+      setSelectedTrack('comercio');
+    }
+  }, [userType]);
 
   useEffect(() => {
     if (typeof isAuthenticated === 'boolean') {
@@ -181,10 +219,11 @@ export function SubscriptionPlans({
     setLoadingTier('send_report');
 
     try {
-      const noteFull = `Método: ${reportPaymentMethod} • Ref/Comprobante: ${reportReference || 'Sin especificar'}`;
+      const trackLabel = selectedTrack === 'turismo' ? 'TURISMO' : 'COMERCIO';
+      const noteFull = `Rubro: ${trackLabel} • Método: ${reportPaymentMethod} • Ref: ${reportReference || 'Sin especificar'}`;
       const res = await createCashPaymentAction({
-        commerceName: commerceName || 'Comercio Adherido',
-        ownerName: 'Titular',
+        commerceName: commerceName || (selectedTrack === 'turismo' ? 'Complejo Turístico' : 'Comercio Adherido'),
+        ownerName: isParticular ? `Vecino Particular (${trackLabel})` : 'Titular',
         phoneWhatsApp: phoneWhatsApp || '5493434001122',
         planName: selectedPlanForReport.name,
         amount: selectedPlanForReport.amount,
@@ -196,7 +235,7 @@ export function SubscriptionPlans({
       });
 
       if (res.success) {
-        setActivatedSuccess(`¡Aviso de pago para la cuota del Plan "${selectedPlanForReport.name}" enviado exitosamente! Notificamos al SuperAdmin para verificar.`);
+        setActivatedSuccess(`¡Aviso de pago para la cuota del "${selectedPlanForReport.name}" enviado exitosamente! Notificamos al SuperAdmin para verificar y activar tu cuenta.`);
         setIsReportModalOpen(false);
         setReportReference('');
         await checkPendingPaymentAndHistory();
@@ -214,24 +253,26 @@ export function SubscriptionPlans({
   const handleCashPaymentRequest = async (planName: string, amount: number) => {
     setLoadingTier(`cash_${planName}`);
     try {
+      const trackLabel = selectedTrack === 'turismo' ? 'TURISMO' : 'COMERCIO';
       const res = await createCashPaymentAction({
-        commerceName: commerceName || 'Comercio Adherido',
-        ownerName: 'Titular',
+        commerceName: commerceName || (selectedTrack === 'turismo' ? 'Complejo Turístico' : 'Comercio Adherido'),
+        ownerName: isParticular ? `Vecino Particular (${trackLabel})` : 'Titular',
         phoneWhatsApp: phoneWhatsApp || '5493434001122',
         planName,
         amount,
         cityName: cityName || 'Entre Ríos / Santa Fe',
         commerceId,
+        referenceNote: `Rubro: ${trackLabel}`,
       });
 
       if (res.success) {
-        setActivatedSuccess(`¡Solicitud de Pago en Efectivo Enviada! Notificamos al equipo SuperAdmin para verificar tu pago del plan "${planName}" y activar tu cuenta.`);
+        setActivatedSuccess(`¡Solicitud de Pago Enviada! Notificamos al equipo SuperAdmin para verificar tu pago del "${planName}" y activar tu cuenta.`);
         await checkPendingPaymentAndHistory();
       } else {
         alert(`Error al enviar la solicitud: ${res.message || 'Intente nuevamente'}`);
       }
     } catch (err) {
-      console.warn('Error al solicitar verificación de pago en efectivo:', err);
+      console.warn('Error al solicitar verificación de pago:', err);
     } finally {
       setLoadingTier(null);
     }
@@ -244,7 +285,7 @@ export function SubscriptionPlans({
       const res = await cancelCashPaymentAction(pendingPayment.id);
       if (res.success) {
         setPendingPayment(null);
-        setActivatedSuccess('Solicitud de pago en efectivo cancelada. Ahora podés seleccionar o cambiar de plan.');
+        setActivatedSuccess('Solicitud de pago cancelada. Ahora podés seleccionar o cambiar de plan.');
         setTimeout(() => setActivatedSuccess(null), 5000);
       }
     } catch (err) {
@@ -258,6 +299,20 @@ export function SubscriptionPlans({
     if (pendingPayment) return;
     setLoadingTier(planTier);
     try {
+      if (isParticular) {
+        try {
+          await convertUserToMerchantAction({
+            businessTrack: selectedTrack,
+            planTier,
+            businessName: commerceName || (selectedTrack === 'turismo' ? 'Complejo Turístico' : 'Mi Comercio'),
+            cityName: cityName,
+            phoneWhatsApp: phoneWhatsApp,
+          });
+        } catch (convErr) {
+          console.warn('Nota convirtiendo usuario a comerciante:', convErr);
+        }
+      }
+
       const res = await createSubscriptionPreferenceAction(planTier, commerceId);
       if (res.success && res.initPoint) {
         window.location.href = res.initPoint;
@@ -265,14 +320,14 @@ export function SubscriptionPlans({
         if (onPlanActivated) {
           onPlanActivated(planName);
         }
-        setActivatedSuccess(`¡Plan "${planName}" seleccionado! Redirigiendo a pasarela de pago...`);
+        setActivatedSuccess(`¡Plan "${planName}" contratado exitosamente! Tu cuenta comercial ha sido activada.`);
         setTimeout(() => setActivatedSuccess(null), 5000);
       }
     } catch (err) {
       if (onPlanActivated) {
         onPlanActivated(planName);
       }
-      setActivatedSuccess(`¡Plan "${planName}" contratado y activado exitosamente!`);
+      setActivatedSuccess(`¡Plan "${planName}" contratado exitosamente!`);
       setTimeout(() => setActivatedSuccess(null), 5000);
     } finally {
       setLoadingTier(null);
@@ -280,7 +335,7 @@ export function SubscriptionPlans({
   };
 
   const renderFeaturesList = (cardType: 'bronce' | 'plata' | 'oro') => {
-    const features = getFeaturesForPlan(cardType);
+    const features = getFeaturesForPlan(cardType, selectedTrack);
     return (
       <ul className="space-y-2.5 text-xs font-semibold">
         {features.map(({ itemNum, isIncluded, text }) => {
@@ -322,13 +377,21 @@ export function SubscriptionPlans({
         <div>
           <span className="text-[10px] font-black uppercase tracking-widest text-[#00ADB5] flex items-center gap-1">
             <Sparkles className="w-3.5 h-3.5 text-[#00ADB5]" />
-            <span>PLANES Y SUSCRIPCIONES ON MÁS</span>
+            <span>
+              {selectedTrack === 'turismo'
+                ? 'PLANES DE TURISMO & ALOJAMIENTOS ON MÁS'
+                : 'PLANES COMERCIALES B2B ON MÁS'}
+            </span>
           </span>
           <h3 className="text-2xl font-black text-[#0047BA] leading-tight mt-1">
-            Elegí tu Plan de Suscripción Comercial / Turismo
+            {selectedTrack === 'turismo'
+              ? 'Elegí el Plan para tu Complejo Turístico / Cabañas'
+              : 'Elegí tu Plan de Suscripción Comercial'}
           </h3>
           <p className="text-xs text-slate-500 font-semibold mt-1">
-            Comparativa transparente de beneficios. Todas las funciones detalladas con tilde (incluido) o cruz (no incluido).
+            {selectedTrack === 'turismo'
+              ? 'Posicionamiento en la guía turística provincial, reservas directas a tu WhatsApp (0% comisiones) y difusión de temporada.'
+              : 'Publicá tus productos, conectá directo por WhatsApp (0% comisiones) y posicioná tu comercio en toda la región.'}
           </p>
         </div>
 
@@ -337,6 +400,83 @@ export function SubscriptionPlans({
           <span>Sin Comisiones por Venta (0%)</span>
         </div>
       </div>
+
+      {/* EXCLUSIVO PARA VECINOS: SELECTOR INTERACTIVO DE RUBRO COMERCIAL O TURÍSTICO */}
+      {isParticular && (
+        <div className="bg-gradient-to-r from-blue-50/90 via-cyan-50/80 to-blue-50/90 border-2 border-cyan-400/80 rounded-3xl p-6 shadow-sm space-y-4 text-slate-900 animate-in fade-in">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div className="flex items-start sm:items-center gap-3.5">
+              <div className="p-3 bg-[#0047BA] text-white rounded-2xl shrink-0 font-black text-xl shadow-xs">
+                <User className="w-6 h-6 text-[#00E5E8]" />
+              </div>
+              <div className="space-y-1">
+                <div className="inline-flex items-center gap-1.5 bg-[#0047BA]/10 border border-[#0047BA]/20 text-[#0047BA] text-[10px] font-black px-2.5 py-0.5 rounded-full uppercase tracking-wider">
+                  Cuenta Vecino / Usuario Particular
+                </div>
+                <h4 className="text-base sm:text-lg font-black text-slate-900">
+                  ¿Tenés un emprendimiento, comercio o complejo turístico y querés publicar?
+                </h4>
+                <p className="text-xs text-slate-600 font-medium leading-relaxed">
+                  Actualmente estás registrado como vecino. Al contratar un plan, <strong>tu cuenta se convertirá automáticamente en Comercio o Turismo</strong>, habilitando tu catálogo y tu perfil público en ON MÁS.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="pt-2 border-t border-cyan-200/80">
+            <span className="text-xs font-black text-slate-700 block mb-2 uppercase tracking-wider">
+              Paso 1: Seleccioná qué tipo de negocio vas a dar de alta:
+            </span>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <button
+                type="button"
+                onClick={() => setSelectedTrack('comercio')}
+                className={`p-4 rounded-2xl border-2 text-left transition-all cursor-pointer flex items-center justify-between ${
+                  selectedTrack === 'comercio'
+                    ? 'border-[#0047BA] bg-white text-[#0047BA] shadow-md ring-2 ring-[#0047BA]/20'
+                    : 'border-slate-200 bg-white/60 hover:bg-white text-slate-700'
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  <div className={`p-2.5 rounded-xl ${selectedTrack === 'comercio' ? 'bg-[#0047BA] text-white' : 'bg-slate-100 text-slate-600'}`}>
+                    <Store className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h5 className="font-black text-sm text-slate-900">Comercio / Emprendimiento</h5>
+                    <p className="text-[11px] text-slate-500 font-medium">Locales, productos, indumentaria, gastronomía, ferreterías, etc.</p>
+                  </div>
+                </div>
+                {selectedTrack === 'comercio' && (
+                  <CheckCircle2 className="w-5 h-5 text-[#0047BA] shrink-0" />
+                )}
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setSelectedTrack('turismo')}
+                className={`p-4 rounded-2xl border-2 text-left transition-all cursor-pointer flex items-center justify-between ${
+                  selectedTrack === 'turismo'
+                    ? 'border-emerald-600 bg-white text-emerald-800 shadow-md ring-2 ring-emerald-600/20'
+                    : 'border-slate-200 bg-white/60 hover:bg-white text-slate-700'
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  <div className={`p-2.5 rounded-xl ${selectedTrack === 'turismo' ? 'bg-emerald-600 text-white' : 'bg-slate-100 text-slate-600'}`}>
+                    <Palmtree className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h5 className="font-black text-sm text-slate-900">Turismo & Alojamientos</h5>
+                    <p className="text-[11px] text-slate-500 font-medium">Cabañas, posadas, hoteles, termas, excursiones y guías.</p>
+                  </div>
+                </div>
+                {selectedTrack === 'turismo' && (
+                  <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0" />
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* BANNER SOLICITUD PENDIENTE DE PAGO EN EFECTIVO */}
       {isUserLoggedIn && pendingPayment && (
@@ -348,13 +488,13 @@ export function SubscriptionPlans({
               </div>
               <div>
                 <span className="text-[10px] font-black uppercase tracking-wider text-amber-900 bg-amber-200/80 px-2.5 py-0.5 rounded-full border border-amber-300">
-                  Solicitud de Pago en Efectivo Pendiente
+                  Solicitud de Pago Pendiente
                 </span>
                 <h4 className="text-lg font-black text-slate-900 mt-1">
                   Pago en revisión para el Plan {pendingPayment.planName} (${pendingPayment.amount.toLocaleString('es-AR')})
                 </h4>
                 <p className="text-xs text-slate-700 font-medium mt-0.5 leading-relaxed">
-                  Avisaste que pagaste en efectivo. La selección de otros planes se encuentra pausada hasta que el equipo SuperAdmin confirme el pago. Podés cancelar esta solicitud si deseas cambiar de plan.
+                  Avisaste tu pago. La selección de otros planes se encuentra pausada hasta que el equipo SuperAdmin confirme el pago. Podés cancelar esta solicitud si deseas cambiar de plan.
                 </p>
               </div>
             </div>
@@ -391,20 +531,20 @@ export function SubscriptionPlans({
                 Paso Previo Requerido
               </span>
               <h4 className="text-base font-black text-slate-900 mt-1">
-                Registrá tu comercio para contratar un plan
+                Registrá tu negocio para contratar un plan
               </h4>
               <p className="text-xs text-slate-600 font-medium mt-0.5 leading-relaxed">
-                Para vincular tu suscripción a tu catálogo y perfil de negocio, primero creá tu cuenta o iniciá sesión.
+                Para vincular tu suscripción a tu catálogo y perfil público, primero creá tu cuenta o iniciá sesión.
               </p>
             </div>
           </div>
 
           <div className="flex items-center gap-2 w-full sm:w-auto shrink-0">
             <Link
-              href="/login?mode=signup&type=comercio"
+              href={`/login?mode=signup&type=${selectedTrack}`}
               className="flex-1 sm:flex-none text-center bg-[#0047BA] hover:bg-[#002878] text-white px-5 py-2.5 rounded-xl text-xs font-black shadow-md transition-all active:scale-95"
             >
-              Registrar comercio
+              Registrar {selectedTrack === 'turismo' ? 'turismo' : 'comercio'}
             </Link>
             <Link
               href="/login?mode=login&redirectTo=/planes"
@@ -419,22 +559,31 @@ export function SubscriptionPlans({
       {/* ==================== PLANES ON MÁS (BRONCE $29k, PLATA $49k, ORO $99k) ==================== */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-stretch max-w-7xl mx-auto">
 
-
-        {/* 1. PLAN BRONCE ($29.000) - Puntos 1 al 3 */}
+        {/* 1. PLAN BRONCE ($29.000) */}
         <div className={`bg-slate-50/90 border-2 border-slate-200 rounded-3xl p-6 flex flex-col justify-between space-y-6 transition-all ${
           pendingPayment ? 'opacity-65 grayscale-[20%]' : 'hover:border-amber-600/50'
         }`}>
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <span className="text-[11px] font-black text-amber-800 uppercase tracking-wider block bg-amber-100 px-2.5 py-1 rounded-full border border-amber-300">
-                Presencia Básica
+                {selectedTrack === 'turismo' ? 'Presencia Turística Básica' : 'Presencia Básica'}
               </span>
-              <Building2 className="w-6 h-6 text-amber-700" />
+              {selectedTrack === 'turismo' ? (
+                <Palmtree className="w-6 h-6 text-amber-700" />
+              ) : (
+                <Building2 className="w-6 h-6 text-amber-700" />
+              )}
             </div>
 
             <div className="space-y-1">
-              <h4 className="text-2xl font-black text-slate-900">Plan Bronce</h4>
-              <p className="text-xs text-slate-500 font-medium">Presencia inicial en el portal regional</p>
+              <h4 className="text-2xl font-black text-slate-900">
+                {selectedTrack === 'turismo' ? 'Plan Bronce Turismo' : 'Plan Bronce'}
+              </h4>
+              <p className="text-xs text-slate-500 font-medium">
+                {selectedTrack === 'turismo' 
+                  ? 'Presencia inicial para cabañas y servicios turísticos' 
+                  : 'Presencia inicial en el portal comercial regional'}
+              </p>
             </div>
 
             <div className="py-3 border-y border-slate-200">
@@ -449,10 +598,10 @@ export function SubscriptionPlans({
           {!isUserLoggedIn ? (
             <div className="space-y-2 pt-4 border-t border-slate-200">
               <Link
-                href="/login?mode=signup&type=comercio"
+                href={`/login?mode=signup&type=${selectedTrack}`}
                 className="w-full bg-[#0047BA] hover:bg-[#002878] text-white py-3.5 rounded-2xl font-black text-xs transition-transform active:scale-95 cursor-pointer shadow-md flex items-center justify-center gap-2 text-center"
               >
-                <span>Registrar mi comercio</span>
+                <span>Registrar mi {selectedTrack === 'turismo' ? 'servicio turístico' : 'comercio'}</span>
                 <ArrowRight className="w-4 h-4" />
               </Link>
 
@@ -466,7 +615,7 @@ export function SubscriptionPlans({
           ) : (
             <div className="space-y-2 pt-4 border-t border-slate-200">
               <button
-                onClick={() => handleSelectPlan('BRONCE', `Plan Bronce ($${planPrices.bronce.toLocaleString('es-AR')})`)}
+                onClick={() => handleSelectPlan('BRONCE', `${selectedTrack === 'turismo' ? 'Plan Bronce Turismo' : 'Plan Bronce'} ($${planPrices.bronce.toLocaleString('es-AR')})`)}
                 disabled={Boolean(pendingPayment) || loadingTier === 'BRONCE'}
                 className="w-full bg-[#0047BA] hover:bg-[#002878] text-white py-3.5 rounded-2xl font-black text-xs transition-transform active:scale-95 cursor-pointer shadow-md flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
               >
@@ -476,7 +625,7 @@ export function SubscriptionPlans({
 
               <button
                 type="button"
-                onClick={() => openReportModal('Bronce', planPrices.bronce)}
+                onClick={() => openReportModal(selectedTrack === 'turismo' ? 'Bronce Turismo' : 'Bronce', planPrices.bronce)}
                 disabled={Boolean(pendingPayment)}
                 className="w-full bg-white border border-slate-300 hover:bg-slate-100 text-slate-900 py-2.5 rounded-xl font-black text-xs transition-colors flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed shadow-2xs"
               >
@@ -489,7 +638,7 @@ export function SubscriptionPlans({
           )}
         </div>
 
-        {/* 2. PLAN PLATA ($49.000) - Puntos 1 al 7 */}
+        {/* 2. PLAN PLATA ($49.000) */}
         <div className={`relative bg-gradient-to-b from-blue-50/90 via-white to-slate-50 border-2 border-[#00ADB5] rounded-3xl p-6 flex flex-col justify-between space-y-6 shadow-xl ${
           pendingPayment ? 'opacity-65 grayscale-[20%]' : ''
         }`}>
@@ -501,14 +650,20 @@ export function SubscriptionPlans({
           <div className="space-y-4 pt-2">
             <div className="flex items-center justify-between">
               <span className="text-[11px] font-black text-[#0047BA] uppercase tracking-wider block bg-blue-100 px-2.5 py-1 rounded-full border border-blue-200">
-                Mayor Visibilidad
+                {selectedTrack === 'turismo' ? 'Mayor Visibilidad Turística' : 'Mayor Visibilidad'}
               </span>
               <Zap className="w-6 h-6 text-[#00ADB5]" />
             </div>
 
             <div className="space-y-1">
-              <h4 className="text-2xl font-black text-slate-900">Plan Plata</h4>
-              <p className="text-xs text-slate-500 font-medium">Para comercios en crecimiento activo</p>
+              <h4 className="text-2xl font-black text-slate-900">
+                {selectedTrack === 'turismo' ? 'Plan Plata Turismo' : 'Plan Plata'}
+              </h4>
+              <p className="text-xs text-slate-500 font-medium">
+                {selectedTrack === 'turismo' 
+                  ? 'Para complejos, cabañas y actividades con alta rotación' 
+                  : 'Para comercios en crecimiento activo'}
+              </p>
             </div>
 
             <div className="py-3 border-y border-slate-200">
@@ -523,10 +678,10 @@ export function SubscriptionPlans({
           {!isUserLoggedIn ? (
             <div className="space-y-2 pt-4 border-t border-slate-200">
               <Link
-                href="/login?mode=signup&type=comercio"
+                href={`/login?mode=signup&type=${selectedTrack}`}
                 className="w-full bg-gradient-to-r from-[#00ADB5] to-[#0047BA] hover:from-[#00969d] hover:to-[#002878] text-white py-3.5 rounded-2xl font-black text-xs shadow-lg transition-transform active:scale-95 cursor-pointer flex items-center justify-center gap-2 text-center"
               >
-                <span>Registrar mi comercio</span>
+                <span>Registrar mi {selectedTrack === 'turismo' ? 'servicio turístico' : 'comercio'}</span>
                 <ArrowRight className="w-4 h-4" />
               </Link>
 
@@ -540,7 +695,7 @@ export function SubscriptionPlans({
           ) : (
             <div className="space-y-2 pt-4 border-t border-slate-200">
               <button
-                onClick={() => handleSelectPlan('PLATA', `Plan Plata ($${planPrices.plata.toLocaleString('es-AR')})`)}
+                onClick={() => handleSelectPlan('PLATA', `${selectedTrack === 'turismo' ? 'Plan Plata Turismo' : 'Plan Plata'} ($${planPrices.plata.toLocaleString('es-AR')})`)}
                 disabled={Boolean(pendingPayment) || loadingTier === 'PLATA'}
                 className="w-full bg-gradient-to-r from-[#00ADB5] to-[#0047BA] hover:from-[#00969d] hover:to-[#002878] text-white py-3.5 rounded-2xl font-black text-xs shadow-lg transition-transform active:scale-95 cursor-pointer flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
               >
@@ -550,7 +705,7 @@ export function SubscriptionPlans({
 
               <button
                 type="button"
-                onClick={() => openReportModal('Plata', planPrices.plata)}
+                onClick={() => openReportModal(selectedTrack === 'turismo' ? 'Plata Turismo' : 'Plata', planPrices.plata)}
                 disabled={Boolean(pendingPayment)}
                 className="w-full bg-slate-100 hover:bg-slate-200 text-slate-900 py-2.5 rounded-xl font-black text-xs transition-colors flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed shadow-2xs"
               >
@@ -563,7 +718,7 @@ export function SubscriptionPlans({
           )}
         </div>
 
-        {/* 3. PLAN ORO ($99.000) - Puntos 1 al 13 COMPLETOS */}
+        {/* 3. PLAN ORO ($99.000) */}
         <div className={`relative bg-gradient-to-b from-[#1F1138] via-[#160b29] to-[#0d051a] border-2 border-amber-400 rounded-3xl p-6 flex flex-col justify-between space-y-6 shadow-2xl text-white ${
           pendingPayment ? 'opacity-65 grayscale-[20%]' : ''
         }`}>
@@ -575,14 +730,20 @@ export function SubscriptionPlans({
           <div className="space-y-4 pt-2">
             <div className="flex items-center justify-between">
               <span className="text-[11px] font-black text-amber-300 uppercase tracking-wider block bg-amber-500/20 px-2.5 py-1 rounded-full border border-amber-500/40">
-                Portada Provincial
+                {selectedTrack === 'turismo' ? 'Portada Provincial • Destino VIP' : 'Portada Provincial'}
               </span>
               <Star className="w-6 h-6 text-amber-400 fill-amber-400/20" />
             </div>
 
             <div className="space-y-1">
-              <h4 className="text-2xl font-black text-white">Plan Oro</h4>
-              <p className="text-xs text-purple-200 font-medium">Liderazgo y máxima cobertura provincial</p>
+              <h4 className="text-2xl font-black text-white">
+                {selectedTrack === 'turismo' ? 'Plan Oro Turismo VIP' : 'Plan Oro'}
+              </h4>
+              <p className="text-xs text-purple-200 font-medium">
+                {selectedTrack === 'turismo' 
+                  ? 'Liderazgo provincial y máxima cobertura en escapadas' 
+                  : 'Liderazgo y máxima cobertura provincial'}
+              </p>
             </div>
 
             <div className="py-3 border-y border-purple-800/80">
@@ -597,10 +758,10 @@ export function SubscriptionPlans({
           {!isUserLoggedIn ? (
             <div className="space-y-2 pt-4 border-t border-purple-800/80">
               <Link
-                href="/login?mode=signup&type=comercio"
+                href={`/login?mode=signup&type=${selectedTrack}`}
                 className="w-full bg-gradient-to-r from-amber-400 via-amber-500 to-amber-600 hover:from-amber-300 hover:to-amber-500 text-slate-950 py-3.5 rounded-2xl font-black text-xs shadow-xl transition-transform active:scale-95 cursor-pointer flex items-center justify-center gap-2 text-center"
               >
-                <span>Registrar mi comercio</span>
+                <span>Registrar mi {selectedTrack === 'turismo' ? 'servicio turístico' : 'comercio'}</span>
                 <ArrowRight className="w-4 h-4" />
               </Link>
 
@@ -614,7 +775,7 @@ export function SubscriptionPlans({
           ) : (
             <div className="space-y-2 pt-4 border-t border-purple-800/80">
               <button
-                onClick={() => handleSelectPlan('ORO', `Plan Oro ($${planPrices.oro.toLocaleString('es-AR')})`)}
+                onClick={() => handleSelectPlan('ORO', `${selectedTrack === 'turismo' ? 'Plan Oro Turismo VIP' : 'Plan Oro'} ($${planPrices.oro.toLocaleString('es-AR')})`)}
                 disabled={Boolean(pendingPayment) || loadingTier === 'ORO'}
                 className="w-full bg-gradient-to-r from-amber-400 via-amber-500 to-amber-600 hover:from-amber-300 hover:to-amber-500 text-slate-950 py-3.5 rounded-2xl font-black text-xs shadow-xl transition-transform active:scale-95 cursor-pointer flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
               >
@@ -624,7 +785,7 @@ export function SubscriptionPlans({
 
               <button
                 type="button"
-                onClick={() => openReportModal('Oro', planPrices.oro)}
+                onClick={() => openReportModal(selectedTrack === 'turismo' ? 'Oro Turismo' : 'Oro', planPrices.oro)}
                 disabled={Boolean(pendingPayment)}
                 className="w-full bg-white/10 hover:bg-white/20 text-white py-2.5 rounded-xl font-extrabold text-xs transition-colors flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed border border-white/20"
               >

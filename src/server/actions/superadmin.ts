@@ -1138,6 +1138,10 @@ export async function approveCashPaymentAction(
       }
     }
 
+    const paymentText = `${payment?.plan_name || ''} ${payment?.owner_name || ''} ${payment?.notes || ''}`.toLowerCase();
+    const isTurismoPayment = paymentText.includes('turismo') || paymentText.includes('cabaña') || paymentText.includes('alojamiento') || paymentText.includes('posada') || paymentText.includes('complejo');
+    const newTargetTrack = isTurismoPayment ? 'turismo' : 'comercio';
+
     if (targetCommerce) {
       // Comercio existe: activarlo y renovarlo
       await adminSupabase
@@ -1150,12 +1154,43 @@ export async function approveCashPaymentAction(
         })
         .eq('id', targetCommerce.id);
 
-      // Vincular comercio al perfil del dueño si no estuviera vinculado
+      // Si el dueño era particular, convertirlo a comercio o turismo
       if (targetCommerce.owner_id) {
-        await adminSupabase
+        const { data: ownerProf } = await adminSupabase
           .from('profiles')
-          .update({ commerce_id: targetCommerce.id })
-          .eq('id', targetCommerce.owner_id);
+          .select('user_type, role')
+          .eq('id', targetCommerce.owner_id)
+          .maybeSingle();
+
+        if (ownerProf?.user_type === 'particular' || ownerProf?.role === 'PUBLIC_USER') {
+          await adminSupabase
+            .from('profiles')
+            .update({
+              user_type: newTargetTrack,
+              role: 'MERCHANT_ADMIN',
+              commerce_id: targetCommerce.id,
+              updated_at: new Date().toISOString()
+            })
+            .eq('id', targetCommerce.owner_id);
+
+          try {
+            await adminSupabase.auth.admin.updateUserById(targetCommerce.owner_id, {
+              user_metadata: {
+                user_type: newTargetTrack,
+                role: 'MERCHANT_ADMIN',
+                is_subscription_active: true,
+                subscription_tier: resolvedTier,
+              }
+            });
+          } catch (e) {
+            console.warn('Nota actualizando auth metadata en approveCashPaymentAction:', e);
+          }
+        } else {
+          await adminSupabase
+            .from('profiles')
+            .update({ commerce_id: targetCommerce.id })
+            .eq('id', targetCommerce.owner_id);
+        }
       }
     } else {
       // El comercio no existía en commerces: buscar perfil del dueño o crearlo directamente
@@ -1185,11 +1220,11 @@ export async function approveCashPaymentAction(
         .insert({
           name: effectiveName || 'Comercio Adherido',
           slug: cleanSlug,
-          category: 'Comercio General',
+          category: isTurismoPayment ? 'Turismo & Alojamientos' : 'Comercio General',
           province_id: isOnline ? 'online' : 'entre-rios',
           city_id: isOnline ? 'online' : 'parana',
           city_name: rawCityName,
-          description: `${effectiveName} - Comercio adherido al portal ON MÁS.`,
+          description: `${effectiveName} - ${isTurismoPayment ? 'Prestador turístico' : 'Comercio'} adherido al portal ON MÁS.`,
           phone_whatsapp: effectivePhone || '',
           address: isOnline ? 'Atención Online / Todo el País' : `${rawCityName}, Argentina`,
           logo_url: '/images/city-rosario.jpg',
@@ -1207,15 +1242,35 @@ export async function approveCashPaymentAction(
       if (!newCommErr && newComm?.id && ownerId) {
         await adminSupabase
           .from('profiles')
-          .update({ commerce_id: newComm.id })
+          .update({
+            user_type: newTargetTrack,
+            role: 'MERCHANT_ADMIN',
+            commerce_id: newComm.id,
+            updated_at: new Date().toISOString(),
+          })
           .eq('id', ownerId);
+
+        try {
+          await adminSupabase.auth.admin.updateUserById(ownerId, {
+            user_metadata: {
+              user_type: newTargetTrack,
+              role: 'MERCHANT_ADMIN',
+              is_subscription_active: true,
+              subscription_tier: resolvedTier,
+              commerce_name: effectiveName || 'Mi Negocio',
+            }
+          });
+        } catch (e) {
+          console.warn('Nota actualizando auth metadata en approveCashPaymentAction:', e);
+        }
       }
     }
 
     revalidatePath('/superadmin');
     revalidatePath('/admin');
     revalidatePath('/comercios');
-    return { success: true, message: 'Pago de cuota mensual aprobado exitosamente. El comercio ha sido activado y renovado en el portal.' };
+    revalidatePath('/turismo');
+    return { success: true, message: 'Pago de cuota mensual aprobado exitosamente. El perfil ha sido activado y renovado en el portal.' };
   } catch (err) {
     return { success: false, message: `Error: ${(err as Error).message}` };
   }

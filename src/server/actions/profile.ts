@@ -428,3 +428,126 @@ export async function registerMerchantFallbackAction(data: {
   }
 }
 
+export async function convertUserToMerchantAction(data: {
+  businessTrack: 'comercio' | 'turismo';
+  planTier: 'BRONCE' | 'PLATA' | 'ORO';
+  businessName?: string;
+  cityName?: string;
+  provinceId?: string;
+  phoneWhatsApp?: string;
+}): Promise<{ success: boolean; message: string; commerceId?: string }> {
+  try {
+    const supabaseUserClient = await createClient();
+    const { data: { user } } = await supabaseUserClient.auth.getUser();
+
+    if (!user) {
+      return { success: false, message: 'Usuario no autenticado.' };
+    }
+
+    const supabase = createAdminClient();
+    const targetTrack = data.businessTrack === 'turismo' ? 'turismo' : 'comercio';
+    const category = targetTrack === 'turismo' ? 'Turismo & Alojamientos' : 'Comercio General';
+
+    // 1. Actualizar public.profiles
+    await supabase.from('profiles').upsert({
+      id: user.id,
+      email: user.email,
+      full_name: user.user_metadata?.full_name || data.businessName || 'Comercio / Turismo ON MÁS',
+      role: 'MERCHANT_ADMIN',
+      user_type: targetTrack,
+      phone_whatsapp: data.phoneWhatsApp || user.user_metadata?.phone_whatsapp || null,
+      updated_at: new Date().toISOString(),
+    }, { onConflict: 'id' });
+
+    // 2. Actualizar metadata en auth.users
+    try {
+      await supabase.auth.admin.updateUserById(user.id, {
+        user_metadata: {
+          ...user.user_metadata,
+          user_type: targetTrack,
+          role: 'MERCHANT_ADMIN',
+          is_subscription_active: true,
+          subscription_tier: data.planTier,
+          commerce_name: data.businessName || user.user_metadata?.commerce_name || user.user_metadata?.full_name || 'Mi Comercio',
+        },
+      });
+    } catch (authErr) {
+      console.warn('Nota actualizando user_metadata:', authErr);
+    }
+
+    // 3. Buscar si el usuario ya tiene un comercio en commerces
+    const { data: existingComm } = await supabase
+      .from('commerces')
+      .select('*')
+      .eq('owner_id', user.id)
+      .maybeSingle();
+
+    let targetCommerceId: string | null = null;
+
+    if (existingComm) {
+      targetCommerceId = existingComm.id;
+      await supabase
+        .from('commerces')
+        .update({
+          is_subscription_active: true,
+          is_verified: true,
+          subscription_tier: data.planTier,
+          category: category,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', existingComm.id);
+    } else {
+      const name = data.businessName || user.user_metadata?.commerce_name || user.user_metadata?.full_name || 'Mi Comercio';
+      const cleanSlug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || `negocio-${Date.now().toString().slice(-4)}`;
+      const cityName = data.cityName || user.user_metadata?.city_name || 'Venta Online / Cobertura Nacional';
+      const isOnline = cityName.toLowerCase().includes('online') || cityName.toLowerCase().includes('nacional');
+
+      const { data: inserted, error: insertErr } = await supabase
+        .from('commerces')
+        .insert({
+          name,
+          slug: cleanSlug,
+          category,
+          province_id: isOnline ? 'online' : (data.provinceId || user.user_metadata?.province_id || 'entre-rios'),
+          city_id: isOnline ? 'online' : 'parana',
+          city_name: cityName,
+          description: `${name} - ${category} en ${cityName}.`,
+          phone_whatsapp: data.phoneWhatsApp || user.user_metadata?.phone_whatsapp || '',
+          address: isOnline ? 'Atención Online / Todo el País' : `${cityName}, Argentina`,
+          logo_url: '/images/city-rosario.jpg',
+          cover_url: '/images/city-rosario.jpg',
+          is_verified: true,
+          is_subscription_active: true,
+          subscription_tier: data.planTier,
+          owner_id: user.id,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        })
+        .select('id')
+        .single();
+
+      if (insertErr) {
+        console.warn('Error creando commerce al convertir usuario:', insertErr);
+      } else if (inserted) {
+        targetCommerceId = inserted.id;
+        await supabase.from('profiles').update({ commerce_id: inserted.id }).eq('id', user.id);
+      }
+    }
+
+    revalidatePath('/admin');
+    revalidatePath('/comercios');
+    revalidatePath('/turismo');
+    revalidatePath('/catalogo');
+    revalidatePath('/superadmin');
+
+    return {
+      success: true,
+      message: `¡Tu cuenta fue convertida con éxito a ${targetTrack === 'turismo' ? 'Turismo' : 'Comercio'}! Tu perfil ya está activo.`,
+      commerceId: targetCommerceId || undefined,
+    };
+  } catch (err) {
+    return { success: false, message: (err as Error).message };
+  }
+}
+
+

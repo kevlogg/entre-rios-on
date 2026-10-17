@@ -10,7 +10,9 @@ import {
   Gift, 
   Sparkles,
   ChevronRight,
-  Globe
+  Globe,
+  User,
+  Palmtree
 } from 'lucide-react';
 
 export type AdminTab = 'dashboard' | 'catalog' | 'profile' | 'subscription' | 'website';
@@ -19,26 +21,58 @@ interface AdminSidebarProps {
   activeTab: AdminTab;
   onTabChange: (tab: AdminTab) => void;
   productCount: number;
+  userType?: 'particular' | 'comercio' | 'turismo' | string;
 }
 
-export function AdminSidebar({ activeTab, onTabChange, productCount }: AdminSidebarProps) {
-  const menuItems: { id: AdminTab; label: string; icon: React.ComponentType<{ className?: string }>; badge?: string }[] = [
-    { id: 'dashboard', label: 'Resumen & Métricas', icon: LayoutDashboard },
-    { id: 'catalog', label: 'Mi Catálogo', icon: ShoppingBag, badge: `${productCount}` },
-    { id: 'profile', label: 'Perfil del Negocio', icon: Store },
-    { id: 'website', label: 'Mi Sitio Web', icon: Globe, badge: 'Exclusivo' },
-    { id: 'subscription', label: 'Suscripción', icon: ShieldCheck, badge: '3 Planes' },
-  ];
+export function AdminSidebar({ activeTab, onTabChange, productCount, userType = 'comercio' }: AdminSidebarProps) {
+  const isParticular = userType === 'particular';
+  const isTurismo = userType === 'turismo';
+
+  const menuItems: { id: AdminTab; label: string; icon: React.ComponentType<{ className?: string }>; badge?: string }[] = isParticular
+    ? [
+        { id: 'dashboard', label: 'Mi Cuenta Vecino', icon: User },
+        { id: 'catalog', label: 'Mi Catálogo', icon: ShoppingBag, badge: 'Requiere Plan' },
+        { id: 'profile', label: 'Mis Datos', icon: Store },
+        { id: 'website', label: 'Mi Sitio Web', icon: Globe, badge: 'Exclusivo' },
+        { id: 'subscription', label: 'Planes de Negocio', icon: ShieldCheck, badge: '¡Activá tu Comercio!' },
+      ]
+    : isTurismo
+    ? [
+        { id: 'dashboard', label: 'Resumen & Consultas', icon: LayoutDashboard },
+        { id: 'catalog', label: 'Servicios / Cabañas', icon: Palmtree, badge: `${productCount}` },
+        { id: 'profile', label: 'Perfil del Complejo', icon: Store },
+        { id: 'website', label: 'Mi Sitio Web', icon: Globe, badge: 'Exclusivo' },
+        { id: 'subscription', label: 'Planes de Turismo', icon: ShieldCheck, badge: '3 Planes' },
+      ]
+    : [
+        { id: 'dashboard', label: 'Resumen & Métricas', icon: LayoutDashboard },
+        { id: 'catalog', label: 'Mi Catálogo', icon: ShoppingBag, badge: `${productCount}` },
+        { id: 'profile', label: 'Perfil del Negocio', icon: Store },
+        { id: 'website', label: 'Mi Sitio Web', icon: Globe, badge: 'Exclusivo' },
+        { id: 'subscription', label: 'Suscripción', icon: ShieldCheck, badge: '3 Planes' },
+      ];
+
+  const panelTag = isParticular
+    ? 'CUENTA VECINO'
+    : isTurismo
+    ? 'TURISMO & ALOJAMIENTOS'
+    : 'PANEL COMERCIAL B2B';
+
+  const panelTitle = isParticular
+    ? 'Mi Espacio Vecino'
+    : isTurismo
+    ? 'Gestión Turística'
+    : 'Gestión del Negocio';
 
   return (
     <aside className="w-full md:w-64 bg-white rounded-3xl border border-slate-200/80 p-4 space-y-6 shadow-xs h-fit shrink-0">
       <div className="px-3 pt-2 space-y-1 border-b border-slate-100 pb-3">
         <span className="text-[10px] font-black uppercase tracking-widest text-[#00ADB5] flex items-center gap-1">
           <Sparkles className="w-3 h-3" />
-          <span>PANEL COMERCIAL B2B</span>
+          <span>{panelTag}</span>
         </span>
         <h2 className="text-lg font-black text-[#0047BA] leading-tight">
-          Gestión del Negocio
+          {panelTitle}
         </h2>
       </div>
 
@@ -79,13 +113,17 @@ export function AdminSidebar({ activeTab, onTabChange, productCount }: AdminSide
           <span>Sorteos ON MÁS Mensual</span>
         </div>
         <p className="text-[11px] text-slate-600 font-medium leading-relaxed">
-          Postulá un producto o voucher para salir destacado en los Sorteos ON MÁS de la región.
+          {isParticular
+            ? 'Participá en sorteos exclusivos de productos regionales, viajes y escapadas termales.'
+            : isTurismo
+            ? 'Postulá una estadía o voucher de relax para salir en el sorteo provincial y atraer viajeros.'
+            : 'Postulá un producto o voucher para salir destacado en los Sorteos ON MÁS de la región.'}
         </p>
         <button
-          onClick={() => onTabChange('catalog')}
+          onClick={() => onTabChange(isParticular ? 'subscription' : 'catalog')}
           className="text-xs font-black text-[#00ADB5] hover:text-[#007C8A] inline-flex items-center gap-1 pt-1 cursor-pointer transition-colors"
         >
-          <span>Destacar Oferta</span>
+          <span>{isParticular ? 'Ver Planes de Negocio' : 'Destacar Oferta'}</span>
           <ChevronRight className="w-3.5 h-3.5" />
         </button>
       </div>

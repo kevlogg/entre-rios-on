@@ -54,7 +54,7 @@ export async function updateSession(request: NextRequest) {
     console.error('[updateSession] Error consultando sesión de Supabase:', err);
   }
 
-  // 2. Protege las rutas de /admin (Comercios/B2B)
+  // 2. Protege las rutas de /admin
   if (pathname.startsWith('/admin')) {
     if (!user) {
       const url = request.nextUrl.clone();
@@ -62,17 +62,8 @@ export async function updateSession(request: NextRequest) {
       url.searchParams.set('redirectTo', pathname);
       return NextResponse.redirect(url);
     }
-    
-    // Bloquear a los usuarios "particular" (consumidores finales)
-    const userType = user.user_metadata?.user_type;
-    const role = user.user_metadata?.role;
-    if (userType === 'particular' || role === 'PUBLIC_USER') {
-      const url = request.nextUrl.clone();
-      url.pathname = '/inicio';
-      url.searchParams.set('alert', 'commerce_only');
-      return NextResponse.redirect(url);
-    }
   }
 
   return supabaseResponse;
 }
+

@@ -26,7 +26,7 @@ export default function AdminPage() {
     'Hola, vi su negocio en el portal ON MÁS y me gustaría realizar una consulta.'
   );
 
-  const [userType, setUserType] = useState<'particular' | 'agencia' | 'negocio_automotor'>('agencia');
+  const [userType, setUserType] = useState<'particular' | 'comercio' | 'turismo'>('comercio');
   const [isSubscriptionActive, setIsSubscriptionActive] = useState<boolean>(true);
 
   React.useEffect(() => {
@@ -43,7 +43,14 @@ export default function AdminPage() {
           return;
         }
 
-        const rawType = (user.user_metadata?.user_type || 'agencia') as 'particular' | 'agencia' | 'negocio_automotor';
+        // Obtener perfil en profiles para tipo de usuario actualizado
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', user.id)
+          .maybeSingle();
+
+        const rawType = (profile?.user_type || user.user_metadata?.user_type || 'comercio') as 'particular' | 'comercio' | 'turismo';
         setUserType(rawType);
 
         let targetCommerce: any = null;
@@ -59,24 +66,19 @@ export default function AdminPage() {
           targetCommerce = userCommerces[0];
         }
 
-        // Se elimina la lógica de auto-creación porque los perfiles comerciales
-        // deben crearse estrictamente durante el flujo de registro.
-        if (!targetCommerce && user.user_metadata?.user_type !== 'particular') {
-          console.warn('Usuario comercial sin perfil en tabla commerces (error de registro).');
-        }
-
         // 4. Resolver objeto Commerce utilizando datos reales del usuario
         const merchantName =
           targetCommerce?.name ||
           user.user_metadata?.commerce_name ||
+          profile?.full_name ||
           user.user_metadata?.full_name ||
           user.email?.split('@')[0] ||
-          'Mi Empresa Comercial';
+          (rawType === 'particular' ? 'Vecino ON MÁS' : rawType === 'turismo' ? 'Mi Complejo Turístico' : 'Mi Empresa Comercial');
 
-        const cityName = targetCommerce?.city_name || user.user_metadata?.city_name || 'Rosario';
+        const cityName = targetCommerce?.city_name || profile?.city_name || user.user_metadata?.city_name || 'Rosario';
         const cleanSlug = merchantName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || 'comercio';
 
-        const hasActiveSub = targetCommerce?.is_subscription_active ?? (user.user_metadata?.is_subscription_active ?? false);
+        const hasActiveSub = targetCommerce?.is_subscription_active ?? (rawType === 'particular' ? false : (user.user_metadata?.is_subscription_active ?? false));
         setIsSubscriptionActive(Boolean(hasActiveSub));
 
         const rawTier = (targetCommerce?.subscription_tier || 'BRONCE').toUpperCase();
@@ -88,19 +90,19 @@ export default function AdminPage() {
           id: targetCommerce?.id || `comm-${user.id}`,
           name: targetCommerce?.name || user.user_metadata?.commerce_name || merchantName,
           slug: targetCommerce?.slug || cleanSlug,
-          category: targetCommerce?.category || 'Comercio General',
+          category: targetCommerce?.category || (rawType === 'turismo' ? 'Turismo & Alojamientos' : 'Comercio General'),
           cityId: targetCommerce?.city_id || user.user_metadata?.city_id || 'rosario',
           cityName: targetCommerce?.city_name || user.user_metadata?.city_name || cityName,
           provinceId: targetCommerce?.province_id || user.user_metadata?.province_id || 'santa-fe',
           provinceName: targetCommerce?.province_name || (targetCommerce?.province_id === 'entre-rios' || user.user_metadata?.province_id === 'entre-rios' ? 'Entre Ríos' : 'Santa Fe'),
-          description: targetCommerce?.description || `Comercio adherido al portal ON MÁS en ${cityName}.`,
+          description: targetCommerce?.description || (rawType === 'particular' ? `Cuenta vecino registrada en ${cityName}.` : `Comercio adherido al portal ON MÁS en ${cityName}.`),
           rating: Number(targetCommerce?.rating || 5.0),
           reviewCount: targetCommerce?.review_count || 1,
-          isVerified: targetCommerce?.is_verified ?? true,
+          isVerified: targetCommerce?.is_verified ?? (rawType !== 'particular'),
           isSubscriptionActive: Boolean(hasActiveSub),
           logoUrl: targetCommerce?.logo_url || user.user_metadata?.logo_url || '/images/city-rosario.jpg',
           coverUrl: targetCommerce?.cover_url || user.user_metadata?.cover_url || '/images/city-rosario.jpg',
-          phoneWhatsApp: targetCommerce?.phone_whatsapp || user.user_metadata?.phone_whatsapp || '',
+          phoneWhatsApp: targetCommerce?.phone_whatsapp || profile?.phone_whatsapp || user.user_metadata?.phone_whatsapp || '',
           address: targetCommerce?.address ?? '',
           email: user.email || targetCommerce?.email || '',
           isDigitalOnly: targetCommerce?.is_digital_only ?? user.user_metadata?.is_digital_only ?? false,
@@ -218,6 +220,7 @@ export default function AdminPage() {
         commerceName={commerce.name}
         commerceSlug={commerce.slug}
         cityName={commerce.cityName}
+        userType={userType}
       />
 
       <main className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
@@ -228,70 +231,124 @@ export default function AdminPage() {
             activeTab={activeTab}
             onTabChange={(tab) => setActiveTab(tab)}
             productCount={products.length}
+            userType={userType}
           />
 
           {/* Main Tab Content */}
           <div className="flex-1 space-y-8">
 
-            {/* CARTEL DE INACTIVIDAD CON ACCESO A SUSCRIPCIÓN */}
+            {/* CARTEL INFORMATIVO PARA VECINOS O CUENTAS INACTIVAS */}
             {!isSubscriptionActive && (
-              <div className="bg-gradient-to-r from-amber-500/10 via-amber-500/5 to-amber-500/10 border-2 border-amber-400 rounded-3xl p-5 sm:p-6 shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                <div className="flex items-start sm:items-center gap-3.5">
-                  <div className="p-3 bg-amber-500 text-slate-950 rounded-2xl shrink-0 font-black text-xl shadow-xs">
-                    ⚠️
-                  </div>
-                  <div className="space-y-0.5">
-                    <div className="inline-flex items-center gap-1.5 bg-amber-500/20 border border-amber-500/40 text-amber-900 text-[10px] font-black px-2.5 py-0.5 rounded-full uppercase tracking-wider">
-                      Acción Requerida • Cuenta Inactiva
+              userType === 'particular' ? (
+                <div className="bg-gradient-to-r from-blue-500/10 via-cyan-500/10 to-blue-500/10 border-2 border-cyan-400 rounded-3xl p-5 sm:p-6 shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                  <div className="flex items-start sm:items-center gap-3.5">
+                    <div className="p-3 bg-[#0047BA] text-white rounded-2xl shrink-0 font-black text-xl shadow-xs">
+                      🏡
                     </div>
-                    <h3 className="text-base sm:text-lg font-black text-slate-900 mt-0.5">
-                      Tu cuenta aún no está activa en el portal ON MÁS
-                    </h3>
-                    <p className="text-xs text-slate-600 font-medium">
-                      Hasta que no contrates un plan no estarás visible en las búsquedas. Elegí un plan para comenzar a publicar.
-                    </p>
+                    <div className="space-y-0.5">
+                      <div className="inline-flex items-center gap-1.5 bg-[#0047BA]/10 border border-[#0047BA]/30 text-[#0047BA] text-[10px] font-black px-2.5 py-0.5 rounded-full uppercase tracking-wider">
+                        Espacio Vecino • Usuario Registrado
+                      </div>
+                      <h3 className="text-base sm:text-lg font-black text-slate-900 mt-0.5">
+                        ¿Querés publicar tu comercio o complejo turístico en ON MÁS?
+                      </h3>
+                      <p className="text-xs text-slate-600 font-medium leading-relaxed">
+                        Actualmente tu cuenta es de vecino. Podés activar tu perfil comercial o turístico en cualquier momento contratando un plan. Tu cuenta se convertirá automáticamente.
+                      </p>
+                    </div>
                   </div>
-                </div>
 
-                <button
-                  onClick={() => setActiveTab('subscription')}
-                  className="w-full sm:w-auto bg-[#0047BA] hover:bg-[#002878] text-white px-5 py-3 rounded-2xl font-black text-xs shadow-md transition-all active:scale-95 shrink-0 flex items-center justify-center gap-2 cursor-pointer"
-                >
-                  <ShieldCheck className="w-4 h-4 text-[#00E5E8]" />
-                  <span>Ver Planes de Suscripción</span>
-                </button>
-              </div>
+                  <button
+                    onClick={() => setActiveTab('subscription')}
+                    className="w-full sm:w-auto bg-[#0047BA] hover:bg-[#002878] text-white px-5 py-3 rounded-2xl font-black text-xs shadow-md transition-all active:scale-95 shrink-0 flex items-center justify-center gap-2 cursor-pointer"
+                  >
+                    <Sparkles className="w-4 h-4 text-[#00E5E8]" />
+                    <span>Ver Planes de Activación</span>
+                  </button>
+                </div>
+              ) : (
+                <div className="bg-gradient-to-r from-amber-500/10 via-amber-500/5 to-amber-500/10 border-2 border-amber-400 rounded-3xl p-5 sm:p-6 shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                  <div className="flex items-start sm:items-center gap-3.5">
+                    <div className="p-3 bg-amber-500 text-slate-950 rounded-2xl shrink-0 font-black text-xl shadow-xs">
+                      ⚠️
+                    </div>
+                    <div className="space-y-0.5">
+                      <div className="inline-flex items-center gap-1.5 bg-amber-500/20 border border-amber-500/40 text-amber-900 text-[10px] font-black px-2.5 py-0.5 rounded-full uppercase tracking-wider">
+                        Acción Requerida • Cuenta Inactiva
+                      </div>
+                      <h3 className="text-base sm:text-lg font-black text-slate-900 mt-0.5">
+                        Tu {userType === 'turismo' ? 'complejo turístico' : 'comercio'} aún no está activo en ON MÁS
+                      </h3>
+                      <p className="text-xs text-slate-600 font-medium">
+                        Hasta que no contrates un plan no estarás visible en las búsquedas. Elegí un plan para comenzar a publicar.
+                      </p>
+                    </div>
+                  </div>
+
+                  <button
+                    onClick={() => setActiveTab('subscription')}
+                    className="w-full sm:w-auto bg-[#0047BA] hover:bg-[#002878] text-white px-5 py-3 rounded-2xl font-black text-xs shadow-md transition-all active:scale-95 shrink-0 flex items-center justify-center gap-2 cursor-pointer"
+                  >
+                    <ShieldCheck className="w-4 h-4 text-[#00E5E8]" />
+                    <span>Ver Planes de Suscripción</span>
+                  </button>
+                </div>
+              )
             )}
 
             {/* TAB 1: DASHBOARD & KPIS */}
             {activeTab === 'dashboard' && (
               <div className="space-y-8 animate-in fade-in duration-200">
                 {/* Hero Greeting & Quick Actions */}
-                <div className="bg-gradient-to-r from-[#004b87] to-[#00a859] rounded-3xl p-6 sm:p-8 text-white flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 shadow-md">
+                <div className={`rounded-3xl p-6 sm:p-8 text-white flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 shadow-md ${
+                  userType === 'particular'
+                    ? 'bg-gradient-to-r from-slate-900 via-[#0047BA] to-cyan-700'
+                    : userType === 'turismo'
+                    ? 'bg-gradient-to-r from-[#064e3b] via-[#047857] to-[#00ADB5]'
+                    : 'bg-gradient-to-r from-[#004b87] to-[#00a859]'
+                }`}>
                   <div className="space-y-2">
                     <div className="inline-flex items-center gap-1.5 bg-white/20 text-white text-xs font-extrabold px-3 py-1 rounded-full uppercase">
                       <Sparkles className="w-3.5 h-3.5" />
-                      <span>Panel • {isSubscriptionActive ? 'Perfil Activo' : 'Perfil Pendiente de Plan'}</span>
+                      <span>
+                        {userType === 'particular'
+                          ? 'Espacio Vecino • Usuario Registrado'
+                          : userType === 'turismo'
+                          ? `Gestión Turística • ${isSubscriptionActive ? 'Perfil Activo' : 'Pendiente de Plan'}`
+                          : `Panel Comercial • ${isSubscriptionActive ? 'Perfil Activo' : 'Pendiente de Plan'}`}
+                      </span>
                     </div>
                     <h1 className="text-2xl sm:text-4xl font-extrabold leading-tight">
                       ¡Hola, {commerce.name}!
                     </h1>
                     <p className="text-xs sm:text-sm text-slate-100 font-medium max-w-xl">
-                      {isSubscriptionActive 
-                        ? `Tu perfil comercial en ${commerce.cityName} se encuentra activo y listo para recibir consultas.`
+                      {userType === 'particular'
+                        ? 'Estás en tu Espacio Vecino. Podés explorar comercios, contactar prestadores y sumarte a sorteos. Si tenés un negocio, activá tu plan para publicar.'
+                        : isSubscriptionActive 
+                        ? (userType === 'turismo'
+                            ? `Tu perfil turístico en ${commerce.cityName} se encuentra activo y listo para recibir consultas y reservas directas a tu WhatsApp.`
+                            : `Tu perfil comercial en ${commerce.cityName} se encuentra activo y listo para recibir consultas.`)
                         : `Contratá tu plan para activar tu presencia en ${commerce.cityName}.`}
                     </p>
                   </div>
 
-                  {isSubscriptionActive && (
+                  {userType === 'particular' ? (
+                    <button
+                      onClick={() => setActiveTab('subscription')}
+                      className="bg-white hover:bg-slate-100 text-[#0047BA] px-5 py-3 rounded-2xl font-extrabold text-xs flex items-center gap-2 shadow-lg shrink-0 transition-transform active:scale-95 cursor-pointer"
+                    >
+                      <Sparkles className="w-4 h-4 text-cyan-600" />
+                      <span>Activar Mi Negocio</span>
+                    </button>
+                  ) : isSubscriptionActive ? (
                     <button
                       onClick={() => setActiveTab('catalog')}
                       className="bg-white hover:bg-slate-100 text-[#004b87] px-5 py-3 rounded-2xl font-extrabold text-xs flex items-center gap-2 shadow-lg shrink-0 transition-transform active:scale-95 cursor-pointer"
                     >
                       <Store className="w-4 h-4 text-[#00a859]" />
-                      <span>Publicar Oferta</span>
+                      <span>{userType === 'turismo' ? 'Publicar Servicio / Cabaña' : 'Publicar Oferta'}</span>
                     </button>
-                  )}
+                  ) : null}
                 </div>
 
                 {/* KPI Cards Row con métricas reales */}
@@ -301,8 +358,8 @@ export default function AdminPage() {
                   profileViewsCount={viewsCount}
                 />
 
-                {/* Quick Catalog Preview - Solo visible si la suscripción está activa */}
-                {isSubscriptionActive && (
+                {/* Quick Catalog Preview - Solo visible si la suscripción está activa y no es particular */}
+                {isSubscriptionActive && userType !== 'particular' && (
                   <CatalogManager
                     commerce={commerce}
                     products={products}
@@ -317,7 +374,7 @@ export default function AdminPage() {
             {/* TAB 2: CATALOG MANAGER */}
             {activeTab === 'catalog' && (
               <div className="animate-in fade-in duration-200">
-                {isSubscriptionActive ? (
+                {isSubscriptionActive && userType !== 'particular' ? (
                   <CatalogManager
                     commerce={commerce}
                     products={products}
@@ -328,17 +385,27 @@ export default function AdminPage() {
                 ) : (
                   <div className="bg-white rounded-3xl p-8 sm:p-12 border border-slate-200 shadow-sm text-center flex flex-col items-center justify-center space-y-4">
                     <div className="w-16 h-16 bg-slate-100 text-slate-400 rounded-full flex items-center justify-center mb-2">
-                      <ShieldCheck className="w-8 h-8" />
+                      <ShieldCheck className="w-8 h-8 text-[#00ADB5]" />
                     </div>
-                    <h2 className="text-xl font-black text-slate-800">Catálogo Bloqueado</h2>
-                    <p className="text-sm text-slate-500 max-w-md mx-auto">
-                      Para agregar productos y ofertas a tu catálogo, debés tener un plan de suscripción activo. 
+                    <h2 className="text-xl font-black text-slate-800">
+                      {userType === 'particular' 
+                        ? 'Catálogo reservado para Comercios y Turismo' 
+                        : userType === 'turismo'
+                        ? 'Servicios y Cabañas Pausados'
+                        : 'Catálogo Bloqueado'}
+                    </h2>
+                    <p className="text-sm text-slate-500 max-w-md mx-auto leading-relaxed">
+                      {userType === 'particular'
+                        ? 'Como usuario Vecino podés navegar y comprar. Para publicar tus productos, promociones o cabañas en el portal ON MÁS y recibir clientes por WhatsApp, contratá un plan para activar tu cuenta comercial.'
+                        : userType === 'turismo'
+                        ? 'Para agregar cabañas, posadas y servicios turísticos a tu catálogo, debés tener un plan de turismo activo.'
+                        : 'Para agregar productos y ofertas a tu catálogo, debés tener un plan de suscripción comercial activo.'}
                     </p>
                     <button
                       onClick={() => setActiveTab('subscription')}
-                      className="mt-4 bg-[#0047BA] hover:bg-[#002878] text-white px-6 py-3 rounded-xl font-bold text-sm shadow-md transition-all active:scale-95"
+                      className="mt-4 bg-[#0047BA] hover:bg-[#002878] text-white px-6 py-3 rounded-xl font-bold text-sm shadow-md transition-all active:scale-95 cursor-pointer"
                     >
-                      Activar Plan Ahora
+                      {userType === 'particular' ? 'Ver Planes y Activar Negocio' : 'Activar Plan Ahora'}
                     </button>
                   </div>
                 )}
@@ -379,6 +446,9 @@ export default function AdminPage() {
                 onPlanActivated={(planName) => {
                   setCommerce({ ...commerce, isSubscriptionActive: true });
                   setIsSubscriptionActive(true);
+                  if (userType === 'particular') {
+                    setUserType(planName.toLowerCase().includes('turismo') ? 'turismo' : 'comercio');
+                  }
                 }}
               />
             )}
