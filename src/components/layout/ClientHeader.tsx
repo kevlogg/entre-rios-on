@@ -18,11 +18,68 @@ import {
   ChevronRight
 } from 'lucide-react';
 import { trackSearchQuery, trackCitySelect } from '@/lib/analytics/events';
-import { PROVINCES, getCitiesByProvince, getProvinceBySlug } from '@/lib/constants/locations';
+import { PROVINCES, getCitiesByProvince, getProvinceBySlug, getCityBySlug } from '@/lib/constants/locations';
 import { useActiveProvinces } from '@/lib/services/province-store';
 import { CATEGORIES_LIST } from '@/lib/constants/categories';
 import { getFeaturedProducts, getAllCommerces } from '@/lib/dal/portal';
 import { Product, Commerce } from '@/types';
+
+// Temas y colores característicos por provincia (Rojo Federal para Entre Ríos, Azul Invencible para Santa Fe, Turquesa para Nacional)
+export const PROVINCE_THEMES: Record<string, {
+  name: string;
+  gradientClass: string;
+  borderClass: string;
+  shadowClass: string;
+  accentHex: string;
+  badgeBg: string;
+  sublabel: string;
+}> = {
+  'entre-rios': {
+    name: 'Entre Ríos',
+    gradientClass: 'bg-gradient-to-r from-[#991b1b] via-[#b91c1c] to-[#dc2626]',
+    borderClass: 'border-red-400/40 hover:border-red-300',
+    shadowClass: 'shadow-md shadow-red-950/20',
+    accentHex: '#b91c1c',
+    badgeBg: 'bg-white/20 text-white',
+    sublabel: 'PROVINCIA',
+  },
+  'santa-fe': {
+    name: 'Santa Fe',
+    gradientClass: 'bg-gradient-to-r from-[#002f87] via-[#0047BA] to-[#0260db]',
+    borderClass: 'border-blue-400/40 hover:border-blue-300',
+    shadowClass: 'shadow-md shadow-blue-950/20',
+    accentHex: '#0047BA',
+    badgeBg: 'bg-white/20 text-white',
+    sublabel: 'PROVINCIA',
+  },
+  'all': {
+    name: 'Todas las provincias',
+    gradientClass: 'bg-gradient-to-r from-[#002878] via-[#004e92] to-[#00ADB5]',
+    borderClass: 'border-cyan-400/40 hover:border-cyan-300',
+    shadowClass: 'shadow-md shadow-cyan-950/20',
+    accentHex: '#00ADB5',
+    badgeBg: 'bg-white/20 text-white',
+    sublabel: 'COBERTURA',
+  },
+  'cordoba': {
+    name: 'Córdoba',
+    gradientClass: 'bg-gradient-to-r from-[#00529b] via-[#b71c1c] to-[#0284c7]',
+    borderClass: 'border-sky-400/40 hover:border-sky-300',
+    shadowClass: 'shadow-md shadow-sky-950/20',
+    accentHex: '#00529b',
+    badgeBg: 'bg-white/20 text-white',
+    sublabel: 'PROVINCIA',
+  },
+  'buenos-aires': {
+    name: 'Buenos Aires',
+    gradientClass: 'bg-gradient-to-r from-[#065f46] via-[#047857] to-[#0284c7]',
+    borderClass: 'border-emerald-400/40 hover:border-emerald-300',
+    shadowClass: 'shadow-md shadow-emerald-950/20',
+    accentHex: '#047857',
+    badgeBg: 'bg-white/20 text-white',
+    sublabel: 'PROVINCIA',
+  },
+};
 
 interface ClientHeaderProps {
   withBackground?: boolean;
@@ -53,6 +110,7 @@ export function ClientHeader({ withBackground = false }: ClientHeaderProps = {})
   const [allCommerces, setAllCommerces] = useState<Commerce[]>([]);
 
   const searchContainerRef = useRef<HTMLDivElement>(null);
+  const provinceContainerRef = useRef<HTMLDivElement>(null);
   const subnavScrollRef = useRef<HTMLDivElement>(null);
   const [canScrollRight, setCanScrollRight] = useState(true);
 
@@ -85,11 +143,14 @@ export function ClientHeader({ withBackground = false }: ClientHeaderProps = {})
     loadSearchIndex();
   }, []);
 
-  // Close search dropdown on click outside
+  // Close search dropdown and province dropdown on click outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (searchContainerRef.current && !searchContainerRef.current.contains(event.target as Node)) {
         setIsSearchFocused(false);
+      }
+      if (provinceContainerRef.current && !provinceContainerRef.current.contains(event.target as Node)) {
+        setIsProvinceDropdownOpen(false);
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
@@ -173,7 +234,23 @@ export function ClientHeader({ withBackground = false }: ClientHeaderProps = {})
     }
   }, [pathname]);
 
+  const activeCitySlug = useMemo(() => {
+    if (!pathname) return null;
+    const parts = pathname.split('/').filter(Boolean);
+    if (parts.length >= 2) {
+      const provMatch = getProvinceBySlug(parts[0]);
+      if (provMatch) return parts[1];
+    }
+    return null;
+  }, [pathname]);
+
+  const activeCityObj = useMemo(() => {
+    if (!activeCitySlug) return null;
+    return getCityBySlug(activeCitySlug);
+  }, [activeCitySlug]);
+
   const currentProvinceObj = activeProvinces.find((p) => p.id === selectedProvince || p.slug === selectedProvince) || activeProvinces[0] || { id: 'santa-fe', name: 'Santa Fe', slug: 'santa-fe' };
+  const currentTheme = PROVINCE_THEMES[currentProvinceObj.id] || PROVINCE_THEMES['santa-fe'];
 
   const handleProvinceSelect = (provId: string) => {
     setSelectedProvince(provId);
@@ -268,41 +345,67 @@ export function ClientHeader({ withBackground = false }: ClientHeaderProps = {})
               </div>
             </Link>
 
-            {/* Selector de Provincia */}
-            <div className="relative flex items-center">
+            {/* Selector de Provincia Prominente (Misma altura que el Logo, con color característico) */}
+            <div ref={provinceContainerRef} className="relative flex items-center">
               <button
                 type="button"
                 onClick={() => setIsProvinceDropdownOpen(!isProvinceDropdownOpen)}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold text-slate-700 bg-slate-50 hover:bg-slate-100 border border-slate-200 transition-colors cursor-pointer shadow-2xs"
-                title="Cambiar Provincia"
+                className={`relative flex items-center gap-2 sm:gap-2.5 px-2.5 sm:px-4 h-11 sm:h-14 lg:h-[62px] rounded-xl sm:rounded-2xl ${currentTheme.gradientClass} ${currentTheme.borderClass} ${currentTheme.shadowClass} border transition-all duration-200 cursor-pointer group hover:scale-[1.02] active:scale-[0.98] shrink-0 text-white select-none`}
+                title="Cambiar Provincia o Región"
               >
-                <MapPin className="w-3.5 h-3.5 text-[#0047BA] shrink-0" />
-                <span className="truncate max-w-[110px]">{currentProvinceObj.name}</span>
-                <ChevronDown className="w-3 h-3 text-slate-400" />
+                <div className="w-7 h-7 sm:w-9 sm:h-9 lg:w-10 lg:h-10 rounded-lg sm:rounded-xl bg-white/20 flex items-center justify-center shrink-0 border border-white/20 group-hover:bg-white/30 transition-colors shadow-2xs">
+                  <MapPin className="w-3.5 h-3.5 sm:w-4 sm:h-4 lg:w-5 lg:h-5 text-white drop-shadow-xs" />
+                </div>
+                <div className="flex flex-col text-left justify-center min-w-0 pr-0.5 sm:pr-1">
+                  <span className="text-[8px] sm:text-[9px] lg:text-[10px] font-black uppercase tracking-wider text-white/80 leading-none">
+                    {activeCityObj ? currentProvinceObj.name.toUpperCase() : currentTheme.sublabel}
+                  </span>
+                  <span className="text-xs sm:text-sm lg:text-[15px] font-black text-white leading-tight truncate max-w-[90px] sm:max-w-[140px] lg:max-w-[180px] drop-shadow-xs">
+                    {activeCityObj ? activeCityObj.name : currentProvinceObj.name}
+                  </span>
+                </div>
+                <ChevronDown className={`w-3.5 h-3.5 sm:w-4 sm:h-4 text-white/80 shrink-0 transition-transform duration-200 ${isProvinceDropdownOpen ? 'rotate-180' : ''}`} />
               </button>
 
               {isProvinceDropdownOpen && (
-                <div className="absolute top-full left-0 mt-1.5 w-52 bg-white border border-slate-200 rounded-xl shadow-xl py-2 z-50 animate-in fade-in duration-100">
-                  <div className="px-3 py-1 text-[10px] font-black text-slate-400 uppercase tracking-wider">
+                <div className="absolute top-full left-0 mt-2 w-64 bg-white border border-slate-200 rounded-2xl shadow-2xl py-2 z-50 animate-in fade-in duration-100 divide-y divide-slate-100">
+                  <div className="px-3.5 py-1.5 text-[10px] font-black text-slate-400 uppercase tracking-wider">
                     Provincias Disponibles
                   </div>
-                  {activeProvinces.map((prov) => (
-                    <button
-                      key={prov.id}
-                      type="button"
-                      onClick={() => handleProvinceSelect(prov.id)}
-                      className={`w-full text-left px-3 py-2 text-xs font-bold flex items-center justify-between hover:bg-slate-50 transition-colors ${
-                        selectedProvince === prov.id || selectedProvince === prov.slug
-                          ? 'text-[#0047BA] bg-blue-50/60 font-black'
-                          : 'text-slate-700'
-                      }`}
-                    >
-                      <span>{prov.name}</span>
-                      {(selectedProvince === prov.id || selectedProvince === prov.slug) && (
-                        <span className="w-1.5 h-1.5 rounded-full bg-[#0047BA]" />
-                      )}
-                    </button>
-                  ))}
+                  <div className="py-1">
+                    {activeProvinces.map((prov) => {
+                      const theme = PROVINCE_THEMES[prov.id] || PROVINCE_THEMES['santa-fe'];
+                      const isSelected = selectedProvince === prov.id || selectedProvince === prov.slug;
+                      return (
+                        <button
+                          key={prov.id}
+                          type="button"
+                          onClick={() => handleProvinceSelect(prov.id)}
+                          className={`w-full text-left px-3.5 py-2.5 text-xs font-bold flex items-center justify-between hover:bg-slate-50 transition-colors cursor-pointer ${
+                            isSelected
+                              ? 'text-slate-900 bg-slate-50 font-black'
+                              : 'text-slate-700'
+                          }`}
+                        >
+                          <div className="flex items-center gap-2.5 min-w-0">
+                            <span
+                              className="w-3.5 h-3.5 rounded-full shrink-0 shadow-xs border border-white"
+                              style={{ backgroundColor: theme.accentHex }}
+                            />
+                            <span className="truncate">{prov.name}</span>
+                          </div>
+                          {isSelected && (
+                            <span
+                              className="text-[9px] font-black px-2 py-0.5 rounded-full text-white"
+                              style={{ backgroundColor: theme.accentHex }}
+                            >
+                              Activa
+                            </span>
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
                 </div>
               )}
             </div>
@@ -639,20 +742,30 @@ export function ClientHeader({ withBackground = false }: ClientHeaderProps = {})
       {/* Mobile Drawer Menu */}
       {isMobileMenuOpen && (
         <div className="lg:hidden bg-white border-b border-slate-200 px-4 pt-3 pb-5 space-y-3 animate-in fade-in duration-200 text-slate-800">
-          <div className="flex flex-col gap-1 border-b border-slate-100 pb-3">
+          <div className="flex flex-col gap-1.5 border-b border-slate-100 pb-3">
             <label className="text-[10px] font-black uppercase tracking-wider text-slate-400">Provincia</label>
-            <div className="flex gap-2">
-              {activeProvinces.map((prov) => (
-                <button
-                  key={prov.id}
-                  onClick={() => handleProvinceSelect(prov.id)}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-bold border ${
-                    selectedProvince === prov.id ? 'border-[#0047BA] bg-blue-50 text-[#0047BA]' : 'border-slate-200 text-slate-700'
-                  }`}
-                >
-                  {prov.name}
-                </button>
-              ))}
+            <div className="flex flex-wrap gap-2">
+              {activeProvinces.map((prov) => {
+                const theme = PROVINCE_THEMES[prov.id] || PROVINCE_THEMES['santa-fe'];
+                const isSelected = selectedProvince === prov.id || selectedProvince === prov.slug;
+                return (
+                  <button
+                    key={prov.id}
+                    onClick={() => handleProvinceSelect(prov.id)}
+                    className={`px-3 py-2 rounded-xl text-xs font-bold border flex items-center gap-2 transition-all cursor-pointer ${
+                      isSelected
+                        ? `${theme.gradientClass} text-white border-transparent shadow-xs`
+                        : 'border-slate-200 text-slate-700 bg-slate-50 hover:bg-slate-100'
+                    }`}
+                  >
+                    <span
+                      className="w-2.5 h-2.5 rounded-full shrink-0 border border-white/60"
+                      style={{ backgroundColor: theme.accentHex }}
+                    />
+                    <span>{prov.name}</span>
+                  </button>
+                );
+              })}
             </div>
           </div>
 

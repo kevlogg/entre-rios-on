@@ -59,7 +59,7 @@ export function ClientHomeContainer({ provinceId, initialProducts = [] }: Client
   }, [pathname, provinceId]);
 
   return (
-    <div className="w-full bg-white text-slate-900 min-h-screen flex flex-col">
+    <div className="w-full bg-[#cbd5e1] text-slate-900 min-h-screen flex flex-col">
       {/* 1. Header Oficial (Top Bar Blanca + Subnav Degradé ON+) */}
       <ClientHeader />
 

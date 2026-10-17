@@ -19,58 +19,6 @@ export const metadata: Metadata = {
   description: 'Programa oficial de promotores y vendedores independientes ON+. Ganá comisiones atractivas y recurrentes adhiriendo comercios, pymes y servicios turísticos a nuestra plataforma.',
 };
 
-const COMMISSION_TIERS = [
-  {
-    tier: 'Plan Bronce',
-    price: '$29.000 / mes',
-    badge: 'Comisión Inicial',
-    badgeColor: 'bg-amber-100 text-amber-900 border-amber-300',
-    commissionAlta: '$12.000',
-    commissionRecurring: '10% mensual recurrente',
-    description: 'Ideal para comercios de barrio, talleres, emprendedores y servicios locales que buscan presencia digital.',
-    features: [
-      'Alta rápida y sencilla para el comercio',
-      'Catálogo de hasta 5 productos',
-      'Botonera directa a WhatsApp del local',
-      'Comisión acreditada de forma inmediata',
-    ],
-    buttonColor: 'bg-slate-900 hover:bg-slate-800 text-white',
-  },
-  {
-    tier: 'Plan Plata',
-    price: '$49.000 / mes',
-    badge: 'Más Comercializado • Recomendado',
-    badgeColor: 'bg-gradient-to-r from-[#00ADB5] to-[#0047BA] text-white border-transparent',
-    commissionAlta: '$22.000',
-    commissionRecurring: '15% mensual recurrente',
-    description: 'El plan favorito de comercios consolidados, tiendas de moda, gastronomía y tecnología con amplio catálogo.',
-    features: [
-      'Insignia Comercio Verificado Plata',
-      'Catálogo ampliado de 20 productos',
-      'Posicionamiento prioritario en su ciudad',
-      'Excelente relación costo/beneficio para vender',
-    ],
-    highlight: true,
-    buttonColor: 'bg-gradient-to-r from-[#00ADB5] to-[#0047BA] hover:from-[#00969d] hover:to-[#002878] text-white',
-  },
-  {
-    tier: 'Plan Oro',
-    price: '$99.000 / mes',
-    badge: 'Máxima Ganancia • VIP',
-    badgeColor: 'bg-gradient-to-r from-amber-400 to-amber-600 text-slate-950 border-transparent',
-    commissionAlta: '$45.000',
-    commissionRecurring: '20% mensual recurrente',
-    description: 'Diseñado para empresas líderes, industrias, concesionarias y complejos turísticos que demandan máxima cobertura.',
-    features: [
-      'Catálogo de productos ILIMITADO',
-      'Destacado TOP en portada provincial',
-      'Publicidad y notas de prensa oficiales',
-      'Mayor margen de ganancia por cierre',
-    ],
-    buttonColor: 'bg-gradient-to-r from-amber-400 via-amber-500 to-amber-600 hover:from-amber-300 hover:to-amber-500 text-slate-950 font-black',
-  },
-];
-
 const STEPS = [
   {
     num: '01',
@@ -158,14 +106,6 @@ export default function VenderOnPage() {
               <MessageCircle className="w-4 h-4 fill-slate-950 text-slate-950" />
               <span>Postularme por WhatsApp</span>
             </a>
-
-            <a
-              href="#comisiones"
-              className="inline-flex items-center gap-2 bg-white/15 hover:bg-white/25 border border-white/30 text-white font-extrabold text-xs sm:text-sm px-5 py-3 rounded-2xl backdrop-blur-md transition-all cursor-pointer"
-            >
-              <span>Ver escala de comisiones</span>
-              <ArrowRight className="w-4 h-4" />
-            </a>
           </div>
         </div>
 
@@ -232,85 +172,7 @@ export default function VenderOnPage() {
           </div>
         </section>
 
-        {/* 2. ESCALA DE COMISIONES TRANSPARENTES */}
-        <section id="comisiones" className="space-y-6 scroll-mt-24">
-          <div className="text-center max-w-2xl mx-auto space-y-1.5">
-            <span className="text-[11px] font-black text-[#00ADB5] uppercase tracking-wider block">
-              Ganancias Claras
-            </span>
-            <h2 className="text-2xl sm:text-3xl font-black text-slate-900">
-              Escala Oficial de Comisiones por Plan
-            </h2>
-            <p className="text-xs sm:text-sm text-slate-600 font-medium">
-              Cobrás por cada nuevo comercio adherido más un porcentaje mensual por cada cuota activa.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-stretch">
-            {COMMISSION_TIERS.map((tier, idx) => (
-              <div
-                key={idx}
-                className={`rounded-3xl p-6 flex flex-col justify-between space-y-6 transition-all border-2 ${
-                  tier.highlight
-                    ? 'bg-gradient-to-b from-blue-50/90 via-white to-slate-50 border-[#00ADB5] shadow-xl relative'
-                    : 'bg-white border-slate-200 shadow-xs hover:border-slate-300'
-                }`}
-              >
-                {tier.highlight && (
-                  <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-gradient-to-r from-[#00ADB5] to-[#0047BA] text-white text-[10px] font-black px-4 py-1 rounded-full uppercase tracking-wider shadow-md">
-                    PLAN MÁS VENDIDO
-                  </div>
-                )}
-
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <span className={`text-[10px] font-black uppercase tracking-wider px-2.5 py-1 rounded-full border ${tier.badgeColor}`}>
-                      {tier.badge}
-                    </span>
-                    <span className="text-xs font-bold text-slate-400">{tier.price}</span>
-                  </div>
-
-                  <div>
-                    <h3 className="text-2xl font-black text-slate-900">{tier.tier}</h3>
-                    <p className="text-xs text-slate-500 font-medium mt-1 leading-relaxed">{tier.description}</p>
-                  </div>
-
-                  {/* Bloque de Ganancia */}
-                  <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4 space-y-2">
-                    <div>
-                      <span className="text-[10px] font-black text-slate-500 uppercase tracking-wider block">Tu Ganancia por Alta:</span>
-                      <span className="text-3xl font-black text-emerald-700">{tier.commissionAlta}</span>
-                    </div>
-                    <div className="pt-2 border-t border-slate-200/80 flex items-center justify-between text-xs font-bold text-slate-700">
-                      <span>Ingreso Recurrente:</span>
-                      <span className="text-[#0047BA]">{tier.commissionRecurring}</span>
-                    </div>
-                  </div>
-
-                  <ul className="space-y-2 text-xs font-semibold text-slate-700">
-                    {tier.features.map((feat, fIdx) => (
-                      <li key={fIdx} className="flex items-start gap-2">
-                        <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-                        <span>{feat}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-
-                <a
-                  href={whatsappUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className={`w-full py-3.5 rounded-2xl text-xs font-black text-center shadow-md transition-all active:scale-95 cursor-pointer block ${tier.buttonColor}`}
-                >
-                  Postularme para vender {tier.tier}
-                </a>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        {/* 3. CÓMO FUNCIONA EN 4 PASOS */}
+        {/* 2. CÓMO FUNCIONA EN 4 PASOS */}
         <section className="bg-white rounded-3xl p-6 sm:p-10 border border-slate-200 shadow-xs space-y-8">
           <div className="text-center max-w-2xl mx-auto space-y-1.5">
             <span className="text-[11px] font-black text-[#0047BA] uppercase tracking-wider block">

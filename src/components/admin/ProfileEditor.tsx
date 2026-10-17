@@ -13,8 +13,8 @@ interface ProfileEditorProps {
 }
 
 export function ProfileEditor({ commerce, onUpdateCommerce }: ProfileEditorProps) {
-  const [logoUrl, setLogoUrl] = useState(commerce.logoUrl || '/images/city-rosario.jpg');
-  const [coverUrl, setCoverUrl] = useState(commerce.coverUrl || '/images/city-rosario.jpg');
+  const [logoUrl, setLogoUrl] = useState(commerce.logoUrl && !commerce.logoUrl.includes('city-rosario.jpg') ? commerce.logoUrl : '');
+  const [coverUrl, setCoverUrl] = useState(commerce.coverUrl && !commerce.coverUrl.includes('city-rosario.jpg') ? commerce.coverUrl : '/images/default-commerce-cover.jpg');
   const [userEmail, setUserEmail] = useState(commerce.email || '');
 
   const [formData, setFormData] = useState({
@@ -234,14 +234,21 @@ export function ProfileEditor({ commerce, onUpdateCommerce }: ProfileEditorProps
           <div className="md:col-span-5 space-y-2">
             <label className="block text-xs font-bold text-slate-700">Logo Oficial del Negocio</label>
             <div className="flex items-center gap-4">
-              <div className="relative w-20 h-20 rounded-2xl overflow-hidden bg-white border-2 border-slate-300 shadow-sm shrink-0">
-                <Image
-                  src={logoUrl}
-                  alt={formData.name}
-                  fill
-                  unoptimized={logoUrl.startsWith('data:')}
-                  className="object-cover"
-                />
+              <div className="relative w-20 h-20 rounded-2xl overflow-hidden bg-slate-100 border-2 border-slate-300 shadow-sm shrink-0 flex items-center justify-center">
+                {logoUrl ? (
+                  <Image
+                    src={logoUrl}
+                    alt={formData.name}
+                    fill
+                    unoptimized={logoUrl.startsWith('data:')}
+                    className="object-cover"
+                  />
+                ) : (
+                  <div className="flex flex-col items-center justify-center text-slate-400 p-2 text-center">
+                    <Store className="w-6 h-6 text-slate-300 mb-0.5" />
+                    <span className="text-[9px] font-bold text-slate-400">Sin logo</span>
+                  </div>
+                )}
               </div>
               <div className="space-y-1.5 flex-1">
                 <span className="text-[11px] font-bold text-slate-500 block leading-tight">

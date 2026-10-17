@@ -93,10 +93,10 @@ export default async function CommerceDetailPage({ params }: PageProps) {
           {/* Cover Photo */}
           <div className="relative h-48 sm:h-64 w-full bg-slate-800">
             <Image
-              src={commerce.coverUrl}
+              src={commerce.coverUrl && !commerce.coverUrl.includes('city-rosario.jpg') ? commerce.coverUrl : '/images/default-commerce-cover.jpg'}
               alt={commerce.name}
               fill
-              unoptimized={commerce.coverUrl.startsWith('data:')}
+              unoptimized={commerce.coverUrl?.startsWith('data:')}
               className="object-cover object-center"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-black/20" />
@@ -110,14 +110,20 @@ export default async function CommerceDetailPage({ params }: PageProps) {
           <div className="p-6 sm:p-8 pt-0 relative">
             <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6 -mt-12 sm:-mt-16 mb-6">
               <div className="flex items-end gap-4">
-                <div className="relative w-24 h-24 sm:w-32 sm:h-32 rounded-2xl overflow-hidden border-4 border-white shadow-xl bg-white shrink-0">
-                  <Image
-                    src={commerce.logoUrl}
-                    alt={commerce.name}
-                    fill
-                    unoptimized={commerce.logoUrl.startsWith('data:')}
-                    className="object-cover"
-                  />
+                <div className="relative w-24 h-24 sm:w-32 sm:h-32 rounded-2xl overflow-hidden border-4 border-white shadow-xl bg-white shrink-0 flex items-center justify-center">
+                  {commerce.logoUrl && !commerce.logoUrl.includes('city-rosario.jpg') && commerce.logoUrl !== '/logo.png' ? (
+                    <Image
+                      src={commerce.logoUrl}
+                      alt={commerce.name}
+                      fill
+                      unoptimized={commerce.logoUrl.startsWith('data:')}
+                      className="object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-slate-100 flex flex-col items-center justify-center text-slate-400">
+                      <Store className="w-10 h-10 sm:w-12 sm:h-12 text-slate-300" />
+                    </div>
+                  )}
                 </div>
                 <div className="space-y-1 pb-1">
                   <div className="flex items-center gap-2">

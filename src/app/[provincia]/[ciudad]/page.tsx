@@ -90,8 +90,8 @@ export default async function CityHubPage({ params }: CityHubPageProps) {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#e9ecef]">
-      <main className="w-full flex-1 bg-[#e9ecef]">
+    <div className="min-h-screen flex flex-col bg-[#cbd5e1]">
+      <main className="w-full flex-1 bg-[#cbd5e1]">
         <ClientHomeContainer provinceId={city.provinceId} />
       </main>
       <ClientFooter />

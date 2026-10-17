@@ -278,14 +278,20 @@ export function CommerceDirectoryClient({ initialCommerces }: CommerceDirectoryC
             >
               <div className="space-y-3">
                 <div className="flex items-center gap-4">
-                  <div className="relative w-16 h-16 rounded-2xl overflow-hidden bg-slate-100 shrink-0 border border-slate-200 shadow-xs group-hover:scale-105 transition-transform">
-                    <Image
-                      src={comm.logoUrl || '/logo.png'}
-                      alt={comm.name}
-                      fill
-                      unoptimized={comm.logoUrl?.startsWith('data:')}
-                      className="object-cover"
-                    />
+                  <div className="relative w-16 h-16 rounded-2xl overflow-hidden bg-slate-100 shrink-0 border border-slate-200 shadow-xs group-hover:scale-105 transition-transform flex items-center justify-center">
+                    {comm.logoUrl && !comm.logoUrl.includes('city-rosario.jpg') && comm.logoUrl !== '/logo.png' ? (
+                      <Image
+                        src={comm.logoUrl}
+                        alt={comm.name}
+                        fill
+                        unoptimized={comm.logoUrl?.startsWith('data:')}
+                        className="object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center bg-slate-100 text-slate-400">
+                        <Store className="w-7 h-7 text-slate-300" />
+                      </div>
+                    )}
                   </div>
                   <div>
                     <div className="flex items-center gap-1.5 flex-wrap">

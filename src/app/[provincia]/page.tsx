@@ -77,8 +77,8 @@ export default async function ProvincePage({ params }: ProvincePageProps) {
   const products = await getFeaturedProducts(undefined, undefined, prov.id);
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#e9ecef]">
-      <main className="w-full flex-1 bg-[#e9ecef]">
+    <div className="min-h-screen flex flex-col bg-[#cbd5e1]">
+      <main className="w-full flex-1 bg-[#cbd5e1]">
         <ClientHomeContainer provinceId={prov.id} initialProducts={products} />
       </main>
       <ClientFooter />
