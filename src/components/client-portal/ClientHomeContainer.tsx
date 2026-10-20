@@ -10,6 +10,7 @@ import { CategoryIconBar } from '@/components/client-portal/CategoryIconBar';
 import { FeaturedOffersGrid } from '@/components/client-portal/FeaturedOffersGrid';
 import { FeaturedSectionsGrid } from '@/components/client-portal/FeaturedSectionsGrid';
 import { AboutUsHomeSection } from '@/components/home/AboutUsHomeSection';
+import { AppDownloadCard } from '@/components/home/AppDownloadCard';
 import { getProvinceBySlug } from '@/lib/constants/locations';
 import { useSideBanners } from '@/lib/services/side-banners-store';
 import { Product } from '@/types';
@@ -140,6 +141,9 @@ export function ClientHomeContainer({ provinceId, initialProducts = [] }: Client
 
             {/* 6. Quiénes Somos (Card Blanco con Tipografía Azul Oscuro y Turquesa) */}
             <AboutUsHomeSection />
+
+            {/* 7. Card Fijo para Descargar App Oficial */}
+            <AppDownloadCard />
           </main>
 
           {/* COLUMNA DERECHA: 2 Banners con proporción áurea fija */}
@@ -203,6 +207,9 @@ export function ClientHomeContainer({ provinceId, initialProducts = [] }: Client
 
           {/* Quiénes Somos */}
           <AboutUsHomeSection />
+
+          {/* Card Fijo para Descargar App Oficial */}
+          <AppDownloadCard />
         </div>
 
       </div>

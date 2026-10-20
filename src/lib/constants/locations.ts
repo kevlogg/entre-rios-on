@@ -243,8 +243,8 @@ export function getCityBySlug(slug: string): City | undefined {
 
 export const VALID_SECTION_SLUGS: Record<string, { name: string; description: string }> = {
   'comercios': {
-    name: 'Comercios Adheridos',
-    description: 'Directorio B2B y comercios verificados con contacto directo a WhatsApp.',
+    name: 'Comercios e Industria',
+    description: 'Directorio B2B, industrias y comercios verificados con contacto directo a WhatsApp.',
   },
   'catalogo': {
     name: 'Catálogo & Ofertas',

@@ -320,11 +320,11 @@ export function ClientHeader({ withBackground = false }: ClientHeaderProps = {})
     }, 200);
   };
 
-  // Enlaces de la barra superior: Inicio, Categorías, Comercios & Pymes, Turismo, Vender ON+, Ayuda, Novedades, Oportunidades
+  // Enlaces de la barra superior: Inicio, Categorías, Comercios e Industria, Turismo, Vender ON+, Ayuda, Novedades, Oportunidades
   const subNavLinks = [
     { name: 'INICIO', href: '/', isCategory: false },
     { name: 'CATEGORÍAS', href: '/catalogo', isCategory: true },
-    { name: 'COMERCIOS & PYMES', href: '/comercios', isCategory: false },
+    { name: 'COMERCIOS E INDUSTRIA', href: '/comercios', isCategory: false },
     { name: 'TURISMO', href: '/turismo', isCategory: false },
     { name: 'VENDER ON+', href: '/vender-on', isCategory: false },
     { name: 'AYUDA', href: '/ayuda', isCategory: false },
@@ -567,10 +567,12 @@ export function ClientHeader({ withBackground = false }: ClientHeaderProps = {})
             {/* Publicá tu negocio */}
             <Link
               href="/planes"
-              className="hidden sm:flex items-center gap-1.5 text-xs font-bold text-slate-800 hover:text-[#0047BA] transition-colors py-1.5 px-2 rounded-lg hover:bg-slate-200/80"
+              className="hidden sm:flex items-center gap-2 text-xs sm:text-sm font-black text-slate-900 bg-white/80 hover:bg-white border border-slate-300 hover:border-[#0047BA]/50 shadow-2xs hover:shadow-xs transition-all py-1.5 px-3 rounded-xl group cursor-pointer"
             >
-              <Store className="w-4 h-4 text-slate-700" />
-              <span>Publicá tu negocio</span>
+              <div className="w-6 h-6 rounded-lg bg-gradient-to-tr from-[#00ADB5] via-[#0047BA] to-[#7B2CBF] text-white flex items-center justify-center shadow-xs shrink-0 group-hover:scale-110 transition-transform">
+                <Store className="w-3.5 h-3.5 fill-current" />
+              </div>
+              <span className="tracking-tight group-hover:text-[#0047BA] transition-colors">Publicá tu negocio</span>
             </Link>
 
             {/* Mi Cuenta / Iniciar sesión */}
@@ -814,9 +816,10 @@ export function ClientHeader({ withBackground = false }: ClientHeaderProps = {})
             <Link
               href="/planes"
               onClick={() => setIsMobileMenuOpen(false)}
-              className="flex-1 text-center py-2 bg-[#0047BA] text-white text-xs font-bold rounded-lg shadow-sm"
+              className="flex-1 text-center py-2.5 bg-gradient-to-r from-[#0047BA] via-[#6C1CD1] to-[#E5007D] text-white text-xs font-black rounded-xl shadow-sm flex items-center justify-center gap-2"
             >
-              Publicá tu negocio
+              <Store className="w-4 h-4 text-white" />
+              <span>Publicá tu negocio</span>
             </Link>
           </div>
         </div>

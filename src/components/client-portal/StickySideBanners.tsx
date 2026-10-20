@@ -72,7 +72,8 @@ export function StickySideBanners() {
               {/* Clickable Image Banner */}
               <Link 
                 href={activeLeft.href || '/planes'} 
-                target={activeLeft.href?.startsWith('http') ? '_blank' : '_self'}
+                target={(activeLeft.isExternal || activeLeft.href?.startsWith('http')) ? '_blank' : '_self'}
+                rel={(activeLeft.isExternal || activeLeft.href?.startsWith('http')) ? 'noopener noreferrer' : undefined}
                 className="absolute inset-0 w-full h-full block group cursor-pointer"
               >
                 <img
@@ -131,7 +132,8 @@ export function StickySideBanners() {
               {/* Clickable Image Banner */}
               <Link 
                 href={activeRight.href || '/planes'} 
-                target={activeRight.href?.startsWith('http') ? '_blank' : '_self'}
+                target={(activeRight.isExternal || activeRight.href?.startsWith('http')) ? '_blank' : '_self'}
+                rel={(activeRight.isExternal || activeRight.href?.startsWith('http')) ? 'noopener noreferrer' : undefined}
                 className="absolute inset-0 w-full h-full block group cursor-pointer"
               >
                 <img

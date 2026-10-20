@@ -217,10 +217,10 @@ export function PlansManager() {
                         onChange={(e) => handlePriceChange(plan.id, parseFloat(e.target.value) || 0)}
                         className="w-full text-3xl font-black text-white bg-transparent border-b-2 border-amber-400 focus:outline-hidden px-1 py-0.5"
                       />
-                      <span className="text-xs font-extrabold text-slate-400 shrink-0">/ mes</span>
+                      <span className="text-xs font-extrabold text-slate-400 shrink-0">/ mes + IVA</span>
                     </div>
                     <span className="text-[10px] text-slate-400 block font-semibold pt-1">
-                      Monto formateado: ${plan.price.toLocaleString('es-AR')} ARS
+                      Monto formateado: ${plan.price.toLocaleString('es-AR')} ARS + IVA
                     </span>
                   </div>
 

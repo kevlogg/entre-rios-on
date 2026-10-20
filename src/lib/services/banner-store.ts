@@ -13,6 +13,7 @@ export interface BannerItem {
   subtitle?: string;
   ctaText?: string;
   ctaHref?: string;
+  isExternal?: boolean;
 }
 
 export function normalizeImageUrl(url?: string): string {
@@ -209,6 +210,7 @@ export async function fetchBannersFromSupabase(provinceId: string): Promise<Bann
           provinceId: slide.province_id || provinceId,
           imageUrl: slide.image_url || slide.imageUrl,
           ctaHref: slide.cta_url || slide.ctaHref || `/${provinceId}`,
+          isExternal: Boolean(slide.is_external || slide.isExternal || (slide.cta_url || slide.ctaHref || '').startsWith('http')),
           location: slide.city_tag || slide.location || '',
           titleLine1: slide.title || '',
         }));

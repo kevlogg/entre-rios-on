@@ -124,26 +124,27 @@ export default async function CityDetailPage({ params }: PageProps) {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {cityCommerces.length > 0 ? (
               cityCommerces.map((comm) => (
-                <div key={comm.id} className="bg-white rounded-3xl p-5 border border-slate-200 shadow-xs hover:shadow-md transition-all flex flex-col justify-between space-y-4">
+                <Link 
+                  key={comm.id} 
+                  href={`/comercio/${comm.slug}`}
+                  className="bg-white rounded-3xl p-5 border border-slate-200 shadow-xs hover:shadow-lg transition-all flex flex-col justify-between space-y-4 group cursor-pointer hover:-translate-y-0.5"
+                >
                   <div className="flex items-center gap-3">
                     <div className="relative w-14 h-14 rounded-2xl overflow-hidden bg-slate-100 shrink-0 border border-slate-200">
-                      <Image src={comm.logoUrl} alt={comm.name} fill className="object-cover" />
+                      <Image src={comm.logoUrl} alt={comm.name} fill className="object-cover group-hover:scale-105 transition-transform duration-300" />
                     </div>
                     <div>
                       <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md uppercase">
                         {comm.category}
                       </span>
-                      <h3 className="font-bold text-slate-900 text-base line-clamp-1">{comm.name}</h3>
+                      <h3 className="font-bold text-slate-900 text-base line-clamp-1 group-hover:text-[#004b87] transition-colors">{comm.name}</h3>
                     </div>
                   </div>
                   <p className="text-xs text-slate-500 line-clamp-2">{comm.description}</p>
-                  <Link
-                    href={`/comercio/${comm.slug}`}
-                    className="bg-[#004b87] hover:bg-[#003663] text-white py-2 px-4 rounded-xl text-xs font-bold text-center block"
-                  >
+                  <span className="bg-[#004b87] group-hover:bg-[#003663] text-white py-2 px-4 rounded-xl text-xs font-bold text-center block transition-colors shadow-2xs">
                     Ver Perfil Completo
-                  </Link>
-                </div>
+                  </span>
+                </Link>
               ))
             ) : (
               <div className="col-span-full bg-white p-8 rounded-2xl border border-slate-200 text-center text-xs font-bold text-slate-500">
@@ -164,20 +165,24 @@ export default async function CityDetailPage({ params }: PageProps) {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {products.map((prod) => (
-              <div key={prod.id} className="bg-white rounded-3xl p-5 border border-slate-200 shadow-xs flex flex-col justify-between space-y-3">
+              <Link 
+                key={prod.id} 
+                href={`/producto/${prod.slug}`}
+                className="bg-white rounded-3xl p-5 border border-slate-200 shadow-xs hover:shadow-lg transition-all flex flex-col justify-between space-y-3 group cursor-pointer hover:-translate-y-0.5"
+              >
                 <div className="relative h-40 w-full rounded-2xl overflow-hidden bg-slate-100">
-                  <Image src={prod.imageUrl} alt={prod.title} fill className="object-cover" />
+                  <Image src={prod.imageUrl} alt={prod.title} fill className="object-cover group-hover:scale-105 transition-transform duration-300" />
                 </div>
-                <h3 className="font-bold text-slate-800 text-sm line-clamp-2">{prod.title}</h3>
+                <h3 className="font-bold text-slate-800 text-sm line-clamp-2 group-hover:text-[#004b87] transition-colors">{prod.title}</h3>
                 <div className="flex items-center justify-between pt-2 border-t border-slate-100">
                   <span className="text-sm font-extrabold text-[#004b87]">
                     ${prod.price ? prod.price.toLocaleString('es-AR') : 'Consultar'} ARS
                   </span>
-                  <Link href={`/producto/${prod.slug}`} className="text-xs font-extrabold text-[#00a859] hover:underline">
+                  <span className="text-xs font-extrabold text-[#00a859] group-hover:underline">
                     Ver Oferta
-                  </Link>
+                  </span>
                 </div>
-              </div>
+              </Link>
             ))}
           </div>
         </section>

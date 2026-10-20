@@ -588,7 +588,7 @@ export function SubscriptionPlans({
 
             <div className="py-3 border-y border-slate-200">
               <span className="text-4xl font-black text-slate-900">${planPrices.bronce.toLocaleString('es-AR')}</span>
-              <span className="text-xs font-bold text-slate-400"> / mes</span>
+              <span className="text-xs font-bold text-slate-400"> / mes + IVA</span>
             </div>
 
             {/* Lista de características del Plan Bronce */}
@@ -615,11 +615,11 @@ export function SubscriptionPlans({
           ) : (
             <div className="space-y-2 pt-4 border-t border-slate-200">
               <button
-                onClick={() => handleSelectPlan('BRONCE', `${selectedTrack === 'turismo' ? 'Plan Bronce Turismo' : 'Plan Bronce'} ($${planPrices.bronce.toLocaleString('es-AR')})`)}
+                onClick={() => handleSelectPlan('BRONCE', `${selectedTrack === 'turismo' ? 'Plan Bronce Turismo' : 'Plan Bronce'} ($${planPrices.bronce.toLocaleString('es-AR')} + IVA)`)}
                 disabled={Boolean(pendingPayment) || loadingTier === 'BRONCE'}
                 className="w-full bg-[#0047BA] hover:bg-[#002878] text-white py-3.5 rounded-2xl font-black text-xs transition-transform active:scale-95 cursor-pointer shadow-md flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                <span>{loadingTier === 'BRONCE' ? 'Procesando...' : `Pagar con MercadoPago ($${planPrices.bronce.toLocaleString('es-AR')})`}</span>
+                <span>{loadingTier === 'BRONCE' ? 'Procesando...' : `Pagar con MercadoPago ($${planPrices.bronce.toLocaleString('es-AR')} + IVA)`}</span>
                 <ArrowRight className="w-4 h-4" />
               </button>
 
@@ -668,7 +668,7 @@ export function SubscriptionPlans({
 
             <div className="py-3 border-y border-slate-200">
               <span className="text-4xl font-black text-[#0047BA]">${planPrices.plata.toLocaleString('es-AR')}</span>
-              <span className="text-xs font-bold text-slate-400"> / mes</span>
+              <span className="text-xs font-bold text-slate-400"> / mes + IVA</span>
             </div>
 
             {/* Lista de características del Plan Plata */}
@@ -695,11 +695,11 @@ export function SubscriptionPlans({
           ) : (
             <div className="space-y-2 pt-4 border-t border-slate-200">
               <button
-                onClick={() => handleSelectPlan('PLATA', `${selectedTrack === 'turismo' ? 'Plan Plata Turismo' : 'Plan Plata'} ($${planPrices.plata.toLocaleString('es-AR')})`)}
+                onClick={() => handleSelectPlan('PLATA', `${selectedTrack === 'turismo' ? 'Plan Plata Turismo' : 'Plan Plata'} ($${planPrices.plata.toLocaleString('es-AR')} + IVA)`)}
                 disabled={Boolean(pendingPayment) || loadingTier === 'PLATA'}
                 className="w-full bg-gradient-to-r from-[#00ADB5] to-[#0047BA] hover:from-[#00969d] hover:to-[#002878] text-white py-3.5 rounded-2xl font-black text-xs shadow-lg transition-transform active:scale-95 cursor-pointer flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                <span>{loadingTier === 'PLATA' ? 'Procesando...' : `Pagar con MercadoPago ($${planPrices.plata.toLocaleString('es-AR')})`}</span>
+                <span>{loadingTier === 'PLATA' ? 'Procesando...' : `Pagar con MercadoPago ($${planPrices.plata.toLocaleString('es-AR')} + IVA)`}</span>
                 <ArrowRight className="w-4 h-4" />
               </button>
 
@@ -748,7 +748,7 @@ export function SubscriptionPlans({
 
             <div className="py-3 border-y border-purple-800/80">
               <span className="text-4xl font-black text-amber-300">${planPrices.oro.toLocaleString('es-AR')}</span>
-              <span className="text-xs font-bold text-purple-300"> / mes</span>
+              <span className="text-xs font-bold text-purple-300"> / mes + IVA</span>
             </div>
 
             {/* Lista de características del Plan Oro */}

@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { usePathname } from 'next/navigation';
 import { MessageCircle } from 'lucide-react';
 
 interface FloatingWhatsAppButtonProps {
@@ -12,6 +13,8 @@ export function FloatingWhatsAppButton({
   phoneNumber = '5493426514889',
   message = 'Hola ON MÁS! Quisiera consultar sobre el portal.',
 }: FloatingWhatsAppButtonProps) {
+  const pathname = usePathname();
+  const isProductPage = Boolean(pathname?.startsWith('/producto'));
   const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
   const [isCoveredByProductCTA, setIsCoveredByProductCTA] = useState(false);
 
@@ -52,7 +55,7 @@ export function FloatingWhatsAppButton({
   return (
     <div
       className={`fixed bottom-[85px] sm:bottom-6 right-4 sm:right-6 z-40 flex items-center gap-3 pointer-events-none transition-all duration-300 ${
-        isCoveredByProductCTA ? 'opacity-0 scale-90 translate-y-3 pointer-events-none' : 'opacity-100 scale-100 translate-y-0'
+        isCoveredByProductCTA || isProductPage ? 'opacity-0 scale-90 translate-y-3 pointer-events-none' : 'opacity-100 scale-100 translate-y-0'
       }`}
     >
       

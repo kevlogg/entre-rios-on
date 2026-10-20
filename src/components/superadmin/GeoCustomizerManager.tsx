@@ -54,6 +54,7 @@ export function GeoCustomizerManager({ initialCities }: GeoCustomizerManagerProp
   const [newBannerDevice, setNewBannerDevice] = useState<'desktop' | 'mobile' | 'all'>('all');
   const [newBannerImage, setNewBannerImage] = useState<string | null>(null);
   const [newBannerCtaHref, setNewBannerCtaHref] = useState('');
+  const [newBannerIsExternal, setNewBannerIsExternal] = useState(false);
 
   // Form para gestión de ciudades de la provincia elegida
   const [provinceCities, setProvinceCities] = useState<ProvinceCityItem[]>([]);
@@ -371,7 +372,15 @@ export function GeoCustomizerManager({ initialCities }: GeoCustomizerManagerProp
     e.preventDefault();
     if (!newBannerImage || isUploading) return;
 
-    const resolvedCtaHref = newBannerCtaHref.trim() || `/${selectedProvinceId}`;
+    let resolvedCtaHref = newBannerCtaHref.trim();
+    if (newBannerIsExternal && resolvedCtaHref && !resolvedCtaHref.startsWith('http://') && !resolvedCtaHref.startsWith('https://')) {
+      resolvedCtaHref = `https://${resolvedCtaHref}`;
+    }
+    if (!resolvedCtaHref) {
+      resolvedCtaHref = `/${selectedProvinceId}`;
+    }
+
+    const isExternal = Boolean(newBannerIsExternal || resolvedCtaHref.startsWith('http'));
 
     const newBanner: BannerItem = {
       id: `b-${Date.now()}`,
@@ -384,11 +393,14 @@ export function GeoCustomizerManager({ initialCities }: GeoCustomizerManagerProp
       subtitle: 'Comprá. Vendé. Publicá. Conectá.',
       ctaText: `Explorar ${currentProv.name}`,
       ctaHref: resolvedCtaHref,
+      isExternal,
     };
 
     const updated = [newBanner, ...banners];
     setBanners(updated);
     setNewBannerImage(null);
+    setNewBannerCtaHref('');
+    setNewBannerIsExternal(false);
     saveBannersByProvince(selectedProvinceId, updated);
 
     await syncToSupabase(selectedProvinceId, updated);
@@ -409,8 +421,18 @@ export function GeoCustomizerManager({ initialCities }: GeoCustomizerManagerProp
     });
   };
 
-  const handleUpdateBannerCtaHref = async (id: string, ctaHref: string) => {
-    const updated = banners.map((b) => (b.id === id ? { ...b, ctaHref } : b));
+  const handleUpdateBannerCtaHref = async (id: string, ctaHref: string, isExternal?: boolean) => {
+    let resolved = ctaHref.trim();
+    if (isExternal && resolved && !resolved.startsWith('http://') && !resolved.startsWith('https://')) {
+      resolved = `https://${resolved}`;
+    }
+    const updated = banners.map((b) => {
+      if (b.id === id) {
+        const finalIsExternal = isExternal !== undefined ? isExternal : Boolean(b.isExternal || resolved.startsWith('http'));
+        return { ...b, ctaHref: resolved, isExternal: finalIsExternal };
+      }
+      return b;
+    });
     setBanners(updated);
     saveBannersByProvince(selectedProvinceId, updated);
     await syncToSupabase(selectedProvinceId, updated);
@@ -813,19 +835,41 @@ export function GeoCustomizerManager({ initialCities }: GeoCustomizerManagerProp
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-slate-700 mb-1.5">
-                URL de Destino al Hacer Clic
-              </label>
+              <div className="flex items-center justify-between mb-1.5">
+                <label className="block text-xs font-bold text-slate-700">
+                  URL de Destino al Hacer Clic
+                </label>
+                <label className="inline-flex items-center gap-1.5 cursor-pointer text-[10px] font-black text-[#0047BA] hover:text-[#002878]">
+                  <input
+                    type="checkbox"
+                    checked={newBannerIsExternal}
+                    onChange={(e) => {
+                      const checked = e.target.checked;
+                      setNewBannerIsExternal(checked);
+                      if (checked && !newBannerCtaHref.startsWith('http')) {
+                        setNewBannerCtaHref('https://');
+                      }
+                    }}
+                    className="w-3.5 h-3.5 rounded text-[#00ADB5] focus:ring-[#00ADB5]"
+                  />
+                  <span>Enlace externo</span>
+                </label>
+              </div>
               <div className="relative">
                 <input
                   type="text"
-                  placeholder={`Ej. /${selectedProvinceId}/rosario o https://...`}
+                  placeholder={newBannerIsExternal ? "https://ejemplo.com/promo o https://wa.me/..." : `Ej. /${selectedProvinceId}/rosario`}
                   value={newBannerCtaHref}
                   onChange={(e) => setNewBannerCtaHref(e.target.value)}
                   className="w-full bg-slate-50 border border-slate-300 rounded-xl pl-8 pr-3 py-2 text-xs font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#00ADB5]"
                 />
                 <LinkIcon className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-3" />
               </div>
+              {newBannerIsExternal && (
+                <p className="text-[10px] text-emerald-600 font-bold mt-1">
+                  ✓ Abrirá en nueva pestaña al hacer clic
+                </p>
+              )}
             </div>
 
             <div>
@@ -926,14 +970,35 @@ export function GeoCustomizerManager({ initialCities }: GeoCustomizerManagerProp
                 </div>
 
                 {/* URL de Destino Editable */}
-                <div className="space-y-1">
-                  <label className="text-[11px] font-bold text-slate-700 flex items-center gap-1">
-                    <LinkIcon className="w-3.5 h-3.5 text-[#00ADB5]" />
-                    <span>URL de Redirección al hacer clic:</span>
-                  </label>
+                <div className="space-y-1.5">
+                  <div className="flex items-center justify-between">
+                    <label className="text-[11px] font-bold text-slate-700 flex items-center gap-1">
+                      <LinkIcon className="w-3.5 h-3.5 text-[#00ADB5]" />
+                      <span>URL de Redirección:</span>
+                    </label>
+                    <label className="inline-flex items-center gap-1 cursor-pointer text-[10px] font-black text-[#0047BA] hover:text-[#002878]">
+                      <input
+                        type="checkbox"
+                        checked={Boolean(banner.isExternal || banner.ctaHref?.startsWith('http'))}
+                        onChange={(e) => {
+                          const checked = e.target.checked;
+                          setBanners((prev) =>
+                            prev.map((b) => (b.id === banner.id ? { 
+                              ...b, 
+                              isExternal: checked, 
+                              ctaHref: checked && !b.ctaHref?.startsWith('http') ? 'https://' : b.ctaHref 
+                            } : b))
+                          );
+                        }}
+                        className="w-3.5 h-3.5 rounded text-[#00ADB5] focus:ring-[#00ADB5]"
+                      />
+                      <span>Enlace externo</span>
+                    </label>
+                  </div>
                   <div className="flex items-center gap-2">
                     <input
                       type="text"
+                      placeholder={banner.isExternal ? "https://..." : `/${selectedProvinceId}`}
                       value={banner.ctaHref || `/${selectedProvinceId}`}
                       onChange={(e) => {
                         const val = e.target.value;
@@ -945,11 +1010,11 @@ export function GeoCustomizerManager({ initialCities }: GeoCustomizerManagerProp
                     />
                     <button
                       type="button"
-                      onClick={() => handleUpdateBannerCtaHref(banner.id, banner.ctaHref || `/${selectedProvinceId}`)}
+                      onClick={() => handleUpdateBannerCtaHref(banner.id, banner.ctaHref || `/${selectedProvinceId}`, banner.isExternal)}
                       className="bg-[#0047BA] hover:bg-[#002878] text-white px-3 py-1.5 rounded-xl text-xs font-extrabold cursor-pointer transition-colors shrink-0 flex items-center gap-1"
                     >
                       <Save className="w-3.5 h-3.5" />
-                      <span>Guardar URL</span>
+                      <span>Guardar</span>
                     </button>
                   </div>
                 </div>
@@ -1343,13 +1408,33 @@ export function GeoCustomizerManager({ initialCities }: GeoCustomizerManagerProp
 
                 {/* 3. URL de Redirección */}
                 <div>
-                  <label className="block text-[11px] font-bold text-slate-700 mb-1 flex items-center gap-1">
-                    <LinkIcon className="w-3.5 h-3.5 text-[#00ADB5]" />
-                    <span>URL o Enlace WhatsApp:</span>
-                  </label>
+                  <div className="flex items-center justify-between mb-1">
+                    <label className="text-[11px] font-bold text-slate-700 flex items-center gap-1">
+                      <LinkIcon className="w-3.5 h-3.5 text-[#00ADB5]" />
+                      <span>URL de Destino:</span>
+                    </label>
+                    <label className="inline-flex items-center gap-1 cursor-pointer text-[10px] font-black text-[#0047BA] hover:text-[#002878]">
+                      <input
+                        type="checkbox"
+                        checked={Boolean(banner.isExternal || banner.href?.startsWith('http'))}
+                        onChange={(e) => {
+                          const checked = e.target.checked;
+                          const updated = localSideBanners.map((b) => (b.id === banner.id ? { 
+                            ...b, 
+                            isExternal: checked, 
+                            href: checked && !b.href?.startsWith('http') ? 'https://' : b.href 
+                          } : b));
+                          setLocalSideBanners(updated);
+                          saveSideBanners(updated);
+                        }}
+                        className="w-3.5 h-3.5 rounded text-[#00ADB5] focus:ring-[#00ADB5]"
+                      />
+                      <span>Enlace externo</span>
+                    </label>
+                  </div>
                   <input
                     type="text"
-                    placeholder="Ej. /planes, /sorteos o https://..."
+                    placeholder={banner.isExternal ? "https://..." : "Ej. /planes, /sorteos o https://..."}
                     value={banner.href}
                     onChange={(e) => {
                       const val = e.target.value;

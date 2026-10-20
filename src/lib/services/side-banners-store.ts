@@ -10,6 +10,7 @@ export interface SideBannerItem {
   href: string;
   position: 'left' | 'right' | 'both';
   idealSize: string;
+  isExternal?: boolean;
 }
 
 export const DEFAULT_SIDE_BANNERS: SideBannerItem[] = [
@@ -60,6 +61,7 @@ function normalizeSideBanners(stored: SideBannerItem[]): SideBannerItem[] {
     href: item.href || '/planes',
     position: item.position || (idx % 2 === 0 ? 'left' : 'right'),
     idealSize: item.idealSize || '160 × 600 px (Rascacielos / Vertical HD)',
+    isExternal: Boolean(item.isExternal || item.href?.startsWith('http')),
   }));
 }
 

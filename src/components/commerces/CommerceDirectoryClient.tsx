@@ -3,6 +3,7 @@
 import React, { useState, useMemo } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { Commerce } from '@/types';
 import { 
   Search, 
@@ -25,6 +26,7 @@ interface CommerceDirectoryClientProps {
 }
 
 export function CommerceDirectoryClient({ initialCommerces }: CommerceDirectoryClientProps) {
+  const router = useRouter();
   // Main Type Filter: 'all' | 'verified' | 'online' | 'pymes'
   const [typeFilter, setTypeFilter] = useState<'all' | 'verified' | 'online' | 'pymes'>('all');
   
@@ -168,7 +170,7 @@ export function CommerceDirectoryClient({ initialCommerces }: CommerceDirectoryC
               }`}
             >
               <Building2 className={`w-4 h-4 shrink-0 ${typeFilter === 'pymes' ? 'text-white' : 'text-amber-500'}`} />
-              <span>Pymes & Empresas</span>
+              <span>Industria & Empresas</span>
             </button>
           </div>
         </div>
@@ -274,7 +276,11 @@ export function CommerceDirectoryClient({ initialCommerces }: CommerceDirectoryC
           {filteredCommerces.map((comm) => (
             <div 
               key={comm.id} 
-              className="bg-white rounded-3xl overflow-hidden border border-slate-200 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col justify-between p-6 space-y-4 group hover:-translate-y-1"
+              onClick={(e) => {
+                if ((e.target as HTMLElement).closest('button, a')) return;
+                router.push(`/comercio/${comm.slug}`);
+              }}
+              className="bg-white rounded-3xl overflow-hidden border border-slate-200 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col justify-between p-6 space-y-4 group hover:-translate-y-1 cursor-pointer"
             >
               <div className="space-y-3">
                 <div className="flex items-center gap-4">

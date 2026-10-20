@@ -533,6 +533,7 @@ export async function saveBannerSlidesAction(
       titleLine1: p.title,
       location: p.city_tag,
       ctaHref: p.cta_url,
+      isExternal: Boolean((banners[idx] as any)?.isExternal || (p.cta_url || '').startsWith('http')),
       device: banners[idx]?.device || 'all',
     }));
 

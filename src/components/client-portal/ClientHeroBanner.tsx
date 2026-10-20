@@ -58,10 +58,33 @@ export function ClientHeroBanner({ provinceId = 'santa-fe' }: ClientHeroBannerPr
           const isCurrent = idx === currentIndex;
           const imgSrc = normalizeImageUrl(slide.imageUrl);
 
+          const targetHref = slide.ctaHref || `/${provinceId}`;
+          const isExternal = Boolean(slide.isExternal || targetHref.startsWith('http://') || targetHref.startsWith('https://'));
+
+          if (isExternal) {
+            return (
+              <a
+                key={slide.id || `slide-${idx}`}
+                href={targetHref}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={`absolute inset-0 block w-full h-full transition-opacity duration-700 ease-in-out cursor-pointer ${
+                  isCurrent ? 'opacity-100 z-10 pointer-events-auto' : 'opacity-0 z-0 pointer-events-none'
+                }`}
+              >
+                <img
+                  src={imgSrc}
+                  alt={slide.titleLine1 || 'Banner Publicitario'}
+                  className="w-full h-full object-cover object-center"
+                />
+              </a>
+            );
+          }
+
           return (
             <Link
               key={slide.id || `slide-${idx}`}
-              href={slide.ctaHref || `/${provinceId}`}
+              href={targetHref}
               className={`absolute inset-0 block w-full h-full transition-opacity duration-700 ease-in-out cursor-pointer ${
                 isCurrent ? 'opacity-100 z-10 pointer-events-auto' : 'opacity-0 z-0 pointer-events-none'
               }`}

@@ -3,6 +3,7 @@
 import React, { useState, useMemo } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { ArrowRight, MapPin, Store, MessageCircle, ShoppingBag } from 'lucide-react';
 import { Product } from '@/types';
 import { FavoriteButton } from '@/components/common/FavoriteButton';
@@ -98,6 +99,7 @@ export function FeaturedOffersGrid({
   selectedCategory = 'all',
   products: initialProducts = [],
 }: FeaturedOffersGridProps) {
+  const router = useRouter();
   // Merge live products with mockup items if live products are few
   const itemsToDisplay = useMemo(() => {
     let source = initialProducts && initialProducts.length > 0 
@@ -163,7 +165,11 @@ export function FeaturedOffersGrid({
         {itemsToDisplay.map((item) => (
           <div
             key={item.id}
-            className="group relative flex flex-row sm:flex-col justify-between rounded-2xl overflow-hidden bg-white border border-slate-200/90 hover:border-[#0047BA]/50 hover:shadow-md transition-all shadow-xs p-2 min-[360px]:p-2.5 sm:p-2.5 lg:p-3"
+            onClick={(e) => {
+              if ((e.target as HTMLElement).closest('button, [data-prevent-card-click="true"]')) return;
+              router.push(`/producto/${item.slug}`);
+            }}
+            className="group relative flex flex-row sm:flex-col justify-between rounded-2xl overflow-hidden bg-white border border-slate-200/90 hover:border-[#0047BA]/50 hover:shadow-md transition-all shadow-xs p-2 min-[360px]:p-2.5 sm:p-2.5 lg:p-3 cursor-pointer"
           >
             {/* Image Container (Left on mobile, Top on desktop con bordes redondeados) */}
             <div className="relative w-28 min-[360px]:w-32 min-[400px]:w-36 h-28 min-[360px]:h-32 min-[400px]:h-36 sm:w-full sm:h-auto sm:aspect-4/3 shrink-0 rounded-xl overflow-hidden bg-slate-100">

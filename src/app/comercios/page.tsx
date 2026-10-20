@@ -10,11 +10,11 @@ export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
 export const metadata: Metadata = {
-  title: 'Directorio Comercial & Empresas Adheridas | ON MÁS Portal',
-  description: 'Directorio unificado de comercios, marcas, talleres artesanales, gastronómicos y servicios verificados de Santa Fe, Entre Ríos y el Litoral. Venta directa por WhatsApp.',
+  title: 'Comercios e Industria Adherida | ON MÁS Portal',
+  description: 'Directorio unificado de comercios, marcas, industrias, talleres artesanales, gastronómicos y servicios verificados de Santa Fe, Entre Ríos y la Región Centro. Venta directa por WhatsApp.',
   openGraph: {
-    title: 'Directorio Comercial & Empresas | ON MÁS Portal',
-    description: 'Conectá directamente con más de 500 comercios y productores del Litoral.',
+    title: 'Comercios e Industria | ON MÁS Portal',
+    description: 'Conectá directamente con más de 500 comercios e industrias de la región.',
   },
 };
 
@@ -32,22 +32,22 @@ export default async function ComerciosPage() {
           <span>Inicio</span>
         </Link>
         <span className="text-white/40">/</span>
-        <span className="text-cyan-300 font-black">Directorio Comercial & Pymes</span>
+        <span className="text-cyan-300 font-black">Comercios e Industria</span>
       </div>
 
       {/* Page Hero Banner */}
       <div className="space-y-3">
         <div className="inline-flex items-center gap-2 bg-white/15 border border-white/20 text-[#00E5E8] text-xs font-extrabold px-3.5 py-1.5 rounded-full backdrop-blur-md">
           <Store className="w-4 h-4 text-[#00E5E8]" />
-          <span>Directorio Comercial, Pymes & Empresas</span>
+          <span>Directorio de Comercios e Industria</span>
         </div>
 
         <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black tracking-tight leading-tight">
-          Comercios, Pymes & Servicios de la Región
+          Comercios e Industria de la Región
         </h1>
 
         <p className="text-xs sm:text-sm text-slate-100 font-medium max-w-2xl leading-relaxed">
-          Conectá directamente con comercios verificados, tiendas online, pymes y servicios profesionales de toda la región.
+          Conectá directamente con comercios verificados, industrias, tiendas online, pymes y servicios profesionales de toda la región.
         </p>
       </div>
     </div>

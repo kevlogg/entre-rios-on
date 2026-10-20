@@ -3,6 +3,7 @@
 import React from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { MapPin, CheckCircle, MessageCircle, Store, Tag } from 'lucide-react';
 import { Product } from '@/types';
 import { trackWhatsAppClick } from '@/lib/analytics/events';
@@ -13,6 +14,7 @@ interface ProductCardProps {
 }
 
 export function ProductCard({ product }: ProductCardProps) {
+  const router = useRouter();
   const formatPrice = (price?: number | null, _currency: string = 'ARS') => {
     if (!price || isNaN(price) || price <= 0) return 'Consultar precio';
     return `$${new Intl.NumberFormat('es-AR').format(price)}`;
@@ -44,7 +46,13 @@ export function ProductCard({ product }: ProductCardProps) {
     : 'citrus-dulces-del-uruguay';
 
   return (
-    <article className="group bg-white hover:bg-white backdrop-blur-md rounded-2xl overflow-hidden border border-slate-200/90 hover:border-cyan-400 shadow-sm sm:shadow-lg hover:shadow-xl transition-all duration-300 flex flex-row sm:flex-col justify-between hover:-translate-y-0.5 relative text-slate-900 p-2 min-[360px]:p-2.5 sm:p-0">
+    <article
+      onClick={(e) => {
+        if ((e.target as HTMLElement).closest('button, [data-prevent-card-click="true"]')) return;
+        router.push(`/producto/${product.slug}`);
+      }}
+      className="group bg-white hover:bg-white backdrop-blur-md rounded-2xl overflow-hidden border border-slate-200/90 hover:border-cyan-400 shadow-sm sm:shadow-lg hover:shadow-xl transition-all duration-300 flex flex-row sm:flex-col justify-between hover:-translate-y-0.5 relative text-slate-900 p-2 min-[360px]:p-2.5 sm:p-0 cursor-pointer"
+    >
       {/* Product Image Container (Left on mobile, Top on desktop) */}
       <div className="relative w-24 min-[360px]:w-28 min-[400px]:w-32 h-24 min-[360px]:h-28 sm:h-44 sm:w-full shrink-0 overflow-hidden rounded-xl sm:rounded-none bg-slate-100">
         <Link href={`/producto/${product.slug}`} className="block w-full h-full">

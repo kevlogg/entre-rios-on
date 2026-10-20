@@ -201,13 +201,17 @@ export default async function CommerceDetailPage({ params }: PageProps) {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {products.map((prod) => (
-              <div key={prod.id} className="bg-white rounded-3xl overflow-hidden border border-slate-200 shadow-xs hover:shadow-md transition-shadow flex flex-col justify-between p-5 space-y-4">
+              <Link 
+                key={prod.id} 
+                href={`/producto/${prod.slug}`}
+                className="bg-white rounded-3xl overflow-hidden border border-slate-200 shadow-xs hover:shadow-lg transition-all flex flex-col justify-between p-5 space-y-4 group cursor-pointer hover:-translate-y-0.5"
+              >
                 <div className="relative h-44 w-full rounded-2xl overflow-hidden bg-slate-100">
-                  <Image src={prod.imageUrl} alt={prod.title} fill className="object-cover" />
+                  <Image src={prod.imageUrl} alt={prod.title} fill className="object-cover group-hover:scale-105 transition-transform duration-500" />
                 </div>
 
                 <div className="space-y-2 flex-1">
-                  <h3 className="font-bold text-slate-800 text-base line-clamp-2">{prod.title}</h3>
+                  <h3 className="font-bold text-slate-800 text-base line-clamp-2 group-hover:text-[#004b87] transition-colors">{prod.title}</h3>
                   <p className="text-xs text-slate-500 line-clamp-2">{prod.description}</p>
                 </div>
 
@@ -219,14 +223,11 @@ export default async function CommerceDetailPage({ params }: PageProps) {
                     </span>
                   </div>
 
-                  <Link
-                    href={`/producto/${prod.slug}`}
-                    className="bg-[#00a859] hover:bg-[#008746] text-white px-4 py-2 rounded-xl font-extrabold text-xs"
-                  >
+                  <span className="bg-[#00a859] group-hover:bg-[#008746] text-white px-4 py-2 rounded-xl font-extrabold text-xs transition-colors shadow-2xs">
                     Ver Detalle
-                  </Link>
+                  </span>
                 </div>
-              </div>
+              </Link>
             ))}
           </div>
         </section>

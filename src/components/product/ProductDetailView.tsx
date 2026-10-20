@@ -168,7 +168,7 @@ export function ProductDetailView({ product, commerce, relatedProducts = [] }: P
   );
 
   return (
-    <div className="max-w-[1400px] mx-auto space-y-6 pb-16 px-4 sm:px-6">
+    <div className="max-w-[1400px] mx-auto space-y-6 pb-16 px-0 sm:px-0">
       
       {showCopiedToast && (
         <div className="fixed bottom-6 right-6 z-50 bg-slate-900 text-white px-5 py-3 rounded-2xl shadow-2xl text-xs font-bold flex items-center gap-2 border border-cyan-400 animate-in fade-in slide-in-from-bottom-3 duration-200">
@@ -316,7 +316,7 @@ export function ProductDetailView({ product, commerce, relatedProducts = [] }: P
                   
                   {/* Precio por docena solo cuando se informe */}
                   {product.dozenPrice ? (
-                    <div className="inline-flex items-center gap-2 bg-blue-50 border border-blue-200 text-[#0047BA] px-3 py-1 rounded-xl text-xs sm:text-sm font-bold w-max shadow-2xs">
+                    <div className="inline-flex items-center gap-2 bg-blue-50 border border-blue-200 text-[#0047BA] px-3 py-1 rounded-xl text-xs sm:text-sm font-bold max-w-full flex-wrap shadow-2xs">
                       <span className="text-slate-600 font-medium">Precio por docena:</span>
                       <span className="font-black text-sm sm:text-base">${product.dozenPrice.toLocaleString('es-AR')} ARS</span>
                     </div>
@@ -329,8 +329,8 @@ export function ProductDetailView({ product, commerce, relatedProducts = [] }: P
               )}
 
               {/* Aclaración de disponibilidad como consulta al vendedor */}
-              <div className="inline-flex items-center gap-2 text-xs font-semibold text-slate-700 bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-full w-max">
-                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+              <div className="inline-flex items-center gap-2 text-xs font-semibold text-slate-700 bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-full max-w-full flex-wrap">
+                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shrink-0"></span>
                 <span>Disponibilidad: <strong className="text-slate-900 font-bold">Consultar con el comercio</strong></span>
               </div>
             </div>
@@ -344,12 +344,13 @@ export function ProductDetailView({ product, commerce, relatedProducts = [] }: P
           <div className="pt-5 space-y-2.5">
             <a
               href={waUrl}
+              data-whatsapp-cta="true"
               target="_blank"
               rel="noopener noreferrer"
-              className="w-full inline-flex items-center justify-center gap-2.5 bg-[#25D366] hover:bg-[#20ba5a] text-white py-3.5 px-5 rounded-2xl font-black text-xs uppercase tracking-wider shadow-md hover:shadow-lg transition-all active:scale-[0.99]"
+              className="w-full max-w-full inline-flex items-center justify-center gap-2 bg-[#25D366] hover:bg-[#20ba5a] text-white py-3.5 px-3 rounded-2xl font-black text-xs uppercase tracking-wider shadow-md hover:shadow-lg transition-all active:scale-[0.99] text-center"
             >
               <MessageCircle className="w-4 h-4 sm:w-5 sm:h-5 fill-current shrink-0" />
-              <span className="text-center">CONSULTAR AL COMERCIO POR WHATSAPP</span>
+              <span className="text-center leading-tight">CONSULTAR AL COMERCIO POR WHATSAPP</span>
             </a>
 
             {/* Nota aclaratoria concisa */}
@@ -432,24 +433,24 @@ export function ProductDetailView({ product, commerce, relatedProducts = [] }: P
       </div>
 
       {/* 5. BARRA DE ACCIONES (Guardar, Compartir, Visitas) */}
-      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm flex items-center justify-center gap-4 sm:gap-6 py-3.5 px-4 sm:px-6 divide-x divide-slate-200">
+      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm grid grid-cols-3 py-3 px-1 sm:px-6 divide-x divide-slate-200 text-xs sm:text-sm">
         <button 
           onClick={toggleFavorite} 
-          className="flex items-center gap-2 text-xs sm:text-sm font-black text-[#002878] hover:text-[#0047BA] transition-colors px-3 sm:px-6"
+          className="flex items-center justify-center gap-1 sm:gap-2 font-black text-[#002878] hover:text-[#0047BA] transition-colors px-1 sm:px-4 cursor-pointer"
         >
-          <Heart className={`w-4 h-4 sm:w-5 sm:h-5 ${isFavorite ? 'fill-rose-500 text-rose-500' : ''}`} />
-          <span>{isFavorite ? 'Guardado' : 'Guardar'}</span>
+          <Heart className={`w-4 h-4 sm:w-5 sm:h-5 shrink-0 ${isFavorite ? 'fill-rose-500 text-rose-500' : ''}`} />
+          <span className="truncate">{isFavorite ? 'Guardado' : 'Guardar'}</span>
         </button>
         <button 
           onClick={handleShare} 
-          className="flex items-center gap-2 text-xs sm:text-sm font-black text-[#002878] hover:text-[#0047BA] transition-colors px-3 sm:px-6"
+          className="flex items-center justify-center gap-1 sm:gap-2 font-black text-[#002878] hover:text-[#0047BA] transition-colors px-1 sm:px-4 cursor-pointer"
         >
-          <Share2 className="w-4 h-4 sm:w-5 sm:h-5" />
-          <span>Compartir</span>
+          <Share2 className="w-4 h-4 sm:w-5 sm:h-5 shrink-0" />
+          <span className="truncate">Compartir</span>
         </button>
-        <div className="flex items-center gap-2 text-xs sm:text-sm font-black text-slate-700 px-3 sm:px-6">
-          <Eye className="w-4 h-4 sm:w-5 sm:h-5 text-[#00ADB5]" />
-          <span>{views} {views === 1 ? 'visita' : 'visitas'}</span>
+        <div className="flex items-center justify-center gap-1 sm:gap-2 font-black text-slate-700 px-1 sm:px-4">
+          <Eye className="w-4 h-4 sm:w-5 sm:h-5 text-[#00ADB5] shrink-0" />
+          <span className="truncate">{views} {views === 1 ? 'visita' : 'visitas'}</span>
         </div>
       </div>
 
