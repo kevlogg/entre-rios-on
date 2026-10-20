@@ -22,7 +22,7 @@ interface ClientHomeContainerProps {
 export function ClientHomeContainer({ provinceId, initialProducts = [] }: ClientHomeContainerProps) {
   const pathname = usePathname();
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
-  const [activeProvince, setActiveProvince] = useState<string>(provinceId || 'santa-fe');
+  const [activeProvince, setActiveProvince] = useState<string | null>(provinceId || null);
 
   // Dynamic Side Banners loaded from SuperAdmin / Supabase
   const sideBanners = useSideBanners();
@@ -55,11 +55,11 @@ export function ClientHomeContainer({ provinceId, initialProducts = [] }: Client
         }
       }
     }
-    setActiveProvince('santa-fe');
+    setActiveProvince(null);
   }, [pathname, provinceId]);
 
   return (
-    <div className="w-full bg-[#cbd5e1] text-slate-900 min-h-screen flex flex-col">
+    <div className="w-full bg-[#e2e8f0] text-slate-900 min-h-screen flex flex-col">
       {/* 1. Header Oficial (Top Bar Blanca + Subnav Degradé ON+) */}
       <ClientHeader />
 
@@ -70,7 +70,7 @@ export function ClientHomeContainer({ provinceId, initialProducts = [] }: Client
         {/* MOBILE VIEW (< lg): Hero Banner Principal                                 */}
         {/* ========================================================================= */}
         <div className="lg:hidden w-full mb-2.5">
-          <ClientHeroBanner provinceId={activeProvince} />
+          <ClientHeroBanner provinceId={activeProvince || undefined} />
         </div>
 
         {/* ========================================================================= */}
@@ -117,11 +117,11 @@ export function ClientHomeContainer({ provinceId, initialProducts = [] }: Client
 
           {/* COLUMNA CENTRAL: Hero + Ciudades + Categorías + Productos + Secciones Destacadas + Quiénes Somos */}
           <main className="w-full min-w-0 space-y-3 sm:space-y-4">
-            {/* 1. Banner Principal de Santa Fe (Cargado dinámicamente desde SuperAdmin) */}
-            <ClientHeroBanner provinceId={activeProvince} />
+            {/* 1. Banner Principal de Portada / Provincia (Cargado dinámicamente desde SuperAdmin) */}
+            <ClientHeroBanner provinceId={activeProvince || undefined} />
 
-            {/* 2. Explorá por Ciudad · Santa Fe (8 Ciudades) */}
-            <CityExploreBar provinceId={activeProvince} />
+            {/* 2. Explorá por Ciudad (Sólo se muestra si hay provincia seleccionada) */}
+            {activeProvince && <CityExploreBar provinceId={activeProvince} />}
 
             {/* 3. Categorías Principales (8 Categorías Compactas con Fotos Reales) */}
             <CategoryIconBar
@@ -183,8 +183,8 @@ export function ClientHomeContainer({ provinceId, initialProducts = [] }: Client
         {/* MOBILE CONTINUACIÓN (< lg): Resto de secciones en flujo continuo          */}
         {/* ========================================================================= */}
         <div className="lg:hidden w-full space-y-2 mt-2">
-          {/* Explorá por Ciudad */}
-          <CityExploreBar provinceId={activeProvince} />
+          {/* Explorá por Ciudad (Sólo se muestra si hay provincia seleccionada) */}
+          {activeProvince && <CityExploreBar provinceId={activeProvince} />}
 
           {/* Categorías Principales */}
           <CategoryIconBar

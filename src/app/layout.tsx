@@ -121,7 +121,7 @@ export default function RootLayout({
         />
       </head>
       <body 
-        className="min-h-screen flex flex-col text-slate-900 bg-[#cbd5e1] antialiased selection:bg-[#00C7B7] selection:text-white app-compact-scale"
+        className="min-h-screen flex flex-col text-slate-900 bg-[#e2e8f0] antialiased selection:bg-[#00C7B7] selection:text-white app-compact-scale"
         style={{ colorScheme: 'light' }}
       >
         <main className="flex-1">

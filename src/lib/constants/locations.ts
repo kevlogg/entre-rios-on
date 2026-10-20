@@ -266,9 +266,13 @@ export const VALID_SECTION_SLUGS: Record<string, { name: string; description: st
     name: 'Mi Sitio Web Propio',
     description: 'Servicio de desarrollo de sitios web corporativos y tiendas online.',
   },
+  'novedades': {
+    name: 'Novedades & Agenda Regional',
+    description: 'Eventos, agenda de novedades, festivales y noticias regionales.',
+  },
   'comunidad': {
-    name: 'Comunidad & Agenda Cultural',
-    description: 'Eventos, agenda cultural, festivales y noticias regionales.',
+    name: 'Novedades & Agenda Regional',
+    description: 'Eventos, agenda de novedades, festivales y noticias regionales.',
   },
   'turismo': {
     name: 'Turismo & Posadas',

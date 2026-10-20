@@ -18,7 +18,9 @@ import {
   ShoppingBag,
   Star,
   ShieldCheck,
-  Info
+  Info,
+  Maximize2,
+  X
 } from 'lucide-react';
 import { Product, Commerce } from '@/types';
 import { ProductRatingWidget } from '@/components/product/ProductRatingWidget';
@@ -56,8 +58,30 @@ export function ProductDetailView({ product, commerce, relatedProducts = [] }: P
   const [activeImageIndex, setActiveImageIndex] = useState<number>(0);
   const [isFavorite, setIsFavorite] = useState<boolean>(false);
   const [showCopiedToast, setShowCopiedToast] = useState<boolean>(false);
+  const [isZoomOpen, setIsZoomOpen] = useState<boolean>(false);
   
-  const views = (product as any).viewsCount || 0;
+  const [views, setViews] = useState<number>(Number((product as any).viewsCount || 0));
+
+  useEffect(() => {
+    async function trackProductVisit() {
+      try {
+        const targetId = product.slug || product.id;
+        if (!targetId) return;
+        const res = await fetch(`/api/lead/product-view?productId=${encodeURIComponent(targetId)}`, {
+          cache: 'no-store',
+        });
+        if (res.ok) {
+          const data = await res.json();
+          if (data.viewsCount !== undefined) {
+            setViews(data.viewsCount);
+          }
+        }
+      } catch (err) {
+        console.warn('Error registrando visita de producto:', err);
+      }
+    }
+    trackProductVisit();
+  }, [product.id, product.slug]);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -156,18 +180,18 @@ export function ProductDetailView({ product, commerce, relatedProducts = [] }: P
       {/* 2. ESTRUCTURA PRINCIPAL DE LA PUBLICACIÓN */}
       <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex flex-col lg:flex-row lg:divide-x divide-slate-100">
         
-        {/* A. GALERÍA DEL PRODUCTO (Izquierda) */}
-        <div className="lg:w-[38%] flex flex-col md:flex-row p-5 sm:p-6 gap-4 sm:gap-6">
+        {/* A. GALERÍA DEL PRODUCTO (Izquierda - 48% para imagen amplia y completa) */}
+        <div className="lg:w-[48%] flex flex-col md:flex-row p-4 sm:p-6 gap-3 sm:gap-5">
           
           {/* Miniaturas */}
           {gallery.length > 1 && (
-            <div className="flex md:flex-col gap-2.5 overflow-x-auto md:overflow-y-auto scrollbar-none order-2 md:order-1">
+            <div className="flex md:flex-col gap-2.5 overflow-x-auto md:overflow-y-auto scrollbar-none order-2 md:order-1 shrink-0">
               {gallery.slice(0, 5).map((img, idx) => (
                 <button
                   key={idx}
                   onClick={() => setActiveImageIndex(idx)}
-                  className={`w-14 h-14 sm:w-16 sm:h-16 shrink-0 rounded-xl overflow-hidden border-2 transition-all bg-white ${
-                    activeImageIndex === idx ? 'border-[#0047BA]' : 'border-slate-200 opacity-70 hover:opacity-100'
+                  className={`w-14 h-14 sm:w-16 sm:h-16 shrink-0 rounded-xl overflow-hidden border-2 transition-all bg-white cursor-pointer ${
+                    activeImageIndex === idx ? 'border-[#0047BA] shadow-xs' : 'border-slate-200 opacity-70 hover:opacity-100'
                   }`}
                   aria-label={`Ver foto ${idx + 1}`}
                 >
@@ -177,13 +201,24 @@ export function ProductDetailView({ product, commerce, relatedProducts = [] }: P
             </div>
           )}
 
-          {/* Imagen Principal */}
-          <div className="relative flex-1 aspect-square md:aspect-auto md:h-[420px] bg-white rounded-2xl overflow-hidden order-1 md:order-2 group border border-slate-100">
+          {/* Imagen Principal Adaptable */}
+          <div className="relative flex-1 aspect-square sm:aspect-[4/3] md:min-h-[440px] md:max-h-[540px] bg-slate-50/80 rounded-2xl overflow-hidden order-1 md:order-2 group border border-slate-100 flex items-center justify-center p-1 sm:p-2">
             <img
               src={gallery[activeImageIndex]}
               alt={product.title}
-              className="w-full h-full object-contain p-2 sm:p-4"
+              className="w-full h-full object-contain cursor-zoom-in transition-transform duration-300 group-hover:scale-[1.01]"
+              onClick={() => setIsZoomOpen(true)}
             />
+            
+            {/* Botón de Zoom / Pantalla Completa */}
+            <button
+              onClick={() => setIsZoomOpen(true)}
+              className="absolute bottom-3 right-3 w-8 h-8 rounded-full bg-white/95 backdrop-blur-xs border border-slate-200 shadow-xs flex items-center justify-center text-slate-700 hover:text-[#0047BA] transition-colors cursor-pointer opacity-80 group-hover:opacity-100"
+              title="Ampliar imagen a pantalla completa"
+              aria-label="Ampliar imagen"
+            >
+              <Maximize2 className="w-4 h-4" />
+            </button>
             
             {gallery.length > 1 && (
               <>
@@ -234,8 +269,8 @@ export function ProductDetailView({ product, commerce, relatedProducts = [] }: P
           </div>
         </div>
 
-        {/* B. INFORMACIÓN PRINCIPAL (Centro) */}
-        <div className="lg:w-[34%] p-5 sm:p-7 flex flex-col justify-between border-t lg:border-t-0 border-slate-100">
+        {/* B. INFORMACIÓN PRINCIPAL (Centro - 28%) */}
+        <div className="lg:w-[28%] p-5 sm:p-6 flex flex-col justify-between border-t lg:border-t-0 border-slate-100">
           <div className="space-y-4">
             <div>
               <div className="flex items-center gap-2 mb-2">
@@ -327,8 +362,8 @@ export function ProductDetailView({ product, commerce, relatedProducts = [] }: P
           </div>
         </div>
 
-        {/* C. IDENTIDAD DEL COMERCIO Y SELLO DE VISITA (Derecha) */}
-        <div className="lg:w-[28%] p-5 sm:p-6 flex flex-col justify-between bg-slate-50/50 border-t lg:border-t-0 border-slate-100">
+        {/* C. IDENTIDAD DEL COMERCIO Y SELLO DE VISITA (Derecha - 24%) */}
+        <div className="lg:w-[24%] p-4 sm:p-5 flex flex-col justify-between bg-slate-50/50 border-t lg:border-t-0 border-slate-100">
           <div className="space-y-4">
             
             {/* Perfil del comercio */}
@@ -412,11 +447,38 @@ export function ProductDetailView({ product, commerce, relatedProducts = [] }: P
           <Share2 className="w-4 h-4 sm:w-5 sm:h-5" />
           <span>Compartir</span>
         </button>
-        <div className="flex items-center gap-2 text-xs sm:text-sm font-black text-slate-500 px-3 sm:px-6">
-          <Eye className="w-4 h-4 sm:w-5 sm:h-5" />
-          <span>{views} visitas</span>
+        <div className="flex items-center gap-2 text-xs sm:text-sm font-black text-slate-700 px-3 sm:px-6">
+          <Eye className="w-4 h-4 sm:w-5 sm:h-5 text-[#00ADB5]" />
+          <span>{views} {views === 1 ? 'visita' : 'visitas'}</span>
         </div>
       </div>
+
+      {/* Modal Zoom / Lightbox Pantalla Completa */}
+      {isZoomOpen && (
+        <div 
+          className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-200 cursor-zoom-out"
+          onClick={() => setIsZoomOpen(false)}
+        >
+          <div 
+            className="relative max-w-5xl max-h-[90vh] w-full flex flex-col items-center justify-center"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              onClick={() => setIsZoomOpen(false)}
+              className="absolute -top-12 right-0 text-white/90 hover:text-white flex items-center gap-1.5 text-xs font-black uppercase tracking-wider bg-white/15 hover:bg-white/25 px-3.5 py-1.5 rounded-full transition-colors cursor-pointer border border-white/20"
+            >
+              <X className="w-4 h-4" />
+              <span>Cerrar</span>
+            </button>
+
+            <img
+              src={gallery[activeImageIndex]}
+              alt={product.title}
+              className="max-w-full max-h-[85vh] object-contain rounded-2xl shadow-2xl bg-white/5"
+            />
+          </div>
+        </div>
+      )}
 
       {/* 6. UBICACIÓN O ZONA COMERCIAL DEL COMERCIO */}
       <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">

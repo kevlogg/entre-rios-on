@@ -26,7 +26,7 @@ function DynamicLayoutContent({ children, heroContent }: DynamicLayoutWrapperPro
   const rightBottomBanner = rightBanners[1] || sideBanners[3] || rightBanners[0];
 
   return (
-    <div className="w-full bg-[#cbd5e1] text-slate-900 min-h-screen flex flex-col">
+    <div className="w-full bg-[#e2e8f0] text-slate-900 min-h-screen flex flex-col">
       {/* 1. Header Oficial (Top Bar Blanca + Subnav Degradé ON+) */}
       <ClientHeader />
 

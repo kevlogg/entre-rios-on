@@ -17,12 +17,15 @@ export interface ProvinceItem {
   slug: string;
   isActive: boolean;
   badge?: string;
+  badgeColor?: string;
   cities?: ProvinceCityItem[];
 }
 
 export const DEFAULT_PROVINCES_CONFIG: ProvinceItem[] = [
-  { id: 'santa-fe', name: 'Santa Fe', slug: 'santa-fe', isActive: true, badge: 'Provincia Activa' },
-  { id: 'entre-rios', name: 'Entre Ríos', slug: 'entre-rios', isActive: false, badge: 'Próximamente' },
+  { id: 'santa-fe', name: 'Santa Fe', slug: 'santa-fe', isActive: true, badge: 'Provincia Activa', badgeColor: '#0047BA' },
+  { id: 'entre-rios', name: 'Entre Ríos', slug: 'entre-rios', isActive: false, badge: 'Próximamente', badgeColor: '#00A859' },
+  { id: 'cordoba', name: 'Córdoba', slug: 'cordoba', isActive: false, badge: 'Próximamente', badgeColor: '#00529B' },
+  { id: 'buenos-aires', name: 'Buenos Aires', slug: 'buenos-aires', isActive: false, badge: 'Próximamente', badgeColor: '#047857' },
 ];
 
 const PROVINCE_STORAGE_KEY = 'onmas_province_config_v1';

@@ -8,7 +8,7 @@ import ComerciosPage from '@/app/comercios/page';
 import CatalogoPage from '@/app/catalogo/page';
 import SorteosPage from '@/app/sorteos/page';
 import EmpleosPage from '@/app/empleos/page';
-import ComunidadPage from '@/app/comunidad/page';
+import NovedadesPage from '@/app/novedades/page';
 import TurismoPage from '@/app/turismo/page';
 
 export const revalidate = 60;
@@ -104,8 +104,9 @@ export default async function GeoSectionPage({ params }: GeoSectionPageProps) {
     case 'empleos':
     case 'clasificados':
       return <EmpleosPage />;
+    case 'novedades':
     case 'comunidad':
-      return <ComunidadPage />;
+      return <NovedadesPage />;
     case 'turismo':
       return <TurismoPage />;
     default:

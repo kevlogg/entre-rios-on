@@ -37,7 +37,7 @@ export function CityExploreBar({ provinceId = 'santa-fe' }: CityExploreBarProps)
       <div className="flex items-center justify-between mb-2 sm:mb-2.5">
         <h2 className="text-sm sm:text-base lg:text-lg font-black text-slate-900 flex items-center gap-1.5">
           <span>Explorá por ciudad</span>
-          <span className="text-[#0047BA] font-black">· {currentProvince.name}</span>
+          <span className="font-black" style={{ color: currentProvinceConfig?.badgeColor || '#0047BA' }}>· {currentProvince.name}</span>
         </h2>
 
         <Link

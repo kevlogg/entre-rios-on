@@ -47,7 +47,7 @@
 :root {
   color-scheme: light only !important;
   supported-color-schemes: light;
-  --background: #cbd5e1;
+  --background: #e2e8f0;
   --foreground: #0f172a;
 }
 
@@ -60,11 +60,11 @@ html {
 
 /* =============================================
    FONDO BASE — Identidad de Marca ON MÁS
-   Gris plomo moderno de alto contraste con tarjetas blancas
+   Gris claro contemporáneo de alto contraste con tarjetas blancas (#e2e8f0)
    ============================================= */
 body {
   color-scheme: light only !important;
-  background-color: #cbd5e1 !important;
+  background-color: #e2e8f0 !important;
   color: #0f172a !important;
   font-family: var(--font-inter), system-ui, -apple-system, sans-serif;
   margin: 0;
@@ -201,9 +201,9 @@ body {
   background: linear-gradient(115deg, #2563eb 0%, #4f46e5 18%, #7c3aed 36%, #c026d3 58%, #e11d48 80%, #ff4500 100%);
 }
 
-/* Fondo Gris Plomo característico ON MÁS */
+/* Fondo Gris Claro característico ON MÁS */
 .bg-brand-page-gradient {
-  background-color: #cbd5e1;
+  background-color: #e2e8f0;
 }
 
 .text-gradient-brand {

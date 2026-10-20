@@ -24,23 +24,11 @@ import {
 } from '@/lib/services/plans-config';
 
 
-function getNextMonthEffectiveDateText(): string {
-  const now = new Date();
-  const nextMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1);
-  const monthNames = [
-    'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
-    'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
-  ];
-  return `1° de ${monthNames[nextMonth.getMonth()]} de ${nextMonth.getFullYear()}`;
-}
-
 export function PlansManager() {
   const [plans, setPlans] = useState<PlanConfigItem[]>(DEFAULT_SUBSCRIPTION_PLANS);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [feedback, setFeedback] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
-
-  const nextMonthText = getNextMonthEffectiveDateText();
 
   const fetchPlans = async () => {
     setLoading(true);
@@ -85,7 +73,7 @@ export function PlansManager() {
       if (res.success) {
         setFeedback({
           type: 'success',
-          message: `¡Valores de los planes guardados exitosamente! Los nuevos precios entrarán en vigencia a partir del ${nextMonthText}.`,
+          message: '¡Valores de los planes guardados exitosamente! Los nuevos precios han sido actualizados y tienen vigencia inmediata en todo el portal.',
         });
       } else {
         setFeedback({ type: 'error', message: res.message || 'Ocurrió un error al guardar los cambios.' });
@@ -121,7 +109,7 @@ export function PlansManager() {
               Administrador de Valores de Planes
             </h2>
             <p className="text-slate-200 text-xs sm:text-sm font-medium leading-relaxed">
-              Configurá los precios mensuales y límites de catálogo para Comercios y Turismo. Los nuevos valores modificados empezarán a regir a partir del <strong className="text-amber-300 font-extrabold">{nextMonthText}</strong>.
+              Configurá los precios mensuales y límites de catálogo para Comercios y Turismo. Los nuevos valores modificados se aplican con <strong className="text-amber-300 font-extrabold">vigencia inmediata</strong> en todo el portal.
             </p>
           </div>
 
@@ -137,11 +125,11 @@ export function PlansManager() {
       </div>
 
       {/* Info Card */}
-      <div className="bg-blue-50/90 border border-blue-200 rounded-2xl p-4 flex items-start gap-3 text-xs text-slate-700">
-        <Info className="w-5 h-5 text-[#0047BA] shrink-0 mt-0.5" />
+      <div className="bg-emerald-50/90 border border-emerald-200 rounded-2xl p-4 flex items-start gap-3 text-xs text-slate-700">
+        <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0 mt-0.5" />
         <div>
-          <strong className="font-extrabold text-[#0047BA] block mb-0.5">Vigencia a Partir del 1° del Mes Siguiente:</strong>
-          Los cambios en los precios de las suscripciones se guardan en el sistema y entrarán en vigencia a partir del <strong className="text-slate-900 font-extrabold">{nextMonthText}</strong>. Aplican para Comercios y prestadores de Turismo.
+          <strong className="font-extrabold text-emerald-800 block mb-0.5">Vigencia Inmediata:</strong>
+          Los cambios en los precios de las suscripciones se guardan en el sistema y se aplican en el instante en todo el portal para nuevos registros y renovaciones de Comercios y Turismo.
         </div>
       </div>
 

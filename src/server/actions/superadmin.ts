@@ -688,12 +688,13 @@ export async function createCommunityArticleAction(articleData: {
       console.warn('Note on Supabase community article creation:', error.message);
     }
 
+    revalidatePath('/novedades');
     revalidatePath('/comunidad');
     revalidatePath('/superadmin');
     return {
       success: true,
       message: articleData.isSuperAdmin
-        ? 'Publicación subida exitosamente a la sección Comunidad.'
+        ? 'Publicación subida exitosamente a la sección Novedades.'
         : 'Nota enviada exitosamente. Quedó en revisión por el equipo OnMás antes de su publicación.',
     };
   } catch (err) {
@@ -739,13 +740,14 @@ export async function updateCommunityArticleAction(
       .eq('id', articleId);
 
     if (error) {
-      console.warn('Error actualizando nota de comunidad en Supabase:', error.message);
+      console.warn('Error actualizando nota en Supabase:', error.message);
       return { success: false, message: `Error en Supabase: ${error.message}` };
     }
 
+    revalidatePath('/novedades');
     revalidatePath('/comunidad');
     revalidatePath('/superadmin');
-    return { success: true, message: 'Nota de comunidad actualizada exitosamente.' };
+    return { success: true, message: 'Nota actualizada exitosamente.' };
   } catch (err) {
     return { success: false, message: `Error al actualizar nota: ${(err as Error).message}` };
   }
@@ -758,12 +760,13 @@ export async function approveCommunityArticleAction(articleId: string): Promise<
 
     const { error } = await client.from('community_events').update({ status: 'APPROVED' }).eq('id', articleId);
     if (error) {
-      console.warn('Error aprobando nota de comunidad en Supabase:', error.message);
+      console.warn('Error aprobando nota en Supabase:', error.message);
     }
 
+    revalidatePath('/novedades');
     revalidatePath('/comunidad');
     revalidatePath('/superadmin');
-    return { success: true, message: 'Nota de comunidad aprobada y publicada en la web.' };
+    return { success: true, message: 'Nota aprobada y publicada en la web.' };
   } catch (err) {
     return { success: false, message: `Error: ${(err as Error).message}` };
   }
@@ -776,12 +779,13 @@ export async function rejectCommunityArticleAction(articleId: string): Promise<{
 
     const { error } = await client.from('community_events').update({ status: 'REJECTED' }).eq('id', articleId);
     if (error) {
-      console.warn('Error rechazando nota de comunidad en Supabase:', error.message);
+      console.warn('Error rechazando nota en Supabase:', error.message);
     }
 
+    revalidatePath('/novedades');
     revalidatePath('/comunidad');
     revalidatePath('/superadmin');
-    return { success: true, message: 'Nota de comunidad rechazada.' };
+    return { success: true, message: 'Nota rechazada.' };
   } catch (err) {
     return { success: false, message: `Error: ${(err as Error).message}` };
   }
@@ -794,12 +798,13 @@ export async function deleteCommunityArticleAction(articleId: string): Promise<{
 
     const { error } = await client.from('community_events').delete().eq('id', articleId);
     if (error) {
-      console.warn('Error eliminando nota de comunidad en Supabase:', error.message);
+      console.warn('Error eliminando nota en Supabase:', error.message);
     }
 
+    revalidatePath('/novedades');
     revalidatePath('/comunidad');
     revalidatePath('/superadmin');
-    return { success: true, message: 'Nota de comunidad eliminada.' };
+    return { success: true, message: 'Nota eliminada.' };
   } catch (err) {
     return { success: false, message: `Error: ${(err as Error).message}` };
   }
@@ -1616,7 +1621,9 @@ export async function updateSubscriptionPlansAction(
     revalidatePath('/superadmin');
     revalidatePath('/comercios');
     revalidatePath('/turismo');
-    return { success: true, message: '¡Valores y configuración de los planes actualizados con éxito!' };
+    revalidatePath('/planes');
+    revalidatePath('/');
+    return { success: true, message: '¡Valores y configuración de los planes actualizados con éxito con vigencia inmediata!' };
   } catch (err) {
     return { success: false, message: `Error guardando planes: ${(err as Error).message}` };
   }

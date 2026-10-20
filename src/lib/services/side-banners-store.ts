@@ -52,8 +52,6 @@ let memoryStoreSideBanners: SideBannerItem[] | null = null;
 
 function normalizeSideBanners(stored: SideBannerItem[]): SideBannerItem[] {
   if (!Array.isArray(stored) || stored.length === 0) return DEFAULT_SIDE_BANNERS;
-  const isObsolete = stored.some((item) => typeof item.imageUrl === 'string' && item.imageUrl.includes('images.unsplash.com'));
-  if (isObsolete) return DEFAULT_SIDE_BANNERS;
 
   return stored.map((item, idx) => ({
     id: item.id || `side-banner-${idx}-${Date.now()}`,
@@ -66,7 +64,7 @@ function normalizeSideBanners(stored: SideBannerItem[]): SideBannerItem[] {
 }
 
 export function getSideBanners(): SideBannerItem[] {
-  if (memoryStoreSideBanners && Array.isArray(memoryStoreSideBanners)) {
+  if (memoryStoreSideBanners && Array.isArray(memoryStoreSideBanners) && memoryStoreSideBanners.length > 0) {
     return memoryStoreSideBanners;
   }
 
@@ -109,7 +107,7 @@ export async function fetchSideBannersFromSupabase(): Promise<SideBannerItem[]> 
   return getSideBanners();
 }
 
-export function saveSideBanners(banners: SideBannerItem[]): void {
+export async function saveSideBanners(banners: SideBannerItem[]): Promise<boolean> {
   memoryStoreSideBanners = banners;
 
   if (typeof window !== 'undefined') {
@@ -121,28 +119,36 @@ export function saveSideBanners(banners: SideBannerItem[]): void {
     }
   }
 
-  saveSideBannersAction(banners).catch((err) => {
+  try {
+    const res = await saveSideBannersAction(banners);
+    return res.success;
+  } catch (err) {
     console.warn('Error guardando banners laterales en Supabase:', err);
-  });
+    return false;
+  }
 }
 
 export function useSideBanners(): SideBannerItem[] {
   const [banners, setBanners] = useState<SideBannerItem[]>(() => getSideBanners());
 
   useEffect(() => {
+    let isMounted = true;
     const sync = () => {
-      setBanners(getSideBanners());
+      if (isMounted) {
+        setBanners(getSideBanners());
+      }
     };
 
-    sync();
-
-    fetchSideBannersFromSupabase().then(() => {
-      sync();
+    fetchSideBannersFromSupabase().then((remoteBanners) => {
+      if (isMounted && Array.isArray(remoteBanners) && remoteBanners.length > 0) {
+        setBanners(remoteBanners);
+      }
     });
 
     window.addEventListener('onmas_side_banners_updated', sync);
     window.addEventListener('storage', sync);
     return () => {
+      isMounted = false;
       window.removeEventListener('onmas_side_banners_updated', sync);
       window.removeEventListener('storage', sync);
     };

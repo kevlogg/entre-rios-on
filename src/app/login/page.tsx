@@ -163,6 +163,7 @@ function LoginFormContent() {
               city_id: effectiveCityId,
               city_name: effectiveCityName,
               is_online_only: isOnlineOnly,
+              is_digital_only: isOnlineOnly,
               role: computedRole,
             },
           },

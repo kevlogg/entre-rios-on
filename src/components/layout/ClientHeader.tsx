@@ -89,7 +89,7 @@ export function ClientHeader({ withBackground = false }: ClientHeaderProps = {})
   const pathname = usePathname();
   const router = useRouter();
 
-  const [selectedProvince, setSelectedProvince] = useState<string>('santa-fe');
+  const [selectedProvince, setSelectedProvince] = useState<string>('');
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   
@@ -228,10 +228,13 @@ export function ClientHeader({ withBackground = false }: ClientHeaderProps = {})
     const parts = pathname.split('/').filter(Boolean);
     if (parts.length > 0) {
       const provMatch = getProvinceBySlug(parts[0]);
-      if (provMatch) {
+      if (provMatch && provMatch.id !== 'all') {
         setSelectedProvince(provMatch.id);
+        return;
       }
     }
+    // Si estamos en la portada raíz "/" o sin provincia en URL, no preseleccionar provincia
+    setSelectedProvince('');
   }, [pathname]);
 
   const activeCitySlug = useMemo(() => {
@@ -249,8 +252,12 @@ export function ClientHeader({ withBackground = false }: ClientHeaderProps = {})
     return getCityBySlug(activeCitySlug);
   }, [activeCitySlug]);
 
-  const currentProvinceObj = activeProvinces.find((p) => p.id === selectedProvince || p.slug === selectedProvince) || activeProvinces[0] || { id: 'santa-fe', name: 'Santa Fe', slug: 'santa-fe' };
-  const currentTheme = PROVINCE_THEMES[currentProvinceObj.id] || PROVINCE_THEMES['santa-fe'];
+  const currentProvinceObj = selectedProvince
+    ? activeProvinces.find((p) => p.id === selectedProvince || p.slug === selectedProvince) || null
+    : null;
+  const currentTheme = currentProvinceObj
+    ? (PROVINCE_THEMES[currentProvinceObj.id] || PROVINCE_THEMES['santa-fe'])
+    : PROVINCE_THEMES['santa-fe'];
 
   const handleProvinceSelect = (provId: string) => {
     setSelectedProvince(provId);
@@ -326,9 +333,9 @@ export function ClientHeader({ withBackground = false }: ClientHeaderProps = {})
   ];
 
   return (
-    <header className="sticky top-0 z-50 shadow-sm bg-[#cbd5e1]">
-      {/* 1. TOP BAR GRIS PLOMO CON LOGO, SELECTOR DE PROVINCIA, BUSCADOR CENTRADO Y ACCESOS */}
-      <div className="bg-[#cbd5e1] border-b border-slate-300">
+    <header className="sticky top-0 z-50 shadow-sm bg-[#e2e8f0]">
+      {/* 1. TOP BAR GRIS CLARO CON LOGO, SELECTOR DE PROVINCIA, BUSCADOR CENTRADO Y ACCESOS */}
+      <div className="bg-[#e2e8f0] border-b border-slate-300">
         <div className="max-w-[1480px] mx-auto px-3 min-[360px]:px-4 sm:px-6 lg:px-8 h-18 sm:h-20 flex items-center justify-between gap-4">
           
           {/* Left: Logo ON+ Portal Comercial + Province Selector */}
@@ -345,23 +352,34 @@ export function ClientHeader({ withBackground = false }: ClientHeaderProps = {})
               </div>
             </Link>
 
-            {/* Selector de Provincia Prominente (Misma altura que el Logo, con color característico) */}
+            {/* Selector de Provincia Prominente */}
             <div ref={provinceContainerRef} className="relative flex items-center">
               <button
                 type="button"
                 onClick={() => setIsProvinceDropdownOpen(!isProvinceDropdownOpen)}
-                className={`relative flex items-center gap-2 sm:gap-2.5 px-2.5 sm:px-4 h-11 sm:h-14 lg:h-[62px] rounded-xl sm:rounded-2xl ${currentTheme.gradientClass} ${currentTheme.borderClass} ${currentTheme.shadowClass} border transition-all duration-200 cursor-pointer group hover:scale-[1.02] active:scale-[0.98] shrink-0 text-white select-none`}
+                className={`relative flex items-center gap-2 sm:gap-2.5 px-2.5 sm:px-4 h-11 sm:h-14 lg:h-[62px] rounded-xl sm:rounded-2xl ${
+                  currentProvinceObj
+                    ? `${currentTheme.gradientClass} ${currentTheme.borderClass} ${currentTheme.shadowClass}`
+                    : 'bg-gradient-to-r from-[#002878] via-[#0047BA] to-[#00ADB5] border-cyan-400/40 hover:border-cyan-300 shadow-md shadow-blue-950/20'
+                } border transition-all duration-200 cursor-pointer group hover:scale-[1.02] active:scale-[0.98] shrink-0 text-white select-none`}
                 title="Cambiar Provincia o Región"
               >
-                <div className="w-7 h-7 sm:w-9 sm:h-9 lg:w-10 lg:h-10 rounded-lg sm:rounded-xl bg-white/20 flex items-center justify-center shrink-0 border border-white/20 group-hover:bg-white/30 transition-colors shadow-2xs">
+                <div 
+                  className="w-7 h-7 sm:w-9 sm:h-9 lg:w-10 lg:h-10 rounded-lg sm:rounded-xl flex items-center justify-center shrink-0 border border-white/20 group-hover:bg-white/30 transition-colors shadow-2xs"
+                  style={{
+                    backgroundColor: currentProvinceObj?.badgeColor
+                      ? `${currentProvinceObj.badgeColor}`
+                      : 'rgba(255, 255, 255, 0.2)'
+                  }}
+                >
                   <MapPin className="w-3.5 h-3.5 sm:w-4 sm:h-4 lg:w-5 lg:h-5 text-white drop-shadow-xs" />
                 </div>
                 <div className="flex flex-col text-left justify-center min-w-0 pr-0.5 sm:pr-1">
                   <span className="text-[8px] sm:text-[9px] lg:text-[10px] font-black uppercase tracking-wider text-white/80 leading-none">
-                    {activeCityObj ? currentProvinceObj.name.toUpperCase() : currentTheme.sublabel}
+                    {activeCityObj ? currentProvinceObj?.name.toUpperCase() : (currentProvinceObj ? currentTheme.sublabel : 'UBICACIÓN')}
                   </span>
-                  <span className="text-xs sm:text-sm lg:text-[15px] font-black text-white leading-tight truncate max-w-[90px] sm:max-w-[140px] lg:max-w-[180px] drop-shadow-xs">
-                    {activeCityObj ? activeCityObj.name : currentProvinceObj.name}
+                  <span className="text-xs sm:text-sm lg:text-[15px] font-black text-white leading-tight truncate max-w-[110px] sm:max-w-[160px] lg:max-w-[200px] drop-shadow-xs">
+                    {activeCityObj ? activeCityObj.name : (currentProvinceObj ? currentProvinceObj.name : 'Selecciona tu provincia')}
                   </span>
                 </div>
                 <ChevronDown className={`w-3.5 h-3.5 sm:w-4 sm:h-4 text-white/80 shrink-0 transition-transform duration-200 ${isProvinceDropdownOpen ? 'rotate-180' : ''}`} />
@@ -370,12 +388,13 @@ export function ClientHeader({ withBackground = false }: ClientHeaderProps = {})
               {isProvinceDropdownOpen && (
                 <div className="absolute top-full left-0 mt-2 w-64 bg-white border border-slate-200 rounded-2xl shadow-2xl py-2 z-50 animate-in fade-in duration-100 divide-y divide-slate-100">
                   <div className="px-3.5 py-1.5 text-[10px] font-black text-slate-400 uppercase tracking-wider">
-                    Provincias Disponibles
+                    Selecciona tu Provincia
                   </div>
                   <div className="py-1">
                     {activeProvinces.map((prov) => {
                       const theme = PROVINCE_THEMES[prov.id] || PROVINCE_THEMES['santa-fe'];
                       const isSelected = selectedProvince === prov.id || selectedProvince === prov.slug;
+                      const color = prov.badgeColor || theme.accentHex;
                       return (
                         <button
                           key={prov.id}
@@ -390,16 +409,24 @@ export function ClientHeader({ withBackground = false }: ClientHeaderProps = {})
                           <div className="flex items-center gap-2.5 min-w-0">
                             <span
                               className="w-3.5 h-3.5 rounded-full shrink-0 shadow-xs border border-white"
-                              style={{ backgroundColor: theme.accentHex }}
+                              style={{ backgroundColor: color }}
                             />
                             <span className="truncate">{prov.name}</span>
                           </div>
                           {isSelected && (
                             <span
                               className="text-[9px] font-black px-2 py-0.5 rounded-full text-white"
-                              style={{ backgroundColor: theme.accentHex }}
+                              style={{ backgroundColor: color }}
                             >
                               Activa
+                            </span>
+                          )}
+                          {!isSelected && prov.badge && (
+                            <span
+                              className="text-[9px] font-bold px-2 py-0.5 rounded-full text-white/90"
+                              style={{ backgroundColor: color }}
+                            >
+                              {prov.badge}
                             </span>
                           )}
                         </button>
@@ -597,7 +624,7 @@ export function ClientHeader({ withBackground = false }: ClientHeaderProps = {})
 
       {/* Mobile Search Expandable */}
       {isMobileSearchOpen && (
-        <div className="lg:hidden px-4 py-2.5 bg-[#cbd5e1] border-b border-slate-300 animate-in slide-in-from-top-2 duration-150">
+        <div className="lg:hidden px-4 py-2.5 bg-[#e2e8f0] border-b border-slate-300 animate-in slide-in-from-top-2 duration-150">
           <form 
             onSubmit={(e) => { 
               handleSearchSubmit(e); 
@@ -741,13 +768,14 @@ export function ClientHeader({ withBackground = false }: ClientHeaderProps = {})
 
       {/* Mobile Drawer Menu */}
       {isMobileMenuOpen && (
-        <div className="lg:hidden bg-[#cbd5e1] border-b border-slate-300 px-4 pt-3 pb-5 space-y-3 animate-in fade-in duration-200 text-slate-800">
+        <div className="lg:hidden bg-[#e2e8f0] border-b border-slate-300 px-4 pt-3 pb-5 space-y-3 animate-in fade-in duration-200 text-slate-800">
           <div className="flex flex-col gap-1.5 border-b border-slate-300/80 pb-3">
             <label className="text-[10px] font-black uppercase tracking-wider text-slate-600">Provincia</label>
             <div className="flex flex-wrap gap-2">
               {activeProvinces.map((prov) => {
                 const theme = PROVINCE_THEMES[prov.id] || PROVINCE_THEMES['santa-fe'];
                 const isSelected = selectedProvince === prov.id || selectedProvince === prov.slug;
+                const color = prov.badgeColor || theme.accentHex;
                 return (
                   <button
                     key={prov.id}
@@ -760,7 +788,7 @@ export function ClientHeader({ withBackground = false }: ClientHeaderProps = {})
                   >
                     <span
                       className="w-2.5 h-2.5 rounded-full shrink-0 border border-white/60"
-                      style={{ backgroundColor: theme.accentHex }}
+                      style={{ backgroundColor: color }}
                     />
                     <span>{prov.name}</span>
                   </button>

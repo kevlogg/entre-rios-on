@@ -254,13 +254,13 @@ export function NewsManager({ events: initialEvents }: NewsManagerProps) {
           <div>
             <span className="text-xs font-black uppercase tracking-widest text-amber-700 flex items-center gap-1.5">
               <Clock className="w-4 h-4 text-amber-600" />
-              Moderación de Notas de la Comunidad
+              Moderación de Novedades y Notas
             </span>
             <h3 className="text-xl font-black text-slate-900 mt-1">
               Notas Propuestas Pendientes de Aprobación ({pendingEvents.length})
             </h3>
             <p className="text-xs text-slate-500">
-              Noticias enviadas por usuarios registrados desde la sección /comunidad que requieren ser revisadas antes de ser visibles.
+              Noticias y novedades enviadas por usuarios registrados desde la sección /novedades que requieren ser revisadas antes de ser visibles.
             </p>
           </div>
 
@@ -343,10 +343,10 @@ export function NewsManager({ events: initialEvents }: NewsManagerProps) {
           <div>
             <h3 className="text-xl font-black text-[#0047BA] flex items-center gap-2">
               <Users className="w-5 h-5 text-[#00ADB5]" />
-              <span>Gestión de Comunidad ON MÁS & Publicaciones Editoriales</span>
+              <span>Gestión de Novedades ON MÁS & Publicaciones Editoriales</span>
             </h3>
             <p className="text-xs text-slate-500 font-medium mt-1">
-              Redactá artículos, historias de emprendedores, noticias y comunicados oficiales que se visualizan en la sección /comunidad del portal.
+              Redactá artículos, historias de emprendedores, noticias y comunicados oficiales que se visualizan en la sección /novedades del portal.
             </p>
           </div>
 

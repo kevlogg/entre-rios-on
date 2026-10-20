@@ -46,6 +46,7 @@ export function GeoCustomizerManager({ initialCities }: GeoCustomizerManagerProp
   // Form para crear nueva provincia
   const [newProvinceName, setNewProvinceName] = useState('');
   const [newProvinceBadge, setNewProvinceBadge] = useState('Próximamente');
+  const [newProvinceBadgeColor, setNewProvinceBadgeColor] = useState('#0047BA');
   const [newProvinceIsActive, setNewProvinceIsActive] = useState(false);
   const [showAddProvinceForm, setShowAddProvinceForm] = useState(false);
 
@@ -202,6 +203,7 @@ export function GeoCustomizerManager({ initialCities }: GeoCustomizerManagerProp
       slug,
       isActive: newProvinceIsActive,
       badge: newProvinceBadge.trim() || 'Próximamente',
+      badgeColor: newProvinceBadgeColor,
       cities: defaultCitiesForNewProv,
     };
 
@@ -212,11 +214,21 @@ export function GeoCustomizerManager({ initialCities }: GeoCustomizerManagerProp
     setSelectedProvinceId(id);
     setNewProvinceName('');
     setNewProvinceBadge('Próximamente');
+    setNewProvinceBadgeColor('#0047BA');
     setNewProvinceIsActive(false);
     setShowAddProvinceForm(false);
 
     setSuccessMsg(`Provincia "${newProv.name}" creada exitosamente.`);
     setTimeout(() => setSuccessMsg(null), 4000);
+  };
+
+  // Actualizar color de badge para una provincia existente
+  const handleUpdateProvinceBadgeColor = (provId: string, color: string) => {
+    const updated = provinces.map((p) => (p.id === provId ? { ...p, badgeColor: color } : p));
+    setProvinces(updated);
+    saveProvincesConfig(updated);
+    setSuccessMsg('Color del badge de provincia actualizado.');
+    setTimeout(() => setSuccessMsg(null), 2500);
   };
 
   // Guardar ciudades para la provincia actual
@@ -479,7 +491,7 @@ export function GeoCustomizerManager({ initialCities }: GeoCustomizerManagerProp
               Nueva Provincia en Plataforma
             </h3>
 
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
               <div>
                 <label className="block text-xs font-bold text-slate-700 mb-1">Nombre de la Provincia *</label>
                 <input
@@ -501,6 +513,24 @@ export function GeoCustomizerManager({ initialCities }: GeoCustomizerManagerProp
                   onChange={(e) => setNewProvinceBadge(e.target.value)}
                   className="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs font-bold text-slate-800 focus:ring-2 focus:ring-[#00ADB5]"
                 />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1">Color del Badge</label>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="color"
+                    value={newProvinceBadgeColor}
+                    onChange={(e) => setNewProvinceBadgeColor(e.target.value)}
+                    className="w-10 h-9 rounded-xl border border-slate-300 cursor-pointer p-1 bg-white shadow-2xs"
+                  />
+                  <input
+                    type="text"
+                    value={newProvinceBadgeColor}
+                    onChange={(e) => setNewProvinceBadgeColor(e.target.value)}
+                    className="flex-1 bg-white border border-slate-300 rounded-xl px-2.5 py-2 text-xs font-mono font-bold text-slate-800 uppercase"
+                  />
+                </div>
               </div>
 
               <div>
@@ -577,6 +607,27 @@ export function GeoCustomizerManager({ initialCities }: GeoCustomizerManagerProp
                       <Trash2 className="w-4 h-4" />
                     </button>
                   </div>
+                </div>
+
+                {/* Personalización de color de badge para la provincia */}
+                <div className="flex items-center justify-between gap-2 bg-white/80 px-2.5 py-2 rounded-xl border border-slate-200 shadow-2xs">
+                  <div className="flex items-center gap-2">
+                    <label htmlFor={`color-${prov.id}`} className="text-[11px] font-bold text-slate-700">Color badge:</label>
+                    <input
+                      id={`color-${prov.id}`}
+                      type="color"
+                      value={prov.badgeColor || '#0047BA'}
+                      onChange={(e) => handleUpdateProvinceBadgeColor(prov.id, e.target.value)}
+                      className="w-7 h-7 rounded-lg border border-slate-300 cursor-pointer p-0.5 bg-white shadow-2xs"
+                      title="Elegí el color del badge para esta provincia"
+                    />
+                  </div>
+                  <span
+                    className="text-[10px] font-black px-2.5 py-0.5 rounded-full text-white shadow-2xs"
+                    style={{ backgroundColor: prov.badgeColor || '#0047BA' }}
+                  >
+                    {prov.badge || (prov.isActive ? 'Activa' : 'Próximamente')}
+                  </span>
                 </div>
 
                 <div className="pt-2 border-t border-slate-200 flex items-center justify-between">
@@ -1152,18 +1203,18 @@ export function GeoCustomizerManager({ initialCities }: GeoCustomizerManagerProp
           <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap">
             <button
               type="button"
-              onClick={() => {
+              onClick={async () => {
                 const newSideBanner: SideBannerItem = {
                   id: `side-${Date.now()}`,
                   title: 'NUEVA PUBLICIDAD LATERAL',
-                  imageUrl: 'https://images.unsplash.com/photo-1557804506-669a67965ba0?auto=format&fit=crop&w=400&q=80',
+                  imageUrl: '/banners/side-sorteo-del-mes.jpg',
                   href: '/planes',
                   position: 'both',
                   idealSize: '160 × 600 px (Rascacielos / Vertical HD)',
                 };
                 const updated = [...localSideBanners, newSideBanner];
                 setLocalSideBanners(updated);
-                saveSideBanners(updated);
+                await saveSideBanners(updated);
                 setSuccessMsg('Se ha agregado un nuevo banner lateral de publicidad.');
                 setTimeout(() => setSuccessMsg(null), 3500);
               }}
@@ -1175,9 +1226,14 @@ export function GeoCustomizerManager({ initialCities }: GeoCustomizerManagerProp
 
             <button
               type="button"
-              onClick={() => {
-                saveSideBanners(localSideBanners);
-                setSuccessMsg(`Se guardaron ${localSideBanners.length} banners laterales exitosamente.`);
+              onClick={async () => {
+                setSuccessMsg('Guardando banners laterales en Supabase...');
+                const ok = await saveSideBanners(localSideBanners);
+                if (ok) {
+                  setSuccessMsg(`Se guardaron ${localSideBanners.length} banners laterales exitosamente en la plataforma.`);
+                } else {
+                  setSuccessMsg(`Banners guardados localmente. Sincronización en curso.`);
+                }
                 setTimeout(() => setSuccessMsg(null), 3500);
               }}
               className="inline-flex items-center gap-2 bg-[#0047BA] hover:bg-[#002878] text-white px-4 py-2.5 rounded-2xl text-xs font-black shadow-md transition-all active:scale-95 cursor-pointer shrink-0"

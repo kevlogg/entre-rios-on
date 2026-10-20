@@ -42,6 +42,20 @@ const nextConfig: NextConfig = {
       },
     ];
   },
+  async redirects() {
+    return [
+      {
+        source: '/comunidad',
+        destination: '/novedades',
+        permanent: true,
+      },
+      {
+        source: '/comunidad/:id',
+        destination: '/novedades/:id',
+        permanent: true,
+      },
+    ];
+  },
 };
 
 export default nextConfig;

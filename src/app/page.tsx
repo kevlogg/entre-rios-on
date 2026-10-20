@@ -24,9 +24,9 @@ export default async function ClientHomePage({ searchParams }: ClientHomePagePro
   const products = await getFeaturedProducts();
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#cbd5e1]">
+    <div className="min-h-screen flex flex-col bg-[#e2e8f0]">
       {/* Contenedor principal */}
-      <main className="w-full flex-1 bg-[#cbd5e1]">
+      <main className="w-full flex-1 bg-[#e2e8f0]">
         <ClientHomeContainer initialProducts={products} />
       </main>
 

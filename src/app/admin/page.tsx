@@ -105,7 +105,12 @@ export default function AdminPage() {
           phoneWhatsApp: targetCommerce?.phone_whatsapp || profile?.phone_whatsapp || user.user_metadata?.phone_whatsapp || '',
           address: targetCommerce?.address ?? '',
           email: user.email || targetCommerce?.email || '',
-          isDigitalOnly: targetCommerce?.is_digital_only ?? user.user_metadata?.is_digital_only ?? false,
+          isDigitalOnly: Boolean(
+            targetCommerce?.is_digital_only ||
+            user.user_metadata?.is_digital_only ||
+            user.user_metadata?.is_online_only ||
+            targetCommerce?.province_id === 'online'
+          ),
           website: targetCommerce?.website || '',
           plan: mappedPlan,
         };

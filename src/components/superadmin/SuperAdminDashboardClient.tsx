@@ -59,6 +59,24 @@ export function SuperAdminDashboardClient({
     amount: string;
     dueDate: string;
   } | null>(null);
+  const [pendingCashCount, setPendingCashCount] = useState<number>(0);
+
+  const loadPendingCashPayments = async () => {
+    try {
+      const { getCashPaymentsAction } = await import('@/server/actions/superadmin');
+      const res = await getCashPaymentsAction();
+      if (res.success && Array.isArray(res.data)) {
+        const pending = res.data.filter((p) => {
+          const isNotKevin = !(p.ownerName || '').toLowerCase().includes('kevin') && !(p.commerceName || '').toLowerCase().includes('kevin');
+          const st = (p.status || 'PENDING').trim().toUpperCase();
+          return isNotKevin && (st === 'PENDING' || st === 'PENDIENTE' || st === 'PENDING_APPROVAL');
+        });
+        setPendingCashCount(pending.length);
+      }
+    } catch (e) {
+      console.warn('Error checking pending cash payments in dashboard:', e);
+    }
+  };
 
   const checkDebtFromPayments = (paymentsList: any[]) => {
     if (!Array.isArray(paymentsList)) return;
@@ -89,6 +107,7 @@ export function SuperAdminDashboardClient({
       }
     }
     loadKevDevPayments();
+    loadPendingCashPayments();
   }, []);
 
   useEffect(() => {
@@ -171,17 +190,25 @@ export function SuperAdminDashboardClient({
     icon: React.ElementType;
     badge?: string;
     badgeClass?: string;
+    hasRedDot?: boolean;
   }
 
   const tabs: TabDef[] = [
     { id: 'geo-customizer', label: 'Provincias y banners', icon: MapPin },
     { id: 'commerces', label: 'Comercios', icon: Store, badge: `${initialCommerces.length}` },
     { id: 'tourism', label: 'Turismo', icon: Compass },
-    { id: 'cash-payments', label: 'Pagos en efectivo', icon: CreditCard, badge: 'Nuevos' },
+    { 
+      id: 'cash-payments', 
+      label: 'Pagos en efectivo', 
+      icon: CreditCard, 
+      badge: pendingCashCount > 0 ? `${pendingCashCount} por aprobar` : undefined,
+      badgeClass: pendingCashCount > 0 ? 'bg-rose-500 text-white font-black animate-pulse shadow-xs' : undefined,
+      hasRedDot: pendingCashCount > 0,
+    },
     { id: 'subscription-plans', label: 'Planes', icon: DollarSign, badge: 'Valores' },
     { id: 'raffles', label: 'Sorteos', icon: Gift },
     { id: 'jobs', label: 'Empleos', icon: Briefcase },
-    { id: 'news', label: 'Comunidad', icon: Newspaper },
+    { id: 'news', label: 'Novedades', icon: Newspaper },
     { id: 'web-requests', label: 'Mi sitio web', icon: Globe, badge: 'Nuevos' },
     { id: 'qr-generator', label: 'Generador QR', icon: QrCode, badge: 'HD' },
     { 
@@ -293,7 +320,15 @@ export function SuperAdminDashboardClient({
                   }`}
                 >
                   <div className="flex items-center gap-3">
-                    <IconComp className={`w-4 h-4 shrink-0 ${isActive ? 'text-amber-300' : 'text-[#00ADB5]'}`} />
+                    <div className="relative flex items-center justify-center">
+                      <IconComp className={`w-4 h-4 shrink-0 ${isActive ? 'text-amber-300' : 'text-[#00ADB5]'}`} />
+                      {tab.hasRedDot && (
+                        <span className="absolute -top-1.5 -right-1.5 flex h-2.5 w-2.5">
+                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
+                          <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-rose-600 ring-2 ring-white"></span>
+                        </span>
+                      )}
+                    </div>
                     <span className="truncate">{tab.label}</span>
                   </div>
                   {tab.badge && (
@@ -320,7 +355,7 @@ export function SuperAdminDashboardClient({
           )}
 
           {activeTab === 'cash-payments' && (
-            <CashPaymentsManager />
+            <CashPaymentsManager onPaymentsUpdated={loadPendingCashPayments} />
           )}
 
           {activeTab === 'subscription-plans' && (

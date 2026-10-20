@@ -924,6 +924,7 @@ export async function getProductBySlug(slug: string): Promise<Product | undefine
           description: cleanDesc,
           phoneWhatsApp: data.phone_whatsapp,
           whatsappMessageCustom: data.whatsapp_message_custom,
+          viewsCount: (data as any).views_count ? Number((data as any).views_count) : 0,
         };
       }
     } catch (e) {

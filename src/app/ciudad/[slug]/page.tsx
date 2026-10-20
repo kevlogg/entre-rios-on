@@ -197,7 +197,7 @@ export default async function CityDetailPage({ params }: PageProps) {
                   <span className="text-xs font-bold text-[#00a859]">{evt.formattedDate}</span>
                   <h3 className="font-bold text-slate-900 text-lg">{evt.title}</h3>
                   <p className="text-xs text-slate-600 line-clamp-2">{evt.excerpt}</p>
-                  <Link href={`/comunidad/${evt.id}`} className="inline-block text-xs font-extrabold text-[#004b87] hover:underline pt-1">
+                  <Link href={`/novedades/${evt.id}`} className="inline-block text-xs font-extrabold text-[#004b87] hover:underline pt-1">
                     Leer nota completa →
                   </Link>
                 </div>

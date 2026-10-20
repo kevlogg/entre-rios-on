@@ -6,7 +6,7 @@ import Link from 'next/link';
 
 export function ClientFooter() {
   return (
-    <footer className="w-full bg-[#cbd5e1] border-t border-slate-300 pt-10 pb-8 text-slate-700">
+    <footer className="w-full bg-[#e2e8f0] border-t border-slate-300 pt-10 pb-8 text-slate-700">
       <div className="max-w-[1480px] mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Main Grid matching mockup */}
@@ -89,11 +89,11 @@ export function ClientFooter() {
           {/* Col 3: Comunidad */}
           <div className="space-y-2">
             <h4 className="text-xs font-black text-slate-900 tracking-wider">
-              Comunidad
+              Novedades
             </h4>
             <ul className="space-y-1.5 text-xs text-slate-700 font-semibold">
               <li><Link href="/clasificados" className="hover:text-[#0047BA] transition-colors">Empleos y avisos</Link></li>
-              <li><Link href="/comunidad" className="hover:text-[#0047BA] transition-colors">Eventos</Link></li>
+              <li><Link href="/novedades" className="hover:text-[#0047BA] transition-colors">Eventos & Agenda</Link></li>
               <li><Link href="/oportunidades" className="hover:text-[#0047BA] transition-colors">Ofertas y descuentos</Link></li>
               <li><Link href="/sorteos" className="hover:text-[#0047BA] transition-colors">Sorteos ON+</Link></li>
               <li><Link href="/novedades" className="hover:text-[#0047BA] transition-colors">Notas y novedades</Link></li>
@@ -107,7 +107,7 @@ export function ClientFooter() {
             </h4>
             <ul className="space-y-1.5 text-xs text-slate-700 font-semibold">
               <li><Link href="/quienes-somos" className="hover:text-[#0047BA] transition-colors">Quiénes somos</Link></li>
-              <li><Link href="/comunidad" className="hover:text-[#0047BA] transition-colors">Nuestro impacto</Link></li>
+              <li><Link href="/novedades" className="hover:text-[#0047BA] transition-colors">Nuestro impacto</Link></li>
               <li><Link href="/terminos" className="hover:text-[#0047BA] transition-colors">Términos y condiciones</Link></li>
               <li><Link href="/privacidad" className="hover:text-[#0047BA] transition-colors">Política de privacidad</Link></li>
               <li><Link href="/ayuda" className="hover:text-[#0047BA] transition-colors">Contacto</Link></li>

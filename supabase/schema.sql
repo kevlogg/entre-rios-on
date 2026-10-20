@@ -109,6 +109,7 @@ CREATE TABLE IF NOT EXISTS public.products (
 
 -- Migración: agregar columna gallery_images si la tabla products ya existe
 ALTER TABLE public.products ADD COLUMN IF NOT EXISTS gallery_images TEXT[];
+ALTER TABLE public.products ADD COLUMN IF NOT EXISTS views_count BIGINT DEFAULT 0;
 
 -- 5. TABLA DE NOTICIAS Y AGENDA CULTURAL REGIONAL
 CREATE TABLE IF NOT EXISTS public.community_events (

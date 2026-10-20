@@ -84,6 +84,7 @@ export interface Product {
   commercePlan?: 'Bronce' | 'Plata' | 'Oro';
   condition?: 'Nuevo' | 'Usado' | 'Reacondicionado';
   salesCount?: number;
+  viewsCount?: number;
   stock?: number;
   rating?: number;
   reviewCount?: number;

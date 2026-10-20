@@ -38,7 +38,11 @@ const isPendingStatus = (status?: string): boolean => {
   return s === 'PENDING' || s === 'PENDIENTE' || s === 'PENDING_APPROVAL';
 };
 
-export function CashPaymentsManager() {
+interface CashPaymentsManagerProps {
+  onPaymentsUpdated?: () => void;
+}
+
+export function CashPaymentsManager({ onPaymentsUpdated }: CashPaymentsManagerProps = {}) {
   const [requests, setRequests] = useState<CashPaymentRequest[]>([]);
   const [notification, setNotification] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
@@ -88,6 +92,7 @@ export function CashPaymentsManager() {
     try {
       await deleteCashPaymentAction(reqId);
       setRequests((prev) => prev.filter((r) => r.id !== reqId));
+      onPaymentsUpdated?.();
       setNotification(`Aviso de pago de "${commerceName}" eliminado.`);
       setTimeout(() => setNotification(null), 3000);
     } catch (err) {
@@ -105,6 +110,7 @@ export function CashPaymentsManager() {
     setRequests((prev) =>
       prev.map((r) => (r.id === reqId ? { ...r, status: 'APPROVED' } : r))
     );
+    onPaymentsUpdated?.();
 
     const isRenewal = paymentType === 'MONTHLY_RENEWAL';
     setNotification(

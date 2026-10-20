@@ -34,6 +34,7 @@ export async function updateCommerceProfileAction(
       if (profileData.cityName) updatePayload.city_name = profileData.cityName;
       if (profileData.website) updatePayload.website = profileData.website;
       if (profileData.slug) updatePayload.slug = profileData.slug;
+      if (profileData.isDigitalOnly !== undefined) updatePayload.is_digital_only = Boolean(profileData.isDigitalOnly);
 
       let targetId: string | null = null;
 
@@ -127,6 +128,7 @@ export async function updateCommerceProfileAction(
             logo_url: (profileData.logoUrl && !profileData.logoUrl.includes('city-rosario.jpg')) ? profileData.logoUrl : '',
             cover_url: (profileData.coverUrl && !profileData.coverUrl.includes('city-rosario.jpg')) ? profileData.coverUrl : '/images/default-commerce-cover.jpg',
             website: profileData.website || '',
+            is_digital_only: Boolean(profileData.isDigitalOnly),
             is_verified: true,
             is_subscription_active: false,
             owner_id: user.id,
@@ -320,6 +322,7 @@ export async function registerUserOnSignUpAction(data: {
               : `${data.businessName} - ${commerceCategory} en ${data.cityName} (${data.provinceId === 'santa-fe' ? 'Santa Fe' : 'Entre Ríos'}).`,
             phone_whatsapp: data.phoneWhatsApp || '',
             address: isOnline ? 'Atención Online / Todo el País' : `${data.cityName}, Argentina`,
+            is_digital_only: isOnline,
             logo_url: '',
             cover_url: '/images/default-commerce-cover.jpg',
             is_verified: true,
@@ -398,6 +401,7 @@ export async function registerMerchantFallbackAction(data: {
           description: `${data.businessName} - Perfil registrado en el portal ON MÁS.`,
           phone_whatsapp: data.phoneWhatsApp || '',
           address: isOnline ? 'Atención Online / Todo el País' : `${data.cityName}, Argentina`,
+          is_digital_only: isOnline,
           logo_url: '',
           cover_url: '/images/default-commerce-cover.jpg',
           is_verified: true,
