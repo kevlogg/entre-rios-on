@@ -3,7 +3,7 @@ import { Metadata } from 'next';
 import Link from 'next/link';
 import { DynamicLayoutWrapper } from '@/components/layout/DynamicLayoutWrapper';
 import { SubscriptionPlans } from '@/components/admin/SubscriptionPlans';
-import { Sparkles, ArrowLeft, Rocket } from 'lucide-react';
+import { Sparkles, ArrowLeft, Rocket, Store, ArrowRight } from 'lucide-react';
 import { createClient } from '@/lib/supabase/server';
 
 export const metadata: Metadata = {
@@ -82,6 +82,31 @@ export default async function PlanesPublicPage() {
   return (
     <DynamicLayoutWrapper heroContent={heroContent}>
       <div className="space-y-8">
+        {isAuthenticated && (
+          <div className="bg-gradient-to-r from-blue-50 to-cyan-50 border border-blue-200 rounded-3xl p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-sm">
+            <div className="flex items-center gap-3.5">
+              <div className="w-10 h-10 rounded-2xl bg-[#0047BA] text-white flex items-center justify-center shrink-0 shadow-xs">
+                <Store className="w-5 h-5" />
+              </div>
+              <div>
+                <p className="text-xs sm:text-sm font-black text-slate-900">
+                  Sesión iniciada: <span className="text-[#0047BA]">{commerceData?.name || 'Tu Negocio'}</span>
+                </p>
+                <p className="text-xs text-slate-600 font-medium">
+                  Para contratar o abonar tu suscripción mensual, gestioná tu plan directamente desde tu panel.
+                </p>
+              </div>
+            </div>
+            <Link
+              href="/admin?tab=subscription"
+              className="inline-flex items-center justify-center gap-2 bg-[#0047BA] hover:bg-[#002878] text-white text-xs font-black px-5 py-3 rounded-2xl transition-transform active:scale-95 shrink-0 shadow-md"
+            >
+              <span>Ir a mi Panel de Control</span>
+              <ArrowRight className="w-4 h-4" />
+            </Link>
+          </div>
+        )}
+
         <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-300/70 shadow-xs space-y-6">
           <div className="flex items-center justify-between border-b border-slate-300/70 pb-4">
             <h2 className="text-xl font-black text-slate-900 flex items-center gap-2">
@@ -99,6 +124,7 @@ export default async function PlanesPublicPage() {
             cityName={commerceData?.cityName}
             phoneWhatsApp={commerceData?.phoneWhatsApp}
             showHistory={false}
+            allowDirectPayment={false}
           />
         </div>
       </div>

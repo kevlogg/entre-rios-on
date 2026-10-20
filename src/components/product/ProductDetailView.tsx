@@ -420,13 +420,17 @@ export function ProductDetailView({ product, commerce, relatedProducts = [] }: P
 
           </div>
 
-          <div className="pt-6 flex flex-col items-center justify-center gap-1 text-center">
-            <span className="font-black text-2xl text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-600 tracking-tighter">
-              ON+
-            </span>
-            <span className="text-[9px] font-black tracking-widest text-[#0047BA] uppercase">
-              PORTAL COMERCIAL REGIONAL
-            </span>
+          <div className="pt-4 flex flex-col items-center justify-center text-center">
+            <Link href="/" className="inline-block group" title="ON MÁS - Portal Comercial Regional">
+              <div className="relative w-28 h-12 sm:w-32 sm:h-14 flex items-center justify-center">
+                <Image
+                  src="/logo1.png"
+                  alt="ON+ Portal Comercial Regional"
+                  fill
+                  className="object-contain group-hover:scale-105 transition-transform duration-200"
+                />
+              </div>
+            </Link>
           </div>
         </div>
 

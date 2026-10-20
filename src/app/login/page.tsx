@@ -73,10 +73,10 @@ function LoginFormContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const redirectTo = searchParams.get('redirectTo') || '/admin';
-  const initialMode = (searchParams.get('mode') as 'login' | 'signup' | 'forgot') || 'login';
+  const initialMode = (searchParams.get('mode') as 'login' | 'signup' | 'forgot' | 'reset') || 'login';
   const initialType = (searchParams.get('type') as UserType) || 'particular';
 
-  const [mode, setMode] = useState<'login' | 'signup' | 'forgot'>(initialMode);
+  const [mode, setMode] = useState<'login' | 'signup' | 'forgot' | 'reset'>(initialMode);
   const [signupStep, setSignupStep] = useState<'type' | 'form'>(searchParams.get('type') ? 'form' : 'type');
   const [userType, setUserType] = useState<UserType>(initialType);
 
@@ -98,6 +98,23 @@ function LoginFormContent() {
 
   const supabase = createClient();
   const availableCities = getCitiesByProvince(provinceId);
+
+  React.useEffect(() => {
+    const modeParam = searchParams.get('mode');
+    if (modeParam === 'reset') {
+      setMode('reset');
+    }
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
+      if (event === 'PASSWORD_RECOVERY') {
+        setMode('reset');
+      }
+    });
+
+    return () => {
+      subscription?.unsubscribe();
+    };
+  }, [searchParams, supabase]);
 
   const handleProvinceChange = (newProvinceId: string) => {
     setProvinceId(newProvinceId);
@@ -261,14 +278,39 @@ function LoginFormContent() {
       } else if (mode === 'forgot') {
         const redirectOrigin = typeof window !== 'undefined' ? window.location.origin : 'https://entre-rios-on.vercel.app';
         const { error } = await supabase.auth.resetPasswordForEmail(email, {
-          redirectTo: `${redirectOrigin}/login?mode=reset`,
+          redirectTo: `${redirectOrigin}/auth/callback?next=/login?mode=reset`,
         });
         if (error) {
-          setMessage({ type: 'error', text: error.message });
+          setMessage({ type: 'error', text: error.message || 'No se pudo enviar el correo de recuperación.' });
         } else {
-          setMessage({ type: 'success', text: '¡Instrucciones enviadas! Revisá tu casilla de correo.' });
+          setMessage({ 
+            type: 'success', 
+            text: '¡Enlace de recuperación enviado! Revisá tu casilla de correo y hacé clic en el enlace para restablecer tu contraseña.' 
+          });
         }
         setLoading(false);
+      } else if (mode === 'reset') {
+        if (password !== confirmPassword) {
+          setMessage({ type: 'error', text: 'Las nuevas contraseñas no coinciden. Por favor verificalas.' });
+          setLoading(false);
+          return;
+        }
+        if (password.length < 6) {
+          setMessage({ type: 'error', text: 'La nueva contraseña debe tener al menos 6 caracteres.' });
+          setLoading(false);
+          return;
+        }
+
+        const { error: resetErr } = await supabase.auth.updateUser({ password });
+        if (resetErr) {
+          setMessage({ type: 'error', text: resetErr.message || 'No se pudo actualizar la contraseña. Solicitá un nuevo enlace.' });
+          setLoading(false);
+        } else {
+          setMessage({ type: 'success', text: '¡Contraseña restablecida con éxito! Redirigiendo a tu panel...' });
+          setTimeout(() => {
+            window.location.href = '/admin';
+          }, 1200);
+        }
       }
     } catch {
       router.push('/admin');
@@ -283,28 +325,34 @@ function LoginFormContent() {
     <div className="bg-white/95 backdrop-blur-xl py-8 px-6 sm:px-10 shadow-2xl rounded-3xl border border-white/40 space-y-6">
 
       {/* Selector de Modo */}
-      <div className="flex items-center justify-center gap-6 border-b border-slate-200 pb-3">
-        <button
-          type="button"
-          disabled={loading}
-          onClick={() => { setMode('login'); setMessage(null); }}
-          className={`text-sm font-black transition-colors cursor-pointer disabled:opacity-50 ${
-            mode === 'login' ? 'text-[#0047BA] border-b-2 border-[#0047BA] pb-1' : 'text-slate-400 hover:text-slate-600'
-          }`}
-        >
-          Ingresar
-        </button>
-        <button
-          type="button"
-          disabled={loading}
-          onClick={() => { setMode('signup'); setSignupStep('type'); setMessage(null); }}
-          className={`text-sm font-black transition-colors cursor-pointer disabled:opacity-50 ${
-            mode === 'signup' ? 'text-[#00ADB5] border-b-2 border-[#00ADB5] pb-1' : 'text-slate-400 hover:text-slate-600'
-          }`}
-        >
-          Crear Cuenta
-        </button>
-      </div>
+      {mode !== 'reset' ? (
+        <div className="flex items-center justify-center gap-6 border-b border-slate-200 pb-3">
+          <button
+            type="button"
+            disabled={loading}
+            onClick={() => { setMode('login'); setMessage(null); }}
+            className={`text-sm font-black transition-colors cursor-pointer disabled:opacity-50 ${
+              mode === 'login' ? 'text-[#0047BA] border-b-2 border-[#0047BA] pb-1' : 'text-slate-400 hover:text-slate-600'
+            }`}
+          >
+            Ingresar
+          </button>
+          <button
+            type="button"
+            disabled={loading}
+            onClick={() => { setMode('signup'); setSignupStep('type'); setMessage(null); }}
+            className={`text-sm font-black transition-colors cursor-pointer disabled:opacity-50 ${
+              mode === 'signup' ? 'text-[#00ADB5] border-b-2 border-[#00ADB5] pb-1' : 'text-slate-400 hover:text-slate-600'
+            }`}
+          >
+            Crear Cuenta
+          </button>
+        </div>
+      ) : (
+        <div className="border-b border-slate-200 pb-3 text-center">
+          <h2 className="text-sm font-black text-[#0047BA] uppercase tracking-wider">Restablecer Contraseña</h2>
+        </div>
+      )}
 
       {/* ========================= SIGNUP STEP 1: Selector de tipo ========================= */}
       {mode === 'signup' && signupStep === 'type' && (
@@ -591,7 +639,17 @@ function LoginFormContent() {
                 </div>
               </div>
               <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">Contraseña *</label>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="block text-xs font-bold text-slate-700">Contraseña *</label>
+                  <button
+                    type="button"
+                    disabled={loading}
+                    onClick={() => { setMode('forgot'); setMessage(null); }}
+                    className="text-[11px] font-extrabold text-[#0047BA] hover:underline cursor-pointer disabled:opacity-50"
+                  >
+                    ¿Olvidaste tu contraseña?
+                  </button>
+                </div>
                 <div className="relative">
                   <Lock className="w-4 h-4 absolute left-3.5 top-3 text-slate-400" />
                   <input
@@ -648,6 +706,58 @@ function LoginFormContent() {
                 className="w-full bg-gradient-to-r from-[#0047BA] to-[#002878] hover:from-[#0B66FF] hover:to-[#0047BA] text-white py-3 rounded-2xl font-extrabold text-xs flex items-center justify-center gap-2 shadow-md transition-transform active:scale-95 cursor-pointer disabled:opacity-50"
               >
                 <span>{loading ? 'Enviando...' : 'Enviar Enlace de Recuperación'}</span>
+                <ArrowRight className="w-4 h-4" />
+              </button>
+            </fieldset>
+          </form>
+        </>
+      )}
+
+      {/* ========================= RESET PASSWORD FORM ========================= */}
+      {mode === 'reset' && (
+        <>
+          <div className="bg-blue-50 border border-blue-200 rounded-2xl p-3.5 text-xs text-blue-900 font-medium flex items-center gap-2">
+            <KeyRound className="w-4 h-4 text-[#0047BA] shrink-0" />
+            <span>Ingresá tu nueva contraseña para actualizar el acceso a tu cuenta.</span>
+          </div>
+          <form onSubmit={handleAuth} className="space-y-4">
+            <fieldset disabled={loading} className="space-y-4">
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1">Nueva Contraseña *</label>
+                <div className="relative">
+                  <Lock className="w-4 h-4 absolute left-3.5 top-3 text-slate-400" />
+                  <input
+                    type="password"
+                    required
+                    autoComplete="new-password"
+                    placeholder="Mínimo 6 caracteres"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-xs text-slate-800 focus:ring-2 focus:ring-[#00ADB5] focus:bg-white disabled:bg-slate-100"
+                  />
+                </div>
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1">Confirmar Nueva Contraseña *</label>
+                <div className="relative">
+                  <Lock className="w-4 h-4 absolute left-3.5 top-3 text-slate-400" />
+                  <input
+                    type="password"
+                    required
+                    autoComplete="new-password"
+                    placeholder="Repetí la nueva contraseña"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-xs text-slate-800 focus:ring-2 focus:ring-[#00ADB5] focus:bg-white disabled:bg-slate-100"
+                  />
+                </div>
+              </div>
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full bg-gradient-to-r from-[#0047BA] to-[#002878] hover:from-[#0B66FF] hover:to-[#0047BA] text-white py-3 rounded-2xl font-extrabold text-xs flex items-center justify-center gap-2 shadow-md transition-transform active:scale-95 cursor-pointer disabled:opacity-50"
+              >
+                <span>{loading ? 'Guardando...' : 'Restablecer Contraseña'}</span>
                 <ArrowRight className="w-4 h-4" />
               </button>
             </fieldset>

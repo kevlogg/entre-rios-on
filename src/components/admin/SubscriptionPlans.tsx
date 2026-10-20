@@ -24,6 +24,7 @@ interface SubscriptionPlansProps {
   currentTier?: string;
   isAuthenticated?: boolean;
   showHistory?: boolean;
+  allowDirectPayment?: boolean;
   onPlanActivated?: (planName: string) => void;
 }
 
@@ -92,6 +93,7 @@ export function SubscriptionPlans({
   currentTier,
   isAuthenticated,
   showHistory = false,
+  allowDirectPayment = true,
   onPlanActivated,
 }: SubscriptionPlansProps) {
   const [isUserLoggedIn, setIsUserLoggedIn] = useState<boolean>(isAuthenticated ?? false);
@@ -612,6 +614,19 @@ export function SubscriptionPlans({
                 <span>Iniciar sesión para contratar</span>
               </Link>
             </div>
+          ) : !allowDirectPayment ? (
+            <div className="space-y-2 pt-4 border-t border-slate-200">
+              <Link
+                href="/admin?tab=subscription"
+                className="w-full bg-[#0047BA] hover:bg-[#002878] text-white py-3.5 rounded-2xl font-black text-xs transition-transform active:scale-95 cursor-pointer shadow-md flex items-center justify-center gap-2 text-center"
+              >
+                <span>Gestionar en mi Panel de Control</span>
+                <ArrowRight className="w-4 h-4" />
+              </Link>
+              <p className="text-[11px] text-center text-slate-500 font-medium">
+                Los pagos y reportes se realizan exclusivamente desde tu panel.
+              </p>
+            </div>
           ) : (
             <div className="space-y-2 pt-4 border-t border-slate-200">
               <button
@@ -692,6 +707,19 @@ export function SubscriptionPlans({
                 <span>Iniciar sesión para contratar</span>
               </Link>
             </div>
+          ) : !allowDirectPayment ? (
+            <div className="space-y-2 pt-4 border-t border-slate-200">
+              <Link
+                href="/admin?tab=subscription"
+                className="w-full bg-gradient-to-r from-[#00ADB5] to-[#0047BA] hover:from-[#00969d] hover:to-[#002878] text-white py-3.5 rounded-2xl font-black text-xs shadow-lg transition-transform active:scale-95 cursor-pointer flex items-center justify-center gap-2 text-center"
+              >
+                <span>Gestionar en mi Panel de Control</span>
+                <ArrowRight className="w-4 h-4" />
+              </Link>
+              <p className="text-[11px] text-center text-slate-500 font-medium">
+                Los pagos y reportes se realizan exclusivamente desde tu panel.
+              </p>
+            </div>
           ) : (
             <div className="space-y-2 pt-4 border-t border-slate-200">
               <button
@@ -771,6 +799,19 @@ export function SubscriptionPlans({
               >
                 <span>Iniciar sesión para contratar</span>
               </Link>
+            </div>
+          ) : !allowDirectPayment ? (
+            <div className="space-y-2 pt-4 border-t border-purple-800/80">
+              <Link
+                href="/admin?tab=subscription"
+                className="w-full bg-gradient-to-r from-amber-400 via-amber-500 to-amber-600 hover:from-amber-300 hover:to-amber-500 text-slate-950 py-3.5 rounded-2xl font-black text-xs shadow-xl transition-transform active:scale-95 cursor-pointer flex items-center justify-center gap-2 text-center"
+              >
+                <span>Gestionar en mi Panel de Control</span>
+                <ArrowRight className="w-4 h-4" />
+              </Link>
+              <p className="text-[11px] text-center text-purple-200/80 font-medium">
+                Los pagos y reportes se realizan exclusivamente desde tu panel.
+              </p>
             </div>
           ) : (
             <div className="space-y-2 pt-4 border-t border-purple-800/80">

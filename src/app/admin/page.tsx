@@ -30,6 +30,16 @@ export default function AdminPage() {
   const [isSubscriptionActive, setIsSubscriptionActive] = useState<boolean>(true);
 
   React.useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      const tabParam = params.get('tab');
+      if (tabParam === 'subscription') {
+        setActiveTab('subscription');
+      }
+    }
+  }, []);
+
+  React.useEffect(() => {
     async function loadRealData() {
       try {
         const { createClient } = await import('@/lib/supabase/client');

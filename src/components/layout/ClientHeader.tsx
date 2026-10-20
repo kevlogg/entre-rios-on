@@ -336,12 +336,12 @@ export function ClientHeader({ withBackground = false }: ClientHeaderProps = {})
     <header className="sticky top-0 z-50 shadow-sm bg-[#e2e8f0]">
       {/* 1. TOP BAR GRIS CLARO CON LOGO, SELECTOR DE PROVINCIA, BUSCADOR CENTRADO Y ACCESOS */}
       <div className="bg-[#e2e8f0] border-b border-slate-300">
-        <div className="max-w-[1480px] mx-auto px-3 min-[360px]:px-4 sm:px-6 lg:px-8 h-18 sm:h-20 flex items-center justify-between gap-4">
+        <div className="max-w-[1480px] mx-auto px-2 min-[360px]:px-3 sm:px-6 lg:px-8 h-16 sm:h-20 flex items-center justify-between gap-2 sm:gap-4">
           
           {/* Left: Logo ON+ Portal Comercial + Province Selector */}
-          <div className="flex items-center gap-3 sm:gap-4 shrink-0">
-            <Link href="/" className="flex items-center group">
-              <div className="relative w-[76px] h-11 sm:w-[96px] sm:h-14 lg:w-[116px] lg:h-[67px] flex items-center">
+          <div className="flex items-center gap-2 sm:gap-4 min-w-0 flex-1 sm:flex-initial">
+            <Link href="/" className="flex items-center group shrink-0">
+              <div className="relative w-[62px] h-9 sm:w-[96px] sm:h-14 lg:w-[116px] lg:h-[67px] flex items-center">
                 <Image
                   src="/logo1.png"
                   alt="ON+ PORTAL COMERCIAL"
@@ -353,36 +353,41 @@ export function ClientHeader({ withBackground = false }: ClientHeaderProps = {})
             </Link>
 
             {/* Selector de Provincia Prominente */}
-            <div ref={provinceContainerRef} className="relative flex items-center">
+            <div ref={provinceContainerRef} className="relative flex items-center min-w-0">
               <button
                 type="button"
                 onClick={() => setIsProvinceDropdownOpen(!isProvinceDropdownOpen)}
-                className={`relative flex items-center gap-2 sm:gap-2.5 px-2.5 sm:px-4 h-11 sm:h-14 lg:h-[62px] rounded-xl sm:rounded-2xl ${
+                className={`relative flex items-center gap-1.5 sm:gap-2.5 px-2 sm:px-4 h-9 sm:h-14 lg:h-[62px] rounded-xl sm:rounded-2xl ${
                   currentProvinceObj
                     ? `${currentTheme.gradientClass} ${currentTheme.borderClass} ${currentTheme.shadowClass}`
                     : 'bg-gradient-to-r from-[#002878] via-[#0047BA] to-[#00ADB5] border-cyan-400/40 hover:border-cyan-300 shadow-md shadow-blue-950/20'
-                } border transition-all duration-200 cursor-pointer group hover:scale-[1.02] active:scale-[0.98] shrink-0 text-white select-none`}
+                } border transition-all duration-200 cursor-pointer group hover:scale-[1.02] active:scale-[0.98] min-w-0 max-w-[130px] min-[390px]:max-w-[160px] sm:max-w-none text-white select-none`}
                 title="Cambiar Provincia o Región"
               >
                 <div 
-                  className="w-7 h-7 sm:w-9 sm:h-9 lg:w-10 lg:h-10 rounded-lg sm:rounded-xl flex items-center justify-center shrink-0 border border-white/20 group-hover:bg-white/30 transition-colors shadow-2xs"
+                  className="w-6 h-6 sm:w-9 sm:h-9 lg:w-10 lg:h-10 rounded-lg sm:rounded-xl flex items-center justify-center shrink-0 border border-white/20 group-hover:bg-white/30 transition-colors shadow-2xs"
                   style={{
                     backgroundColor: currentProvinceObj?.badgeColor
                       ? `${currentProvinceObj.badgeColor}`
                       : 'rgba(255, 255, 255, 0.2)'
                   }}
                 >
-                  <MapPin className="w-3.5 h-3.5 sm:w-4 sm:h-4 lg:w-5 lg:h-5 text-white drop-shadow-xs" />
+                  <MapPin className="w-3 h-3 sm:w-4 sm:h-4 lg:w-5 lg:h-5 text-white drop-shadow-xs" />
                 </div>
                 <div className="flex flex-col text-left justify-center min-w-0 pr-0.5 sm:pr-1">
-                  <span className="text-[8px] sm:text-[9px] lg:text-[10px] font-black uppercase tracking-wider text-white/80 leading-none">
+                  <span className="hidden sm:block text-[8px] sm:text-[9px] lg:text-[10px] font-black uppercase tracking-wider text-white/80 leading-none">
                     {activeCityObj ? currentProvinceObj?.name.toUpperCase() : (currentProvinceObj ? currentTheme.sublabel : 'UBICACIÓN')}
                   </span>
-                  <span className="text-xs sm:text-sm lg:text-[15px] font-black text-white leading-tight truncate max-w-[110px] sm:max-w-[160px] lg:max-w-[200px] drop-shadow-xs">
-                    {activeCityObj ? activeCityObj.name : (currentProvinceObj ? currentProvinceObj.name : 'Selecciona tu provincia')}
+                  <span className="text-xs sm:text-sm lg:text-[15px] font-black text-white leading-tight truncate drop-shadow-xs">
+                    {activeCityObj ? activeCityObj.name : (currentProvinceObj ? currentProvinceObj.name : (
+                      <>
+                        <span className="sm:hidden">Provincia</span>
+                        <span className="hidden sm:inline">Selecciona tu provincia</span>
+                      </>
+                    ))}
                   </span>
                 </div>
-                <ChevronDown className={`w-3.5 h-3.5 sm:w-4 sm:h-4 text-white/80 shrink-0 transition-transform duration-200 ${isProvinceDropdownOpen ? 'rotate-180' : ''}`} />
+                <ChevronDown className={`w-3 h-3 sm:w-4 sm:h-4 text-white/80 shrink-0 transition-transform duration-200 ${isProvinceDropdownOpen ? 'rotate-180' : ''}`} />
               </button>
 
               {isProvinceDropdownOpen && (
@@ -553,21 +558,21 @@ export function ClientHeader({ withBackground = false }: ClientHeaderProps = {})
           </div>
 
           {/* Right: Publicá tu negocio, Mi cuenta, Carrito / Mobile toggle */}
-          <div className="flex items-center gap-3 sm:gap-5 shrink-0">
+          <div className="flex items-center gap-1 min-[360px]:gap-2 sm:gap-4 shrink-0">
             {/* Mobile Search Icon */}
             <button
               type="button"
               onClick={() => setIsMobileSearchOpen(!isMobileSearchOpen)}
-              className="lg:hidden p-2 text-slate-700 hover:text-[#0070F3] transition-colors"
+              className="lg:hidden p-1.5 sm:p-2 text-slate-700 hover:text-[#0070F3] transition-colors rounded-lg hover:bg-slate-200/80"
               aria-label="Buscar"
             >
-              <Search className="w-5 h-5" />
+              <Search className="w-4.5 h-4.5 sm:w-5 sm:h-5" />
             </button>
 
-            {/* Publicá tu negocio */}
+            {/* Publicá tu negocio (Visible a partir de md para no saturar mobile) */}
             <Link
               href="/planes"
-              className="hidden sm:flex items-center gap-2 text-xs sm:text-sm font-black text-slate-900 bg-white/80 hover:bg-white border border-slate-300 hover:border-[#0047BA]/50 shadow-2xs hover:shadow-xs transition-all py-1.5 px-3 rounded-xl group cursor-pointer"
+              className="hidden md:flex items-center gap-2 text-xs sm:text-sm font-black text-slate-900 bg-white/80 hover:bg-white border border-slate-300 hover:border-[#0047BA]/50 shadow-2xs hover:shadow-xs transition-all py-1.5 px-3 rounded-xl group cursor-pointer"
             >
               <div className="w-6 h-6 rounded-lg bg-gradient-to-tr from-[#00ADB5] via-[#0047BA] to-[#7B2CBF] text-white flex items-center justify-center shadow-xs shrink-0 group-hover:scale-110 transition-transform">
                 <Store className="w-3.5 h-3.5 fill-current" />
@@ -579,7 +584,8 @@ export function ClientHeader({ withBackground = false }: ClientHeaderProps = {})
             {!currentUser ? (
               <Link
                 href="/login"
-                className="flex items-center gap-1.5 text-xs font-bold text-slate-800 hover:text-[#0047BA] transition-colors py-1.5 px-2 rounded-lg hover:bg-slate-200/80"
+                className="flex items-center gap-1.5 text-xs font-bold text-slate-800 hover:text-[#0047BA] transition-colors p-1.5 sm:py-1.5 sm:px-2 rounded-lg hover:bg-slate-200/80"
+                title="Mi Cuenta"
               >
                 <User className="w-4 h-4 text-slate-700" />
                 <span className="hidden sm:inline">Mi cuenta</span>
@@ -587,7 +593,8 @@ export function ClientHeader({ withBackground = false }: ClientHeaderProps = {})
             ) : (
               <Link
                 href="/admin"
-                className="flex items-center gap-2 text-xs font-bold text-slate-800 hover:text-[#0047BA] transition-colors py-1 px-2 rounded-lg hover:bg-slate-200/80"
+                className="flex items-center gap-1.5 text-xs font-bold text-slate-800 hover:text-[#0047BA] transition-colors p-1 sm:py-1 sm:px-2 rounded-lg hover:bg-slate-200/80"
+                title="Mi Panel de Control"
               >
                 {userCommerce?.logoUrl ? (
                   <div className="relative w-6 h-6 rounded-md overflow-hidden border border-slate-300 bg-white shrink-0">
@@ -605,16 +612,16 @@ export function ClientHeader({ withBackground = false }: ClientHeaderProps = {})
             {/* Carrito / Bolsa */}
             <Link
               href="/catalogo"
-              className="p-2 text-slate-800 hover:text-[#0047BA] hover:bg-slate-200/80 rounded-lg transition-colors cursor-pointer"
+              className="p-1.5 sm:p-2 text-slate-800 hover:text-[#0047BA] hover:bg-slate-200/80 rounded-lg transition-colors cursor-pointer"
               title="Catálogo & Pedidos"
             >
-              <ShoppingBag className="w-5 h-5 text-slate-800" />
+              <ShoppingBag className="w-4.5 h-4.5 sm:w-5 sm:h-5 text-slate-800" />
             </Link>
 
             {/* Mobile Menu Toggle */}
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="lg:hidden p-2 text-slate-800 hover:text-[#0047BA] hover:bg-slate-200/80 rounded-lg transition-colors"
+              className="lg:hidden p-1.5 sm:p-2 text-slate-800 hover:text-[#0047BA] hover:bg-slate-200/80 rounded-lg transition-colors"
               aria-label="Abrir Menú"
             >
               {isMobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
