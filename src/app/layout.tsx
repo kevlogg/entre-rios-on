@@ -119,6 +119,25 @@ export default function RootLayout({
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, '\\u003c') }}
         />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              try {
+                window.__pwaInstallPrompt = null;
+                window.addEventListener('beforeinstallprompt', function(e) {
+                  e.preventDefault();
+                  window.__pwaInstallPrompt = e;
+                  window.dispatchEvent(new CustomEvent('pwa-prompt-ready'));
+                });
+                window.addEventListener('appinstalled', function() {
+                  window.__pwaInstallPrompt = null;
+                  window.__pwaIsInstalled = true;
+                  window.dispatchEvent(new CustomEvent('pwa-app-installed'));
+                });
+              } catch (err) {}
+            `,
+          }}
+        />
       </head>
       <body 
         className="min-h-screen flex flex-col text-slate-900 bg-[#e2e8f0] antialiased selection:bg-[#00C7B7] selection:text-white app-compact-scale"

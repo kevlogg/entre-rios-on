@@ -308,6 +308,8 @@ function LoginFormContent() {
           let errText = error.message;
           if (error.message.includes('rate limit') || error.message.includes('over_email_send_rate_limit')) {
             errText = 'Se ha alcanzado el límite de correos por hora. Por favor aguardá unos minutos antes de reintentar.';
+          } else if (error.message.includes('Error sending recovery email') || (error as any).status === 500) {
+            errText = 'Error en el servidor de correo al enviar el email de recuperación. Verificá la configuración del remitente o dominio en Supabase SMTP (Resend).';
           }
           setMessage({ type: 'error', text: errText || 'No se pudo enviar el correo de recuperación.' });
         } else {

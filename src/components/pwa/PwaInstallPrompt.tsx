@@ -50,13 +50,27 @@ export function PwaInstallPrompt() {
     const isIosDevice = /iphone|ipad|ipod/.test(userAgent);
     setIsIos(isIosDevice);
 
-    // 5. Escuchar evento nativo beforeinstallprompt en Android / Chrome / Edge
+    // 5. Verificar prompt temprano o escuchar eventos nativos
+    if (typeof window !== 'undefined' && (window as any).__pwaInstallPrompt) {
+      setDeferredPrompt((window as any).__pwaInstallPrompt);
+      setShowPrompt(true);
+    }
+
+    const handlePwaPromptReady = () => {
+      if (typeof window !== 'undefined' && (window as any).__pwaInstallPrompt) {
+        setDeferredPrompt((window as any).__pwaInstallPrompt);
+        setShowPrompt(true);
+      }
+    };
+
     const handleBeforeInstallPrompt = (e: Event) => {
       e.preventDefault();
+      (window as any).__pwaInstallPrompt = e;
       setDeferredPrompt(e);
       setShowPrompt(true);
     };
 
+    window.addEventListener('pwa-prompt-ready', handlePwaPromptReady);
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
 
     // 6. Si no se activó standalone y no fue cerrado en la sesión, mostrar el cartel tras 1.2 segundos
@@ -66,20 +80,25 @@ export function PwaInstallPrompt() {
 
     return () => {
       clearTimeout(timer);
+      window.removeEventListener('pwa-prompt-ready', handlePwaPromptReady);
       window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
     };
   }, []);
 
   const handleInstallClick = async () => {
-    if (deferredPrompt) {
-      deferredPrompt.prompt();
-      const choiceResult = await deferredPrompt.userChoice;
-      if (choiceResult?.outcome === 'accepted') {
-        setShowPrompt(false);
+    const prompt = deferredPrompt || (typeof window !== 'undefined' ? (window as any).__pwaInstallPrompt : null);
+    if (prompt && typeof prompt.prompt === 'function') {
+      try {
+        await prompt.prompt();
+        const choiceResult = await prompt.userChoice;
+        if (choiceResult?.outcome === 'accepted') {
+          setShowPrompt(false);
+        }
+        setDeferredPrompt(null);
+        if (typeof window !== 'undefined') (window as any).__pwaInstallPrompt = null;
+      } catch (e) {
+        setShowManualGuide(true);
       }
-      setDeferredPrompt(null);
-    } else if (isIos) {
-      setShowManualGuide(true);
     } else {
       setShowManualGuide(true);
     }
@@ -184,7 +203,7 @@ export function PwaInstallPrompt() {
             className="flex-1 bg-gradient-to-r from-cyan-400 to-[#00ADB5] hover:from-cyan-300 hover:to-[#00969d] text-slate-950 font-black text-xs py-2.5 px-4 rounded-xl shadow-lg flex items-center justify-center gap-2 transition-transform active:scale-95 cursor-pointer"
           >
             <Download className="w-4 h-4 text-slate-950" />
-            <span>{deferredPrompt ? 'Instalar App Ahora' : 'Cómo Instalar'}</span>
+            <span>{(deferredPrompt || (typeof window !== 'undefined' && (window as any).__pwaInstallPrompt)) ? 'Instalar App Ahora' : 'Cómo Instalar'}</span>
           </button>
 
           <button

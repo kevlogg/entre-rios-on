@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import Image from 'next/image';
 import { 
   Smartphone, 
@@ -14,47 +14,18 @@ import {
   Zap, 
   ShieldCheck 
 } from 'lucide-react';
+import { usePwaInstall } from '@/hooks/usePwaInstall';
 
 export function AppDownloadCard() {
-  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
-  const [isIos, setIsIos] = useState(false);
-  const [isInstalled, setIsInstalled] = useState(false);
+  const { canInstallNatively, isInstalled, isIos, triggerInstall } = usePwaInstall();
   const [showGuideModal, setShowGuideModal] = useState(false);
 
-  useEffect(() => {
-    // Detect if already installed (standalone mode)
-    const isStandaloneMode = 
-      (typeof window !== 'undefined' && window.matchMedia('(display-mode: standalone)').matches) || 
-      (typeof navigator !== 'undefined' && (navigator as any).standalone === true) ||
-      (typeof document !== 'undefined' && document.referrer.includes('android-app://'));
-
-    setIsInstalled(isStandaloneMode);
-
-    // Detect iOS
-    if (typeof window !== 'undefined') {
-      const userAgent = window.navigator.userAgent.toLowerCase();
-      setIsIos(/iphone|ipad|ipod/.test(userAgent));
-    }
-
-    // Capture native install prompt
-    const handleBeforeInstallPrompt = (e: Event) => {
-      e.preventDefault();
-      setDeferredPrompt(e);
-    };
-
-    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-    return () => window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-  }, []);
-
   const handleInstallClick = async () => {
-    if (deferredPrompt) {
-      deferredPrompt.prompt();
-      const choiceResult = await deferredPrompt.userChoice;
-      if (choiceResult?.outcome === 'accepted') {
-        setIsInstalled(true);
-      }
-      setDeferredPrompt(null);
-    } else {
+    if (isInstalled) {
+      return;
+    }
+    const result = await triggerInstall();
+    if (result === 'manual_guide') {
       setShowGuideModal(true);
     }
   };
