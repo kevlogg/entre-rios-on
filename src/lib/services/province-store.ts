@@ -21,11 +21,19 @@ export interface ProvinceItem {
   cities?: ProvinceCityItem[];
 }
 
+export function normalizeProvinceBadge(p: ProvinceItem): ProvinceItem {
+  return {
+    ...p,
+    badge: p.isActive ? 'Activa' : 'Próximamente',
+  };
+}
+
 export const DEFAULT_PROVINCES_CONFIG: ProvinceItem[] = [
-  { id: 'santa-fe', name: 'Santa Fe', slug: 'santa-fe', isActive: true, badge: 'Provincia Activa', badgeColor: '#0047BA' },
-  { id: 'entre-rios', name: 'Entre Ríos', slug: 'entre-rios', isActive: false, badge: 'Próximamente', badgeColor: '#00A859' },
-  { id: 'cordoba', name: 'Córdoba', slug: 'cordoba', isActive: false, badge: 'Próximamente', badgeColor: '#00529B' },
-  { id: 'buenos-aires', name: 'Buenos Aires', slug: 'buenos-aires', isActive: false, badge: 'Próximamente', badgeColor: '#047857' },
+  { id: 'santa-fe', name: 'Santa Fe', slug: 'santa-fe', isActive: true, badge: 'Activa', badgeColor: '#0047BA' },
+  { id: 'entre-rios', name: 'Entre Ríos', slug: 'entre-rios', isActive: true, badge: 'Activa', badgeColor: '#00A859' },
+  { id: 'caba', name: 'CABA', slug: 'caba', isActive: true, badge: 'Activa', badgeColor: '#EAB308' },
+  { id: 'cordoba', name: 'Córdoba', slug: 'cordoba', isActive: true, badge: 'Activa', badgeColor: '#8B4513' },
+  { id: 'buenos-aires', name: 'Buenos Aires', slug: 'buenos-aires', isActive: false, badge: 'Próximamente', badgeColor: '#00529B' },
 ];
 
 const PROVINCE_STORAGE_KEY = 'onmas_province_config_v1';
@@ -34,7 +42,7 @@ let memoryStoreProvinces: ProvinceItem[] | null = null;
 
 export function getProvincesConfig(): ProvinceItem[] {
   if (memoryStoreProvinces && memoryStoreProvinces.length > 0) {
-    return memoryStoreProvinces;
+    return memoryStoreProvinces.map(normalizeProvinceBadge);
   }
 
   if (typeof window !== 'undefined') {
@@ -43,8 +51,9 @@ export function getProvincesConfig(): ProvinceItem[] {
       if (raw) {
         const parsed: ProvinceItem[] = JSON.parse(raw);
         if (Array.isArray(parsed) && parsed.length > 0) {
-          memoryStoreProvinces = parsed;
-          return parsed;
+          const normalized = parsed.map(normalizeProvinceBadge);
+          memoryStoreProvinces = normalized;
+          return normalized;
         }
       }
     } catch (e) {
@@ -52,21 +61,22 @@ export function getProvincesConfig(): ProvinceItem[] {
     }
   }
 
-  return DEFAULT_PROVINCES_CONFIG;
+  return DEFAULT_PROVINCES_CONFIG.map(normalizeProvinceBadge);
 }
 
 export async function fetchProvincesFromSupabase(): Promise<ProvinceItem[]> {
   try {
     const res = await getProvincesConfigAction();
     if (res.success && Array.isArray(res.data) && res.data.length > 0) {
-      memoryStoreProvinces = res.data;
+      const normalized = res.data.map(normalizeProvinceBadge);
+      memoryStoreProvinces = normalized;
       if (typeof window !== 'undefined') {
         try {
-          localStorage.setItem(PROVINCE_STORAGE_KEY, JSON.stringify(res.data));
+          localStorage.setItem(PROVINCE_STORAGE_KEY, JSON.stringify(normalized));
           window.dispatchEvent(new Event('onmas_provinces_updated'));
         } catch (e) {}
       }
-      return res.data;
+      return normalized;
     }
   } catch (e) {
     console.warn('Nota leyendo provincias de Supabase:', e);
@@ -75,17 +85,19 @@ export async function fetchProvincesFromSupabase(): Promise<ProvinceItem[]> {
 }
 
 export function getActiveProvinces(): ProvinceItem[] {
+  // El criterio unificado exige que aparezcan en la lista todas las provincias:
+  // Si está activa con badge "Activa", si no está activa con badge "Próximamente".
   const all = getProvincesConfig();
-  const active = all.filter((p) => p.isActive);
-  return active.length > 0 ? active : [DEFAULT_PROVINCES_CONFIG[0]];
+  return all.map(normalizeProvinceBadge);
 }
 
 export function saveProvincesConfig(provinces: ProvinceItem[]): void {
-  memoryStoreProvinces = provinces;
+  const normalized = provinces.map(normalizeProvinceBadge);
+  memoryStoreProvinces = normalized;
 
   if (typeof window !== 'undefined') {
     try {
-      localStorage.setItem(PROVINCE_STORAGE_KEY, JSON.stringify(provinces));
+      localStorage.setItem(PROVINCE_STORAGE_KEY, JSON.stringify(normalized));
       window.dispatchEvent(new Event('onmas_provinces_updated'));
     } catch (e) {
       console.error('Error al guardar configuración de provincias:', e);
@@ -93,7 +105,7 @@ export function saveProvincesConfig(provinces: ProvinceItem[]): void {
   }
 
   // Persistir en Supabase Cloud
-  saveProvincesConfigAction(provinces).catch((err) => {
+  saveProvincesConfigAction(normalized).catch((err) => {
     console.warn('Error guardando provincias en Supabase:', err);
   });
 }

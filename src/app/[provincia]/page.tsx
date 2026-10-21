@@ -14,22 +14,26 @@ interface ProvincePageProps {
 }
 
 export async function generateStaticParams() {
-  return PROVINCES.map((p) => ({
+  return PROVINCES.filter((p) => p.id !== 'all').map((p) => ({
     provincia: p.slug,
   }));
 }
 
 export async function generateMetadata({ params }: ProvincePageProps): Promise<Metadata> {
   const { provincia } = await params;
-  const prov = getProvinceBySlug(provincia);
+  const prov = getProvinceBySlug(provincia) || {
+    id: provincia,
+    name: provincia.split('-').map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(' '),
+    slug: provincia,
+  };
 
   if (!prov || prov.id === 'all') {
     return {
-      title: 'Entre Ríos ON MÁS Portal | Comercio, Turismo y Medios',
+      title: 'ON MÁS Portal | Comercio, Turismo y Medios',
     };
   }
 
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://entreriosonmas.gob.ar';
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://onmasportal.com.ar';
   const title = `Provincia de ${prov.name} | Comercio, Turismo y Guía B2B ON MÁS`;
   const description = `Portal oficial de la provincia de ${prov.name}. Encontrá comercios adheridos, catálogo con pedido a WhatsApp, sorteos, clasificados y agenda de la comunidad en ${prov.name}.`;
   const canonicalUrl = `${baseUrl}/${prov.slug}`;
@@ -45,15 +49,15 @@ export async function generateMetadata({ params }: ProvincePageProps): Promise<M
       title,
       description,
       url: canonicalUrl,
-      siteName: 'Entre Ríos ON MÁS Portal',
+      siteName: 'ON MÁS Portal',
       locale: 'es_AR',
       type: 'website',
       images: [
         {
-          url: '/logo.png',
+          url: '/logo1.png',
           width: 1200,
           height: 630,
-          alt: `Entre Ríos ON MÁS Portal - ${prov.name}`,
+          alt: `ON MÁS Portal - ${prov.name}`,
         },
       ],
     },
@@ -61,18 +65,18 @@ export async function generateMetadata({ params }: ProvincePageProps): Promise<M
       card: 'summary_large_image',
       title,
       description,
-      images: ['/logo.png'],
+      images: ['/logo1.png'],
     },
   };
 }
 
 export default async function ProvincePage({ params }: ProvincePageProps) {
   const { provincia } = await params;
-  const prov = getProvinceBySlug(provincia);
-
-  if (!prov) {
-    notFound();
-  }
+  const prov = getProvinceBySlug(provincia) || {
+    id: provincia,
+    name: provincia.split('-').map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(' '),
+    slug: provincia,
+  };
 
   const products = await getFeaturedProducts(undefined, undefined, prov.id);
 

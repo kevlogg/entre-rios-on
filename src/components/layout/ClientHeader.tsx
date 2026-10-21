@@ -79,6 +79,15 @@ export const PROVINCE_THEMES: Record<string, {
     badgeBg: 'bg-white/20 text-white',
     sublabel: 'PROVINCIA',
   },
+  'caba': {
+    name: 'CABA',
+    gradientClass: 'bg-gradient-to-r from-[#ca8a04] via-[#eab308] to-[#facc15]',
+    borderClass: 'border-yellow-400/40 hover:border-yellow-300',
+    shadowClass: 'shadow-md shadow-amber-950/20',
+    accentHex: '#eab308',
+    badgeBg: 'bg-white/20 text-white',
+    sublabel: 'CIUDAD',
+  },
 };
 
 interface ClientHeaderProps {
@@ -445,22 +454,14 @@ export function ClientHeader({ withBackground = false }: ClientHeaderProps = {})
                             />
                             <span className="truncate">{prov.name}</span>
                           </div>
-                          {isSelected && (
-                            <span
-                              className="text-[9px] font-black px-2 py-0.5 rounded-full text-white"
-                              style={{ backgroundColor: color }}
-                            >
-                              Activa
-                            </span>
-                          )}
-                          {!isSelected && prov.badge && (
-                            <span
-                              className="text-[9px] font-bold px-2 py-0.5 rounded-full text-white/90"
-                              style={{ backgroundColor: color }}
-                            >
-                              {prov.badge}
-                            </span>
-                          )}
+                          <span
+                            className={`text-[9px] font-black px-2 py-0.5 rounded-full text-white shadow-2xs ${
+                              isSelected ? 'ring-2 ring-white/60' : 'opacity-90'
+                            }`}
+                            style={{ backgroundColor: color }}
+                          >
+                            {prov.isActive ? 'Activa' : 'Próximamente'}
+                          </span>
                         </button>
                       );
                     })}

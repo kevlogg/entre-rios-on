@@ -3,6 +3,9 @@ import { Province, City } from '@/types';
 export const PROVINCES: Province[] = [
   { id: 'santa-fe', name: 'Santa Fe', slug: 'santa-fe' },
   { id: 'entre-rios', name: 'Entre Ríos', slug: 'entre-rios' },
+  { id: 'caba', name: 'CABA', slug: 'caba' },
+  { id: 'cordoba', name: 'Córdoba', slug: 'cordoba' },
+  { id: 'buenos-aires', name: 'Buenos Aires', slug: 'buenos-aires' },
   { id: 'all', name: 'Todas las provincias', slug: 'todas' },
 ];
 
@@ -188,7 +191,286 @@ export const CITIES_ENTRE_RIOS: City[] = [
   },
 ];
 
-export const ALL_CITIES: City[] = [...CITIES_SANTA_FE, ...CITIES_ENTRE_RIOS];
+export const CITIES_CABA: City[] = [
+  {
+    id: 'palermo',
+    name: 'Palermo',
+    slug: 'palermo',
+    department: 'Comuna 14',
+    description: 'Polo gastronómico, comercial y de diseño de la Ciudad de Buenos Aires.',
+    imageUrl: '/images/city-rosario.jpg',
+    isFeatured: true,
+    provinceId: 'caba',
+    provinceName: 'CABA',
+  },
+  {
+    id: 'recoleta',
+    name: 'Recoleta',
+    slug: 'recoleta',
+    department: 'Comuna 2',
+    description: 'Tradición, arquitectura histórica y paseos comerciales de primer nivel.',
+    imageUrl: '/images/city-rosario.jpg',
+    isFeatured: true,
+    provinceId: 'caba',
+    provinceName: 'CABA',
+  },
+  {
+    id: 'belgrano',
+    name: 'Belgrano',
+    slug: 'belgrano',
+    department: 'Comuna 13',
+    description: 'Centro comercial, residencial y gastronómico de la zona norte porteña.',
+    imageUrl: '/images/city-rosario.jpg',
+    isFeatured: true,
+    provinceId: 'caba',
+    provinceName: 'CABA',
+  },
+  {
+    id: 'caballito',
+    name: 'Caballito',
+    slug: 'caballito',
+    department: 'Comuna 6',
+    description: 'Centro geográfico porteño con gran actividad comercial y conectividad.',
+    imageUrl: '/images/city-rosario.jpg',
+    isFeatured: true,
+    provinceId: 'caba',
+    provinceName: 'CABA',
+  },
+  {
+    id: 'puerto-madero',
+    name: 'Puerto Madero',
+    slug: 'puerto-madero',
+    department: 'Comuna 1',
+    description: 'Polo corporativo, gastronómico y residencial moderno frente al río.',
+    imageUrl: '/images/city-rosario.jpg',
+    isFeatured: true,
+    provinceId: 'caba',
+    provinceName: 'CABA',
+  },
+  {
+    id: 'san-telmo',
+    name: 'San Telmo',
+    slug: 'san-telmo',
+    department: 'Comuna 1',
+    description: 'Casco histórico, antigüedades, tango y vida cultural bohemia.',
+    imageUrl: '/images/city-rosario.jpg',
+    isFeatured: false,
+    provinceId: 'caba',
+    provinceName: 'CABA',
+  },
+  {
+    id: 'flores',
+    name: 'Flores',
+    slug: 'flores',
+    department: 'Comuna 7',
+    description: 'Polo textil mayorista y comercial de la Ciudad de Buenos Aires.',
+    imageUrl: '/images/city-rosario.jpg',
+    isFeatured: false,
+    provinceId: 'caba',
+    provinceName: 'CABA',
+  },
+  {
+    id: 'villa-urquiza',
+    name: 'Villa Urquiza',
+    slug: 'villa-urquiza',
+    department: 'Comuna 12',
+    description: 'Barrio residencial y pujante centro gastronómico.',
+    imageUrl: '/images/city-rosario.jpg',
+    isFeatured: false,
+    provinceId: 'caba',
+    provinceName: 'CABA',
+  },
+];
+
+export const CITIES_CORDOBA: City[] = [
+  {
+    id: 'cordoba-capital',
+    name: 'Córdoba Capital',
+    slug: 'cordoba-capital',
+    department: 'Capital',
+    description: 'Capital provincial, polo universitario, industrial y cultural.',
+    imageUrl: '/images/city-rosario.jpg',
+    isFeatured: true,
+    provinceId: 'cordoba',
+    provinceName: 'Córdoba',
+  },
+  {
+    id: 'villa-carlos-paz',
+    name: 'Villa Carlos Paz',
+    slug: 'villa-carlos-paz',
+    department: 'Punilla',
+    description: 'Principal destino turístico del valle de Punilla y del país.',
+    imageUrl: '/images/city-rosario.jpg',
+    isFeatured: true,
+    provinceId: 'cordoba',
+    provinceName: 'Córdoba',
+  },
+  {
+    id: 'rio-cuarto',
+    name: 'Río Cuarto',
+    slug: 'rio-cuarto',
+    department: 'Río Cuarto',
+    description: 'Capital alterna y centro agroindustrial del sur cordobés.',
+    imageUrl: '/images/city-rosario.jpg',
+    isFeatured: true,
+    provinceId: 'cordoba',
+    provinceName: 'Córdoba',
+  },
+  {
+    id: 'villa-maria',
+    name: 'Villa María',
+    slug: 'villa-maria',
+    department: 'General San Martín',
+    description: 'Importante cuenca láctea, polo universitario y centro neurálgico provincial.',
+    imageUrl: '/images/city-rosario.jpg',
+    isFeatured: true,
+    provinceId: 'cordoba',
+    provinceName: 'Córdoba',
+  },
+  {
+    id: 'alta-gracia',
+    name: 'Alta Gracia',
+    slug: 'alta-gracia',
+    department: 'Santa María',
+    description: 'Ciudad histórica, legado jesuítico y turismo serrano.',
+    imageUrl: '/images/city-rosario.jpg',
+    isFeatured: false,
+    provinceId: 'cordoba',
+    provinceName: 'Córdoba',
+  },
+  {
+    id: 'san-francisco',
+    name: 'San Francisco',
+    slug: 'san-francisco',
+    department: 'San Justo',
+    description: 'Polo productivo y metalmecánico del este cordobés.',
+    imageUrl: '/images/city-rosario.jpg',
+    isFeatured: false,
+    provinceId: 'cordoba',
+    provinceName: 'Córdoba',
+  },
+  {
+    id: 'villa-general-belgrano',
+    name: 'Villa General Belgrano',
+    slug: 'villa-general-belgrano',
+    department: 'Calamuchita',
+    description: 'Turismo centroeuropeo, gastronomía y cervecerías artesanales.',
+    imageUrl: '/images/city-rosario.jpg',
+    isFeatured: false,
+    provinceId: 'cordoba',
+    provinceName: 'Córdoba',
+  },
+  {
+    id: 'cosquin',
+    name: 'Cosquín',
+    slug: 'cosquin',
+    department: 'Punilla',
+    description: 'Capital nacional del folklore a orillas del río Cosquín.',
+    imageUrl: '/images/city-rosario.jpg',
+    isFeatured: false,
+    provinceId: 'cordoba',
+    provinceName: 'Córdoba',
+  },
+];
+
+export const CITIES_BUENOS_AIRES: City[] = [
+  {
+    id: 'la-plata',
+    name: 'La Plata',
+    slug: 'la-plata',
+    department: 'La Plata',
+    description: 'Capital provincial, ciudad planificada, polo administrativo y universitario.',
+    imageUrl: '/images/city-rosario.jpg',
+    isFeatured: true,
+    provinceId: 'buenos-aires',
+    provinceName: 'Buenos Aires',
+  },
+  {
+    id: 'mar-del-plata',
+    name: 'Mar del Plata',
+    slug: 'mar-del-plata',
+    department: 'General Pueyrredón',
+    description: 'Principal polo turístico de la costa atlántica y puerto pesquero.',
+    imageUrl: '/images/city-rosario.jpg',
+    isFeatured: true,
+    provinceId: 'buenos-aires',
+    provinceName: 'Buenos Aires',
+  },
+  {
+    id: 'bahia-blanca',
+    name: 'Bahía Blanca',
+    slug: 'bahia-blanca',
+    department: 'Bahía Blanca',
+    description: 'Polo petroquímico y puerto de aguas profundas del sur bonaerense.',
+    imageUrl: '/images/city-rosario.jpg',
+    isFeatured: true,
+    provinceId: 'buenos-aires',
+    provinceName: 'Buenos Aires',
+  },
+  {
+    id: 'tandil',
+    name: 'Tandil',
+    slug: 'tandil',
+    department: 'Tandil',
+    description: 'Turismo serrano, industria quesera y polo tecnológico bonaerense.',
+    imageUrl: '/images/city-rosario.jpg',
+    isFeatured: true,
+    provinceId: 'buenos-aires',
+    provinceName: 'Buenos Aires',
+  },
+  {
+    id: 'san-nicolas',
+    name: 'San Nicolás',
+    slug: 'san-nicolas',
+    department: 'San Nicolás',
+    description: 'Polo industrial siderúrgico y turismo religioso a orillas del Paraná.',
+    imageUrl: '/images/city-rosario.jpg',
+    isFeatured: false,
+    provinceId: 'buenos-aires',
+    provinceName: 'Buenos Aires',
+  },
+  {
+    id: 'pergamino',
+    name: 'Pergamino',
+    slug: 'pergamino',
+    department: 'Pergamino',
+    description: 'Capital nacional de la semilla y centro agroindustrial del norte bonaerense.',
+    imageUrl: '/images/city-rosario.jpg',
+    isFeatured: false,
+    provinceId: 'buenos-aires',
+    provinceName: 'Buenos Aires',
+  },
+  {
+    id: 'junin',
+    name: 'Junín',
+    slug: 'junin',
+    department: 'Junín',
+    description: 'Centro comercial, administrativo y turístico del noroeste bonaerense.',
+    imageUrl: '/images/city-rosario.jpg',
+    isFeatured: false,
+    provinceId: 'buenos-aires',
+    provinceName: 'Buenos Aires',
+  },
+  {
+    id: 'olavarria',
+    name: 'Olavarría',
+    slug: 'olavarria',
+    department: 'Olavarría',
+    description: 'Capital minera e industrial del centro bonaerense.',
+    imageUrl: '/images/city-rosario.jpg',
+    isFeatured: false,
+    provinceId: 'buenos-aires',
+    provinceName: 'Buenos Aires',
+  },
+];
+
+export const ALL_CITIES: City[] = [
+  ...CITIES_SANTA_FE,
+  ...CITIES_ENTRE_RIOS,
+  ...CITIES_CABA,
+  ...CITIES_CORDOBA,
+  ...CITIES_BUENOS_AIRES,
+];
 
 export function getCitiesByProvince(provinceId: string): City[] {
   if (!provinceId || provinceId === 'all' || provinceId === 'todas') {
@@ -224,21 +506,89 @@ export function getCitiesByProvince(provinceId: string): City[] {
     // Fallback to static defaults
   }
 
-  return ALL_CITIES.filter((city) => city.provinceId === provinceId);
+  const staticMatches = ALL_CITIES.filter((city) => city.provinceId === provinceId);
+  if (staticMatches.length > 0) {
+    return staticMatches;
+  }
+
+  // Fallback garantizado para provincias agregadas dinámicamente: nunca devolver array vacío
+  const provObj = getProvinceById(provinceId);
+  const provName = provObj?.name || provinceId;
+  return [
+    {
+      id: `${provinceId}-capital`,
+      name: `${provName} Capital`,
+      slug: `${provinceId}-capital`,
+      department: provName,
+      description: `Centro comercial y administrativo de ${provName}.`,
+      imageUrl: '/images/city-rosario.jpg',
+      isFeatured: true,
+      provinceId: provinceId,
+      provinceName: provName,
+    },
+  ];
 }
 
 export function getProvinceById(provinceId: string): Province | undefined {
-  return PROVINCES.find((p) => p.id === provinceId);
+  if (!provinceId) return undefined;
+  const staticFound = PROVINCES.find((p) => p.id === provinceId || p.slug === provinceId);
+  if (staticFound) return staticFound;
+
+  try {
+    const { getProvincesConfig } = require('@/lib/services/province-store');
+    const configs = getProvincesConfig();
+    const dynamicFound = configs.find((p: any) => p.id === provinceId || p.slug === provinceId);
+    if (dynamicFound) {
+      return {
+        id: dynamicFound.id,
+        name: dynamicFound.name,
+        slug: dynamicFound.slug || dynamicFound.id,
+      };
+    }
+  } catch (e) {}
+
+  // Sintetizar objeto Province válido con formato limpio para que nunca falle con 404
+  const name = provinceId
+    .split('-')
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+    .join(' ');
+  return { id: provinceId, name, slug: provinceId };
 }
 
 export function getProvinceBySlug(slug: string): Province | undefined {
   if (!slug) return undefined;
-  return PROVINCES.find((p) => p.slug === slug || p.id === slug);
+  return getProvinceById(slug);
 }
 
 export function getCityBySlug(slug: string): City | undefined {
   if (!slug) return undefined;
-  return ALL_CITIES.find((c) => c.slug === slug || c.id === slug);
+  const staticCity = ALL_CITIES.find((c) => c.slug === slug || c.id === slug);
+  if (staticCity) return staticCity;
+
+  try {
+    const { getProvincesConfig } = require('@/lib/services/province-store');
+    const configs = getProvincesConfig();
+    for (const prov of configs) {
+      if (Array.isArray(prov.cities)) {
+        const found = prov.cities.find((c: any) => c.slug === slug || c.id === slug);
+        if (found) {
+          return {
+            id: found.id,
+            name: found.name,
+            slug: found.slug || found.id,
+            department: prov.name,
+            description: `Ciudad de ${prov.name}`,
+            imageUrl: found.imageUrl || '/images/city-rosario.jpg',
+            isFeatured: true,
+            provinceId: prov.id,
+            provinceName: prov.name,
+          };
+        }
+      }
+    }
+  } catch (e) {}
+
+  return undefined;
 }
 
 export const VALID_SECTION_SLUGS: Record<string, { name: string; description: string }> = {

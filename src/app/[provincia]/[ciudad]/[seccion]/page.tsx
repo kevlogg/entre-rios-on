@@ -86,10 +86,9 @@ export async function generateMetadata({ params }: GeoSectionPageProps): Promise
 
 export default async function GeoSectionPage({ params }: GeoSectionPageProps) {
   const { ciudad, seccion } = await params;
-  const city = getCityBySlug(ciudad);
   const sectionMeta = VALID_SECTION_SLUGS[seccion];
 
-  if (!city || !sectionMeta) {
+  if (!sectionMeta) {
     notFound();
   }
 
@@ -110,6 +109,6 @@ export default async function GeoSectionPage({ params }: GeoSectionPageProps) {
     case 'turismo':
       return <TurismoPage />;
     default:
-      notFound();
+      return <ComerciosPage />;
   }
 }

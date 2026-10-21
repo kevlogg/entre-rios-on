@@ -141,12 +141,22 @@ export function GeoCustomizerManager({ initialCities }: GeoCustomizerManagerProp
 
   // Toggle Activa / Inactiva para una provincia
   const handleToggleProvinceActive = (provId: string) => {
-    const updated = provinces.map((p) => (p.id === provId ? { ...p, isActive: !p.isActive } : p));
+    const updated = provinces.map((p) => {
+      if (p.id === provId) {
+        const nextActive = !p.isActive;
+        return {
+          ...p,
+          isActive: nextActive,
+          badge: nextActive ? 'Activa' : 'Próximamente',
+        };
+      }
+      return p;
+    });
     setProvinces(updated);
     saveProvincesConfig(updated);
 
     const prov = updated.find((p) => p.id === provId);
-    setSuccessMsg(`Provincia "${prov?.name}" ahora está ${prov?.isActive ? 'ACTIVA en la web principal' : 'INACTIVA (Próximamente)'}.`);
+    setSuccessMsg(`Provincia "${prov?.name}" ahora está ${prov?.isActive ? 'ACTIVA (Badge: Activa)' : 'INACTIVA (Badge: Próximamente)'}.`);
     setTimeout(() => setSuccessMsg(null), 3500);
   };
 
@@ -203,7 +213,7 @@ export function GeoCustomizerManager({ initialCities }: GeoCustomizerManagerProp
       name: newProvinceName.trim(),
       slug,
       isActive: newProvinceIsActive,
-      badge: newProvinceBadge.trim() || 'Próximamente',
+      badge: newProvinceIsActive ? 'Activa' : 'Próximamente',
       badgeColor: newProvinceBadgeColor,
       cities: defaultCitiesForNewProv,
     };
@@ -527,14 +537,11 @@ export function GeoCustomizerManager({ initialCities }: GeoCustomizerManagerProp
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">Etiqueta / Insignia</label>
-                <input
-                  type="text"
-                  placeholder="Ej. Próximamente / Lanzamiento"
-                  value={newProvinceBadge}
-                  onChange={(e) => setNewProvinceBadge(e.target.value)}
-                  className="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs font-bold text-slate-800 focus:ring-2 focus:ring-[#00ADB5]"
-                />
+                <label className="block text-xs font-bold text-slate-700 mb-1">Badge / Insignia</label>
+                <div className="w-full bg-slate-100 border border-slate-300 rounded-xl px-3 py-2 text-xs font-bold text-slate-600 flex items-center justify-between">
+                  <span>{newProvinceIsActive ? 'Activa' : 'Próximamente'}</span>
+                  <span className="text-[10px] text-slate-400 font-normal">Automático según visibilidad</span>
+                </div>
               </div>
 
               <div>
@@ -648,7 +655,7 @@ export function GeoCustomizerManager({ initialCities }: GeoCustomizerManagerProp
                     className="text-[10px] font-black px-2.5 py-0.5 rounded-full text-white shadow-2xs"
                     style={{ backgroundColor: prov.badgeColor || '#0047BA' }}
                   >
-                    {prov.badge || (prov.isActive ? 'Activa' : 'Próximamente')}
+                    {prov.isActive ? 'Activa' : 'Próximamente'}
                   </span>
                 </div>
 

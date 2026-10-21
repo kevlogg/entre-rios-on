@@ -5,6 +5,7 @@ import { ClientHeader } from '@/components/layout/ClientHeader';
 import { ClientHomeContainer } from '@/components/client-portal/ClientHomeContainer';
 import { ClientFooter } from '@/components/layout/ClientFooter';
 import { getProvinceBySlug, getCityBySlug, ALL_CITIES } from '@/lib/constants/locations';
+import { City } from '@/types';
 
 export const revalidate = 60;
 
@@ -24,22 +25,17 @@ export async function generateMetadata({ params }: CityHubPageProps): Promise<Me
   const prov = getProvinceBySlug(provincia);
   const city = getCityBySlug(ciudad);
 
-  if (!city) {
-    return {
-      title: 'Entre Ríos ON MÁS Portal',
-    };
-  }
-
-  const provName = prov?.name || city.provinceName || 'Entre Ríos';
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://entreriosonmas.gob.ar';
-  const title = `${city.name}, ${provName} | Comercios, Turismo y Ofertas ON MÁS`;
-  const description = `Guía comercial y portal de ${city.name} en la Provincia de ${provName}. Encontrá comercios locales, catálogo con pedido directo a WhatsApp, servicios y eventos.`;
-  const canonicalUrl = `${baseUrl}/${prov?.slug || 'entre-rios'}/${city.slug}`;
+  const cityName = city?.name || ciudad.split('-').map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+  const provName = prov?.name || city?.provinceName || 'ON MÁS';
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://onmasportal.com.ar';
+  const title = `${cityName}, ${provName} | Comercios, Turismo y Ofertas ON MÁS`;
+  const description = `Guía comercial y portal de ${cityName} en la Provincia de ${provName}. Encontrá comercios locales, catálogo con pedido directo a WhatsApp, servicios y eventos.`;
+  const canonicalUrl = `${baseUrl}/${prov?.slug || provincia}/${city?.slug || ciudad}`;
 
   return {
     title,
     description,
-    keywords: [city.name, provName, `Comercios en ${city.name}`, `Turismo ${city.name}`, `Ofertas ${city.name}`, 'ON MÁS'],
+    keywords: [cityName, provName, `Comercios en ${cityName}`, `Turismo ${cityName}`, `Ofertas ${cityName}`, 'ON MÁS'],
     alternates: {
       canonical: canonicalUrl,
     },
@@ -47,15 +43,15 @@ export async function generateMetadata({ params }: CityHubPageProps): Promise<Me
       title,
       description,
       url: canonicalUrl,
-      siteName: 'Entre Ríos ON MÁS Portal',
+      siteName: 'ON MÁS Portal',
       locale: 'es_AR',
       type: 'website',
       images: [
         {
-          url: city.imageUrl || '/logo.png',
+          url: city?.imageUrl || '/logo1.png',
           width: 1200,
           height: 630,
-          alt: `Entre Ríos ON MÁS Portal - ${city.name}`,
+          alt: `ON MÁS Portal - ${cityName}`,
         },
       ],
     },
@@ -63,7 +59,7 @@ export async function generateMetadata({ params }: CityHubPageProps): Promise<Me
       card: 'summary_large_image',
       title,
       description,
-      images: [city.imageUrl || '/logo.png'],
+      images: [city?.imageUrl || '/logo1.png'],
     },
   };
 }
@@ -83,16 +79,25 @@ export default async function CityHubPage({ params }: CityHubPageProps) {
     redirect(`/superadmin?tab=${tab}`);
   }
 
+  const prov = getProvinceBySlug(provincia);
   const city = getCityBySlug(ciudad);
 
-  if (!city) {
-    notFound();
-  }
+  const resolvedCity: City = city || {
+    id: ciudad,
+    name: ciudad.split('-').map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(' '),
+    slug: ciudad,
+    department: prov?.name || 'Región',
+    description: `Guía comercial y portal de la ciudad.`,
+    imageUrl: '/images/city-rosario.jpg',
+    isFeatured: true,
+    provinceId: prov?.id || provincia,
+    provinceName: prov?.name || provincia,
+  };
 
   return (
     <div className="min-h-screen flex flex-col bg-[#e2e8f0]">
       <main className="w-full flex-1 bg-[#e2e8f0]">
-        <ClientHomeContainer provinceId={city.provinceId} />
+        <ClientHomeContainer provinceId={resolvedCity.provinceId} />
       </main>
       <ClientFooter />
     </div>
