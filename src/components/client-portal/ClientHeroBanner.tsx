@@ -10,12 +10,13 @@ interface ClientHeroBannerProps {
   provinceId?: string;
 }
 
-export function ClientHeroBanner({ provinceId = 'santa-fe' }: ClientHeroBannerProps) {
+export function ClientHeroBanner({ provinceId }: ClientHeroBannerProps) {
+  const targetProvId = !provinceId || provinceId === 'todas' ? 'all' : provinceId;
   // Dynamic banners loaded from Supabase / SuperAdmin
-  const dynamicBanners = useProvinceBanners(provinceId);
+  const dynamicBanners = useProvinceBanners(targetProvId);
   const banners = dynamicBanners && dynamicBanners.length > 0 
     ? dynamicBanners 
-    : (DEFAULT_PROVINCE_BANNERS[provinceId] || DEFAULT_PROVINCE_BANNERS['santa-fe'] || []);
+    : (DEFAULT_PROVINCE_BANNERS[targetProvId] || DEFAULT_PROVINCE_BANNERS['all'] || DEFAULT_PROVINCE_BANNERS['santa-fe'] || []);
 
   const [currentIndex, setCurrentIndex] = useState(0);
   const totalSlides = banners.length;

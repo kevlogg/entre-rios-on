@@ -17,52 +17,62 @@ export const DEFAULT_SIDE_BANNERS: SideBannerItem[] = [
   {
     id: 'side-left-1',
     title: 'Sorteo del Mes ON+',
-    imageUrl: '/banners/side-sorteo-del-mes.jpg',
+    imageUrl: 'https://oetagnusdhbqrznugwuo.supabase.co/storage/v1/object/public/commerces/uploads/1791856726958-kdk1p8.jpg',
     href: '/sorteos',
     position: 'left',
     idealSize: '160 × 600 px (Rascacielos / Vertical HD)',
   },
   {
     id: 'side-left-2',
-    title: 'Descubrí Santa Fe - Turismo Todo el Año',
-    imageUrl: '/banners/side-descubri-santa-fe.jpg',
-    href: '/turismo',
+    title: 'Cápsulas 4 en 1',
+    imageUrl: 'https://oetagnusdhbqrznugwuo.supabase.co/storage/v1/object/public/commerces/uploads/1791853804014-udq9am.jpg',
+    href: '/producto/c-psulas-4-en-1',
     position: 'left',
-    idealSize: '160 × 600 px (Rascacielos / Vertical HD)',
+    idealSize: '160 × 240 px',
   },
   {
     id: 'side-right-1',
-    title: 'Tu Comercio en ON MÁS',
-    imageUrl: '/banners/side-comercio-onmas.jpg',
-    href: '/planes',
+    title: 'Sitio Automotor',
+    imageUrl: 'https://oetagnusdhbqrznugwuo.supabase.co/storage/v1/object/public/commerces/uploads/1792455289554-lqote6.jpg',
+    href: 'https://www.sitioautomotor.com.ar/?utm_source=ig&utm_medium=social&utm_content=link_in_bio&fbclid=PAZXh0bgNhZW0CMTEAcGRvZgJzcnRjBmFwcF9pZA85MzY2MTk3NDMzOTI0NTkAAacLuWEvk1eCt9RcwGK9kf9Lt4SiJDVbCQNIIqgAGFP3X9dLJ-rMsDQEppCqkQ_aem_3Ib8qVKPZD1Szj_eW1j_Yw#inicio',
     position: 'right',
     idealSize: '160 × 600 px (Rascacielos / Vertical HD)',
+    isExternal: true,
   },
   {
     id: 'side-right-2',
-    title: 'Viví la Costa Santafesina',
-    imageUrl: '/banners/side-costa-santafesina.jpg',
-    href: '/turismo',
+    title: 'Re-Vest Das Almas',
+    imageUrl: 'https://oetagnusdhbqrznugwuo.supabase.co/storage/v1/object/public/commerces/uploads/1792455246638-5fvkq0.png',
+    href: '/comercio/re-vest-das-almas',
     position: 'right',
-    idealSize: '160 × 600 px (Rascacielos / Vertical HD)',
+    idealSize: '160 × 240 px',
   },
 ];
 
-const SIDE_BANNERS_STORAGE_KEY = 'onmas_side_banners_v2';
+const SIDE_BANNERS_STORAGE_KEY = 'onmas_side_banners_v3';
 let memoryStoreSideBanners: SideBannerItem[] | null = null;
 
 function normalizeSideBanners(stored: SideBannerItem[]): SideBannerItem[] {
   if (!Array.isArray(stored) || stored.length === 0) return DEFAULT_SIDE_BANNERS;
 
-  return stored.map((item, idx) => ({
-    id: item.id || `side-banner-${idx}-${Date.now()}`,
-    title: item.title || 'Anuncio Publicitario',
-    imageUrl: item.imageUrl || '/banners/side-sorteo-del-mes.jpg',
-    href: item.href || '/planes',
-    position: item.position || (idx % 2 === 0 ? 'left' : 'right'),
-    idealSize: item.idealSize || '160 × 600 px (Rascacielos / Vertical HD)',
-    isExternal: Boolean(item.isExternal || item.href?.startsWith('http')),
-  }));
+  return stored.map((item, idx) => {
+    const fallback = DEFAULT_SIDE_BANNERS[idx % DEFAULT_SIDE_BANNERS.length];
+    const isLegacyStockImage = !item.imageUrl ||
+      item.imageUrl.includes('side-descubri') ||
+      item.imageUrl.includes('side-costa') ||
+      item.imageUrl.includes('side-comercio') ||
+      item.imageUrl === '/banners/side-sorteo-del-mes.jpg';
+
+    return {
+      id: item.id || `side-banner-${idx}-${Date.now()}`,
+      title: item.title || fallback.title,
+      imageUrl: !isLegacyStockImage ? item.imageUrl : fallback.imageUrl,
+      href: item.href || fallback.href,
+      position: item.position || fallback.position,
+      idealSize: item.idealSize || fallback.idealSize,
+      isExternal: Boolean(item.isExternal || item.href?.startsWith('http')),
+    };
+  });
 }
 
 export function getSideBanners(): SideBannerItem[] {

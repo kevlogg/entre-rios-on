@@ -93,7 +93,7 @@ export function ClientHomeContainer({ provinceId, initialProducts = [] }: Client
         {/* MOBILE VIEW (< lg): Hero Banner Principal                                 */}
         {/* ========================================================================= */}
         <div className="lg:hidden w-full mb-2.5">
-          <ClientHeroBanner provinceId={activeProvince || undefined} />
+          <ClientHeroBanner provinceId={activeProvince || 'all'} />
         </div>
 
         {/* ========================================================================= */}
@@ -141,7 +141,7 @@ export function ClientHomeContainer({ provinceId, initialProducts = [] }: Client
           {/* COLUMNA CENTRAL: Hero + Ciudades + Categorías + Productos + Secciones Destacadas + Quiénes Somos */}
           <main className="w-full min-w-0 space-y-3 sm:space-y-4">
             {/* 1. Banner Principal de Portada / Provincia (Cargado dinámicamente desde SuperAdmin) */}
-            <ClientHeroBanner provinceId={activeProvince || undefined} />
+            <ClientHeroBanner provinceId={activeProvince || 'all'} />
 
             {/* 2. Explorá por Ciudad (Sólo se muestra si hay provincia seleccionada) */}
             {activeProvince && <CityExploreBar provinceId={activeProvince} />}

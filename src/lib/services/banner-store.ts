@@ -34,6 +34,44 @@ export function normalizeImageUrl(url?: string): string {
 }
 
 export const DEFAULT_PROVINCE_BANNERS: Record<string, BannerItem[]> = {
+  'all': [
+    {
+      id: 'all-hero-1',
+      provinceId: 'all',
+      imageUrl: 'https://oetagnusdhbqrznugwuo.supabase.co/storage/v1/object/public/commerces/uploads/1792023396271-sgjols.png',
+      device: 'all',
+      location: 'ON MÁS Portal',
+      titleLine1: 'ON+ PORTAL REGIONAL',
+      titleLine2: 'CONECTANDO LA REGIÓN',
+      subtitle: 'Comprá. Vendé. Publicá. Conectá.',
+      ctaText: 'Ver Comercios',
+      ctaHref: '/comercios',
+    },
+    {
+      id: 'all-hero-2',
+      provinceId: 'all',
+      imageUrl: 'https://oetagnusdhbqrznugwuo.supabase.co/storage/v1/object/public/commerces/uploads/1792378190435-jul4q6.png',
+      device: 'all',
+      location: 'Cobertura Regional',
+      titleLine1: 'SIEMPRE ON MÁS',
+      titleLine2: 'TODO EN UN SOLO LUGAR',
+      subtitle: 'Comercio, Turismo, Clasificados y Oportunidades',
+      ctaText: 'Explorar Catálogo',
+      ctaHref: '/catalogo',
+    },
+    {
+      id: 'all-hero-3',
+      provinceId: 'all',
+      imageUrl: 'https://oetagnusdhbqrznugwuo.supabase.co/storage/v1/object/public/commerces/uploads/1792349261081-ggyb0c.png',
+      device: 'all',
+      location: 'Comercio & Pymes',
+      titleLine1: 'PUBLICÁ TU NEGOCIO',
+      titleLine2: 'EN ON MÁS',
+      subtitle: 'Hacé crecer tus ventas y conectá por WhatsApp',
+      ctaText: 'Vender en ON+',
+      ctaHref: '/vender-on',
+    },
+  ],
   'entre-rios': [
     {
       id: 'er-1',
@@ -155,8 +193,10 @@ const memoryStore: Record<string, BannerItem[]> = {};
 const configuredProvinces = new Set<string>();
 
 export function getBannersByProvince(provinceId: string): BannerItem[] {
-  if (configuredProvinces.has(provinceId) && memoryStore[provinceId] !== undefined) {
-    return memoryStore[provinceId];
+  const targetId = !provinceId || provinceId === 'todas' ? 'all' : provinceId;
+
+  if (configuredProvinces.has(targetId) && memoryStore[targetId] !== undefined) {
+    return memoryStore[targetId];
   }
 
   if (typeof window !== 'undefined') {
@@ -164,17 +204,17 @@ export function getBannersByProvince(provinceId: string): BannerItem[] {
       const raw = localStorage.getItem(STORAGE_KEY);
       if (raw) {
         const parsed: Record<string, BannerItem[]> = JSON.parse(raw);
-        if (provinceId in parsed && Array.isArray(parsed[provinceId])) {
-          const targetList = parsed[provinceId];
+        if (targetId in parsed && Array.isArray(parsed[targetId])) {
+          const targetList = parsed[targetId];
           const valid = targetList.filter((b) => b && typeof b.imageUrl === 'string' && b.imageUrl.trim().length > 0);
           if (valid.length > 0) {
             // Ensure sf-bridge is included if santa-fe
-            if (provinceId === 'santa-fe' && !valid.some((b) => b.id === 'sf-bridge' || (b.imageUrl && b.imageUrl.includes('hero-santa-fe-bridge')))) {
+            if (targetId === 'santa-fe' && !valid.some((b) => b.id === 'sf-bridge' || (b.imageUrl && b.imageUrl.includes('hero-santa-fe-bridge')))) {
               const defaultBridge = DEFAULT_PROVINCE_BANNERS['santa-fe']?.[0];
               if (defaultBridge) valid.unshift(defaultBridge);
             }
-            memoryStore[provinceId] = valid;
-            configuredProvinces.add(provinceId);
+            memoryStore[targetId] = valid;
+            configuredProvinces.add(targetId);
             return valid;
           }
         }
@@ -184,45 +224,47 @@ export function getBannersByProvince(provinceId: string): BannerItem[] {
     }
   }
 
-  if (memoryStore[provinceId] !== undefined) {
-    return memoryStore[provinceId];
+  if (memoryStore[targetId] !== undefined) {
+    return memoryStore[targetId];
   }
 
-  const fallback = DEFAULT_PROVINCE_BANNERS[provinceId] || DEFAULT_PROVINCE_BANNERS['santa-fe'] || [];
+  const fallback = DEFAULT_PROVINCE_BANNERS[targetId] || DEFAULT_PROVINCE_BANNERS['all'] || DEFAULT_PROVINCE_BANNERS['santa-fe'] || [];
   return fallback;
 }
 
 export async function fetchBannersFromSupabase(provinceId: string): Promise<BannerItem[]> {
+  const targetId = !provinceId || provinceId === 'todas' ? 'all' : provinceId;
+
   try {
     const { createPublicClient } = await import('@/lib/supabase/public');
     const supabase = createPublicClient();
     const { data, error } = await supabase
       .from('banner_slides')
       .select('*')
-      .eq('province_id', provinceId)
+      .eq('province_id', targetId)
       .order('created_at', { ascending: false });
 
-    if (!error && Array.isArray(data)) {
+    if (!error && Array.isArray(data) && data.length > 0) {
       const mapped: BannerItem[] = data
         .filter((slide) => slide && (slide.image_url || slide.imageUrl))
         .map((slide, idx) => ({
           id: slide.id || `b-sp-${idx}`,
-          provinceId: slide.province_id || provinceId,
+          provinceId: slide.province_id || targetId,
           imageUrl: slide.image_url || slide.imageUrl,
-          ctaHref: slide.cta_url || slide.ctaHref || `/${provinceId}`,
+          ctaHref: slide.cta_url || slide.ctaHref || (targetId === 'all' ? '/' : `/${targetId}`),
           isExternal: Boolean(slide.is_external || slide.isExternal || (slide.cta_url || slide.ctaHref || '').startsWith('http')),
           location: slide.city_tag || slide.location || '',
           titleLine1: slide.title || '',
         }));
 
-      memoryStore[provinceId] = mapped;
-      configuredProvinces.add(provinceId);
+      memoryStore[targetId] = mapped;
+      configuredProvinces.add(targetId);
 
       if (typeof window !== 'undefined') {
         try {
           const raw = localStorage.getItem(STORAGE_KEY);
           const store: Record<string, BannerItem[]> = raw ? JSON.parse(raw) : {};
-          store[provinceId] = mapped;
+          store[targetId] = mapped;
           localStorage.setItem(STORAGE_KEY, JSON.stringify(store));
           window.dispatchEvent(new Event('onmas_banners_updated'));
         } catch (e) {}
@@ -233,18 +275,19 @@ export async function fetchBannersFromSupabase(provinceId: string): Promise<Bann
     console.warn('Notice loading Supabase banners:', e);
   }
 
-  return getBannersByProvince(provinceId);
+  return getBannersByProvince(targetId);
 }
 
 export function saveBannersByProvince(provinceId: string, banners: BannerItem[]): void {
-  memoryStore[provinceId] = banners;
-  configuredProvinces.add(provinceId);
+  const targetId = !provinceId || provinceId === 'todas' ? 'all' : provinceId;
+  memoryStore[targetId] = banners;
+  configuredProvinces.add(targetId);
 
   if (typeof window !== 'undefined') {
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
       const store: Record<string, BannerItem[]> = raw ? JSON.parse(raw) : {};
-      store[provinceId] = banners;
+      store[targetId] = banners;
       localStorage.setItem(STORAGE_KEY, JSON.stringify(store));
     } catch (e) {
       console.warn('Warning saving province banners to localStorage:', e);
@@ -255,18 +298,21 @@ export function saveBannersByProvince(provinceId: string, banners: BannerItem[])
 }
 
 export function useProvinceBanners(provinceId: string): BannerItem[] {
-  const [banners, setBanners] = useState<BannerItem[]>(() => getBannersByProvince(provinceId));
+  const targetId = !provinceId || provinceId === 'todas' ? 'all' : provinceId;
+  const [banners, setBanners] = useState<BannerItem[]>(() => getBannersByProvince(targetId));
 
   useEffect(() => {
     let isMounted = true;
     const sync = () => {
-      if (isMounted) setBanners(getBannersByProvince(provinceId));
+      if (isMounted) setBanners(getBannersByProvince(targetId));
     };
 
     sync();
 
-    fetchBannersFromSupabase(provinceId).then((b) => {
-      if (isMounted) setBanners(b);
+    fetchBannersFromSupabase(targetId).then((b) => {
+      if (isMounted && Array.isArray(b) && b.length > 0) {
+        setBanners(b);
+      }
     });
 
     if (typeof window !== 'undefined') {
@@ -280,7 +326,7 @@ export function useProvinceBanners(provinceId: string): BannerItem[] {
         window.removeEventListener('storage', sync);
       }
     };
-  }, [provinceId]);
+  }, [targetId]);
 
   return banners;
 }

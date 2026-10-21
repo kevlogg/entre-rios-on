@@ -113,31 +113,43 @@ export function GeoCustomizerManager({ initialCities }: GeoCustomizerManagerProp
         if (isMounted) setBanners(b);
       });
 
-      // Cargar ciudades para la provincia seleccionada
-      const currProv = provinces.find((p) => p.id === selectedProvinceId || p.slug === selectedProvinceId);
-      if (currProv && Array.isArray(currProv.cities) && currProv.cities.length > 0) {
-        setProvinceCities(currProv.cities);
+      // Cargar ciudades para la provincia seleccionada (si no es Portada General 'all')
+      if (selectedProvinceId === 'all') {
+        setProvinceCities([]);
+        setNewBannerCtaHref('/');
       } else {
-        const defaults = getCitiesByProvince(selectedProvinceId).map((c) => ({
-          id: c.id,
-          name: c.name,
-          slug: c.slug || c.id,
-          isActive: true,
-        }));
-        setProvinceCities(defaults);
+        const currProv = provinces.find((p) => p.id === selectedProvinceId || p.slug === selectedProvinceId);
+        if (currProv && Array.isArray(currProv.cities) && currProv.cities.length > 0) {
+          setProvinceCities(currProv.cities);
+        } else {
+          const defaults = getCitiesByProvince(selectedProvinceId).map((c) => ({
+            id: c.id,
+            name: c.name,
+            slug: c.slug || c.id,
+            isActive: true,
+          }));
+          setProvinceCities(defaults);
+        }
+        setNewBannerCtaHref(`/${selectedProvinceId}`);
       }
-
-      setNewBannerCtaHref(`/${selectedProvinceId}`);
     }
     return () => { isMounted = false; };
   }, [selectedProvinceId, provinces]);
 
-  const currentProv = provinces.find((p) => p.id === selectedProvinceId) || {
-    id: selectedProvinceId,
-    name: selectedProvinceId,
-    slug: selectedProvinceId,
-    isActive: true,
-  };
+  const isGeneralPortada = selectedProvinceId === 'all';
+  const currentProv = isGeneralPortada
+    ? {
+        id: 'all',
+        name: 'Portada General (Sin provincia seleccionada)',
+        slug: '',
+        isActive: true,
+      }
+    : provinces.find((p) => p.id === selectedProvinceId) || {
+        id: selectedProvinceId,
+        name: selectedProvinceId,
+        slug: selectedProvinceId,
+        isActive: true,
+      };
 
   // Toggle Activa / Inactiva para una provincia
   const handleToggleProvinceActive = (provId: string) => {
@@ -387,7 +399,7 @@ export function GeoCustomizerManager({ initialCities }: GeoCustomizerManagerProp
       resolvedCtaHref = `https://${resolvedCtaHref}`;
     }
     if (!resolvedCtaHref) {
-      resolvedCtaHref = `/${selectedProvinceId}`;
+      resolvedCtaHref = selectedProvinceId === 'all' ? '/' : `/${selectedProvinceId}`;
     }
 
     const isExternal = Boolean(newBannerIsExternal || resolvedCtaHref.startsWith('http'));
@@ -397,11 +409,11 @@ export function GeoCustomizerManager({ initialCities }: GeoCustomizerManagerProp
       provinceId: selectedProvinceId,
       imageUrl: newBannerImage,
       device: newBannerDevice,
-      location: `${currentProv.name} ON`,
-      titleLine1: `${currentProv.name.toUpperCase()},`,
+      location: selectedProvinceId === 'all' ? 'ON MÁS Portal' : `${currentProv.name} ON`,
+      titleLine1: selectedProvinceId === 'all' ? 'ON MÁS,' : `${currentProv.name.toUpperCase()},`,
       titleLine2: 'SIEMPRE ON MÁS',
       subtitle: 'Comprá. Vendé. Publicá. Conectá.',
-      ctaText: `Explorar ${currentProv.name}`,
+      ctaText: selectedProvinceId === 'all' ? 'Explorar Portal' : `Explorar ${currentProv.name}`,
       ctaHref: resolvedCtaHref,
       isExternal,
     };
@@ -585,6 +597,59 @@ export function GeoCustomizerManager({ initialCities }: GeoCustomizerManagerProp
           </form>
         )}
 
+        {/* Card Especial: Portada General / Sin Provincia Seleccionada */}
+        <div className="mb-4">
+          <div
+            className={`p-4 sm:p-5 rounded-2xl border transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-4 ${
+              selectedProvinceId === 'all'
+                ? 'bg-gradient-to-r from-blue-50 via-cyan-50 to-white border-[#00ADB5] ring-2 ring-[#00ADB5]/40 shadow-sm'
+                : 'bg-white border-slate-200 hover:bg-slate-50 shadow-2xs'
+            }`}
+          >
+            <div className="flex items-start gap-3">
+              <div className="w-10 h-10 rounded-xl bg-blue-100 border border-blue-200 flex items-center justify-center text-xl shrink-0 shadow-2xs">
+                🌐
+              </div>
+              <div className="space-y-1">
+                <div className="flex items-center gap-2">
+                  <h3 className="text-sm font-black text-slate-900">Portada General (Sin Provincia Seleccionada)</h3>
+                  <span className="text-[10px] font-black px-2.5 py-0.5 rounded-full bg-blue-600 text-white shadow-2xs">
+                    Global
+                  </span>
+                </div>
+                <p className="text-xs text-slate-500 font-medium">
+                  Banners rotativos que se muestran cuando un visitante ingresa al portal y aún dice &quot;Selecciona tu provincia&quot;.
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3 shrink-0">
+              <button
+                type="button"
+                onClick={() => setSelectedProvinceId('all')}
+                className={`text-xs font-black px-4 py-2 rounded-xl transition-all cursor-pointer ${
+                  selectedProvinceId === 'all'
+                    ? 'bg-[#0047BA] text-white shadow-md'
+                    : 'bg-slate-200 hover:bg-slate-300 text-slate-700'
+                }`}
+              >
+                {selectedProvinceId === 'all' ? 'Gestionando Banners ★' : 'Gestionar Banners Portada'}
+              </button>
+
+              <a
+                href="/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-slate-400 hover:text-[#0047BA] text-xs font-bold flex items-center gap-1"
+                title="Ver portada general en una pestaña nueva"
+              >
+                <span>Ver Portada</span>
+                <ExternalLink className="w-3.5 h-3.5" />
+              </a>
+            </div>
+          </div>
+        </div>
+
         {/* Listado de Provincias con Toggle Activo/Inactivo y Borrar con Confirmación */}
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
           {provinces.map((prov) => {
@@ -688,17 +753,18 @@ export function GeoCustomizerManager({ initialCities }: GeoCustomizerManagerProp
         </div>
       </div>
 
-      {/* BLOQUE 2: Selector & Imágenes de Cards para Ciudades (Imagen 1) */}
-      <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-sm space-y-6">
-        <div className="border-b border-slate-100 pb-3 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div>
-            <h3 className="text-base font-black text-slate-900 flex items-center gap-2">
-              <Building2 className="w-5 h-5 text-[#0047BA]" />
-              Ciudades & Cards de: <span className="text-[#0047BA]">{currentProv.name}</span>
-            </h3>
-            <p className="text-xs text-slate-500">
-              Personalizá la imagen de fondo para la card de cada ciudad que se muestra en el inicio y activá/desactivá su presencia en los selectores.
-            </p>
+      {/* BLOQUE 2: Selector & Imágenes de Cards para Ciudades (Sólo para provincias puntuales) */}
+      {selectedProvinceId !== 'all' ? (
+        <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-sm space-y-6">
+          <div className="border-b border-slate-100 pb-3 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <h3 className="text-base font-black text-slate-900 flex items-center gap-2">
+                <Building2 className="w-5 h-5 text-[#0047BA]" />
+                Ciudades & Cards de: <span className="text-[#0047BA]">{currentProv.name}</span>
+              </h3>
+              <p className="text-xs text-slate-500">
+                Personalizá la imagen de fondo para la card de cada ciudad que se muestra en el inicio y activá/desactivá su presencia en los selectores.
+              </p>
             <div className="mt-2 inline-flex items-center gap-1.5 bg-cyan-50 border border-cyan-300 text-cyan-900 px-3 py-1 rounded-xl text-[11px] font-black shadow-2xs">
               <span>📐 Tamaño Ideal para Card de Ciudad:</span>
               <span className="text-[#0047BA]">400 x 300 px (o proporción 4:3 en HD)</span>
@@ -800,17 +866,29 @@ export function GeoCustomizerManager({ initialCities }: GeoCustomizerManagerProp
           ))}
         </div>
       </div>
+    ) : (
+      <div className="bg-white rounded-3xl p-5 border border-slate-200 text-slate-600 text-xs flex items-center gap-3 shadow-2xs">
+        <div className="w-8 h-8 rounded-xl bg-blue-50 text-[#0047BA] flex items-center justify-center shrink-0 text-base">
+          ℹ️
+        </div>
+        <p className="font-medium">
+          La <strong>Portada General</strong> muestra la visión global de la plataforma para todo el país y no posee ciudades específicas asociadas. Para personalizar ciudades, seleccioná una provincia puntual (ej. Santa Fe, Entre Ríos, etc.) en el listado superior.
+        </p>
+      </div>
+    )}
 
-      {/* BLOQUE 3: Banners Hero de la Provincia Seleccionada */}
+      {/* BLOQUE 3: Banners Hero de la Provincia Seleccionada o Portada General */}
       <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-sm space-y-6">
         <div className="border-b border-slate-100 pb-3 flex items-center justify-between">
           <div>
             <h3 className="text-base font-black text-slate-900 flex items-center gap-2">
               <Upload className="w-5 h-5 text-[#00ADB5]" />
-              Banners para Provincia: <span className="text-[#0047BA]">{currentProv.name}</span>
+              Banners para: <span className="text-[#0047BA]">{currentProv.name}</span>
             </h3>
             <p className="text-xs text-slate-500">
-              Subí las imágenes publicitarias y configurá la URL a la que redirigen al hacer clic.
+              {isGeneralPortada
+                ? 'Personalizá las imágenes publicitarias que rotan en la portada principal cuando un visitante entra a la web y no ha seleccionado provincia.'
+                : 'Subí las imágenes publicitarias y configurá la URL a la que redirigen al hacer clic.'}
             </p>
             <div className="mt-2 space-y-1">
               <div className="inline-flex items-center gap-1.5 bg-cyan-50 border border-cyan-300 text-cyan-900 px-3.5 py-1.5 rounded-xl text-[11px] font-black shadow-2xs">
