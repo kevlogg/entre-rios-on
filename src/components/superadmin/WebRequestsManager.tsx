@@ -170,7 +170,7 @@ export function WebRequestsManager() {
 
                 <div className="flex items-center justify-between gap-2 pt-1">
                   <a
-                    href={`https://wa.me/549${req.phone || '3434001122'}?text=${encodeURIComponent(`Hola ${req.contactName}, recibimos tu solicitud en ON MÁS para la creación del sitio web de ${req.businessName}.`)}`}
+                    href={`https://wa.me/549${req.phone || '3426514889'}?text=${encodeURIComponent(`Hola ${req.contactName}, recibimos tu solicitud en ON MÁS para la creación del sitio web de ${req.businessName}.`)}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="inline-flex items-center gap-1.5 bg-[#25D366] hover:bg-emerald-600 text-white px-3.5 py-2 rounded-xl text-xs font-bold transition-transform active:scale-95"

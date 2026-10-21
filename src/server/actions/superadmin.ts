@@ -946,7 +946,7 @@ export async function createCashPaymentAction(paymentData: {
 
     let resolvedName = paymentData.commerceName || 'Comercio Adherido';
     let resolvedOwner = paymentData.ownerName || 'Titular';
-    let resolvedPhone = paymentData.phoneWhatsApp || '5493434001122';
+    let resolvedPhone = paymentData.phoneWhatsApp || '5493426514889';
     let resolvedCity = paymentData.cityName || 'Entre Ríos / Santa Fe';
 
     if (paymentData.commerceId) {

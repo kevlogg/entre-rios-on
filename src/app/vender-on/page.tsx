@@ -13,6 +13,7 @@ import {
   Clock, 
   MessageCircle
 } from 'lucide-react';
+import { ONMAS_OFFICIAL_WHATSAPP } from '@/lib/constants/brand';
 
 export const metadata: Metadata = {
   title: 'Vender en ON+ • Sumate como Asesor Comercial y Ganá Comisiones',
@@ -66,7 +67,7 @@ const BENEFITS = [
 ];
 
 export default function VenderOnPage() {
-  const whatsappUrl = `https://wa.me/5493434001122?text=${encodeURIComponent('Hola equipo ON+, quiero sumarme como asesor comercial para vender la plataforma y adherir comercios a comisión. ¿Cómo comenzamos?')}`;
+  const whatsappUrl = `https://wa.me/${ONMAS_OFFICIAL_WHATSAPP}?text=${encodeURIComponent('Hola equipo ON+, quiero sumarme como asesor comercial para vender la plataforma y adherir comercios a comisión. ¿Cómo comenzamos?')}`;
 
   const heroContent = (
     <div className="space-y-4">

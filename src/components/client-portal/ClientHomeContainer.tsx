@@ -13,6 +13,7 @@ import { AboutUsHomeSection } from '@/components/home/AboutUsHomeSection';
 import { AppDownloadCard } from '@/components/home/AppDownloadCard';
 import { getProvinceBySlug } from '@/lib/constants/locations';
 import { useSideBanners } from '@/lib/services/side-banners-store';
+import { getPersistedProvince, setPersistedProvince } from '@/lib/services/province-store';
 import { Product } from '@/types';
 
 interface ClientHomeContainerProps {
@@ -43,6 +44,7 @@ export function ClientHomeContainer({ provinceId, initialProducts = [] }: Client
   useEffect(() => {
     if (provinceId) {
       setActiveProvince(provinceId);
+      setPersistedProvince(provinceId, false);
       return;
     }
 
@@ -52,12 +54,32 @@ export function ClientHomeContainer({ provinceId, initialProducts = [] }: Client
         const provMatch = getProvinceBySlug(parts[0]);
         if (provMatch && provMatch.id !== 'all') {
           setActiveProvince(provMatch.id);
+          setPersistedProvince(provMatch.id, false);
           return;
         }
       }
     }
-    setActiveProvince(null);
+
+    // Si estamos en "/" sin slug en URL, recuperar la provincia previamente elegida
+    const savedProv = getPersistedProvince();
+    if (savedProv) {
+      setActiveProvince(savedProv);
+    } else {
+      setActiveProvince(null);
+    }
   }, [pathname, provinceId]);
+
+  // Escuchar cambios de provincia disparados desde el selector en tiempo real
+  useEffect(() => {
+    const handleProvinceChange = (e: any) => {
+      const newProvId = e.detail?.provinceId;
+      if (newProvId) {
+        setActiveProvince(newProvId);
+      }
+    };
+    window.addEventListener('onmas:province_changed', handleProvinceChange);
+    return () => window.removeEventListener('onmas:province_changed', handleProvinceChange);
+  }, []);
 
   return (
     <div className="w-full bg-[#e2e8f0] text-slate-900 min-h-screen flex flex-col">

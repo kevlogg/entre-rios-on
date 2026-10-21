@@ -226,7 +226,7 @@ export function SubscriptionPlans({
       const res = await createCashPaymentAction({
         commerceName: commerceName || (selectedTrack === 'turismo' ? 'Complejo Turístico' : 'Comercio Adherido'),
         ownerName: isParticular ? `Vecino Particular (${trackLabel})` : 'Titular',
-        phoneWhatsApp: phoneWhatsApp || '5493434001122',
+        phoneWhatsApp: phoneWhatsApp || '5493426514889',
         planName: selectedPlanForReport.name,
         amount: selectedPlanForReport.amount,
         cityName: cityName || 'Entre Ríos / Santa Fe',
@@ -259,7 +259,7 @@ export function SubscriptionPlans({
       const res = await createCashPaymentAction({
         commerceName: commerceName || (selectedTrack === 'turismo' ? 'Complejo Turístico' : 'Comercio Adherido'),
         ownerName: isParticular ? `Vecino Particular (${trackLabel})` : 'Titular',
-        phoneWhatsApp: phoneWhatsApp || '5493434001122',
+        phoneWhatsApp: phoneWhatsApp || '5493426514889',
         planName,
         amount,
         cityName: cityName || 'Entre Ríos / Santa Fe',

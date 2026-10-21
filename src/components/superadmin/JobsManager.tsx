@@ -82,7 +82,7 @@ export function JobsManager() {
         jobType: type,
         salary: salary || 'A convenir',
         description: description || `Búsqueda laboral activa para ${company} (${modality}).`,
-        phoneWhatsApp: phone || '5493434567890',
+        phoneWhatsApp: phone || '5493426514889',
         isSuperAdmin: true,
       });
 

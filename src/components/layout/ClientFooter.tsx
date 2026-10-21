@@ -114,14 +114,19 @@ export function ClientFooter() {
             </ul>
           </div>
 
-          {/* Col 5: Pertenece a ON PORTAL & MEDIA */}
+          {/* Col 5: Pertenece a CG PORTAL & MEDIA */}
           <div className="space-y-2">
             <span className="text-[11px] font-bold text-slate-600 block">
               Pertenece a
             </span>
-            <h4 className="text-sm font-black text-slate-900 tracking-tight leading-tight">
-              ON<br />PORTAL & MEDIA
-            </h4>
+            <div className="relative w-[145px] h-[48px]">
+              <Image
+                src="/cgportal.png"
+                alt="CG PORTAL & MEDIA"
+                fill
+                className="object-contain object-left"
+              />
+            </div>
             <p className="text-[11px] text-slate-600 leading-snug pt-1">
               Medios, tecnología y soluciones, para el desarrollo regional.
             </p>

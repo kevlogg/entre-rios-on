@@ -32,7 +32,7 @@ const caveat = Caveat({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://onmas.gob.ar'),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://onmasportal.com.ar'),
   title: 'ON MÁS Portal | Comercio. Comunidad. Oportunidades.',
   description: 'Portal regional híbrido ON MÁS: Directorio Comercial B2B, Catálogo directo a WhatsApp, Turismo, Gastronomía y Agenda de la Comunidad de Entre Ríos, Santa Fe y la región.',
   keywords: [

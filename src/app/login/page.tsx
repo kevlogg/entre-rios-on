@@ -160,7 +160,9 @@ function LoginFormContent() {
           return;
         }
 
-        const redirectOrigin = typeof window !== 'undefined' ? window.location.origin : 'https://entre-rios-on.vercel.app';
+        const redirectOrigin = typeof window !== 'undefined' && window.location.origin
+          ? window.location.origin
+          : (process.env.NEXT_PUBLIC_SITE_URL || 'https://onmasportal.com.ar');
         const cityObj = availableCities.find((c) => c.name === cityName) || availableCities[0];
         const fullName = `${firstName} ${lastName}`.trim();
 
@@ -294,7 +296,7 @@ function LoginFormContent() {
 
         const redirectOrigin = typeof window !== 'undefined' && window.location.origin
           ? window.location.origin
-          : (process.env.NEXT_PUBLIC_SITE_URL || 'https://entre-rios-on.vercel.app');
+          : (process.env.NEXT_PUBLIC_SITE_URL || 'https://onmasportal.com.ar');
 
         const callbackUrl = `${redirectOrigin}/auth/callback?next=${encodeURIComponent('/login?mode=reset')}`;
 

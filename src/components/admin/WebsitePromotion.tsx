@@ -18,13 +18,14 @@ import {
   Laptop
 } from 'lucide-react';
 import { Commerce } from '@/types';
+import { ONMAS_OFFICIAL_WHATSAPP } from '@/lib/constants/brand';
 
 interface WebsitePromotionProps {
   commerce: Commerce;
 }
 
 export function WebsitePromotion({ commerce }: WebsitePromotionProps) {
-  const whatsappSupportNumber = '5493434001122';
+  const whatsappSupportNumber = ONMAS_OFFICIAL_WHATSAPP;
   const customMessage = encodeURIComponent(
     `Hola! Soy titular de "${commerce.name}" (${commerce.cityName}) en el portal ON MÁS y me gustaría recibir asesoramiento e información para crear mi propio Sitio Web Oficial.`
   );

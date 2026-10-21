@@ -127,4 +127,56 @@ export function useActiveProvinces(): ProvinceItem[] {
   return activeProvinces;
 }
 
+const SELECTED_PROVINCE_KEY = 'onmas_selected_province';
+const PROVINCE_COOKIE_NAME = 'onmas_province';
+
+export function getPersistedProvince(): string | null {
+  if (typeof window === 'undefined') return null;
+  try {
+    const fromLocal = localStorage.getItem(SELECTED_PROVINCE_KEY);
+    if (fromLocal && fromLocal !== 'all' && fromLocal.trim()) {
+      return fromLocal.trim();
+    }
+    const match = document.cookie.match(new RegExp('(^| )' + PROVINCE_COOKIE_NAME + '=([^;]+)'));
+    if (match && match[2] && match[2] !== 'all') {
+      return decodeURIComponent(match[2].trim());
+    }
+  } catch (e) {
+    console.warn('Error al leer provincia persistente:', e);
+  }
+  return null;
+}
+
+export function setPersistedProvince(provinceId: string, persistToUser = true): void {
+  if (typeof window === 'undefined') return;
+  try {
+    if (!provinceId || provinceId === 'all') {
+      localStorage.removeItem(SELECTED_PROVINCE_KEY);
+      document.cookie = `${PROVINCE_COOKIE_NAME}=; path=/; max-age=0; SameSite=Lax`;
+    } else {
+      localStorage.setItem(SELECTED_PROVINCE_KEY, provinceId);
+      document.cookie = `${PROVINCE_COOKIE_NAME}=${encodeURIComponent(provinceId)}; path=/; max-age=31536000; SameSite=Lax`;
+    }
+
+    window.dispatchEvent(new CustomEvent('onmas:province_changed', { detail: { provinceId } }));
+
+    if (persistToUser && provinceId) {
+      import('@/lib/supabase/client').then(({ createClient }) => {
+        const supabase = createClient();
+        supabase.auth.getUser().then(({ data: { user } }) => {
+          if (user) {
+            supabase.auth.updateUser({
+              data: {
+                preferred_province_id: provinceId,
+              },
+            }).catch(() => {});
+          }
+        }).catch(() => {});
+      }).catch(() => {});
+    }
+  } catch (e) {
+    console.warn('Error al guardar provincia persistente:', e);
+  }
+}
+
 

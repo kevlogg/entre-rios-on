@@ -288,7 +288,7 @@ export function CashPaymentsManager({ onPaymentsUpdated }: CashPaymentsManagerPr
                           </button>
                         ) : (
                           <a
-                            href={`https://wa.me/549${req.phone || '3434001122'}?text=${encodeURIComponent(`Hola ${req.ownerName}, confirmamos la aprobación de tu pago para el ${req.planName} en ON MÁS.`)}`}
+                            href={`https://wa.me/549${req.phone || '3426514889'}?text=${encodeURIComponent(`Hola ${req.ownerName}, confirmamos la aprobación de tu pago para el ${req.planName} en ON MÁS.`)}`}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="inline-flex items-center gap-1 bg-[#25D366] text-white px-3 py-1.5 rounded-xl text-xs font-bold"

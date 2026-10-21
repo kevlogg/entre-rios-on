@@ -57,7 +57,7 @@ export async function GET(request: NextRequest) {
       };
 
   // Normalizar número telefónico
-  const cleanPhone = (phone || '5493434001122').replace(/\D/g, '');
+  const cleanPhone = (phone || '5493426514889').replace(/\D/g, '');
 
   // 3. Registrar métricas en Supabase (sin bloquear el redirect)
   try {

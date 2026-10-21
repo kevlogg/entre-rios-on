@@ -19,7 +19,7 @@ import {
 } from 'lucide-react';
 import { trackSearchQuery, trackCitySelect } from '@/lib/analytics/events';
 import { PROVINCES, getCitiesByProvince, getProvinceBySlug, getCityBySlug } from '@/lib/constants/locations';
-import { useActiveProvinces } from '@/lib/services/province-store';
+import { useActiveProvinces, getPersistedProvince, setPersistedProvince } from '@/lib/services/province-store';
 import { CATEGORIES_LIST } from '@/lib/constants/categories';
 import { getFeaturedProducts, getAllCommerces } from '@/lib/dal/portal';
 import { Product, Commerce } from '@/types';
@@ -168,6 +168,15 @@ export function ClientHeader({ withBackground = false }: ClientHeaderProps = {})
         if (user) {
           setCurrentUser(user);
 
+          // Si el usuario tiene una provincia preferida guardada y no hay ninguna en local, adoptarla
+          if (!getPersistedProvince()) {
+            const userProv = user.user_metadata?.preferred_province_id || user.user_metadata?.province_id;
+            if (userProv && userProv !== 'all') {
+              setPersistedProvince(userProv, false);
+              setSelectedProvince(userProv);
+            }
+          }
+
           const { data: commerces } = await supabase
             .from('commerces')
             .select('name, logo_url')
@@ -222,7 +231,7 @@ export function ClientHeader({ withBackground = false }: ClientHeaderProps = {})
     }).catch(() => {});
   }, []);
 
-  // Sync state from URL pathname
+  // Sync state from URL pathname or persistent storage
   useEffect(() => {
     if (!pathname) return;
     const parts = pathname.split('/').filter(Boolean);
@@ -230,12 +239,31 @@ export function ClientHeader({ withBackground = false }: ClientHeaderProps = {})
       const provMatch = getProvinceBySlug(parts[0]);
       if (provMatch && provMatch.id !== 'all') {
         setSelectedProvince(provMatch.id);
+        setPersistedProvince(provMatch.id, false);
         return;
       }
     }
-    // Si estamos en la portada raíz "/" o sin provincia en URL, no preseleccionar provincia
-    setSelectedProvince('');
+    // Si estamos en la portada raíz "/" o en una sección sin provincia en la URL,
+    // mantener la provincia seleccionada previamente por el usuario
+    const savedProv = getPersistedProvince();
+    if (savedProv) {
+      setSelectedProvince(savedProv);
+    } else {
+      setSelectedProvince('');
+    }
   }, [pathname]);
+
+  // Escuchar cambios de provincia disparados por otros componentes en tiempo real
+  useEffect(() => {
+    const handleProvinceChange = (e: any) => {
+      const newProvId = e.detail?.provinceId;
+      if (newProvId) {
+        setSelectedProvince(newProvId);
+      }
+    };
+    window.addEventListener('onmas:province_changed', handleProvinceChange);
+    return () => window.removeEventListener('onmas:province_changed', handleProvinceChange);
+  }, []);
 
   const activeCitySlug = useMemo(() => {
     if (!pathname) return null;
@@ -261,6 +289,7 @@ export function ClientHeader({ withBackground = false }: ClientHeaderProps = {})
 
   const handleProvinceSelect = (provId: string) => {
     setSelectedProvince(provId);
+    setPersistedProvince(provId, true);
     setIsProvinceDropdownOpen(false);
 
     const targetProv = activeProvinces.find((p) => p.id === provId || p.slug === provId);
