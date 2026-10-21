@@ -116,7 +116,7 @@ export default function VenderOnPage() {
             Beneficio Destacado
           </span>
           <div className="text-2xl sm:text-3xl font-black text-white leading-none">
-            Hasta 45%
+            Hasta 60%
             <span className="block text-xs font-extrabold text-slate-200 mt-1">de comisión por cada alta</span>
           </div>
           <p className="text-xs text-slate-200 font-medium leading-relaxed">
