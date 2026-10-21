@@ -5,10 +5,13 @@ export async function GET(request: Request) {
   const requestUrl = new URL(request.url);
   const code = requestUrl.searchParams.get('code');
   let next = requestUrl.searchParams.get('next') ?? '/admin';
+  const type = requestUrl.searchParams.get('type');
   const mode = requestUrl.searchParams.get('mode');
 
-  // Si 'mode=reset' viene como parámetro independiente en la URL, asegurarlo en el destino
-  if (mode && !next.includes('mode=')) {
+  // Si es recuperación de contraseña o 'mode=reset', dirigir al formulario de nueva contraseña
+  if (type === 'recovery' || mode === 'reset') {
+    next = '/login?mode=reset';
+  } else if (mode && !next.includes('mode=')) {
     next += (next.includes('?') ? '&' : '?') + `mode=${encodeURIComponent(mode)}`;
   }
 

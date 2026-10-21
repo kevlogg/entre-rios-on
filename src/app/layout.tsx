@@ -6,6 +6,7 @@ import { FloatingWhatsAppButton } from '@/components/common/FloatingWhatsAppButt
 import { ScrollToTopButton } from '@/components/common/ScrollToTopButton';
 import { PageBackground } from '@/components/common/PageBackground';
 import { PwaInstallPrompt } from '@/components/pwa/PwaInstallPrompt';
+import { AuthRecoveryListener } from '@/components/auth/AuthRecoveryListener';
 
 export const viewport: Viewport = {
   themeColor: [
@@ -149,6 +150,7 @@ export default function RootLayout({
         <FloatingWhatsAppButton />
         <ScrollToTopButton />
         <PwaInstallPrompt />
+        <AuthRecoveryListener />
       </body>
     </html>
   );
