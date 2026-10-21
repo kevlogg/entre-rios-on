@@ -386,20 +386,18 @@ export function ClientHeader({ withBackground = false }: ClientHeaderProps = {})
               <button
                 type="button"
                 onClick={() => setIsProvinceDropdownOpen(!isProvinceDropdownOpen)}
+                style={currentProvinceObj?.badgeColor ? { backgroundColor: currentProvinceObj.badgeColor, borderColor: 'rgba(255, 255, 255, 0.35)' } : undefined}
                 className={`relative flex items-center gap-1.5 sm:gap-2.5 px-2 sm:px-4 h-9 sm:h-14 lg:h-[62px] rounded-xl sm:rounded-2xl ${
-                  currentProvinceObj
-                    ? `${currentTheme.gradientClass} ${currentTheme.borderClass} ${currentTheme.shadowClass}`
-                    : 'bg-gradient-to-r from-[#002878] via-[#0047BA] to-[#00ADB5] border-cyan-400/40 hover:border-cyan-300 shadow-md shadow-blue-950/20'
+                  currentProvinceObj?.badgeColor
+                    ? 'text-white shadow-md'
+                    : currentProvinceObj
+                      ? `${currentTheme.gradientClass} ${currentTheme.borderClass} ${currentTheme.shadowClass}`
+                      : 'bg-gradient-to-r from-[#002878] via-[#0047BA] to-[#00ADB5] border-cyan-400/40 hover:border-cyan-300 shadow-md shadow-blue-950/20'
                 } border transition-all duration-200 cursor-pointer group hover:scale-[1.02] active:scale-[0.98] min-w-0 max-w-[130px] min-[390px]:max-w-[160px] sm:max-w-none text-white select-none`}
                 title="Cambiar Provincia o Región"
               >
                 <div 
-                  className="w-6 h-6 sm:w-9 sm:h-9 lg:w-10 lg:h-10 rounded-lg sm:rounded-xl flex items-center justify-center shrink-0 border border-white/20 group-hover:bg-white/30 transition-colors shadow-2xs"
-                  style={{
-                    backgroundColor: currentProvinceObj?.badgeColor
-                      ? `${currentProvinceObj.badgeColor}`
-                      : 'rgba(255, 255, 255, 0.2)'
-                  }}
+                  className="w-6 h-6 sm:w-9 sm:h-9 lg:w-10 lg:h-10 rounded-lg sm:rounded-xl flex items-center justify-center shrink-0 border border-white/20 bg-white/20 group-hover:bg-white/30 transition-colors shadow-2xs"
                 >
                   <MapPin className="w-3 h-3 sm:w-4 sm:h-4 lg:w-5 lg:h-5 text-white drop-shadow-xs" />
                 </div>
@@ -818,9 +816,10 @@ export function ClientHeader({ withBackground = false }: ClientHeaderProps = {})
                   <button
                     key={prov.id}
                     onClick={() => handleProvinceSelect(prov.id)}
+                    style={isSelected && prov.badgeColor ? { backgroundColor: prov.badgeColor, borderColor: 'transparent' } : undefined}
                     className={`px-3 py-2 rounded-xl text-xs font-bold border flex items-center gap-2 transition-all cursor-pointer ${
                       isSelected
-                        ? `${theme.gradientClass} text-white border-transparent shadow-xs`
+                        ? `${prov.badgeColor ? '' : theme.gradientClass} text-white border-transparent shadow-xs`
                         : 'border-slate-300 text-slate-700 bg-slate-100 hover:bg-slate-200'
                     }`}
                   >
