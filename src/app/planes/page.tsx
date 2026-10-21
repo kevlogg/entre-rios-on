@@ -6,6 +6,8 @@ import { SubscriptionPlans } from '@/components/admin/SubscriptionPlans';
 import { Sparkles, ArrowLeft, Rocket, Store, ArrowRight } from 'lucide-react';
 import { createClient } from '@/lib/supabase/server';
 
+export const dynamic = 'force-dynamic';
+
 export const metadata: Metadata = {
   title: 'Planes & Precios para Comercios | ON MÁS Portal',
   description: 'Conocé los planes oficiales de suscripción para comercios y servicios. Elegí el plan que mejor se adapte a tu negocio y publicá tu catálogo.',

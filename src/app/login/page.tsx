@@ -105,6 +105,15 @@ function LoginFormContent() {
       setMode('reset');
     }
 
+    const errorParam = searchParams.get('error');
+    if (errorParam === 'auth-failed') {
+      setMessage({
+        type: 'error',
+        text: 'El enlace de recuperación es inválido o ha expirado. Por favor, solicitá un nuevo enlace ingresando tu correo.',
+      });
+      setMode('forgot');
+    }
+
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
       if (event === 'PASSWORD_RECOVERY') {
         setMode('reset');
@@ -276,16 +285,33 @@ function LoginFormContent() {
           window.location.href = redirectTo;
         }
       } else if (mode === 'forgot') {
-        const redirectOrigin = typeof window !== 'undefined' ? window.location.origin : 'https://entre-rios-on.vercel.app';
-        const { error } = await supabase.auth.resetPasswordForEmail(email, {
-          redirectTo: `${redirectOrigin}/auth/callback?next=/login?mode=reset`,
+        const cleanEmail = email.trim().toLowerCase();
+        if (!cleanEmail || !cleanEmail.includes('@')) {
+          setMessage({ type: 'error', text: 'Por favor, ingresá un correo electrónico válido.' });
+          setLoading(false);
+          return;
+        }
+
+        const redirectOrigin = typeof window !== 'undefined' && window.location.origin
+          ? window.location.origin
+          : (process.env.NEXT_PUBLIC_SITE_URL || 'https://entre-rios-on.vercel.app');
+
+        const callbackUrl = `${redirectOrigin}/auth/callback?next=${encodeURIComponent('/login?mode=reset')}`;
+
+        const { error } = await supabase.auth.resetPasswordForEmail(cleanEmail, {
+          redirectTo: callbackUrl,
         });
+
         if (error) {
-          setMessage({ type: 'error', text: error.message || 'No se pudo enviar el correo de recuperación.' });
+          let errText = error.message;
+          if (error.message.includes('rate limit') || error.message.includes('over_email_send_rate_limit')) {
+            errText = 'Se ha alcanzado el límite de correos por hora. Por favor aguardá unos minutos antes de reintentar.';
+          }
+          setMessage({ type: 'error', text: errText || 'No se pudo enviar el correo de recuperación.' });
         } else {
           setMessage({ 
             type: 'success', 
-            text: '¡Enlace de recuperación enviado! Revisá tu casilla de correo y hacé clic en el enlace para restablecer tu contraseña.' 
+            text: '¡Enlace de recuperación enviado! Revisá tu casilla de correo y hacé clic en el botón para restablecer tu contraseña.' 
           });
         }
         setLoading(false);
@@ -325,7 +351,15 @@ function LoginFormContent() {
     <div className="bg-white/95 backdrop-blur-xl py-8 px-6 sm:px-10 shadow-2xl rounded-3xl border border-white/40 space-y-6">
 
       {/* Selector de Modo */}
-      {mode !== 'reset' ? (
+      {mode === 'forgot' ? (
+        <div className="border-b border-slate-200 pb-3 text-center">
+          <h2 className="text-sm font-black text-[#0047BA] uppercase tracking-wider">Recuperar Contraseña</h2>
+        </div>
+      ) : mode === 'reset' ? (
+        <div className="border-b border-slate-200 pb-3 text-center">
+          <h2 className="text-sm font-black text-[#0047BA] uppercase tracking-wider">Nueva Contraseña</h2>
+        </div>
+      ) : (
         <div className="flex items-center justify-center gap-6 border-b border-slate-200 pb-3">
           <button
             type="button"
@@ -347,10 +381,6 @@ function LoginFormContent() {
           >
             Crear Cuenta
           </button>
-        </div>
-      ) : (
-        <div className="border-b border-slate-200 pb-3 text-center">
-          <h2 className="text-sm font-black text-[#0047BA] uppercase tracking-wider">Restablecer Contraseña</h2>
         </div>
       )}
 
