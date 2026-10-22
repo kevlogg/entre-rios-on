@@ -764,6 +764,56 @@ export async function getFeaturedProducts(cityId?: string, categoryId?: string, 
   const activeCommerceSlugs = new Set(activeCommerces.map((c) => c.slug.toLowerCase()));
   const activeCommerceNames = new Set(activeCommerces.map((c) => c.name.toLowerCase()));
 
+  const commerceMap = new Map<string, Commerce>();
+  activeCommerces.forEach((c) => {
+    if (c.id) commerceMap.set(c.id.toLowerCase(), c);
+    if (c.slug) commerceMap.set(c.slug.toLowerCase(), c);
+    if (c.name) commerceMap.set(c.name.toLowerCase(), c);
+  });
+
+  const mapProducts = (rows: any[]): Product[] => {
+    return rows.map((p) => {
+      const matchedCommerce = p.commerce_id
+        ? commerceMap.get(p.commerce_id.toLowerCase())
+        : (p.commerce_name ? commerceMap.get(p.commerce_name.toLowerCase()) : undefined);
+      const { description: cleanDesc, galleryImages } = parseProductGallery(
+        p.description,
+        p.image_url,
+        (p as any).gallery_images
+      );
+      return {
+        id: p.id,
+        title: p.title,
+        slug: p.slug,
+        price: p.price ? Number(p.price) : undefined,
+        currency: p.currency || 'ARS',
+        commerceId: matchedCommerce ? matchedCommerce.id : p.commerce_id,
+        commerceName: matchedCommerce ? matchedCommerce.name : p.commerce_name,
+        cityId: p.city_id,
+        cityName: p.city_name,
+        provinceId: p.province_id,
+        provinceName: p.province_name,
+        imageUrl: p.image_url,
+        galleryImages,
+        category: p.category,
+        categoryId: p.category_id,
+        isFeatured: p.is_featured,
+        description: cleanDesc,
+        phoneWhatsApp: p.phone_whatsapp,
+        whatsappMessageCustom: p.whatsapp_message_custom,
+      };
+    });
+  };
+
+  const filterActive = (rows: any[]): any[] => {
+    return rows.filter((p) => {
+      if (!p.commerce_id && !p.commerce_name) return true;
+      const cId = (p.commerce_id || '').toLowerCase();
+      const cName = (p.commerce_name || '').toLowerCase();
+      return activeCommerceIds.has(cId) || activeCommerceSlugs.has(cId) || activeCommerceNames.has(cName);
+    });
+  };
+
   if (isSupabaseConfigured()) {
     try {
       const { createPublicClient } = await import('@/lib/supabase/public');
@@ -780,73 +830,34 @@ export async function getFeaturedProducts(cityId?: string, categoryId?: string, 
       }
       const { data, error } = await query;
       if (!error && Array.isArray(data)) {
-        const activeProducts = data.filter((p) => {
-          if (!p.commerce_id && !p.commerce_name) return true;
-          const cId = (p.commerce_id || '').toLowerCase();
-          const cName = (p.commerce_name || '').toLowerCase();
-          return activeCommerceIds.has(cId) || activeCommerceSlugs.has(cId) || activeCommerceNames.has(cName);
-        });
+        const activeProducts = filterActive(data);
+        if (activeProducts.length > 0) {
+          return mapProducts(activeProducts);
+        }
 
-        const commerceMap = new Map<string, Commerce>();
-        activeCommerces.forEach((c) => {
-          if (c.id) commerceMap.set(c.id.toLowerCase(), c);
-          if (c.slug) commerceMap.set(c.slug.toLowerCase(), c);
-          if (c.name) commerceMap.set(c.name.toLowerCase(), c);
-        });
-
-        return activeProducts.map((p) => {
-          const matchedCommerce = p.commerce_id ? commerceMap.get(p.commerce_id.toLowerCase()) : (p.commerce_name ? commerceMap.get(p.commerce_name.toLowerCase()) : undefined);
-          const { description: cleanDesc, galleryImages } = parseProductGallery(p.description, p.image_url, (p as any).gallery_images);
-          return {
-            id: p.id,
-            title: p.title,
-            slug: p.slug,
-            price: p.price ? Number(p.price) : undefined,
-            currency: p.currency || 'ARS',
-            commerceId: matchedCommerce ? matchedCommerce.id : p.commerce_id,
-            commerceName: matchedCommerce ? matchedCommerce.name : p.commerce_name,
-            cityId: p.city_id,
-            cityName: p.city_name,
-            provinceId: p.province_id,
-            provinceName: p.province_name,
-            imageUrl: p.image_url,
-            galleryImages,
-            category: p.category,
-            categoryId: p.category_id,
-            isFeatured: p.is_featured,
-            description: cleanDesc,
-            phoneWhatsApp: p.phone_whatsapp,
-            whatsappMessageCustom: p.whatsapp_message_custom,
-          };
-        });
+        // Si se seleccionó una provincia puntual sin comercios o productos adheridos,
+        // no mostrar productos de mentira ni comercio fantasma: mostrar los válidos reales de otras provincias.
+        if (provinceId && provinceId !== 'all') {
+          let fallbackQuery = supabase.from('products').select('*');
+          if (categoryId && categoryId !== 'all') {
+            fallbackQuery = fallbackQuery.eq('category_id', categoryId);
+          }
+          const { data: allData, error: allErr } = await fallbackQuery;
+          if (!allErr && Array.isArray(allData)) {
+            const allActive = filterActive(allData);
+            if (allActive.length > 0) {
+              return mapProducts(allActive);
+            }
+          }
+        }
       }
     } catch (e) {
-      console.warn('Fallback to mock products:', e);
+      console.warn('Fallback en getFeaturedProducts:', e);
     }
   }
 
-  await simulateNetworkDelay();
-  let list = PRODUCTS_MOCK.filter((p) => {
-    if (!p.commerceId) return true;
-    const cId = p.commerceId.toLowerCase();
-    const cName = (p.commerceName || '').toLowerCase();
-    return activeCommerceIds.has(cId) || activeCommerceSlugs.has(cId) || activeCommerceNames.has(cName);
-  });
-
-  if (provinceId && provinceId !== 'all') {
-    list = list.filter((p) => !p.provinceId || p.provinceId === provinceId);
-  }
-  if (cityId && cityId !== 'all') {
-    list = list.filter((product) => product.cityId.toLowerCase() === cityId.toLowerCase());
-  }
-  if (categoryId && categoryId !== 'all') {
-    list = list.filter(
-      (product) => 
-        (product.categoryId && product.categoryId.toLowerCase() === categoryId.toLowerCase()) ||
-        product.category.toLowerCase().includes(categoryId.toLowerCase())
-    );
-  }
-  return list;
+  // NUNCA devolver productos ficticios / mock con comercios inventados
+  return [];
 }
 
 export const getProductBySlug = cache(async (slug: string): Promise<Product | undefined> => {
@@ -920,17 +931,16 @@ export const getProductBySlug = cache(async (slug: string): Promise<Product | un
           description: cleanDesc,
           phoneWhatsApp: data.phone_whatsapp,
           whatsappMessageCustom: data.whatsapp_message_custom,
-          viewsCount: (data as any).views_count ? Number((data as any).views_count) : 0,
-        };
+          };
       }
+      return undefined;
     } catch (e) {
       console.warn('Error fetching product from Supabase:', e);
+      return undefined;
     }
   }
 
-  await simulateNetworkDelay();
-  const mockFound = PRODUCTS_MOCK.find((p) => p.slug === slug || p.id === slug);
-  return mockFound;
+  return undefined;
 });
 
 export async function getAllCommerces(includeInactive: boolean = false): Promise<Commerce[]> {
@@ -1128,8 +1138,7 @@ export async function getProductsByCommerce(commerceId: string): Promise<Product
     }
   }
 
-  await simulateNetworkDelay();
-  return PRODUCTS_MOCK.filter((p) => p.commerceId === commerceId);
+  return [];
 }
 
 export async function getUpcomingEvents(cityId?: string): Promise<CommunityEvent[]> {

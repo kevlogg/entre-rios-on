@@ -8,88 +8,6 @@ import { ArrowRight, MapPin, Store, MessageCircle, ShoppingBag } from 'lucide-re
 import { Product } from '@/types';
 import { FavoriteButton } from '@/components/common/FavoriteButton';
 
-// Default mock items matching the exact owner mockup
-const MOCKUP_FEATURED_PRODUCTS = [
-  {
-    id: 'mock-1',
-    title: 'iPhone 13 128GB Excelente estado',
-    slug: 'iphone-13-128gb',
-    cityName: 'Rosario',
-    commerceName: 'Tech Rosario Oficial',
-    description: 'Batería 92%, libre de fábrica, con caja y cable original. Factura con garantía.',
-    price: 650000,
-    priceSuffix: '',
-    imageUrl: 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&w=500&q=80',
-    categoryId: 'tecnologia',
-    phoneWhatsApp: '5493426514889',
-  },
-  {
-    id: 'mock-2',
-    title: 'Sillón 3 cuerpos Tela antimanchas',
-    slug: 'sillon-3-cuerpos',
-    cityName: 'Santa Fe Capital',
-    commerceName: 'Muebles Bulevar',
-    description: 'Tapizado de alta resistencia antimanchas, estructura reforzada en eucalipto.',
-    price: 480000,
-    priceSuffix: '',
-    imageUrl: 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&w=500&q=80',
-    categoryId: 'hogar',
-    phoneWhatsApp: '5493426514889',
-  },
-  {
-    id: 'mock-3',
-    title: 'Lavarropas automático 9kg',
-    slug: 'lavarropas-automatico-9kg',
-    cityName: 'Rafaela',
-    commerceName: 'Electro Hogar Rafaela',
-    description: '1200 RPM, motor inverter bajo consumo, tecnología de lavado rápido.',
-    price: 320000,
-    priceSuffix: '',
-    imageUrl: 'https://images.unsplash.com/photo-1626806787461-102c1bfaaea1?auto=format&fit=crop&w=500&q=80',
-    categoryId: 'electro',
-    phoneWhatsApp: '5493426514889',
-  },
-  {
-    id: 'mock-4',
-    title: 'Juego de mesa y 6 sillas',
-    slug: 'juego-de-comedor',
-    cityName: 'Esperanza',
-    commerceName: 'DATYVIA Cariati',
-    description: 'Juego de mesa y sillas nuevas de Pino macizo lustrado.',
-    price: 195000,
-    priceSuffix: '',
-    imageUrl: 'https://images.unsplash.com/photo-1617806118233-18e1de247200?auto=format&fit=crop&w=500&q=80',
-    categoryId: 'hogar',
-    phoneWhatsApp: '5493426514889',
-  },
-  {
-    id: 'mock-5',
-    title: 'Servicio mecánico integral Todas las marcas',
-    slug: 'servicio-mecanico-integral',
-    cityName: 'Santo Tomé',
-    commerceName: 'Taller Santo Tomé',
-    description: 'Diagnóstico computarizado, tren delantero, frenos y distribución.',
-    price: 25000,
-    priceSuffix: '',
-    imageUrl: 'https://images.unsplash.com/photo-1487754180451-c456f719a1fc?auto=format&fit=crop&w=500&q=80',
-    categoryId: 'autos',
-    phoneWhatsApp: '5493426514889',
-  },
-  {
-    id: 'mock-6',
-    title: 'Oportunidad turística Cabaña frente al río',
-    slug: 'oportunidad-turistica-cabana',
-    cityName: 'Reconquista',
-    commerceName: 'Cabañas del Paraná',
-    description: 'Cabaña equipada con muelle propio, pileta, asador y vista panorámica al río.',
-    price: 120000,
-    priceSuffix: ' por noche',
-    imageUrl: 'https://images.unsplash.com/photo-1470770841072-f978cf4d019e?auto=format&fit=crop&w=500&q=80',
-    categoryId: 'turismo',
-    phoneWhatsApp: '5493426514889',
-  },
-];
-
 interface FeaturedOffersGridProps {
   selectedCategory?: string;
   products?: Product[];
@@ -100,9 +18,10 @@ export function FeaturedOffersGrid({
   products: initialProducts = [],
 }: FeaturedOffersGridProps) {
   const router = useRouter();
-  // Merge live products with mockup items if live products are few
+
+  // Mostrar únicamente productos reales y válidos de comercios registrados
   const itemsToDisplay = useMemo(() => {
-    let source = initialProducts && initialProducts.length > 0 
+    const source = initialProducts && initialProducts.length > 0 
       ? initialProducts.map(p => ({
           id: p.id,
           title: p.title,
@@ -118,11 +37,6 @@ export function FeaturedOffersGrid({
         }))
       : [];
 
-    if (source.length < 6) {
-      // Append mockup products not already in list
-      source = [...source, ...MOCKUP_FEATURED_PRODUCTS.slice(0, 6 - source.length)];
-    }
-
     if (selectedCategory !== 'all') {
       const filtered = source.filter(p => (p.categoryId || '').toLowerCase().includes(selectedCategory.toLowerCase()));
       return filtered.length > 0 ? filtered : source.slice(0, 6);
@@ -130,6 +44,10 @@ export function FeaturedOffersGrid({
 
     return source.slice(0, 6);
   }, [initialProducts, selectedCategory]);
+
+  if (itemsToDisplay.length === 0) {
+    return null;
+  }
 
   const handleWhatsAppClick = (e: React.MouseEvent, item: typeof itemsToDisplay[0]) => {
     e.preventDefault();
