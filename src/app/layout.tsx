@@ -140,15 +140,28 @@ export default function RootLayout({
             `,
           }}
         />
+        {/* CSS Crítico: cubre la pantalla con fondo blanco desde el primer frame
+            para evitar el "flash" de contenido antes de que React monte el splash */}
+        <style dangerouslySetInnerHTML={{ __html: `
+          #__splash_body_cover {
+            position: fixed;
+            inset: 0;
+            z-index: 99998;
+            background: #ffffff;
+            pointer-events: none;
+          }
+        ` }} />
       </head>
       <body 
         className="min-h-screen flex flex-col text-slate-900 bg-[#e2e8f0] antialiased selection:bg-[#00C7B7] selection:text-white app-compact-scale"
         style={{ colorScheme: 'light' }}
       >
+        {/* Cobertura blanca estática del primer frame (SSR) — eliminada por AppSplashScreen al finalizar */}
+        <div id="__splash_body_cover" />
+        <AppSplashScreen />
         <main className="flex-1">
           {children}
         </main>
-        <AppSplashScreen />
         <FloatingWhatsAppButton />
         <ScrollToTopButton />
         <PwaInstallPrompt />

@@ -73,7 +73,10 @@ export function ClientHomeContainer({ provinceId, initialProducts = [] }: Client
   useEffect(() => {
     const handleProvinceChange = (e: any) => {
       const newProvId = e.detail?.provinceId;
-      if (newProvId) {
+      // Si es 'all', null o vacío → limpiar para ocultar CityExploreBar
+      if (!newProvId || newProvId === 'all') {
+        setActiveProvince(null);
+      } else {
         setActiveProvince(newProvId);
       }
     };
