@@ -47,10 +47,10 @@ export function AppSplashScreen() {
       }}
     >
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2rem', padding: '1.5rem' }}>
-        {/* Logo ON MÁS */}
-        <div style={{ position: 'relative', width: '280px', height: '158px' }}>
+        {/* Logo ON+ Oficial Grande y Centrado (Sin texto 'ON MÁS PORTAL') */}
+        <div style={{ position: 'relative', width: '280px', height: '124px' }}>
           <Image
-            src="/logo1.png"
+            src="/logo-icon.png"
             alt="ON MÁS"
             fill
             priority
