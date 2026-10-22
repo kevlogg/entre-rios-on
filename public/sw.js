@@ -1,5 +1,5 @@
 // ON+ Portal Comercial — PWA Service Worker
-const CACHE_NAME = 'onmas-portal-v4';
+const CACHE_NAME = 'onmas-portal-v5';
 const SHELL_URLS = ['/', '/catalogo', '/comercios', '/turismo', '/planes'];
 
 self.addEventListener('install', (event) => {

@@ -167,77 +167,91 @@ export function ClientHeader({ withBackground = false }: ClientHeaderProps = {})
   }, []);
 
   useEffect(() => {
-    async function checkAuthAndCommerce() {
+    let isMounted = true;
+    let subscription: { unsubscribe: () => void } | null = null;
+
+    async function initAuth() {
       try {
         const { createClient } = await import('@/lib/supabase/client');
         const supabase = createClient();
 
-        const { data: { user } } = await supabase.auth.getUser();
+        async function checkUser() {
+          if (!isMounted) return;
+          try {
+            const { data: { user } } = await supabase.auth.getUser();
+            if (!isMounted) return;
 
-        if (user) {
-          setCurrentUser(user);
+            if (user) {
+              setCurrentUser(user);
 
-          // Si el usuario tiene una provincia preferida guardada y no hay ninguna en local, adoptarla
-          if (!getPersistedProvince()) {
-            const userProv = user.user_metadata?.preferred_province_id || user.user_metadata?.province_id;
-            if (userProv && userProv !== 'all') {
-              setPersistedProvince(userProv, false);
-              setSelectedProvince(userProv);
+              if (!getPersistedProvince()) {
+                const userProv = user.user_metadata?.preferred_province_id || user.user_metadata?.province_id;
+                if (userProv && userProv !== 'all') {
+                  setPersistedProvince(userProv, false);
+                  setSelectedProvince(userProv);
+                }
+              }
+
+              const { data: commerces } = await supabase
+                .from('commerces')
+                .select('name, logo_url')
+                .eq('owner_id', user.id)
+                .order('created_at', { ascending: false })
+                .limit(1);
+
+              if (!isMounted) return;
+              const commerceObj = commerces && commerces.length > 0 ? commerces[0] : null;
+              const commerceName =
+                commerceObj?.name ||
+                user.user_metadata?.commerce_name ||
+                user.user_metadata?.full_name ||
+                user.email?.split('@')[0] ||
+                'Mi Comercio';
+
+              const rawLogo = commerceObj?.logo_url || user.user_metadata?.logo_url || '';
+              const hasValidCustomLogo =
+                rawLogo &&
+                !rawLogo.includes('city-rosario.jpg') &&
+                (rawLogo.startsWith('http') || rawLogo.startsWith('data:') || rawLogo.startsWith('/uploads'));
+
+              setUserCommerce({
+                name: commerceName,
+                logoUrl: hasValidCustomLogo ? rawLogo : undefined,
+                initial: commerceName.trim().charAt(0).toUpperCase() || 'M',
+              });
+            } else {
+              setCurrentUser(null);
+              setUserCommerce(null);
             }
+          } catch (err) {
+            console.warn('Error verificando autenticación en ClientHeader:', err);
           }
-
-          const { data: commerces } = await supabase
-            .from('commerces')
-            .select('name, logo_url')
-            .eq('owner_id', user.id)
-            .order('created_at', { ascending: false })
-            .limit(1);
-
-          const commerceObj = commerces && commerces.length > 0 ? commerces[0] : null;
-
-          const commerceName =
-            commerceObj?.name ||
-            user.user_metadata?.commerce_name ||
-            user.user_metadata?.full_name ||
-            user.email?.split('@')[0] ||
-            'Mi Comercio';
-
-          const rawLogo = commerceObj?.logo_url || user.user_metadata?.logo_url || '';
-          const hasValidCustomLogo =
-            rawLogo &&
-            !rawLogo.includes('city-rosario.jpg') &&
-            (rawLogo.startsWith('http') || rawLogo.startsWith('data:') || rawLogo.startsWith('/uploads'));
-
-          const initialChar = commerceName.trim().charAt(0).toUpperCase() || 'M';
-
-          setUserCommerce({
-            name: commerceName,
-            logoUrl: hasValidCustomLogo ? rawLogo : undefined,
-            initial: initialChar,
-          });
-        } else {
-          setCurrentUser(null);
-          setUserCommerce(null);
         }
+
+        await checkUser();
+
+        // Suscribir a cambios de auth — reutilizando el mismo cliente (sin nuevas instancias)
+        const { data } = supabase.auth.onAuthStateChange((_event, session) => {
+          if (!isMounted) return;
+          if (!session?.user) {
+            setCurrentUser(null);
+            setUserCommerce(null);
+          } else {
+            checkUser();
+          }
+        });
+        subscription = data.subscription;
       } catch (err) {
-        console.warn('Error verificando autenticación en ClientHeader:', err);
+        console.warn('Error inicializando auth en ClientHeader:', err);
       }
     }
 
-    checkAuthAndCommerce();
+    initAuth();
 
-    import('@/lib/supabase/client').then(({ createClient }) => {
-      const supabase = createClient();
-      const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-        if (!session?.user) {
-          setCurrentUser(null);
-          setUserCommerce(null);
-        } else {
-          checkAuthAndCommerce();
-        }
-      });
-      return () => subscription.unsubscribe();
-    }).catch(() => {});
+    return () => {
+      isMounted = false;
+      subscription?.unsubscribe();
+    };
   }, []);
 
   // Sync state from URL pathname or persistent storage
@@ -252,10 +266,14 @@ export function ClientHeader({ withBackground = false }: ClientHeaderProps = {})
         return;
       }
     }
-    // Si estamos en la portada raíz "/" o en una sección sin provincia en la URL,
-    // mantener la provincia seleccionada previamente por el usuario
+    if (pathname === '/') {
+      setSelectedProvince('');
+      return;
+    }
+    // Si estamos en una sección sin provincia en la URL (ej. /catalogo, /comercios),
+    // mantener la provincia seleccionada previamente por el usuario si existe
     const savedProv = getPersistedProvince();
-    if (savedProv) {
+    if (savedProv && savedProv !== 'all') {
       setSelectedProvince(savedProv);
     } else {
       setSelectedProvince('');

@@ -42,9 +42,8 @@ export function ClientHomeContainer({ provinceId, initialProducts = [] }: Client
   const mobileBanners = sideBanners.slice(0, 4);
 
   useEffect(() => {
-    if (provinceId) {
+    if (provinceId && provinceId !== 'all') {
       setActiveProvince(provinceId);
-      setPersistedProvince(provinceId, false);
       return;
     }
 
@@ -54,19 +53,13 @@ export function ClientHomeContainer({ provinceId, initialProducts = [] }: Client
         const provMatch = getProvinceBySlug(parts[0]);
         if (provMatch && provMatch.id !== 'all') {
           setActiveProvince(provMatch.id);
-          setPersistedProvince(provMatch.id, false);
           return;
         }
       }
     }
 
-    // Si estamos en "/" sin slug en URL, recuperar la provincia previamente elegida
-    const savedProv = getPersistedProvince();
-    if (savedProv) {
-      setActiveProvince(savedProv);
-    } else {
-      setActiveProvince(null);
-    }
+    // Si estamos en la portada raíz "/" o no hay provincia en la ruta, NO hay provincia seleccionada
+    setActiveProvince(null);
   }, [pathname, provinceId]);
 
   // Escuchar cambios de provincia disparados desde el selector en tiempo real

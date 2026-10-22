@@ -1,40 +1,25 @@
 'use client';
 
-import React, { useState, useEffect, useLayoutEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 
-// Hook isomórfico: en el servidor (SSR) no existe useLayoutEffect; usamos useEffect como fallback seguro.
-const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
-
 export function AppSplashScreen() {
-  // Inicializar como `true` siempre — el CSS crítico inline en layout.tsx
-  // ya cubre la pantalla desde el primer frame, así que no hay flash.
-  const [isVisible, setIsVisible] = useState(true);
-  const [isFading, setIsFading] = useState(false);
+  const [phase, setPhase] = useState<'visible' | 'fading' | 'hidden'>('visible');
 
-  useIsomorphicLayoutEffect(() => {
-    // Revisamos si el usuario ya vio el splash en esta sesión de navegación
+  useEffect(() => {
     let hasSeenSplash = false;
-    try {
-      hasSeenSplash = !!sessionStorage.getItem('onmas_splash_shown');
-    } catch {}
+    try { hasSeenSplash = !!sessionStorage.getItem('onmas_splash_shown'); } catch {}
 
-    // Primera visita: 700ms de logo visible; visitas subsiguientes: 200ms (casi invisible)
     const displayTime = hasSeenSplash ? 200 : 700;
 
     const fadeTimer = setTimeout(() => {
-      setIsFading(true);
+      setPhase('fading');
       try { sessionStorage.setItem('onmas_splash_shown', 'true'); } catch {}
     }, displayTime);
 
     const hideTimer = setTimeout(() => {
-      setIsVisible(false);
-      // Revelar el contenido que el CSS crítico había ocultado
-      try {
-        const el = document.getElementById('__splash_body_cover');
-        if (el) el.remove();
-      } catch {}
-    }, displayTime + 480);
+      setPhase('hidden');
+    }, displayTime + 460);
 
     return () => {
       clearTimeout(fadeTimer);
@@ -42,44 +27,69 @@ export function AppSplashScreen() {
     };
   }, []);
 
-  if (!isVisible) return null;
+  if (phase === 'hidden') return null;
 
   return (
     <div
       id="app-splash-screen"
-      className={`fixed inset-0 z-[99999] flex flex-col items-center justify-center transition-opacity duration-480 ease-out select-none ${
-        isFading ? 'opacity-0 pointer-events-none' : 'opacity-100'
-      }`}
-      style={{ backgroundColor: '#ffffff' }}
+      style={{
+        position: 'fixed',
+        inset: 0,
+        zIndex: 99999,
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: '#ffffff',
+        transition: 'opacity 0.46s ease-out',
+        opacity: phase === 'fading' ? 0 : 1,
+        pointerEvents: phase === 'fading' ? 'none' : 'auto',
+      }}
     >
-      <div className="flex flex-col items-center justify-center p-6 space-y-8">
-        {/* Logo Oficial ON MÁS Agrandado y Centrado */}
-        <div className="relative w-64 h-36 min-[380px]:w-72 min-[380px]:h-40 sm:w-88 sm:h-48 md:w-96 md:h-52 flex items-center justify-center">
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2rem', padding: '1.5rem' }}>
+        {/* Logo ON MÁS */}
+        <div style={{ position: 'relative', width: '280px', height: '158px' }}>
           <Image
             src="/logo1.png"
             alt="ON MÁS"
             fill
             priority
-            sizes="(max-width: 640px) 290px, 384px"
-            className="object-contain drop-shadow-sm"
+            sizes="280px"
+            style={{ objectFit: 'contain' }}
           />
         </div>
 
-        {/* Indicador de carga animado consistente con el branding ON+ (Azul Rey y Turquesa) */}
-        <div className="flex flex-col items-center justify-center space-y-3 pt-2">
-          <div className="relative w-10 h-10 sm:w-11 sm:h-11 flex items-center justify-center">
-            {/* Anillo de fondo translúcido */}
-            <div className="absolute inset-0 rounded-full border-[3px] border-slate-100" />
-            {/* Anillo giratorio branded */}
-            <div
-              className="w-full h-full rounded-full border-[3px] border-transparent border-t-[#0047BA] border-r-[#00ADB5] animate-spin"
-              style={{ animationDuration: '0.85s' }}
-            />
-            {/* Punto central con pulso */}
-            <div className="w-2.5 h-2.5 rounded-full bg-gradient-to-tr from-[#0047BA] to-[#00ADB5] animate-pulse" />
-          </div>
+        {/* Spinner branded */}
+        <div style={{ position: 'relative', width: '40px', height: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div style={{
+            position: 'absolute',
+            inset: 0,
+            borderRadius: '50%',
+            border: '3px solid #f1f5f9',
+          }} />
+          <div style={{
+            width: '100%',
+            height: '100%',
+            borderRadius: '50%',
+            border: '3px solid transparent',
+            borderTopColor: '#0047BA',
+            borderRightColor: '#00ADB5',
+            animation: 'spin 0.85s linear infinite',
+          }} />
+          <div style={{
+            width: '10px',
+            height: '10px',
+            borderRadius: '50%',
+            background: 'linear-gradient(135deg, #0047BA, #00ADB5)',
+            animation: 'pulse 1.5s ease-in-out infinite',
+          }} />
         </div>
       </div>
+
+      <style>{`
+        @keyframes spin { to { transform: rotate(360deg); } }
+        @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.4; } }
+      `}</style>
     </div>
   );
 }
