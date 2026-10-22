@@ -163,17 +163,15 @@ export function FeaturedOffersGrid({
       {/* Cards: Uno abajo de otro en mobile (grid-cols-1 con foto izq y texto der), grilla en desktop */}
       <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-6 gap-2.5 sm:gap-3">
         {itemsToDisplay.map((item) => (
-          <div
+          <Link
             key={item.id}
-            onClick={(e) => {
-              if ((e.target as HTMLElement).closest('button, [data-prevent-card-click="true"]')) return;
-              router.push(`/producto/${item.slug}`);
-            }}
+            href={`/producto/${item.slug}`}
+            prefetch={true}
             className="group relative flex flex-row sm:flex-col justify-between rounded-2xl overflow-hidden bg-white border border-slate-200/90 hover:border-[#0047BA]/50 hover:shadow-md transition-all shadow-xs p-2 min-[360px]:p-2.5 sm:p-2.5 lg:p-3 cursor-pointer"
           >
             {/* Image Container (Left on mobile, Top on desktop con bordes redondeados) */}
             <div className="relative w-28 min-[360px]:w-32 min-[400px]:w-36 h-28 min-[360px]:h-32 min-[400px]:h-36 sm:w-full sm:h-auto sm:aspect-4/3 shrink-0 rounded-xl overflow-hidden bg-slate-100">
-              <Link href={`/producto/${item.slug}`} className="block w-full h-full">
+              <div className="w-full h-full relative">
                 <Image
                   src={item.imageUrl}
                   alt={item.title}
@@ -181,10 +179,13 @@ export function FeaturedOffersGrid({
                   sizes="(max-width: 640px) 140px, (max-width: 1024px) 33vw, 16vw"
                   className="object-cover group-hover:scale-105 transition-transform duration-500 rounded-xl"
                 />
-              </Link>
+              </div>
 
               {/* Heart favorite icon on Desktop */}
-              <div className="absolute top-1.5 right-1.5 z-10 hidden sm:block">
+              <div 
+                className="absolute top-1.5 right-1.5 z-10 hidden sm:block"
+                onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}
+              >
                 <FavoriteButton
                   itemId={item.id}
                   itemType="producto"
@@ -212,7 +213,10 @@ export function FeaturedOffersGrid({
                     <span className="truncate">{item.commerceName}</span>
                   </div>
 
-                  <div className="sm:hidden shrink-0">
+                  <div 
+                    className="sm:hidden shrink-0"
+                    onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}
+                  >
                     <FavoriteButton
                       itemId={item.id}
                       itemType="producto"
@@ -223,11 +227,11 @@ export function FeaturedOffersGrid({
                 </div>
 
                 {/* Title */}
-                <Link href={`/producto/${item.slug}`} className="block">
+                <div>
                   <h3 className="text-xs min-[360px]:text-sm sm:text-xs font-black sm:font-bold text-slate-900 line-clamp-1 sm:line-clamp-2 leading-tight group-hover:text-[#0047BA] transition-colors">
                     {item.title}
                   </h3>
-                </Link>
+                </div>
 
                 {/* Description (visible on mobile) */}
                 <p className="text-[10px] min-[360px]:text-[11px] text-slate-500 line-clamp-1 sm:hidden font-medium mt-0.5">
@@ -267,7 +271,7 @@ export function FeaturedOffersGrid({
                 </button>
               </div>
             </div>
-          </div>
+          </Link>
         ))}
       </div>
     </section>

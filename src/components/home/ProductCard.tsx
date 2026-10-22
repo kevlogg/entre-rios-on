@@ -46,16 +46,14 @@ export function ProductCard({ product }: ProductCardProps) {
     : 'citrus-dulces-del-uruguay';
 
   return (
-    <article
-      onClick={(e) => {
-        if ((e.target as HTMLElement).closest('button, [data-prevent-card-click="true"]')) return;
-        router.push(`/producto/${product.slug}`);
-      }}
+    <Link
+      href={`/producto/${product.slug}`}
+      prefetch={true}
       className="group bg-white hover:bg-white backdrop-blur-md rounded-2xl overflow-hidden border border-slate-200/90 hover:border-cyan-400 shadow-sm sm:shadow-lg hover:shadow-xl transition-all duration-300 flex flex-row sm:flex-col justify-between hover:-translate-y-0.5 relative text-slate-900 p-2 min-[360px]:p-2.5 sm:p-0 cursor-pointer"
     >
       {/* Product Image Container (Left on mobile, Top on desktop) */}
       <div className="relative w-24 min-[360px]:w-28 min-[400px]:w-32 h-24 min-[360px]:h-28 sm:h-44 sm:w-full shrink-0 overflow-hidden rounded-xl sm:rounded-none bg-slate-100">
-        <Link href={`/producto/${product.slug}`} className="block w-full h-full">
+        <div className="w-full h-full relative">
           <Image
             src={product.imageUrl}
             alt={product.title}
@@ -63,7 +61,7 @@ export function ProductCard({ product }: ProductCardProps) {
             sizes="(max-width: 640px) 130px, (max-width: 1024px) 33vw, 25vw"
             className="object-cover object-center group-hover:scale-105 transition-transform duration-500 rounded-xl sm:rounded-none"
           />
-        </Link>
+        </div>
 
         {/* City & Category Badges */}
         <div className="absolute bottom-1.5 left-1.5 sm:top-2 sm:left-2 flex flex-wrap items-center gap-1 z-10">
@@ -105,12 +103,12 @@ export function ProductCard({ product }: ProductCardProps) {
             </div>
           </div>
 
-          {/* Title Link */}
-          <Link href={`/producto/${product.slug}`} className="block">
+          {/* Title */}
+          <div>
             <h3 className="text-xs min-[360px]:text-sm font-black text-slate-900 line-clamp-1 sm:line-clamp-2 leading-tight group-hover:text-[#0047BA] transition-colors">
               {product.title}
             </h3>
-          </Link>
+          </div>
 
           {/* Description */}
           <p className="text-[10px] min-[360px]:text-[11px] text-slate-500 line-clamp-1 sm:line-clamp-2 leading-tight font-medium">
@@ -154,6 +152,6 @@ export function ProductCard({ product }: ProductCardProps) {
           </button>
         </div>
       </div>
-    </article>
+    </Link>
   );
 }

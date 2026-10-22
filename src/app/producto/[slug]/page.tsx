@@ -39,8 +39,10 @@ export default async function ProductDetailPage({ params }: PageProps) {
     notFound();
   }
 
-  const commerce = await getCommerceBySlug(product.commerceId);
-  const allFeatured = await getFeaturedProducts(product.cityId, product.categoryId);
+  const [commerce, allFeatured] = await Promise.all([
+    getCommerceBySlug(product.commerceId),
+    getFeaturedProducts(product.cityId, product.categoryId),
+  ]);
   const relatedProducts = allFeatured.filter((p) => p.id !== product.id && p.slug !== product.slug);
 
   const jsonLdData = {

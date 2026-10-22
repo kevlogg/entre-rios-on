@@ -7,6 +7,7 @@ import { ScrollToTopButton } from '@/components/common/ScrollToTopButton';
 import { PageBackground } from '@/components/common/PageBackground';
 import { PwaInstallPrompt } from '@/components/pwa/PwaInstallPrompt';
 import { AuthRecoveryListener } from '@/components/auth/AuthRecoveryListener';
+import { AppSplashScreen } from '@/components/common/AppSplashScreen';
 
 export const viewport: Viewport = {
   themeColor: [
@@ -147,6 +148,7 @@ export default function RootLayout({
         <main className="flex-1">
           {children}
         </main>
+        <AppSplashScreen />
         <FloatingWhatsAppButton />
         <ScrollToTopButton />
         <PwaInstallPrompt />

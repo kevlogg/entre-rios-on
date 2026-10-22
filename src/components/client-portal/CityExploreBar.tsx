@@ -13,11 +13,25 @@ interface CityExploreBarProps {
   provinceId?: string;
 }
 
-export function CityExploreBar({ provinceId = 'santa-fe' }: CityExploreBarProps) {
+export function CityExploreBar({ provinceId }: CityExploreBarProps) {
   const activeProvinces = useActiveProvinces();
+
+  // Si no se seleccionó provincia puntual o está en Portada General 'all', la sección no debe aparecer
+  if (!provinceId || provinceId === 'all') {
+    return null;
+  }
+
   const currentProvinceConfig = activeProvinces.find((p) => p.id === provinceId || p.slug === provinceId);
-  const currentProvince = getProvinceById(provinceId) || PROVINCES[0];
+  const currentProvince = getProvinceById(provinceId);
+
+  if (!currentProvince || currentProvince.id === 'all') {
+    return null;
+  }
+
   const staticCities: City[] = getCitiesByProvince(currentProvince.id);
+  if (!staticCities || staticCities.length === 0) {
+    return null;
+  }
 
   const cities: City[] = staticCities.map((c) => {
     const customCity = currentProvinceConfig?.cities?.find((cc) => cc.id === c.id || cc.slug === c.slug);

@@ -15,6 +15,7 @@ import {
 
 import { ALL_CITIES } from '@/lib/constants/locations';
 import { parseProductGallery } from '@/lib/utils/product-gallery';
+import { cache } from 'react';
 
 // Mock Cities Data
 const CITIES_MOCK: City[] = ALL_CITIES;
@@ -848,12 +849,7 @@ export async function getFeaturedProducts(cityId?: string, categoryId?: string, 
   return list;
 }
 
-export async function getProductBySlug(slug: string): Promise<Product | undefined> {
-  const activeCommerces = await getAllCommerces(false);
-  const activeCommerceIds = new Set(activeCommerces.map((c) => c.id.toLowerCase()));
-  const activeCommerceSlugs = new Set(activeCommerces.map((c) => c.slug.toLowerCase()));
-  const activeCommerceNames = new Set(activeCommerces.map((c) => c.name.toLowerCase()));
-
+export const getProductBySlug = cache(async (slug: string): Promise<Product | undefined> => {
   if (isSupabaseConfigured()) {
     try {
       const { createPublicClient } = await import('@/lib/supabase/public');
@@ -866,24 +862,24 @@ export async function getProductBySlug(slug: string): Promise<Product | undefine
         prodQuery = prodQuery.eq('slug', slug);
       }
       const { data, error } = await prodQuery.maybeSingle();
-      if (!error) {
-        if (!data) return undefined;
-        if (data.commerce_id || data.commerce_name) {
-          const cId = (data.commerce_id || '').toLowerCase();
-          const cName = (data.commerce_name || '').toLowerCase();
-          if (activeCommerceIds.size > 0 && !activeCommerceIds.has(cId) && !activeCommerceSlugs.has(cId) && !activeCommerceNames.has(cName)) {
-            // Si la consulta estricta no lo encuentra pero existe el comercio en la DB
-            const { data: commData } = await supabase.from('commerces').select('id').or(`id.eq.${data.commerce_id},name.ilike.${data.commerce_name}`).maybeSingle();
-            if (!commData) {
+      if (!error && data) {
+        let resolvedCommerceName = data.commerce_name;
+
+        // Comprobación directa y ultra rápida del comercio específico
+        if (data.commerce_id) {
+          const { data: commData } = await supabase
+            .from('commerces')
+            .select('id, name, is_subscription_active')
+            .eq('id', data.commerce_id)
+            .maybeSingle();
+
+          if (commData) {
+            if (commData.is_subscription_active === false) {
               return undefined;
             }
-          }
-        }
-        let resolvedCommerceName = data.commerce_name;
-        if (data.commerce_id) {
-          const { data: commData } = await supabase.from('commerces').select('id, name').eq('id', data.commerce_id).maybeSingle();
-          if (commData?.name) {
-            resolvedCommerceName = commData.name;
+            if (commData.name) {
+              resolvedCommerceName = commData.name;
+            }
           }
         }
 
@@ -934,15 +930,8 @@ export async function getProductBySlug(slug: string): Promise<Product | undefine
 
   await simulateNetworkDelay();
   const mockFound = PRODUCTS_MOCK.find((p) => p.slug === slug || p.id === slug);
-  if (mockFound && mockFound.commerceId) {
-    const cId = mockFound.commerceId.toLowerCase();
-    const cName = (mockFound.commerceName || '').toLowerCase();
-    if (!activeCommerceIds.has(cId) && !activeCommerceSlugs.has(cId) && !activeCommerceNames.has(cName)) {
-      return undefined;
-    }
-  }
   return mockFound;
-}
+});
 
 export async function getAllCommerces(includeInactive: boolean = false): Promise<Commerce[]> {
   if (isSupabaseConfigured()) {
@@ -987,7 +976,7 @@ export async function getAllCommerces(includeInactive: boolean = false): Promise
   return allCommerces.filter((c) => c.isSubscriptionActive !== false);
 }
 
-export async function getCommerceBySlug(slug: string): Promise<Commerce | undefined> {
+export const getCommerceBySlug = cache(async (slug: string): Promise<Commerce | undefined> => {
   if (isSupabaseConfigured()) {
     try {
       const { createPublicClient } = await import('@/lib/supabase/public');
@@ -1089,7 +1078,7 @@ export async function getCommerceBySlug(slug: string): Promise<Commerce | undefi
     phoneWhatsApp: '',
     address: '',
   };
-}
+});
 
 export async function getProductsByCommerce(commerceId: string): Promise<Product[]> {
   const activeCommerces = await getAllCommerces(false);

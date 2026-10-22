@@ -416,10 +416,17 @@ export function ClientHeader({ withBackground = false }: ClientHeaderProps = {})
                   </span>
                   <span className="text-xs sm:text-sm lg:text-[15px] font-black text-white leading-tight truncate drop-shadow-xs">
                     {activeCityObj ? activeCityObj.name : (currentProvinceObj ? currentProvinceObj.name : (
-                      <>
-                        <span className="sm:hidden">Provincia</span>
-                        <span className="hidden sm:inline">Selecciona tu provincia</span>
-                      </>
+                      selectedProvince === 'all' ? (
+                        <>
+                          <span className="sm:hidden">General</span>
+                          <span className="hidden sm:inline">Portada General</span>
+                        </>
+                      ) : (
+                        <>
+                          <span className="sm:hidden">Provincia</span>
+                          <span className="hidden sm:inline">Selecciona tu provincia</span>
+                        </>
+                      )
                     ))}
                   </span>
                 </div>
@@ -432,6 +439,33 @@ export function ClientHeader({ withBackground = false }: ClientHeaderProps = {})
                     Selecciona tu Provincia
                   </div>
                   <div className="py-1">
+                    {/* Opción Portada General (Sin provincia específica) */}
+                    <button
+                      type="button"
+                      onClick={() => handleProvinceSelect('all')}
+                      className={`w-full text-left px-3.5 py-2.5 text-xs font-bold flex items-center justify-between hover:bg-slate-50 transition-colors cursor-pointer border-b border-slate-100 ${
+                        !selectedProvince || selectedProvince === 'all'
+                          ? 'text-slate-900 bg-slate-50 font-black'
+                          : 'text-slate-700'
+                      }`}
+                    >
+                      <div className="flex items-center gap-2.5 min-w-0">
+                        <span
+                          className="w-3.5 h-3.5 rounded-full shrink-0 shadow-xs border border-white"
+                          style={{ backgroundColor: '#00ADB5' }}
+                        />
+                        <span className="truncate">Portada General (Todas)</span>
+                      </div>
+                      <span
+                        className={`text-[9px] font-black px-2 py-0.5 rounded-full text-white shadow-2xs ${
+                          !selectedProvince || selectedProvince === 'all' ? 'ring-2 ring-white/60' : 'opacity-90'
+                        }`}
+                        style={{ backgroundColor: '#00ADB5' }}
+                      >
+                        Nacional
+                      </span>
+                    </button>
+
                     {activeProvinces.map((prov) => {
                       const theme = PROVINCE_THEMES[prov.id] || PROVINCE_THEMES['santa-fe'];
                       const isSelected = selectedProvince === prov.id || selectedProvince === prov.slug;

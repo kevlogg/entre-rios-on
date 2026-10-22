@@ -144,7 +144,7 @@ export function ClientHomeContainer({ provinceId, initialProducts = [] }: Client
             <ClientHeroBanner provinceId={activeProvince || 'all'} />
 
             {/* 2. Explorá por Ciudad (Sólo se muestra si hay provincia seleccionada) */}
-            {activeProvince && <CityExploreBar provinceId={activeProvince} />}
+            {activeProvince && activeProvince !== 'all' && <CityExploreBar provinceId={activeProvince} />}
 
             {/* 3. Categorías Principales (8 Categorías Compactas con Fotos Reales) */}
             <CategoryIconBar
@@ -210,7 +210,7 @@ export function ClientHomeContainer({ provinceId, initialProducts = [] }: Client
         {/* ========================================================================= */}
         <div className="lg:hidden w-full space-y-2 mt-2">
           {/* Explorá por Ciudad (Sólo se muestra si hay provincia seleccionada) */}
-          {activeProvince && <CityExploreBar provinceId={activeProvince} />}
+          {activeProvince && activeProvince !== 'all' && <CityExploreBar provinceId={activeProvince} />}
 
           {/* Categorías Principales */}
           <CategoryIconBar

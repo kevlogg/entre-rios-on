@@ -2,8 +2,8 @@ import { MetadataRoute } from 'next';
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: 'ON+ Portal Comercial',
-    short_name: 'ON+ Portal',
+    name: 'ON MÁS',
+    short_name: 'ON MÁS',
     description: 'Portal Oficial del Comercio, Turismo y Medios de Santa Fe y Entre Ríos',
     start_url: '/',
     display: 'standalone',

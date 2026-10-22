@@ -13,7 +13,7 @@ export function ClientFooter() {
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-8 pb-8 border-b border-slate-300/80">
           
           {/* Brand Column */}
-          <div className="col-span-2 md:col-span-3 lg:col-span-1 space-y-3">
+          <div className="col-span-2 md:col-span-3 lg:col-span-1 space-y-3 flex flex-col items-center sm:items-start text-center sm:text-left">
             <Link href="/" className="inline-block">
               <div className="relative w-[104px] h-[60px] sm:w-[121px] sm:h-[70px]">
                 <Image
@@ -25,11 +25,11 @@ export function ClientFooter() {
               </div>
             </Link>
             <p className="text-xs text-slate-600 font-medium leading-tight">
-              Tu negocio, más cerca<br />de más personas.
+              Tu negocio, más cerca<br className="hidden sm:inline" /> de más personas.
             </p>
             
             {/* Social media icons (SVG) */}
-            <div className="flex items-center gap-2 pt-1 text-slate-600">
+            <div className="flex items-center justify-center sm:justify-start gap-2 pt-1 text-slate-600">
               {/* Instagram */}
               <a 
                 href="https://instagram.com/onmasportal" 
@@ -115,7 +115,7 @@ export function ClientFooter() {
           </div>
 
           {/* Col 5: Pertenece a CG PORTAL & MEDIA */}
-          <div className="space-y-2">
+          <div className="col-span-2 sm:col-span-1 space-y-2 flex flex-col items-center sm:items-start text-center sm:text-left">
             <span className="text-[11px] font-bold text-slate-600 block">
               Pertenece a
             </span>
@@ -124,10 +124,10 @@ export function ClientFooter() {
                 src="/cgportal.png"
                 alt="CG PORTAL & MEDIA"
                 fill
-                className="object-contain object-left"
+                className="object-contain object-center sm:object-left"
               />
             </div>
-            <p className="text-[11px] text-slate-600 leading-snug pt-1">
+            <p className="text-[11px] text-slate-600 leading-snug pt-1 max-w-xs sm:max-w-none">
               Medios, tecnología y soluciones, para el desarrollo regional.
             </p>
           </div>
