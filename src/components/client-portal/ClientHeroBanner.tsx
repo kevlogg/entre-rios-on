@@ -49,7 +49,7 @@ export function ClientHeroBanner({ provinceId }: ClientHeroBannerProps) {
 
   return (
     <section 
-      aria-label="Banner Principal de Santa Fe"
+      aria-label="Banner Principal"
       className="w-full relative"
     >
       <div className="relative w-full aspect-[21/9] sm:aspect-[24/9] md:aspect-[28/9] min-h-[140px] sm:min-h-[170px] lg:min-h-[195px] max-h-[260px] rounded-xl sm:rounded-2xl overflow-hidden bg-slate-900 border border-slate-200/90 group">
@@ -59,7 +59,8 @@ export function ClientHeroBanner({ provinceId }: ClientHeroBannerProps) {
           const isCurrent = idx === currentIndex;
           const imgSrc = normalizeImageUrl(slide.imageUrl);
 
-          const targetHref = slide.ctaHref || `/${provinceId}`;
+          // Si no hay provincia o es 'all', el fallback del banner es la portada raíz '/'
+          const targetHref = slide.ctaHref || (provinceId && provinceId !== 'all' ? `/${provinceId}` : '/');
           const isExternal = Boolean(slide.isExternal || targetHref.startsWith('http://') || targetHref.startsWith('https://'));
 
           if (isExternal) {
