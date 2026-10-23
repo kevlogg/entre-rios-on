@@ -1557,36 +1557,75 @@ export async function getSubscriptionPlansAction(): Promise<{
   try {
     const adminSupabase = getAdminClient();
     if (adminSupabase) {
-      const { data, error } = await adminSupabase.from('subscription_plans').select('*');
-      if (!error && Array.isArray(data) && data.length > 0) {
-        const mapped = data.map((p: any) => {
-          let feats: string[] = [];
-          if (Array.isArray(p.features)) {
-            feats = p.features;
-          } else if (typeof p.features === 'string') {
-            try {
-              feats = JSON.parse(p.features);
-            } catch (e) {
-              feats = [];
+      // 1. Intentar leer de tabla subscription_plans si existe
+      try {
+        const { data, error } = await adminSupabase.from('subscription_plans').select('*');
+        if (!error && Array.isArray(data) && data.length > 0) {
+          const mapped = data.map((p: any) => {
+            let feats: string[] = [];
+            if (Array.isArray(p.features)) {
+              feats = p.features;
+            } else if (typeof p.features === 'string') {
+              try {
+                feats = JSON.parse(p.features);
+              } catch (e) {
+                feats = [];
+              }
             }
+
+            return {
+              id: String(p.id || ''),
+              name: String(p.name || (p.id === 'oro' ? 'Plan Oro' : p.id === 'plata' ? 'Plan Plata' : 'Plan Bronce')),
+              price: Number(p.price) || (p.id === 'oro' ? 99000 : p.id === 'plata' ? 49000 : 29000),
+              period: String(p.period || 'mes'),
+              badge: String(p.badge || (p.id === 'oro' ? 'MÁXIMO ALCANCE • VIP' : p.id === 'plata' ? 'Mayor Visibilidad' : 'Presencia Básica')),
+              catalogLimitText: String(p.catalog_limit_text || (p.id === 'oro' ? 'Catálogo ILIMITADO de productos y servicios' : p.id === 'plata' ? 'Catálogo de hasta 20 productos / servicios' : 'Catálogo de hasta 5 productos / servicios')),
+              description: String(p.description || ''),
+              targetAudience: String(p.target_audience || 'Comercios y Turismo'),
+              features: Array.isArray(feats) ? feats : [],
+            };
+          });
+
+          const mapById = new Map(mapped.map((m) => [m.id, m]));
+          const fullPlans = DEFAULT_SUBSCRIPTION_PLANS.map((d) => mapById.get(d.id) || d);
+          return { success: true, plans: fullPlans };
+        }
+      } catch (errPlansTable) {
+        // subscription_plans no existe, continuar al almacenamiento persistente en province_configs
+      }
+
+      // 2. Leer desde almacenamiento persistente en Supabase province_configs
+      const { data: configRow, error: cfgErr } = await adminSupabase
+        .from('province_configs')
+        .select('*')
+        .eq('id', 'config_subscription_plans')
+        .maybeSingle();
+
+      if (!cfgErr && configRow && configRow.banner_desktop) {
+        try {
+          const parsed = JSON.parse(configRow.banner_desktop);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            const mapById = new Map(parsed.map((m: PlanConfigItem) => [m.id, m]));
+            const fullPlans = DEFAULT_SUBSCRIPTION_PLANS.map((d) => {
+              const saved = mapById.get(d.id);
+              if (saved) {
+                return {
+                  ...d,
+                  name: saved.name || d.name,
+                  price: typeof saved.price === 'number' ? saved.price : d.price,
+                  badge: saved.badge || d.badge,
+                  catalogLimitText: saved.catalogLimitText || d.catalogLimitText,
+                  description: saved.description || d.description,
+                  features: Array.isArray(saved.features) && saved.features.length > 0 ? saved.features : d.features,
+                };
+              }
+              return d;
+            });
+            return { success: true, plans: fullPlans };
           }
-
-          return {
-            id: String(p.id || ''),
-            name: String(p.name || (p.id === 'oro' ? 'Plan Oro' : p.id === 'plata' ? 'Plan Plata' : 'Plan Bronce')),
-            price: Number(p.price) || (p.id === 'oro' ? 99000 : p.id === 'plata' ? 49000 : 29000),
-            period: String(p.period || 'mes'),
-            badge: String(p.badge || (p.id === 'oro' ? 'MÁXIMO ALCANCE • VIP' : p.id === 'plata' ? 'Mayor Visibilidad' : 'Presencia Básica')),
-            catalogLimitText: String(p.catalog_limit_text || (p.id === 'oro' ? 'Catálogo ILIMITADO de productos y servicios' : p.id === 'plata' ? 'Catálogo de hasta 20 productos / servicios' : 'Catálogo de hasta 5 productos / servicios')),
-            description: String(p.description || ''),
-            targetAudience: String(p.target_audience || 'Comercios y Turismo'),
-            features: Array.isArray(feats) ? feats : [],
-          };
-        });
-
-        const mapById = new Map(mapped.map((m) => [m.id, m]));
-        const fullPlans = DEFAULT_SUBSCRIPTION_PLANS.map((d) => mapById.get(d.id) || d);
-        return { success: true, plans: fullPlans };
+        } catch (parseErr) {
+          console.warn('Error parseando planes desde province_configs:', parseErr);
+        }
       }
     }
     return { success: true, plans: DEFAULT_SUBSCRIPTION_PLANS };
@@ -1601,7 +1640,28 @@ export async function updateSubscriptionPlansAction(
 ): Promise<{ success: boolean; message: string }> {
   try {
     const adminSupabase = getAdminClient();
-    if (adminSupabase) {
+    if (!adminSupabase) {
+      return { success: false, message: 'No se pudo conectar con el cliente administrativo de base de datos.' };
+    }
+
+    // 1. Guardar en province_configs (tabla persistente confirmada en Supabase)
+    const { error: cfgError } = await adminSupabase
+      .from('province_configs')
+      .upsert({
+        id: 'config_subscription_plans',
+        name: 'Configuración Oficial de Planes de Suscripción',
+        banner_desktop: JSON.stringify(plans),
+        banner_mobile: 'system_plans',
+        updated_at: new Date().toISOString(),
+      });
+
+    if (cfgError) {
+      console.error('Error guardando planes en province_configs:', cfgError);
+      return { success: false, message: `Error guardando planes en la base de datos: ${cfgError.message}` };
+    }
+
+    // 2. Si existe la tabla subscription_plans, también actualizarla en paralelo
+    try {
       for (const p of plans) {
         await adminSupabase.from('subscription_plans').upsert({
           id: p.id,
@@ -1616,6 +1676,8 @@ export async function updateSubscriptionPlansAction(
           updated_at: new Date().toISOString(),
         });
       }
+    } catch {
+      // Opcional si la tabla no existe en la base de datos
     }
 
     revalidatePath('/admin');

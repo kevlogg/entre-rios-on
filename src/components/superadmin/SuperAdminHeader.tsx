@@ -24,7 +24,7 @@ export function SuperAdminHeader() {
     <header className="sticky top-0 z-40 bg-white border-b border-slate-200 transition-all shadow-xs">
       {/* Top Banner Ribbon - Matches Site Header */}
       <div className="bg-gradient-to-r from-[#002878] via-[#0047BA] to-[#00ADB5] text-white text-xs py-1.5 px-4 font-semibold">
-        <div className="max-w-7xl mx-auto flex items-center justify-between gap-2">
+        <div className="max-w-[1720px] mx-auto flex items-center justify-between gap-2">
           <div className="flex items-center gap-2">
             <Sparkles className="w-3.5 h-3.5 text-cyan-300 animate-pulse" />
             <span> Panel SuperAdmin Provincial • Control Central ON MÁS (Santa Fe & Entre Ríos) </span>
@@ -38,7 +38,7 @@ export function SuperAdminHeader() {
       </div>
 
       {/* Main Header Row */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-[1720px] mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-20 gap-4">
           
           {/* Brand Logo & SuperAdmin Crown Badge */}

@@ -2,8 +2,8 @@
 
 import React, { useState } from 'react';
 import Image from 'next/image';
-import { Commerce, Product } from '@/types';
-import { Plus, Edit2, Trash2, Power, CheckCircle, Tag, ShoppingBag, X, Sparkles, MessageCircle } from 'lucide-react';
+import { Commerce, Product, ProductPaymentConfig } from '@/types';
+import { Plus, Edit2, Trash2, Power, CheckCircle, Tag, ShoppingBag, X, Sparkles, MessageCircle, CreditCard } from 'lucide-react';
 import { CATEGORIES_LIST } from '@/lib/constants/categories';
 import { ALL_CITIES } from '@/lib/constants/locations';
 import { createProductAction, updateProductAction, deleteProductAction } from '@/server/actions/catalog';
@@ -37,6 +37,15 @@ export function CatalogManager({
   const [description, setDescription] = useState('');
   const [images, setImages] = useState<string[]>([]);
 
+  // Promociones y Medios de Pago State
+  const [discountPercent, setDiscountPercent] = useState('');
+  const [installments, setInstallments] = useState<'none' | '3' | '6' | '12'>('none');
+  const [acceptsCash, setAcceptsCash] = useState(true);
+  const [acceptsTransfer, setAcceptsTransfer] = useState(true);
+  const [acceptsVisa, setAcceptsVisa] = useState(true);
+  const [acceptsMastercard, setAcceptsMastercard] = useState(true);
+  const [acceptsMercadoPago, setAcceptsMercadoPago] = useState(true);
+
   const plan = commerce?.plan || 'Bronce';
   const maxProducts = plan === 'Oro' ? Infinity : plan === 'Plata' ? 20 : 5;
   const isLimitReached = products.length >= maxProducts;
@@ -57,6 +66,13 @@ export function CatalogManager({
     setCityId('rosario');
     setDescription('');
     setImages([]);
+    setDiscountPercent('');
+    setInstallments('none');
+    setAcceptsCash(true);
+    setAcceptsTransfer(true);
+    setAcceptsVisa(true);
+    setAcceptsMastercard(true);
+    setAcceptsMercadoPago(true);
     setIsModalOpen(true);
   };
 
@@ -71,6 +87,13 @@ export function CatalogManager({
       ? prod.galleryImages
       : (prod.imageUrl ? [prod.imageUrl] : []);
     setImages(initialImages);
+    setDiscountPercent(prod.paymentConfig?.discountPercent ? String(prod.paymentConfig.discountPercent) : '');
+    setInstallments(prod.paymentConfig?.installments || 'none');
+    setAcceptsCash(prod.paymentConfig?.acceptsCash ?? true);
+    setAcceptsTransfer(prod.paymentConfig?.acceptsTransfer ?? true);
+    setAcceptsVisa(prod.paymentConfig?.acceptsVisa ?? true);
+    setAcceptsMastercard(prod.paymentConfig?.acceptsMastercard ?? true);
+    setAcceptsMercadoPago(prod.paymentConfig?.acceptsMercadoPago ?? true);
     setIsModalOpen(true);
   };
 
@@ -89,6 +112,16 @@ export function CatalogManager({
     const primaryImage = images[0] || '/images/city-rosario.jpg';
     const galleryImages = images.length > 0 ? images : [primaryImage];
 
+    const currentPaymentConfig: ProductPaymentConfig = {
+      discountPercent: discountPercent ? Math.max(1, Math.min(99, parseInt(discountPercent, 10))) : undefined,
+      installments,
+      acceptsCash,
+      acceptsTransfer,
+      acceptsVisa,
+      acceptsMastercard,
+      acceptsMercadoPago,
+    };
+
     if (editingProduct) {
       const updatedFields: Partial<Product> = {
         title,
@@ -100,6 +133,7 @@ export function CatalogManager({
         description,
         imageUrl: primaryImage,
         galleryImages,
+        paymentConfig: currentPaymentConfig,
       };
 
       try {
@@ -141,6 +175,7 @@ export function CatalogManager({
         description: description || 'Producto destacado publicado por el comercio socio.',
         phoneWhatsApp: commerce?.phoneWhatsApp || '5493415550199',
         whatsappMessageCustom: `Hola, vi en el portal ON MÁS el producto "${title}" y quisiera consultar disponibilidad.`,
+        paymentConfig: currentPaymentConfig,
       };
 
       try {
@@ -393,6 +428,112 @@ export function CatalogManager({
                 maxImages={3}
                 label="Fotos del Producto / Oferta"
               />
+
+              {/* Bloque: Promociones y Medios de Pago Configurable */}
+              <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4 space-y-3.5">
+                <div className="flex items-center gap-2 border-b border-slate-200/80 pb-2">
+                  <CreditCard className="w-4 h-4 text-[#0047BA]" />
+                  <span className="text-xs font-black uppercase tracking-wider text-slate-800">
+                    Promociones y Medios de Pago Habilitados
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1">
+                      Descuento (% OFF opcional)
+                    </label>
+                    <div className="relative">
+                      <input
+                        type="number"
+                        min="1"
+                        max="99"
+                        placeholder="Ej. 20 (mostrará 20% OFF)"
+                        value={discountPercent}
+                        onChange={(e) => setDiscountPercent(e.target.value)}
+                        className="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs font-bold text-slate-800 focus:ring-2 focus:ring-[#00ADB5]"
+                      />
+                      <span className="absolute right-3 top-2 text-xs font-black text-emerald-600">% OFF</span>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1">
+                      Cuotas sin interés
+                    </label>
+                    <select
+                      value={installments}
+                      onChange={(e) => setInstallments(e.target.value as any)}
+                      className="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs font-bold text-slate-800 focus:ring-2 focus:ring-[#00ADB5]"
+                    >
+                      <option value="none">Sin cuotas sin interés</option>
+                      <option value="3">Hasta 3 cuotas sin interés</option>
+                      <option value="6">Hasta 6 cuotas sin interés</option>
+                      <option value="12">Hasta 12 cuotas sin interés</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-2">
+                    Medios de pago que acepta tu comercio para este producto:
+                  </label>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 text-xs">
+                    <label className="flex items-center gap-2 p-2 bg-white rounded-xl border border-slate-200 cursor-pointer hover:bg-slate-100/60 font-bold text-slate-800">
+                      <input
+                        type="checkbox"
+                        checked={acceptsCash}
+                        onChange={(e) => setAcceptsCash(e.target.checked)}
+                        className="rounded-md text-[#0047BA] focus:ring-[#00ADB5]"
+                      />
+                      <span>Efectivo</span>
+                    </label>
+
+                    <label className="flex items-center gap-2 p-2 bg-white rounded-xl border border-slate-200 cursor-pointer hover:bg-slate-100/60 font-bold text-slate-800">
+                      <input
+                        type="checkbox"
+                        checked={acceptsTransfer}
+                        onChange={(e) => setAcceptsTransfer(e.target.checked)}
+                        className="rounded-md text-[#0047BA] focus:ring-[#00ADB5]"
+                      />
+                      <span>Transferencia</span>
+                    </label>
+
+                    <label className="flex items-center gap-2 p-2 bg-white rounded-xl border border-slate-200 cursor-pointer hover:bg-slate-100/60 font-bold text-slate-800">
+                      <input
+                        type="checkbox"
+                        checked={acceptsVisa}
+                        onChange={(e) => setAcceptsVisa(e.target.checked)}
+                        className="rounded-md text-[#0047BA] focus:ring-[#00ADB5]"
+                      />
+                      <span>Tarjeta Visa</span>
+                    </label>
+
+                    <label className="flex items-center gap-2 p-2 bg-white rounded-xl border border-slate-200 cursor-pointer hover:bg-slate-100/60 font-bold text-slate-800">
+                      <input
+                        type="checkbox"
+                        checked={acceptsMastercard}
+                        onChange={(e) => setAcceptsMastercard(e.target.checked)}
+                        className="rounded-md text-[#0047BA] focus:ring-[#00ADB5]"
+                      />
+                      <span>Mastercard</span>
+                    </label>
+
+                    <label className="flex items-center gap-2 p-2 bg-white rounded-xl border border-slate-200 cursor-pointer hover:bg-slate-100/60 font-bold text-slate-800 col-span-2 sm:col-span-1">
+                      <input
+                        type="checkbox"
+                        checked={acceptsMercadoPago}
+                        onChange={(e) => setAcceptsMercadoPago(e.target.checked)}
+                        className="rounded-md text-[#0047BA] focus:ring-[#00ADB5]"
+                      />
+                      <span>Mercado Pago</span>
+                    </label>
+                  </div>
+                  <p className="text-[10px] text-slate-400 mt-1.5 italic">
+                    Los logos de Visa, Mastercard y Mercado Pago se mostrarán en la ficha del producto únicamente si los habilitás acá.
+                  </p>
+                </div>
+              </div>
 
               <div className="bg-cyan-50 border border-cyan-200 rounded-2xl p-3 text-xs text-[#007C8A] font-semibold flex items-center gap-2">
                 <MessageCircle className="w-4 h-4 text-[#00ADB5] shrink-0" />

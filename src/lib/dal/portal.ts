@@ -15,6 +15,7 @@ import {
 
 import { ALL_CITIES } from '@/lib/constants/locations';
 import { parseProductGallery } from '@/lib/utils/product-gallery';
+import { parseProductPayment } from '@/lib/utils/product-payment';
 import { cache } from 'react';
 
 // Mock Cities Data
@@ -781,6 +782,11 @@ export async function getFeaturedProducts(cityId?: string, categoryId?: string, 
         p.image_url,
         (p as any).gallery_images
       );
+      const { description: finalDesc, paymentConfig } = parseProductPayment(
+        cleanDesc,
+        p.price ? Number(p.price) : undefined,
+        (p as any).original_price ? Number((p as any).original_price) : undefined
+      );
       return {
         id: p.id,
         title: p.title,
@@ -798,9 +804,10 @@ export async function getFeaturedProducts(cityId?: string, categoryId?: string, 
         category: p.category,
         categoryId: p.category_id,
         isFeatured: p.is_featured,
-        description: cleanDesc,
+        description: finalDesc,
         phoneWhatsApp: p.phone_whatsapp,
         whatsappMessageCustom: p.whatsapp_message_custom,
+        paymentConfig,
       };
     });
   };
@@ -910,6 +917,12 @@ export const getProductBySlug = cache(async (slug: string): Promise<Product | un
           (data as any).gallery_images
         );
 
+        const { description: finalDesc, paymentConfig } = parseProductPayment(
+          cleanDesc,
+          data.price ? Number(data.price) : undefined,
+          (data as any).original_price ? Number((data as any).original_price) : undefined
+        );
+
         return {
           id: data.id,
           title: data.title,
@@ -928,10 +941,11 @@ export const getProductBySlug = cache(async (slug: string): Promise<Product | un
           category: data.category,
           categoryId: data.category_id,
           isFeatured: data.is_featured,
-          description: cleanDesc,
+          description: finalDesc,
           phoneWhatsApp: data.phone_whatsapp,
           whatsappMessageCustom: data.whatsapp_message_custom,
-          };
+          paymentConfig,
+        };
       }
       return undefined;
     } catch (e) {
@@ -1112,6 +1126,11 @@ export async function getProductsByCommerce(commerceId: string): Promise<Product
             p.image_url,
             (p as any).gallery_images
           );
+          const { description: finalDesc, paymentConfig } = parseProductPayment(
+            cleanDesc,
+            p.price ? Number(p.price) : undefined,
+            (p as any).original_price ? Number((p as any).original_price) : undefined
+          );
           return {
             id: p.id,
             title: p.title,
@@ -1127,9 +1146,10 @@ export async function getProductsByCommerce(commerceId: string): Promise<Product
             category: p.category,
             categoryId: p.category_id,
             isFeatured: p.is_featured,
-            description: cleanDesc,
+            description: finalDesc,
             phoneWhatsApp: p.phone_whatsapp,
             whatsappMessageCustom: p.whatsapp_message_custom,
+            paymentConfig,
           };
         });
       }

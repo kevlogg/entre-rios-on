@@ -292,10 +292,10 @@ export function SuperAdminDashboardClient({
       </div>
 
       {/* Main Layout Grid: Sidebar Panel + Tab Content */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-start">
         
         {/* Sticky Vertical Sidebar Access Panel */}
-        <aside className="lg:col-span-3 bg-white rounded-3xl p-4 border border-slate-200 shadow-sm space-y-3 sticky top-24">
+        <aside className="lg:col-span-3 xl:col-span-3 2xl:col-span-2 bg-white rounded-3xl p-4 border border-slate-200 shadow-sm space-y-3 sticky top-24">
           <div className="px-3 py-2 border-b border-slate-100 flex items-center justify-between">
             <span className="text-xs font-black uppercase tracking-wider text-slate-400">
               Menú Principal
@@ -349,7 +349,7 @@ export function SuperAdminDashboardClient({
         </aside>
 
         {/* Tab Content Panel */}
-        <main className="lg:col-span-9 space-y-6">
+        <main className="lg:col-span-9 xl:col-span-9 2xl:col-span-10 space-y-6">
           {activeTab === 'commerces' && (
             <CommerceApprovalTable commerces={initialCommerces} />
           )}

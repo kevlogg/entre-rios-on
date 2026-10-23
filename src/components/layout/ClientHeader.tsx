@@ -15,7 +15,20 @@ import {
   ShoppingBag, 
   ArrowRight,
   LayoutGrid,
-  ChevronRight
+  ChevronRight,
+  Car,
+  Wrench,
+  Flower2,
+  Wine,
+  Leaf,
+  Smartphone,
+  Shirt,
+  Armchair,
+  Home,
+  WashingMachine,
+  Dumbbell,
+  UtensilsCrossed,
+  Palmtree
 } from 'lucide-react';
 import { trackSearchQuery, trackCitySelect } from '@/lib/analytics/events';
 import { PROVINCES, getCitiesByProvince, getProvinceBySlug, getCityBySlug } from '@/lib/constants/locations';
@@ -23,6 +36,120 @@ import { useActiveProvinces, getPersistedProvince, setPersistedProvince } from '
 import { CATEGORIES_LIST } from '@/lib/constants/categories';
 import { getFeaturedProducts, getAllCommerces } from '@/lib/dal/portal';
 import { Product, Commerce } from '@/types';
+
+// Categorías del desplegable con estructura visual exacta a la imagen de referencia
+const HEADER_DROPDOWN_CATEGORIES = [
+  // Fila 1
+  {
+    id: 'autos',
+    title: 'Autos, motos y vehículos',
+    subtitle: 'Autos, motos, utilitarios y más',
+    icon: Car,
+    href: '/catalogo?categoria=autos',
+  },
+  {
+    id: 'tecnologia',
+    title: 'Celulares y tecnología',
+    subtitle: 'Celulares, accesorios y electrónica',
+    icon: Smartphone,
+    href: '/catalogo?categoria=tecnologia',
+  },
+  {
+    id: 'electro',
+    title: 'Electrodomésticos',
+    subtitle: 'Para tu hogar, con la mejor tecnología',
+    icon: WashingMachine,
+    href: '/catalogo?categoria=electro',
+  },
+  // Fila 2
+  {
+    id: 'industria',
+    title: 'Herramientas e industria',
+    subtitle: 'Herramientas, insumos y maquinaria',
+    icon: Wrench,
+    href: '/catalogo?categoria=industria',
+  },
+  {
+    id: 'indumentaria',
+    title: 'Ropa, calzado y accesorios',
+    subtitle: 'Moda para toda la familia',
+    icon: Shirt,
+    href: '/catalogo?categoria=indumentaria',
+  },
+  {
+    id: 'deportes',
+    title: 'Deportes y fitness',
+    subtitle: 'Indumentaria, accesorios y equipamiento',
+    icon: Dumbbell,
+    href: '/catalogo?categoria=deportes',
+  },
+  // Fila 3
+  {
+    id: 'salud',
+    title: 'Belleza y cuidado personal',
+    subtitle: 'Cosmética, cuidado y bienestar',
+    icon: Flower2,
+    href: '/catalogo?categoria=salud',
+  },
+  {
+    id: 'hogar',
+    title: 'Hogar, muebles y jardín',
+    subtitle: 'Muebles, decoración y vida al aire libre',
+    icon: Armchair,
+    href: '/catalogo?categoria=hogar',
+  },
+  {
+    id: 'gastronomia',
+    title: 'Gastronomía y sabores',
+    subtitle: 'Alimentos, bebidas y productos gourmet',
+    icon: UtensilsCrossed,
+    href: '/catalogo?categoria=gastronomia',
+  },
+  // Fila 4
+  {
+    id: 'bebidas',
+    title: 'Vinos, cervezas y bodegas',
+    subtitle: 'Vinos, cervezas y experiencias',
+    icon: Wine,
+    href: '/catalogo?categoria=bebidas',
+  },
+  {
+    id: 'construccion',
+    title: 'Construcción e inmuebles',
+    subtitle: 'Materiales, servicios y propiedades',
+    icon: Home,
+    href: '/catalogo?categoria=construccion',
+  },
+  {
+    id: 'turismo',
+    title: 'Turismo, termas y posadas',
+    subtitle: 'Escapadas, alojamientos y experiencias',
+    icon: Palmtree,
+    href: '/catalogo?categoria=turismo',
+  },
+  // Fila 5
+  {
+    id: 'agro',
+    title: 'Agro, campo y alimentos',
+    subtitle: 'Insumos, maquinaria y productos del campo',
+    icon: Leaf,
+    href: '/catalogo?categoria=agro',
+  },
+  {
+    id: 'productos',
+    title: 'Productos y artesanías',
+    subtitle: 'Artículos únicos y regionales',
+    icon: ShoppingBag,
+    href: '/catalogo?categoria=productos',
+  },
+  {
+    id: 'comercios',
+    title: 'Comercios y servicios B2B',
+    subtitle: 'Soluciones para empresas y profesionales',
+    icon: Store,
+    href: '/catalogo?categoria=comercios',
+  },
+];
 
 // Temas y colores característicos por provincia (Rojo Federal para Entre Ríos, Azul Invencible para Santa Fe, Turquesa para Nacional)
 export const PROVINCE_THEMES: Record<string, {
@@ -774,45 +901,55 @@ export function ClientHeader({ withBackground = false }: ClientHeaderProps = {})
                     {/* Desplegable de Categorías */}
                     {isCategoriesHovered && (
                       <div
-                        className="absolute top-full left-0 mt-1 w-[480px] bg-white border border-slate-200 rounded-2xl p-3 shadow-2xl z-50 animate-in fade-in slide-in-from-top-1 duration-150 grid grid-cols-2 gap-1.5 text-slate-800 text-left"
+                        className="absolute top-full left-0 mt-1.5 w-[920px] max-w-[95vw] bg-white border border-slate-200/90 rounded-3xl p-5 sm:p-6 shadow-2xl z-50 animate-in fade-in slide-in-from-top-1.5 duration-150 text-slate-800 text-left"
                         onMouseEnter={handleCategoriesMouseEnter}
                         onMouseLeave={handleCategoriesMouseLeave}
                       >
-                        <div className="col-span-2 px-2 py-1 flex items-center justify-between border-b border-slate-100 pb-2 mb-1">
-                          <span className="text-[10px] font-black uppercase tracking-wider text-[#0047BA] flex items-center gap-1.5">
-                            <LayoutGrid className="w-3.5 h-3.5" />
-                            Categorías del Catálogo ON+
-                          </span>
+                        {/* Cabecera del Desplegable */}
+                        <div className="flex items-center justify-between border-b border-slate-100 pb-3.5 mb-3.5">
+                          <div className="flex items-center gap-2 text-[#0f172a]">
+                            <LayoutGrid className="w-5 h-5 text-[#0f172a] stroke-[2]" />
+                            <span className="text-xs sm:text-sm font-black tracking-wider uppercase text-[#0f172a]">
+                              EXPLORÁ POR CATEGORÍA
+                            </span>
+                          </div>
                           <Link
                             href="/catalogo"
                             onClick={() => setIsCategoriesHovered(false)}
-                            className="text-[11px] font-bold text-[#0047BA] hover:underline flex items-center gap-1"
+                            className="text-xs sm:text-[13px] font-black text-[#0052cc] hover:text-[#002878] flex items-center gap-1.5 transition-colors group"
                           >
-                            <span>Ver Todo</span>
-                            <ArrowRight className="w-3 h-3" />
+                            <span>Ver todas las categorías</span>
+                            <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
                           </Link>
                         </div>
 
-                        {CATEGORIES_LIST.map((cat) => {
-                          const IconComp = cat.icon;
-                          return (
-                            <Link
-                              key={cat.id}
-                              href={`/catalogo?categoria=${cat.id}`}
-                              onClick={() => setIsCategoriesHovered(false)}
-                              className="flex items-center gap-2.5 p-2 rounded-xl hover:bg-slate-50 transition-colors group cursor-pointer"
-                            >
-                              <div className={`w-7 h-7 rounded-lg ${cat.iconBg} flex items-center justify-center shrink-0 border border-slate-200`}>
-                                <IconComp className={`w-3.5 h-3.5 ${cat.iconColor}`} />
-                              </div>
-                              <div className="truncate">
-                                <span className="text-xs font-bold text-slate-800 group-hover:text-[#0047BA] block truncate transition-colors">
-                                  {cat.label}
-                                </span>
-                              </div>
-                            </Link>
-                          );
-                        })}
+                        {/* Grilla 3 columnas x 5 filas (15 Categorías) */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2.5 sm:gap-3">
+                          {HEADER_DROPDOWN_CATEGORIES.map((cat) => {
+                            const IconComp = cat.icon;
+                            return (
+                              <Link
+                                key={cat.id}
+                                href={cat.href}
+                                onClick={() => setIsCategoriesHovered(false)}
+                                className="flex items-center justify-between gap-3 p-3 rounded-2xl border border-slate-200/80 hover:border-slate-300 hover:bg-slate-50/90 transition-all duration-150 group cursor-pointer bg-white"
+                              >
+                                <div className="flex items-center gap-3.5 min-w-0">
+                                  <IconComp className="w-6 h-6 sm:w-7 sm:h-7 text-[#0f172a] shrink-0 stroke-[1.8] group-hover:text-[#0047BA] transition-colors" />
+                                  <div className="min-w-0">
+                                    <span className="text-xs sm:text-[13px] font-black text-slate-900 group-hover:text-[#0047BA] leading-tight block truncate transition-colors">
+                                      {cat.title}
+                                    </span>
+                                    <span className="text-[10px] sm:text-[11px] font-medium text-slate-500 leading-tight block truncate mt-0.5">
+                                      {cat.subtitle}
+                                    </span>
+                                  </div>
+                                </div>
+                                <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-[#0047BA] group-hover:translate-x-0.5 transition-all shrink-0 ml-1" />
+                              </Link>
+                            );
+                          })}
+                        </div>
                       </div>
                     )}
                   </div>

@@ -58,6 +58,16 @@ export interface ProductVariantItem {
   imageUrl?: string;
 }
 
+export interface ProductPaymentConfig {
+  discountPercent?: number; // Ej: 20 para mostrar "20% OFF"
+  installments?: 'none' | '3' | '6' | '12'; // Hasta 3, 6 o 12 cuotas sin interés
+  acceptsCash?: boolean; // Efectivo
+  acceptsTransfer?: boolean; // Transferencia
+  acceptsVisa?: boolean; // Tarjeta Visa
+  acceptsMastercard?: boolean; // Tarjeta Mastercard
+  acceptsMercadoPago?: boolean; // Mercado Pago
+}
+
 export interface Product {
   id: string;
   title: string;
@@ -91,6 +101,7 @@ export interface Product {
   variants?: ProductVariantItem[];
   specs?: ProductSpecItem[];
   highlights?: string[];
+  paymentConfig?: ProductPaymentConfig;
 }
 
 export interface CommunityEvent {

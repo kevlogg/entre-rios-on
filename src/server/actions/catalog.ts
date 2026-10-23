@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { Product } from '@/types';
 import { parseProductGallery, encodeProductGallery } from '@/lib/utils/product-gallery';
+import { encodeProductPayment, parseProductPayment } from '@/lib/utils/product-payment';
 
 export async function createProductAction(productData: Partial<Product>): Promise<{ success: boolean; message: string; data?: Product }> {
   try {
@@ -77,7 +78,8 @@ export async function createProductAction(productData: Partial<Product>): Promis
         ? productData.galleryImages
         : (productData.imageUrl ? [productData.imageUrl] : ['/images/city-rosario.jpg']);
       const primaryImage = rawGallery[0] || productData.imageUrl || '/images/city-rosario.jpg';
-      const encodedDesc = encodeProductGallery(productData.description, rawGallery);
+      const descWithPayment = encodeProductPayment(productData.description, productData.paymentConfig);
+      const encodedDesc = encodeProductGallery(descWithPayment, rawGallery);
 
       const insertPayload: any = {
         title: productData.title,
@@ -297,11 +299,12 @@ export async function updateProductAction(
         updatePayload.image_url = productData.imageUrl;
       }
 
-      if (productData.description !== undefined || rawGallery !== undefined) {
+      if (productData.description !== undefined || rawGallery !== undefined || productData.paymentConfig !== undefined) {
         const baseDesc = productData.description !== undefined 
           ? productData.description 
           : ((productToModify as any).description || '');
-        updatePayload.description = encodeProductGallery(baseDesc, rawGallery);
+        const descWithPayment = encodeProductPayment(baseDesc, productData.paymentConfig);
+        updatePayload.description = encodeProductGallery(descWithPayment, rawGallery);
       }
 
       if (productData.phoneWhatsApp) updatePayload.phone_whatsapp = productData.phoneWhatsApp;

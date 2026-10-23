@@ -20,7 +20,10 @@ import {
   ShieldCheck,
   Info,
   Maximize2,
-  X
+  X,
+  CreditCard,
+  Banknote,
+  ArrowRightLeft
 } from 'lucide-react';
 import { Product, Commerce } from '@/types';
 import { ProductRatingWidget } from '@/components/product/ProductRatingWidget';
@@ -334,6 +337,99 @@ export function ProductDetailView({ product, commerce, relatedProducts = [] }: P
                 <span>Disponibilidad: <strong className="text-slate-900 font-bold">Consultar con el comercio</strong></span>
               </div>
             </div>
+
+            {/* Bloque: Promociones y medios de pago */}
+            {(() => {
+              const paymentConfig = product.paymentConfig || {
+                discountPercent: (product.originalPrice && product.price && product.originalPrice > product.price) 
+                  ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
+                  : undefined,
+                installments: 'none',
+                acceptsCash: true,
+                acceptsTransfer: true,
+                acceptsVisa: true,
+                acceptsMastercard: true,
+                acceptsMercadoPago: true,
+              };
+
+              const hasCards = paymentConfig.acceptsVisa || paymentConfig.acceptsMastercard || paymentConfig.acceptsMercadoPago;
+
+              return (
+                <div className="bg-gradient-to-br from-slate-50 to-slate-100/80 border border-slate-200/90 rounded-2xl p-3.5 space-y-2.5 shadow-2xs">
+                  <div className="flex items-center justify-between gap-2 flex-wrap">
+                    <div className="flex items-center gap-1.5 text-slate-800">
+                      <CreditCard className="w-4 h-4 text-[#0047BA]" />
+                      <span className="text-xs font-black uppercase tracking-wider text-slate-800">
+                        Promociones y medios de pago
+                      </span>
+                    </div>
+                    {paymentConfig.discountPercent && paymentConfig.discountPercent > 0 ? (
+                      <span className="bg-emerald-600 text-white text-[11px] font-black px-2.5 py-0.5 rounded-full shadow-xs uppercase tracking-wider animate-pulse">
+                        {paymentConfig.discountPercent}% OFF
+                      </span>
+                    ) : null}
+                  </div>
+
+                  {/* Opciones de cuotas */}
+                  {paymentConfig.installments && paymentConfig.installments !== 'none' && (
+                    <div className="inline-flex items-center gap-1.5 text-xs font-black text-emerald-800 bg-emerald-100/90 border border-emerald-300/80 px-2.5 py-1 rounded-xl shadow-2xs">
+                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                      <span>Hasta {paymentConfig.installments} cuotas sin interés</span>
+                    </div>
+                  )}
+
+                  {/* Opciones directas: Efectivo y/o Transferencia */}
+                  <div className="flex items-center gap-1.5 flex-wrap">
+                    {paymentConfig.acceptsCash && (
+                      <span className="inline-flex items-center gap-1 text-[11px] font-extrabold text-slate-700 bg-white border border-slate-200 px-2.5 py-1 rounded-lg shadow-2xs">
+                        <Banknote className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                        <span>Efectivo</span>
+                      </span>
+                    )}
+                    {paymentConfig.acceptsTransfer && (
+                      <span className="inline-flex items-center gap-1 text-[11px] font-extrabold text-slate-700 bg-white border border-slate-200 px-2.5 py-1 rounded-lg shadow-2xs">
+                        <ArrowRightLeft className="w-3.5 h-3.5 text-[#0047BA] shrink-0" />
+                        <span>Transferencia</span>
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Logos de medios de pago habilitados */}
+                  {hasCards && (
+                    <div className="flex items-center gap-2 pt-0.5 flex-wrap">
+                      {paymentConfig.acceptsVisa && (
+                        <div className="h-7 px-2.5 bg-white border border-slate-200 rounded-lg flex items-center justify-center shadow-2xs" title="Visa habilitada">
+                          <svg className="h-3 w-auto" viewBox="0 0 48 16" fill="none">
+                            <path d="M19.14 1.13L12.56 15H8.26L5.03 3.86C4.84 3.12 4.67 2.85 4.09 2.53C3.15 2.03 1.54 1.56 0 1.22L0.1 0.75H7.07C7.98 0.75 8.79 1.35 8.99 2.39L10.7 11.45L14.9 0.75H19.14V1.13ZM36.03 10.37C36.05 6.42 30.56 6.2 30.6 4.43C30.61 3.89 31.13 3.32 32.28 3.16C32.85 3.09 34.42 3.03 36.06 3.79L36.8 0.35C35.79 -0.02 34.49 -0.19 32.86 -0.19C28.84 -0.19 26.01 1.94 25.98 5.01C25.95 7.27 27.97 8.53 29.51 9.28C31.09 10.05 31.62 10.54 31.61 11.23C31.6 12.28 30.36 12.75 29.21 12.77C27.17 12.8 25.98 12.22 25.04 11.78L24.27 15.37C25.26 15.82 27.08 16.21 28.96 16.23C33.22 16.23 36.01 14.12 36.03 10.37ZM46.61 15H50.33L47.08 0.75H43.64C42.84 0.75 42.16 1.21 41.86 1.93L35.76 15H40.06L40.92 12.63H46.16L46.61 15ZM42.08 9.68L44.22 3.79L45.45 9.68H42.08ZM25.03 0.75L21.65 15H17.58L20.96 0.75H25.03Z" fill="#1434CB"/>
+                            <path d="M5.03 3.86C4.84 3.12 4.67 2.85 4.09 2.53C3.15 2.03 1.54 1.56 0 1.22L0.1 0.75H7.07C7.98 0.75 8.79 1.35 8.99 2.39L10.7 11.45L5.03 3.86Z" fill="#F8A51D"/>
+                          </svg>
+                        </div>
+                      )}
+                      {paymentConfig.acceptsMastercard && (
+                        <div className="h-7 px-2 bg-white border border-slate-200 rounded-lg flex items-center justify-center shadow-2xs" title="Mastercard habilitada">
+                          <svg className="h-4 w-auto" viewBox="0 0 32 20" fill="none">
+                            <circle cx="11" cy="10" r="7" fill="#EB001B"/>
+                            <circle cx="21" cy="10" r="7" fill="#F79E1B" fillOpacity="0.95"/>
+                            <path d="M16 4.9C17.65 6.25 18.7 8 18.7 10C18.7 12 17.65 13.75 16 15.1C14.35 13.75 13.3 12 13.3 10C13.3 8 14.35 6.25 16 4.9Z" fill="#FF5F00"/>
+                          </svg>
+                        </div>
+                      )}
+                      {paymentConfig.acceptsMercadoPago && (
+                        <div className="h-7 px-2.5 bg-[#009EE3]/10 border border-[#009EE3]/30 rounded-lg flex items-center gap-1.5 shadow-2xs" title="Mercado Pago habilitado">
+                          <span className="w-2 h-2 rounded-full bg-[#009EE3] shrink-0"></span>
+                          <span className="text-[11px] font-black text-[#007EA7]">Mercado Pago</span>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Aclaración obligatoria */}
+                  <p className="text-[10px] text-slate-500 font-medium leading-tight pt-2 border-t border-slate-200/70 italic">
+                    Opciones disponibles según cada comercio. Consultá antes de comprar.
+                  </p>
+                </div>
+              );
+            })()}
 
             <p className="text-xs sm:text-sm text-slate-600 leading-relaxed font-medium">
               {product.description}
