@@ -509,10 +509,10 @@ export function ProductDetailView({ product, commerce, relatedProducts = [] }: P
                 </div>
                 <div className="space-y-1 flex-1 min-w-0">
                   <span className="text-xs font-black tracking-wider uppercase text-emerald-900 block leading-tight">
-                    COMERCIO VISITADO POR ON+
+                    COMERCIO VERIFICADO POR ON+
                   </span>
                   <p className="text-xs font-medium text-emerald-800 leading-snug">
-                    Visitamos el comercio y verificamos sus datos de contacto.
+                    Verificamos el comercio y sus datos de contacto.
                   </p>
                 </div>
               </div>
