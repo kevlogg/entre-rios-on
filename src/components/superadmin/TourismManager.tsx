@@ -640,13 +640,29 @@ export function TourismManager({ commerces: initialCommerces = [] }: TourismMana
                       </td>
 
                       <td className="py-3.5 px-3">
-                        <div className="flex flex-col gap-0.5">
-                          <span className="bg-slate-100 text-slate-800 px-2.5 py-0.5 rounded-md text-[10px] font-extrabold uppercase w-fit">
+                        <div className="flex flex-col gap-1 items-start">
+                          <span className="bg-slate-100 text-slate-800 px-2 py-0.5 rounded-md text-[10px] font-extrabold uppercase w-fit">
                             {comm.category}
                           </span>
-                          <span className="text-[10px] font-bold text-[#0047BA]">
-                            {isGoldOrSilver ? 'Plan Oro / Plata' : 'Plan Bronce'}
-                          </span>
+                          {comm.isSubscriptionActive ? (
+                            comm.plan === 'Oro' ? (
+                              <span className="inline-flex items-center gap-1 text-[10px] font-black text-amber-700 bg-amber-50 border border-amber-300 px-2 py-0.5 rounded-md">
+                                ⭐ Plan Oro
+                              </span>
+                            ) : comm.plan === 'Plata' ? (
+                              <span className="inline-flex items-center gap-1 text-[10px] font-black text-[#007C8A] bg-cyan-50 border border-cyan-300 px-2 py-0.5 rounded-md">
+                                ⚡ Plan Plata
+                              </span>
+                            ) : (
+                              <span className="inline-flex items-center gap-1 text-[10px] font-black text-[#0047BA] bg-blue-50 border border-blue-200 px-2 py-0.5 rounded-md">
+                                🛡️ Plan Bronce
+                              </span>
+                            )
+                          ) : (
+                            <span className="inline-flex items-center gap-1 text-[10px] font-bold text-rose-700 bg-rose-50 border border-rose-200 px-2 py-0.5 rounded-md">
+                              🚫 Sin Plan / Pausado
+                            </span>
+                          )}
                         </div>
                       </td>
 

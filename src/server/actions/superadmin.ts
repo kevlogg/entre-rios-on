@@ -68,6 +68,35 @@ export async function toggleCommerceSubscriptionAction(
   }
 }
 
+export async function updateCommercePlanAction(
+  commerceId: string,
+  planTier: 'BRONCE' | 'PLATA' | 'ORO'
+): Promise<{ success: boolean; message: string }> {
+  try {
+    const adminSupabase = getAdminClient();
+    const client = adminSupabase || (await createClient());
+
+    const { error } = await client
+      .from('commerces')
+      .update({
+        subscription_tier: planTier,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', commerceId);
+
+    if (error) {
+      return { success: false, message: `Error actualizando plan: ${error.message}` };
+    }
+
+    revalidatePath('/comercios');
+    revalidatePath('/superadmin');
+    revalidatePath('/admin');
+    return { success: true, message: `Plan actualizado correctamente a ${planTier}` };
+  } catch (err) {
+    return { success: false, message: `Error: ${(err as Error).message}` };
+  }
+}
+
 export async function deleteCommerceAction(
   commerceId: string
 ): Promise<{ success: boolean; message: string }> {

@@ -27,7 +27,8 @@ import {
   toggleCommerceVerificationAction, 
   toggleCommerceSubscriptionAction,
   getCommercePaymentHistoryAction,
-  deleteCommerceAction
+  deleteCommerceAction,
+  updateCommercePlanAction
 } from '@/server/actions/superadmin';
 
 interface CommerceApprovalTableProps {
@@ -235,13 +236,12 @@ export function CommerceApprovalTable({ commerces: initialCommerces }: CommerceA
               <th className="pb-3 px-3">Localidad</th>
               <th className="pb-3 px-3">Categoría & Plan</th>
               <th className="pb-3 px-3 text-center">Insignia Verificado</th>
-              <th className="pb-3 px-3 text-center">Estado del Plan (Lectura)</th>
+              <th className="pb-3 px-3 text-center">Estado del Plan</th>
               <th className="pb-3 px-3 text-right">Acciones</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100 font-medium text-slate-700">
             {filteredCommerces.map((comm) => {
-              const isGoldOrSilver = comm.isVerified;
               return (
                 <tr key={comm.id} className="hover:bg-slate-50/90 transition-colors group">
                   <td className="py-3.5 px-3">
@@ -267,13 +267,29 @@ export function CommerceApprovalTable({ commerces: initialCommerces }: CommerceA
                   </td>
 
                   <td className="py-3.5 px-3">
-                    <div className="flex flex-col gap-0.5">
-                      <span className="bg-slate-100 text-slate-800 px-2.5 py-0.5 rounded-md text-[10px] font-extrabold uppercase w-fit">
+                    <div className="flex flex-col gap-1 items-start">
+                      <span className="bg-slate-100 text-slate-800 px-2 py-0.5 rounded-md text-[10px] font-extrabold uppercase w-fit">
                         {comm.category}
                       </span>
-                      <span className="text-[10px] font-bold text-[#0047BA]">
-                        {isGoldOrSilver ? 'Plan Oro / Plata' : 'Plan Bronce'}
-                      </span>
+                      {comm.isSubscriptionActive ? (
+                        comm.plan === 'Oro' ? (
+                          <span className="inline-flex items-center gap-1 text-[10px] font-black text-amber-700 bg-amber-50 border border-amber-300 px-2 py-0.5 rounded-md">
+                            ⭐ Plan Oro
+                          </span>
+                        ) : comm.plan === 'Plata' ? (
+                          <span className="inline-flex items-center gap-1 text-[10px] font-black text-[#007C8A] bg-cyan-50 border border-cyan-300 px-2 py-0.5 rounded-md">
+                            ⚡ Plan Plata
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1 text-[10px] font-black text-[#0047BA] bg-blue-50 border border-blue-200 px-2 py-0.5 rounded-md">
+                            🛡️ Plan Bronce
+                          </span>
+                        )
+                      ) : (
+                        <span className="inline-flex items-center gap-1 text-[10px] font-bold text-rose-700 bg-rose-50 border border-rose-200 px-2 py-0.5 rounded-md">
+                          🚫 Sin Plan / Pausado
+                        </span>
+                      )}
                     </div>
                   </td>
 
@@ -404,7 +420,34 @@ export function CommerceApprovalTable({ commerces: initialCommerces }: CommerceA
               </div>
               <div>
                 <span className="text-slate-400 block font-bold text-[10px] uppercase">Plan Actual en Sistema:</span>
-                <strong className="text-[#0047BA]">{selectedCommerce.isVerified ? 'Plan Oro / Plata' : 'Plan Bronce'}</strong>
+                <div className="flex items-center gap-2 mt-1">
+                  <strong className={`font-black text-xs ${
+                    selectedCommerce.plan === 'Oro'
+                      ? 'text-amber-600'
+                      : selectedCommerce.plan === 'Plata'
+                      ? 'text-[#00ADB5]'
+                      : 'text-[#0047BA]'
+                  }`}>
+                    {selectedCommerce.isSubscriptionActive ? `Plan ${selectedCommerce.plan || 'Bronce'}` : 'Sin Plan / Pausado'}
+                  </strong>
+
+                  <select
+                    value={selectedCommerce.plan || 'Bronce'}
+                    onChange={async (e) => {
+                      const newTier = e.target.value as 'Bronce' | 'Plata' | 'Oro';
+                      const res = await updateCommercePlanAction(selectedCommerce.id, newTier.toUpperCase() as 'BRONCE' | 'PLATA' | 'ORO');
+                      if (res.success) {
+                        setSelectedCommerce({ ...selectedCommerce, plan: newTier });
+                        setCommerces(prev => prev.map(c => c.id === selectedCommerce.id ? { ...c, plan: newTier } : c));
+                      }
+                    }}
+                    className="bg-slate-50 border border-slate-300 text-slate-800 text-[11px] font-bold rounded-lg px-2 py-0.5 cursor-pointer hover:bg-slate-100"
+                  >
+                    <option value="Bronce">Cambiar a Bronce</option>
+                    <option value="Plata">Cambiar a Plata</option>
+                    <option value="Oro">Cambiar a Oro</option>
+                  </select>
+                </div>
               </div>
             </div>
 

@@ -970,24 +970,34 @@ export async function getAllCommerces(includeInactive: boolean = false): Promise
 
       const { data, error } = await query;
       if (!error && Array.isArray(data)) {
-        return data.map((c) => ({
-          id: c.id,
-          name: c.name,
-          slug: c.slug,
-          category: c.category,
-          cityId: c.city_id,
-          cityName: c.city_name,
-          description: c.description,
-          rating: Number(c.rating),
-          reviewCount: c.review_count,
-          isVerified: c.is_verified,
-          isSubscriptionActive: c.is_subscription_active ?? true,
-          logoUrl: c.logo_url,
-          coverUrl: c.cover_url,
-          phoneWhatsApp: c.phone_whatsapp,
-          address: c.address,
-          website: c.website,
-        }));
+        return data.map((c) => {
+          const rawTier = (c.subscription_tier || 'BRONCE').toUpperCase();
+          const plan: 'Bronce' | 'Plata' | 'Oro' = rawTier.includes('ORO')
+            ? 'Oro'
+            : rawTier.includes('PLATA')
+            ? 'Plata'
+            : 'Bronce';
+
+          return {
+            id: c.id,
+            name: c.name,
+            slug: c.slug,
+            category: c.category,
+            cityId: c.city_id,
+            cityName: c.city_name,
+            description: c.description,
+            rating: Number(c.rating),
+            reviewCount: c.review_count,
+            isVerified: c.is_verified,
+            isSubscriptionActive: c.is_subscription_active ?? true,
+            logoUrl: c.logo_url,
+            coverUrl: c.cover_url,
+            phoneWhatsApp: c.phone_whatsapp,
+            address: c.address,
+            website: c.website,
+            plan,
+          };
+        });
       }
     } catch (e) {
       console.warn('Fallback to mock commerces:', e);
@@ -1036,6 +1046,13 @@ export const getCommerceBySlug = cache(async (slug: string): Promise<Commerce | 
           } catch (e) {}
         }
 
+        const rawTier = (item.subscription_tier || 'BRONCE').toUpperCase();
+        const plan: 'Bronce' | 'Plata' | 'Oro' = rawTier.includes('ORO')
+          ? 'Oro'
+          : rawTier.includes('PLATA')
+          ? 'Plata'
+          : 'Bronce';
+
         return {
           id: item.id,
           name: item.name,
@@ -1059,6 +1076,7 @@ export const getCommerceBySlug = cache(async (slug: string): Promise<Commerce | 
           isDigitalOnly: item.is_digital_only ?? false,
           legalName: resolvedLegalName,
           ownerId: item.owner_id || undefined,
+          plan,
         };
       }
     } catch (e) {
