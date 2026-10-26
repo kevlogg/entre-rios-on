@@ -107,9 +107,10 @@ export async function disconnectMercadoPago(): Promise<boolean> {
 /**
  * Genera la URL de autorización OAuth para que el cliente conecte su cuenta
  */
-export function getOAuthAuthorizationUrl(redirectUri: string): string {
+export function getOAuthAuthorizationUrl(redirectUri?: string): string {
   const clientId = MP_MARKETPLACE_CONFIG.clientId;
-  return `https://auth.mercadopago.com/authorization?client_id=${clientId}&response_type=code&platform_id=mp&redirect_uri=${encodeURIComponent(redirectUri)}`;
+  const targetUri = redirectUri || 'https://onmasportal.com.ar/api/superadmin/mp/callback';
+  return `https://auth.mercadopago.com/authorization?client_id=${clientId}&response_type=code&platform_id=mp&redirect_uri=${targetUri}`;
 }
 
 /**

@@ -17,7 +17,8 @@ export async function GET(req: Request) {
   }
 
   try {
-    const redirectUri = process.env.MP_REDIRECT_URI || `${baseUrl}/api/superadmin/mp/callback`;
+    const canonicalUri = 'https://onmasportal.com.ar/api/superadmin/mp/callback';
+    const redirectUri = process.env.MP_REDIRECT_URI || (baseUrl.includes('onmasportal.com.ar') ? canonicalUri : `${baseUrl}/api/superadmin/mp/callback`);
 
     console.log('[MercadoPago OAuth] Intercambiando código con redirectUri:', redirectUri);
     const data = await exchangeCodeForTokens(code, redirectUri);
