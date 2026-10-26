@@ -17,14 +17,29 @@ export function usePwaInstall() {
   useEffect(() => {
     if (typeof window === 'undefined') return;
 
-    // 1. Detect if running in standalone mode (already installed)
+    // 1. Detect if running in standalone mode (already installed) or stored
     const isStandaloneMode =
       window.matchMedia('(display-mode: standalone)').matches ||
+      window.matchMedia('(display-mode: fullscreen)').matches ||
+      window.matchMedia('(display-mode: minimal-ui)').matches ||
       (navigator as any).standalone === true ||
       document.referrer.includes('android-app://') ||
-      window.__pwaIsInstalled === true;
+      window.__pwaIsInstalled === true ||
+      localStorage.getItem('onmas_pwa_installed') === 'true';
 
     setIsInstalled(isStandaloneMode);
+
+    if ('getInstalledRelatedApps' in navigator) {
+      (navigator as any).getInstalledRelatedApps().then((apps: any[]) => {
+        if (Array.isArray(apps) && apps.length > 0) {
+          setIsInstalled(true);
+          window.__pwaIsInstalled = true;
+          try {
+            localStorage.setItem('onmas_pwa_installed', 'true');
+          } catch (e) {}
+        }
+      }).catch(() => {});
+    }
 
     // 2. Detect iOS device
     const ua = window.navigator.userAgent.toLowerCase();
@@ -32,7 +47,7 @@ export function usePwaInstall() {
     setIsIos(isIosDevice);
 
     // 3. Register service worker if supported
-    if ('serviceWorker' in navigator) {
+    if ('serviceWorker' in navigator && process.env.NODE_ENV === 'production') {
       navigator.serviceWorker.register('/sw.js').catch((err) => {
         console.debug('Service Worker registration note:', err);
       });
@@ -52,6 +67,9 @@ export function usePwaInstall() {
       setCanInstallNatively(false);
       window.__pwaIsInstalled = true;
       window.__pwaInstallPrompt = null;
+      try {
+        localStorage.setItem('onmas_pwa_installed', 'true');
+      } catch (e) {}
     };
 
     const handleBeforeInstall = (e: Event) => {
@@ -86,6 +104,9 @@ export function usePwaInstall() {
         if (choice?.outcome === 'accepted') {
           setIsInstalled(true);
           window.__pwaIsInstalled = true;
+          try {
+            localStorage.setItem('onmas_pwa_installed', 'true');
+          } catch (e) {}
           return 'accepted';
         }
         return 'dismissed';

@@ -64,7 +64,7 @@ export function ClientHeroBanner({ provinceId }: ClientHeroBannerProps) {
     return { href: raw, isExternal };
   };
 
-  const wrapperClass = 'relative w-full aspect-[21/9] sm:aspect-[24/9] md:aspect-[28/9] min-h-[140px] sm:min-h-[170px] lg:min-h-[195px] max-h-[260px] rounded-xl sm:rounded-2xl overflow-hidden bg-slate-900 border border-slate-200/90 group';
+  const wrapperClass = 'relative w-full aspect-[3/1] min-h-[120px] sm:min-h-[160px] lg:min-h-[200px] rounded-xl sm:rounded-2xl overflow-hidden bg-slate-950 border border-slate-200/90 group shadow-xs';
 
   // ── SSR / primer frame: solo primer slide estático, sin botones interactivos ──
   // Esto evita el hydration mismatch porque el árbol del DOM siempre empieza igual.
@@ -72,16 +72,30 @@ export function ClientHeroBanner({ provinceId }: ClientHeroBannerProps) {
     const firstSlide = banners[0];
     const { href, isExternal } = buildHref(firstSlide);
     const imgSrc = normalizeImageUrl(firstSlide.imageUrl);
+    const innerContent = (
+      <>
+        <div
+          className="absolute inset-0 bg-cover bg-center filter blur-xl scale-110 opacity-35 pointer-events-none"
+          style={{ backgroundImage: `url(${imgSrc})` }}
+        />
+        <img
+          src={imgSrc}
+          alt={firstSlide.titleLine1 || 'Banner'}
+          className="relative z-10 w-full h-full object-contain object-center"
+        />
+      </>
+    );
+
     return (
       <section aria-label="Banner Principal" className="w-full relative">
         <div className={wrapperClass}>
           {isExternal ? (
             <a href={href} target="_blank" rel="noopener noreferrer" className="absolute inset-0 block w-full h-full">
-              <img src={imgSrc} alt={firstSlide.titleLine1 || 'Banner'} className="w-full h-full object-cover object-center" />
+              {innerContent}
             </a>
           ) : (
             <Link href={href} className="absolute inset-0 block w-full h-full">
-              <img src={imgSrc} alt={firstSlide.titleLine1 || 'Banner'} className="w-full h-full object-cover object-center" />
+              {innerContent}
             </Link>
           )}
         </div>
@@ -104,13 +118,27 @@ export function ClientHeroBanner({ provinceId }: ClientHeroBannerProps) {
             isCurrent ? 'opacity-100 z-10 pointer-events-auto' : 'opacity-0 z-0 pointer-events-none'
           }`;
 
+          const slideContent = (
+            <>
+              <div
+                className="absolute inset-0 bg-cover bg-center filter blur-xl scale-110 opacity-35 pointer-events-none"
+                style={{ backgroundImage: `url(${imgSrc})` }}
+              />
+              <img
+                src={imgSrc}
+                alt={slide.titleLine1 || 'Banner Publicitario'}
+                className="relative z-10 w-full h-full object-contain object-center"
+              />
+            </>
+          );
+
           return isExternal ? (
             <a key={slide.id || `slide-${idx}`} href={href} target="_blank" rel="noopener noreferrer" className={slideClass}>
-              <img src={imgSrc} alt={slide.titleLine1 || 'Banner Publicitario'} className="w-full h-full object-cover object-center" />
+              {slideContent}
             </a>
           ) : (
             <Link key={slide.id || `slide-${idx}`} href={href} className={slideClass}>
-              <img src={imgSrc} alt={slide.titleLine1 || 'Banner Publicitario'} className="w-full h-full object-cover object-center" />
+              {slideContent}
             </Link>
           );
         })}

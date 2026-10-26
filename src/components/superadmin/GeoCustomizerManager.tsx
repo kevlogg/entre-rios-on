@@ -893,10 +893,10 @@ export function GeoCustomizerManager({ initialCities }: GeoCustomizerManagerProp
             <div className="mt-2 space-y-1">
               <div className="inline-flex items-center gap-1.5 bg-cyan-50 border border-cyan-300 text-cyan-900 px-3.5 py-1.5 rounded-xl text-[11px] font-black shadow-2xs">
                 <span>📐 Medidas Recomendadas para Hero Banners:</span>
-                <span className="text-[#0047BA] font-extrabold">1920 × 600 px (3:1 Desktop) | 800 × 500 px (Mobile)</span>
+                <span className="text-[#0047BA] font-extrabold">1920 × 640 px o 1500 × 500 px (Proporción 3:1) | 1200 × 400 px / 1000 × 333 px</span>
               </div>
               <p className="text-[11px] text-slate-500 font-medium">
-                ✨ <em>El reproductor adapta automáticamente cada imagen al 100% de su tamaño (<span className="font-bold text-slate-700">sin recortes ni pérdidas de bordes o textos</span>) con un fondo ambiente difuminado.</em>
+                ✨ <em>El reproductor adapta automáticamente cada imagen a proporción 3:1 (<span className="font-bold text-slate-700">100% visible, sin recortes de bordes, marcos ni textos</span>) con un fondo ambiente difuminado.</em>
               </p>
             </div>
           </div>

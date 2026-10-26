@@ -8,16 +8,11 @@ export function PwaInstallPrompt() {
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
   const [showPrompt, setShowPrompt] = useState(false);
   const [isIos, setIsIos] = useState(false);
-  const [isStandalone, setIsStandalone] = useState(false);
+  const [isInstalled, setIsInstalled] = useState(false);
   const [showManualGuide, setShowManualGuide] = useState(false);
 
   useEffect(() => {
-    // Limpiar bloqueo permanente previo en localStorage si existía
-    if (typeof window !== 'undefined') {
-      try {
-        localStorage.removeItem('onmas_pwa_dismissed');
-      } catch (e) {}
-    }
+    if (typeof window === 'undefined') return;
 
     // 1. Registrar Service Worker para PWA
     if ('serviceWorker' in navigator && process.env.NODE_ENV === 'production') {
@@ -26,20 +21,43 @@ export function PwaInstallPrompt() {
       });
     }
 
-    // 2. Verificar si REALMENTE ingresó desde la app instalada (modo standalone)
+    // 2. Verificar si ya está instalada la PWA
+    // A) Modo standalone / fullscreen / minimal-ui
     const isStandaloneMode = 
-      (typeof window !== 'undefined' && window.matchMedia('(display-mode: standalone)').matches) || 
-      (typeof navigator !== 'undefined' && (navigator as any).standalone === true) ||
-      (typeof document !== 'undefined' && document.referrer.includes('android-app://'));
+      window.matchMedia('(display-mode: standalone)').matches ||
+      window.matchMedia('(display-mode: fullscreen)').matches ||
+      window.matchMedia('(display-mode: minimal-ui)').matches ||
+      (navigator as any).standalone === true ||
+      document.referrer.includes('android-app://') ||
+      (window as any).__pwaIsInstalled === true;
 
-    setIsStandalone(isStandaloneMode);
+    // B) Registro previo de instalación en localStorage
+    const isStoredInstalled = localStorage.getItem('onmas_pwa_installed') === 'true';
 
-    // Si ya está dentro de la app instalada, no mostrar nunca el cartel
-    if (isStandaloneMode) {
+    if (isStandaloneMode || isStoredInstalled) {
+      setIsInstalled(true);
       return;
     }
 
-    // 3. Verificar si el usuario lo cerró en la sesión actual de navegación
+    // C) Detección de Apps relacionadas instaladas (Chrome / Edge / Android)
+    if ('getInstalledRelatedApps' in navigator) {
+      (navigator as any).getInstalledRelatedApps().then((relatedApps: any[]) => {
+        if (Array.isArray(relatedApps) && relatedApps.length > 0) {
+          setIsInstalled(true);
+          setShowPrompt(false);
+          try {
+            localStorage.setItem('onmas_pwa_installed', 'true');
+          } catch (e) {}
+        }
+      }).catch(() => {});
+    }
+
+    // 3. Verificar si el usuario cerró el cartel recientemente
+    const dismissedUntil = localStorage.getItem('onmas_pwa_dismissed_until');
+    if (dismissedUntil && Date.now() < Number(dismissedUntil)) {
+      return;
+    }
+
     const isSessionDismissed = sessionStorage.getItem('onmas_pwa_session_dismissed') === 'true';
     if (isSessionDismissed) {
       return;
@@ -50,14 +68,14 @@ export function PwaInstallPrompt() {
     const isIosDevice = /iphone|ipad|ipod/.test(userAgent);
     setIsIos(isIosDevice);
 
-    // 5. Verificar prompt temprano o escuchar eventos nativos
-    if (typeof window !== 'undefined' && (window as any).__pwaInstallPrompt) {
+    // 5. Escuchar eventos de prompt nativo
+    if ((window as any).__pwaInstallPrompt) {
       setDeferredPrompt((window as any).__pwaInstallPrompt);
       setShowPrompt(true);
     }
 
     const handlePwaPromptReady = () => {
-      if (typeof window !== 'undefined' && (window as any).__pwaInstallPrompt) {
+      if ((window as any).__pwaInstallPrompt) {
         setDeferredPrompt((window as any).__pwaInstallPrompt);
         setShowPrompt(true);
       }
@@ -70,18 +88,36 @@ export function PwaInstallPrompt() {
       setShowPrompt(true);
     };
 
+    // 6. Detectar cuando se completa la instalación para nunca más mostrar el cartel
+    const handleAppInstalled = () => {
+      setIsInstalled(true);
+      setShowPrompt(false);
+      try {
+        localStorage.setItem('onmas_pwa_installed', 'true');
+      } catch (e) {}
+      (window as any).__pwaIsInstalled = true;
+      (window as any).__pwaInstallPrompt = null;
+    };
+
     window.addEventListener('pwa-prompt-ready', handlePwaPromptReady);
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    window.addEventListener('appinstalled', handleAppInstalled);
+    window.addEventListener('pwa-app-installed', handleAppInstalled);
 
-    // 6. Si no se activó standalone y no fue cerrado en la sesión, mostrar el cartel tras 1.2 segundos
+    // 7. Mostrar el cartel tras 1.5s si no está instalada
     const timer = setTimeout(() => {
-      setShowPrompt(true);
-    }, 1200);
+      const alreadyInstalled = localStorage.getItem('onmas_pwa_installed') === 'true';
+      if (!alreadyInstalled) {
+        setShowPrompt(true);
+      }
+    }, 1500);
 
     return () => {
       clearTimeout(timer);
       window.removeEventListener('pwa-prompt-ready', handlePwaPromptReady);
       window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+      window.removeEventListener('appinstalled', handleAppInstalled);
+      window.removeEventListener('pwa-app-installed', handleAppInstalled);
     };
   }, []);
 
@@ -92,7 +128,11 @@ export function PwaInstallPrompt() {
         await prompt.prompt();
         const choiceResult = await prompt.userChoice;
         if (choiceResult?.outcome === 'accepted') {
+          setIsInstalled(true);
           setShowPrompt(false);
+          try {
+            localStorage.setItem('onmas_pwa_installed', 'true');
+          } catch (e) {}
         }
         setDeferredPrompt(null);
         if (typeof window !== 'undefined') (window as any).__pwaInstallPrompt = null;
@@ -107,13 +147,14 @@ export function PwaInstallPrompt() {
   const handleDismiss = () => {
     setShowPrompt(false);
     setShowManualGuide(false);
-    // Solo cerrar durante la sesión actual (no de forma permanente)
     try {
       sessionStorage.setItem('onmas_pwa_session_dismissed', 'true');
+      // Cooldown de 7 días si el usuario lo cierra voluntariamente
+      localStorage.setItem('onmas_pwa_dismissed_until', (Date.now() + 7 * 24 * 60 * 60 * 1000).toString());
     } catch (e) {}
   };
 
-  if (!showPrompt || isStandalone) {
+  if (!showPrompt || isInstalled) {
     return null;
   }
 

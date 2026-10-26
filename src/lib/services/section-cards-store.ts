@@ -20,7 +20,7 @@ export const DEFAULT_SECTION_CARDS: SectionCardItem[] = [
     subtitle: 'Descubrí paseos, playas y destinos de la región.',
     cta: 'Explorar',
     href: '/turismo',
-    image: '/images/section-turismo-regional.jpg',
+    image: 'https://oetagnusdhbqrznugwuo.supabase.co/storage/v1/object/public/commerces/uploads/1791852863068-0xq4aw.jpg',
     idealSize: '600 × 400 px (3:2 en HD)',
   },
   {
@@ -29,7 +29,7 @@ export const DEFAULT_SECTION_CARDS: SectionCardItem[] = [
     subtitle: 'Directorio unificado de comercios, marcas y pymes regionales.',
     cta: 'Ver comercios',
     href: '/comercios',
-    image: '/images/section-comercio-industria.jpg',
+    image: 'https://oetagnusdhbqrznugwuo.supabase.co/storage/v1/object/public/commerces/uploads/1791855391965-pfahg5.jpg',
     idealSize: '600 × 400 px (3:2 en HD)',
   },
   {
@@ -38,7 +38,7 @@ export const DEFAULT_SECTION_CARDS: SectionCardItem[] = [
     subtitle: 'Miles de productos, promociones y beneficios comerciales.',
     cta: 'Ver ofertas',
     href: '/oportunidades',
-    image: '/images/section-ofertas-descuentos.jpg',
+    image: 'https://oetagnusdhbqrznugwuo.supabase.co/storage/v1/object/public/commerces/uploads/1792345986187-if46yh.jpg',
     idealSize: '600 × 400 px (3:2 en HD)',
   },
   {
@@ -47,7 +47,7 @@ export const DEFAULT_SECTION_CARDS: SectionCardItem[] = [
     subtitle: 'Todos los meses, nuevos premios y sorteos regionales.',
     cta: 'Participar',
     href: '/sorteos',
-    image: '/images/section-sorteos-onmas.jpg',
+    image: 'https://oetagnusdhbqrznugwuo.supabase.co/storage/v1/object/public/commerces/uploads/1792346332354-cdvw3v.png',
     idealSize: '600 × 400 px (3:2 en HD)',
   },
   {
@@ -56,7 +56,7 @@ export const DEFAULT_SECTION_CARDS: SectionCardItem[] = [
     subtitle: 'Búsquedas laborales y avisos clasificados directos.',
     cta: 'Ver avisos',
     href: '/clasificados',
-    image: '/images/section-empleos-avisos.jpg',
+    image: 'https://oetagnusdhbqrznugwuo.supabase.co/storage/v1/object/public/commerces/uploads/1791855347332-crxd5m.jpg',
     idealSize: '600 × 400 px (3:2 en HD)',
   },
   {
@@ -65,12 +65,12 @@ export const DEFAULT_SECTION_CARDS: SectionCardItem[] = [
     subtitle: 'Obtené la página web y tienda online para tu comercio.',
     cta: 'Solicitar sitio',
     href: '/mi-sitio-web',
-    image: '/images/section-mi-sitio-web.jpg',
+    image: 'https://oetagnusdhbqrznugwuo.supabase.co/storage/v1/object/public/commerces/uploads/1792346670545-alhfeb.png',
     idealSize: '600 × 400 px (3:2 en HD)',
   },
 ];
 
-const SECTION_CARDS_STORAGE_KEY = 'onmas_section_cards_v2';
+const SECTION_CARDS_STORAGE_KEY = 'onmas_section_cards_v4';
 let memoryStoreSectionCards: SectionCardItem[] | null = null;
 
 function mergeWithDefaults(stored: SectionCardItem[]): SectionCardItem[] {
@@ -78,15 +78,21 @@ function mergeWithDefaults(stored: SectionCardItem[]): SectionCardItem[] {
   const isObsolete = stored.some((item) => item.id === 'comercio-digital' || item.id === 'catalogo-ofertas');
   if (isObsolete) return DEFAULT_SECTION_CARDS;
 
-  return stored.map((item, idx) => ({
-    id: item.id || `custom-card-${idx}-${Date.now()}`,
-    title: item.title || 'NUEVA SECCIÓN',
-    subtitle: item.subtitle || 'Descripción de la sección',
-    cta: item.cta || 'Explorar',
-    href: item.href || '/',
-    image: item.image || '/images/section-turismo-regional.jpg',
-    idealSize: item.idealSize || '600 × 400 px (3:2 en HD)',
-  }));
+  return stored.map((item, idx) => {
+    const defaultItem = DEFAULT_SECTION_CARDS.find((d) => d.id === item.id) || DEFAULT_SECTION_CARDS[idx];
+    const isOldScreenshot = !item.image || item.image.includes('/images/section-');
+    const validImage = isOldScreenshot && defaultItem ? defaultItem.image : (item.image || defaultItem?.image || '/images/bento-1.jpg');
+
+    return {
+      id: item.id || defaultItem?.id || `custom-card-${idx}-${Date.now()}`,
+      title: item.title || defaultItem?.title || 'NUEVA SECCIÓN',
+      subtitle: item.subtitle || defaultItem?.subtitle || 'Descripción de la sección',
+      cta: item.cta || defaultItem?.cta || 'Explorar',
+      href: item.href || defaultItem?.href || '/',
+      image: validImage,
+      idealSize: item.idealSize || defaultItem?.idealSize || '600 × 400 px (3:2 en HD)',
+    };
+  });
 }
 
 export function getSectionCards(): SectionCardItem[] {
@@ -96,6 +102,10 @@ export function getSectionCards(): SectionCardItem[] {
 
   if (typeof window !== 'undefined') {
     try {
+      localStorage.removeItem('onmas_section_cards');
+      localStorage.removeItem('onmas_section_cards_v1');
+      localStorage.removeItem('onmas_section_cards_v2');
+      localStorage.removeItem('onmas_section_cards_v3');
       const raw = localStorage.getItem(SECTION_CARDS_STORAGE_KEY);
       if (raw) {
         const parsed: SectionCardItem[] = JSON.parse(raw);

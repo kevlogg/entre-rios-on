@@ -12,7 +12,7 @@ import {
   Briefcase, 
   Globe 
 } from 'lucide-react';
-import { useSectionCards } from '@/lib/services/section-cards-store';
+import { useSectionCards, DEFAULT_SECTION_CARDS } from '@/lib/services/section-cards-store';
 
 function getCardIcon(id: string = '', title: string = '') {
   const lower = (id + ' ' + title).toLowerCase();
@@ -81,6 +81,9 @@ export function FeaturedSectionsGrid() {
       >
         {cards.map((card, index) => {
           const IconComp = getCardIcon(card.id, card.title);
+          const safeImage = (!card.image || card.image.includes('/images/section-'))
+            ? (DEFAULT_SECTION_CARDS[index]?.image || '/images/bento-1.jpg')
+            : card.image;
 
           return (
             <Link
@@ -90,7 +93,7 @@ export function FeaturedSectionsGrid() {
             >
               {/* Background Photo from SuperAdmin */}
               <img
-                src={card.image || '/images/bento-1.jpg'}
+                src={safeImage}
                 alt={card.title}
                 className="absolute inset-0 w-full h-full object-cover object-center group-hover:scale-108 transition-transform duration-700"
               />
