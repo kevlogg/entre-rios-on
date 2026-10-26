@@ -56,6 +56,40 @@ export async function getMercadoPagoAuthUrlAction(redirectUri: string): Promise<
   }
 }
 
+export async function connectMercadoPagoManualAction(accessToken: string): Promise<{ success: boolean; message: string }> {
+  try {
+    const cleanToken = (accessToken || '').trim();
+    if (!cleanToken.startsWith('APP_USR-') && !cleanToken.startsWith('TEST-')) {
+      return { success: false, message: 'El Access Token debe comenzar con APP_USR- (o TEST-).' };
+    }
+
+    const res = await fetch('https://api.mercadopago.com/users/me', {
+      headers: { Authorization: `Bearer ${cleanToken}` },
+    });
+    const userData = await res.json();
+    if (!res.ok || !userData.id) {
+      return { success: false, message: 'El Access Token ingresado no es válido o está revocado en Mercado Pago.' };
+    }
+
+    const { saveMercadoPagoSettings } = await import('@/lib/services/mercadopago');
+    const ok = await saveMercadoPagoSettings({
+      connected: true,
+      seller_id: userData.id,
+      seller_access_token: cleanToken,
+      seller_public_key: null,
+      connected_at: new Date().toISOString(),
+    });
+
+    if (ok) {
+      revalidatePath('/superadmin');
+      return { success: true, message: `¡Cuenta oficial de Mercado Pago conectada exitosamente! (ID: ${userData.id})` };
+    }
+    return { success: false, message: 'No se pudo guardar la configuración en la base de datos.' };
+  } catch (err: unknown) {
+    return { success: false, message: (err as Error).message || 'Error al conectar manualmente.' };
+  }
+}
+
 import { headers } from 'next/headers';
 import { MercadoPagoConfig, Preference } from 'mercadopago';
 

@@ -18,7 +18,8 @@ import {
   getMercadoPagoStatusAction, 
   disconnectMercadoPagoAction, 
   getMercadoPagoAuthUrlAction,
-  createTestPaymentPreferenceAction
+  createTestPaymentPreferenceAction,
+  connectMercadoPagoManualAction
 } from '@/server/actions/mercadopago';
 import { getSuperAdminSession } from '@/lib/security/superadmin-auth';
 import { createClient } from '@/lib/supabase/client';
@@ -35,6 +36,9 @@ export function MercadoPagoConnectCard() {
   const [callbackUrl, setCallbackUrl] = useState<string>('');
   const [isDeveloper, setIsDeveloper] = useState(false);
   const [testingPayment, setTestingPayment] = useState(false);
+  const [showManualConnect, setShowManualConnect] = useState(false);
+  const [manualToken, setManualToken] = useState('');
+  const [connectingManual, setConnectingManual] = useState(false);
 
 
   const loadStatus = async () => {
@@ -144,6 +148,28 @@ export function MercadoPagoConnectCard() {
       alert((e as Error).message || 'Error al desconectar');
     } finally {
       setDisconnecting(false);
+    }
+  };
+
+  const handleManualConnect = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!manualToken.trim()) return;
+
+    setConnectingManual(true);
+    try {
+      const res = await connectMercadoPagoManualAction(manualToken);
+      if (res.success) {
+        setStatusMessage({ type: 'success', text: res.message });
+        setManualToken('');
+        setShowManualConnect(false);
+        await loadStatus();
+      } else {
+        alert(res.message);
+      }
+    } catch (err: unknown) {
+      alert((err as Error).message || 'Error al conectar.');
+    } finally {
+      setConnectingManual(false);
     }
   };
 
@@ -291,15 +317,52 @@ export function MercadoPagoConnectCard() {
                 </p>
               </div>
 
-              <div className="pt-2">
+              <div className="pt-2 flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
                 <a
                   href={authUrl || '#'}
-                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 bg-gradient-to-r from-[#00ADB5] to-[#009EE3] hover:from-[#00969d] hover:to-[#0082ba] text-white px-6 py-3.5 rounded-2xl font-black text-sm shadow-xl transition-all active:scale-95 cursor-pointer border border-cyan-300/40"
+                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 bg-gradient-to-r from-[#00ADB5] to-[#009EE3] hover:from-[#00969d] hover:to-[#0082ba] text-white px-6 py-3.5 rounded-2xl font-black text-sm shadow-xl transition-all active:scale-95 cursor-pointer border border-cyan-300/40 text-center"
                 >
                   <ExternalLink className="w-4 h-4" />
                   <span>Conectar Cuenta Oficial de Mercado Pago</span>
                 </a>
+
+                <button
+                  type="button"
+                  onClick={() => setShowManualConnect(!showManualConnect)}
+                  className="text-xs text-cyan-200 hover:text-white underline font-bold px-3 py-2 text-center transition-colors cursor-pointer"
+                >
+                  {showManualConnect ? 'Ocultar conexión manual' : '¿Problemas con el botón? Conectar con Access Token'}
+                </button>
               </div>
+
+              {showManualConnect && (
+                <form onSubmit={handleManualConnect} className="mt-3 p-4 bg-slate-900/90 rounded-2xl border border-cyan-400/40 space-y-3 animate-in fade-in duration-200">
+                  <div className="space-y-1">
+                    <label className="text-xs font-black text-cyan-200 block">
+                      Access Token de Producción de Mercado Pago:
+                    </label>
+                    <p className="text-[11px] text-slate-300">
+                      Podés obtenerlo en <em>Mercado Pago Developers → Tus integraciones → Credenciales de producción</em>.
+                    </p>
+                  </div>
+                  <div className="flex flex-col sm:flex-row gap-2">
+                    <input
+                      type="password"
+                      placeholder="APP_USR-..."
+                      value={manualToken}
+                      onChange={(e) => setManualToken(e.target.value)}
+                      className="flex-1 bg-slate-950 border border-slate-700 rounded-xl px-3 py-2.5 text-xs text-white placeholder-slate-500 font-mono focus:outline-none focus:ring-2 focus:ring-cyan-400"
+                    />
+                    <button
+                      type="submit"
+                      disabled={connectingManual || !manualToken.trim()}
+                      className="bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white font-black text-xs px-5 py-2.5 rounded-xl transition-all cursor-pointer whitespace-nowrap"
+                    >
+                      {connectingManual ? 'Validando...' : 'Conectar Token'}
+                    </button>
+                  </div>
+                </form>
+              )}
             </div>
           )}
         </div>
@@ -325,6 +388,9 @@ export function MercadoPagoConnectCard() {
                 {copiedUrl ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
               </button>
             </div>
+            <p className="text-[10px] text-amber-300/90 font-medium bg-amber-500/10 p-2 rounded-lg border border-amber-400/20">
+              💡 <strong>Importante:</strong> Esta URL exacta debe estar registrada en el panel de <em>Mercado Pago Developers → URLs de redireccionamiento</em> de tu aplicación para que el botón de 1 clic funcione sin bloqueos.
+            </p>
           </div>
 
           <div className="pt-3 border-t border-white/15 text-[11px] text-slate-300 space-y-1.5">
