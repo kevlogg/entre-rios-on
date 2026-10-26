@@ -40,10 +40,32 @@ export async function POST(req: Request) {
     console.log(`[MercadoPago Webhook] Pago ${paymentId} status: ${paymentInfo.status}, external_reference: ${paymentInfo.external_reference}`);
 
     if (paymentInfo.status === 'approved' && paymentInfo.external_reference) {
-      const extRef = paymentInfo.external_reference; // formato: sub_{commerceId}_{planTier}_{timestamp}
+      const extRef = paymentInfo.external_reference;
+
+      // Manejo de pago de prueba de $10 ARS exclusivo para loggia.1996@gmail.com
+      if (extRef.startsWith('test_payment_')) {
+        const adminSupabase = createAdminClient();
+        if (adminSupabase) {
+          await adminSupabase.from('cash_payments').insert({
+            commerce_name: 'Pago de Prueba (Desarrollador)',
+            owner_name: `Test Mercado Pago ($10 ARS)`,
+            phone_whatsapp: '5493426514889',
+            plan_name: 'Prueba',
+            amount: paymentInfo.transaction_amount || 10,
+            city_name: 'Test / Desarrollo',
+            status: 'APPROVED',
+            notes: `Pago de prueba de $10 ARS aprobado con éxito. ID Transacción: ${paymentId}`,
+          });
+        }
+        console.log(`[MercadoPago Webhook] Pago de prueba ${paymentId} registrado con éxito.`);
+        return NextResponse.json({ success: true, test: true, paymentId });
+      }
+
+      // Formato normal: sub_{commerceId}_{planTier}_{timestamp}
       const parts = extRef.split('_');
 
       if (parts[0] === 'sub' && parts.length >= 3) {
+
         const rawCommerceId = parts[1];
         const planTier = (parts[2] || 'BRONCE').toUpperCase(); // BRONCE, PLATA, ORO
         const cleanPlanName = planTier === 'ORO' ? 'Oro' : planTier === 'PLATA' ? 'Plata' : 'Bronce';

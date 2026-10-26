@@ -17,8 +17,11 @@ import {
 import { 
   getMercadoPagoStatusAction, 
   disconnectMercadoPagoAction, 
-  getMercadoPagoAuthUrlAction 
+  getMercadoPagoAuthUrlAction,
+  createTestPaymentPreferenceAction
 } from '@/server/actions/mercadopago';
+import { getSuperAdminSession } from '@/lib/security/superadmin-auth';
+import { createClient } from '@/lib/supabase/client';
 
 export function MercadoPagoConnectCard() {
   const [loading, setLoading] = useState(true);
@@ -30,6 +33,9 @@ export function MercadoPagoConnectCard() {
   const [statusMessage, setStatusMessage] = useState<{ type: 'success' | 'error' | 'info'; text: string } | null>(null);
   const [authUrl, setAuthUrl] = useState<string>('');
   const [callbackUrl, setCallbackUrl] = useState<string>('');
+  const [isDeveloper, setIsDeveloper] = useState(false);
+  const [testingPayment, setTestingPayment] = useState(false);
+
 
   const loadStatus = async () => {
     setLoading(true);
@@ -61,12 +67,35 @@ export function MercadoPagoConnectCard() {
   useEffect(() => {
     loadStatus();
 
+    // Comprobar si el usuario logueado es el desarrollador (loggia.1996@gmail.com)
+    try {
+      const session = getSuperAdminSession();
+      if (session?.email?.toLowerCase() === 'loggia.1996@gmail.com') {
+        setIsDeveloper(true);
+      }
+    } catch {}
+
+    try {
+      const supabase = createClient();
+      supabase.auth.getUser().then(({ data: { user } }) => {
+        if (user?.email?.toLowerCase() === 'loggia.1996@gmail.com') {
+          setIsDeveloper(true);
+        }
+      }).catch(() => {});
+    } catch {}
+
     if (typeof window !== 'undefined') {
       const params = new URLSearchParams(window.location.search);
       if (params.get('mp_connected') === 'true') {
         setStatusMessage({
           type: 'success',
           text: '¡Cuenta oficial de Mercado Pago vinculada exitosamente! Los cobros de planes ya están activos.',
+        });
+        window.history.replaceState({}, '', window.location.pathname + '?tab=subscription-plans');
+      } else if (params.get('test_mp') === 'approved') {
+        setStatusMessage({
+          type: 'success',
+          text: '¡Pago de prueba de $10 ARS aprobado y validado con éxito en Mercado Pago!',
         });
         window.history.replaceState({}, '', window.location.pathname + '?tab=subscription-plans');
       } else if (params.get('mp_error')) {
@@ -77,6 +106,23 @@ export function MercadoPagoConnectCard() {
       }
     }
   }, []);
+
+  const handleRunTestPayment = async () => {
+    setTestingPayment(true);
+    try {
+      const res = await createTestPaymentPreferenceAction('loggia.1996@gmail.com');
+      if (res.success && res.initPoint) {
+        window.location.href = res.initPoint;
+      } else {
+        alert(res.message || 'No se pudo generar el checkout de prueba.');
+      }
+    } catch (err: unknown) {
+      alert((err as Error).message || 'Error al conectar con Mercado Pago.');
+    } finally {
+      setTestingPayment(false);
+    }
+  };
+
 
   const handleDisconnect = async () => {
     if (!confirm('¿Estás seguro de que deseas desconectar la cuenta de Mercado Pago? El cobro automático de suscripciones quedará pausado.')) {
@@ -296,8 +342,53 @@ export function MercadoPagoConnectCard() {
             </div>
           </div>
         </div>
-
       </div>
+
+
+      {/* SECCIÓN EXCLUSIVA DE TEST PARA loggia.1996@gmail.com */}
+
+      {isDeveloper && (
+        <div className="relative z-10 pt-5 border-t border-white/15">
+          <div className="bg-gradient-to-r from-amber-500/15 via-purple-500/15 to-blue-500/15 border-2 border-amber-400/50 rounded-2xl p-5 space-y-3">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div className="space-y-1">
+                <div className="inline-flex items-center gap-1.5 bg-amber-400/25 border border-amber-400/50 text-amber-300 text-[10px] font-black px-2.5 py-0.5 rounded-full uppercase tracking-wider">
+                  <span>🧪 Modo Pruebas Desarrollador (Exclusivo loggia.1996@gmail.com)</span>
+                </div>
+                <h4 className="text-base font-black text-white">Prueba Real de Cobro y Split de Comisión ($10 ARS)</h4>
+                <p className="text-xs text-slate-200 leading-relaxed font-medium">
+                  Genera una orden real de $10 ARS para validar que el cobro entra a la cuenta conectada del cliente y los $0.30 (3%) se acreditan automáticamente en tu billetera de Mercado Pago.
+                </p>
+              </div>
+
+              <button
+                type="button"
+                onClick={handleRunTestPayment}
+                disabled={testingPayment || !connected}
+                className="inline-flex items-center justify-center gap-2 bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-slate-950 font-black text-xs px-6 py-3.5 rounded-xl shadow-lg transition-all active:scale-95 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed shrink-0"
+              >
+                {testingPayment ? (
+                  <>
+                    <RefreshCw className="w-4 h-4 animate-spin" />
+                    <span>Iniciando Checkout...</span>
+                  </>
+                ) : (
+                  <>
+                    <Sparkles className="w-4 h-4 text-slate-950" />
+                    <span>Ejecutar Pago de Prueba ($10 ARS)</span>
+                  </>
+                )}
+              </button>
+            </div>
+            {!connected && (
+              <p className="text-[11px] text-amber-300/80 font-semibold">
+                ⚠️ Para realizar el pago de prueba, primero debe estar conectada la cuenta oficial de Mercado Pago arriba.
+              </p>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
+
