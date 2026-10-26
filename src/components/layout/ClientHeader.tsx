@@ -776,7 +776,7 @@ export function ClientHeader({ withBackground = false }: ClientHeaderProps = {})
               <Search className="w-4.5 h-4.5 sm:w-5 sm:h-5" />
             </button>
 
-            {/* Publicá tu negocio (Visible a partir de md para no saturar mobile) */}
+            {/* Suscripciones (Visible a partir de md para no saturar mobile) */}
             <Link
               href="/planes"
               className="hidden md:flex items-center gap-2 text-xs sm:text-sm font-black text-slate-900 bg-white/80 hover:bg-white border border-slate-300 hover:border-[#0047BA]/50 shadow-2xs hover:shadow-xs transition-all py-1.5 px-3 rounded-xl group cursor-pointer"
@@ -784,7 +784,7 @@ export function ClientHeader({ withBackground = false }: ClientHeaderProps = {})
               <div className="w-6 h-6 rounded-lg bg-gradient-to-tr from-[#00ADB5] via-[#0047BA] to-[#7B2CBF] text-white flex items-center justify-center shadow-xs shrink-0 group-hover:scale-110 transition-transform">
                 <Store className="w-3.5 h-3.5 fill-current" />
               </div>
-              <span className="tracking-tight group-hover:text-[#0047BA] transition-colors">Publicá tu negocio</span>
+              <span className="tracking-tight group-hover:text-[#0047BA] transition-colors">Suscripciones</span>
             </Link>
 
             {/* Mi Cuenta / Iniciar sesión */}
@@ -1044,7 +1044,7 @@ export function ClientHeader({ withBackground = false }: ClientHeaderProps = {})
               className="flex-1 text-center py-2.5 bg-gradient-to-r from-[#0047BA] via-[#6C1CD1] to-[#E5007D] text-white text-xs font-black rounded-xl shadow-sm flex items-center justify-center gap-2"
             >
               <Store className="w-4 h-4 text-white" />
-              <span>Publicá tu negocio</span>
+              <span>Suscripciones</span>
             </Link>
           </div>
         </div>
