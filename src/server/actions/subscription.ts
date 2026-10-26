@@ -66,7 +66,105 @@ export async function createSubscriptionPreferenceAction(
     return {
       success: false,
       message: (err as Error).message || 'Error al conectar con la pasarela de Mercado Pago.',
-
     };
   }
 }
+
+import { createAdminClient } from '@/lib/supabase/admin';
+import { calculateSubscriptionLifecycle, SubscriptionLifecycle } from '@/lib/services/subscription-lifecycle';
+
+export async function getCommerceSubscriptionLifecycleAction(
+  commerceId: string,
+  commerceName?: string
+): Promise<{
+  success: boolean;
+  lifecycle: SubscriptionLifecycle | null;
+  message?: string;
+}> {
+  try {
+    const adminSupabase = createAdminClient();
+    if (!adminSupabase) {
+      return { success: false, lifecycle: null, message: 'Sin conexión a base de datos' };
+    }
+
+    // 1. Obtener comercio
+    const cleanId = (commerceId || '').replace(/^comm-/, '');
+    const { data: comm } = await adminSupabase
+      .from('commerces')
+      .select('*')
+      .or(`id.eq.${commerceId},slug.eq.${cleanId},slug.eq.${commerceId}`)
+      .maybeSingle();
+
+    if (!comm) {
+      return { success: false, lifecycle: null, message: 'Comercio no encontrado' };
+    }
+
+    // 2. Obtener último pago aprobado en cash_payments
+    let latestPayment: { created_at: string; amount?: number; plan_name?: string } | null = null;
+    const nameToMatch = (comm.name || commerceName || '').trim();
+    const phoneToMatch = (comm.phone_whatsapp || '').replace(/[^\d]/g, '');
+
+    if (nameToMatch) {
+      const { data: payments } = await adminSupabase
+        .from('cash_payments')
+        .select('*')
+        .eq('status', 'APPROVED')
+        .ilike('commerce_name', `%${nameToMatch}%`)
+        .order('created_at', { ascending: false })
+        .limit(1);
+
+      if (payments && payments.length > 0) {
+        latestPayment = {
+          created_at: payments[0].created_at,
+          amount: Number(payments[0].amount || 0),
+          plan_name: payments[0].plan_name,
+        };
+      }
+    }
+
+    if (!latestPayment && phoneToMatch && phoneToMatch.length >= 6) {
+      const { data: paymentsByPhone } = await adminSupabase
+        .from('cash_payments')
+        .select('*')
+        .eq('status', 'APPROVED')
+        .ilike('phone_whatsapp', `%${phoneToMatch.slice(-8)}%`)
+        .order('created_at', { ascending: false })
+        .limit(1);
+
+      if (paymentsByPhone && paymentsByPhone.length > 0) {
+        latestPayment = {
+          created_at: paymentsByPhone[0].created_at,
+          amount: Number(paymentsByPhone[0].amount || 0),
+          plan_name: paymentsByPhone[0].plan_name,
+        };
+      }
+    }
+
+    // 3. Calcular lifecycle de 30 días
+    const lifecycle = calculateSubscriptionLifecycle(comm, latestPayment);
+
+    // 4. Si el ciclo venció (> 30 días) y figuraba activo en DB, pausarlo automáticamente
+    if (lifecycle.isExpired && comm.is_subscription_active === true) {
+      await adminSupabase
+        .from('commerces')
+        .update({
+          is_subscription_active: false,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', comm.id);
+      console.log(`[Subscription Lifecycle] Comercio ${comm.name} (${comm.id}) pausado automáticamente por vencimiento de ciclo de 30 días.`);
+    }
+
+    return {
+      success: true,
+      lifecycle,
+    };
+  } catch (err: unknown) {
+    return {
+      success: false,
+      lifecycle: null,
+      message: (err as Error).message || 'Error al verificar ciclo de suscripción',
+    };
+  }
+}
+

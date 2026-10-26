@@ -11,8 +11,10 @@ import { KpiCardsRow } from '@/components/admin/KpiCardsRow';
 import { CatalogManager } from '@/components/admin/CatalogManager';
 import { ProfileEditor } from '@/components/admin/ProfileEditor';
 import { SubscriptionPlans } from '@/components/admin/SubscriptionPlans';
-import { MessageCircle, ShieldCheck, Zap, Sparkles, ExternalLink, ArrowRight, Store, Gift } from 'lucide-react';
+import { MessageCircle, ShieldCheck, Zap, Sparkles, ExternalLink, ArrowRight, Store, Gift, AlertTriangle, Clock } from 'lucide-react';
 import { parseProductGallery } from '@/lib/utils/product-gallery';
+import { getCommerceSubscriptionLifecycleAction } from '@/server/actions/subscription';
+import type { SubscriptionLifecycle } from '@/lib/services/subscription-lifecycle';
 
 export default function AdminPage() {
   const router = useRouter();
@@ -28,6 +30,8 @@ export default function AdminPage() {
 
   const [userType, setUserType] = useState<'particular' | 'comercio' | 'turismo'>('comercio');
   const [isSubscriptionActive, setIsSubscriptionActive] = useState<boolean>(true);
+  const [lifecycle, setLifecycle] = useState<SubscriptionLifecycle | null>(null);
+  const [paymentSuccessMsg, setPaymentSuccessMsg] = useState<string | null>(null);
 
   React.useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -36,8 +40,13 @@ export default function AdminPage() {
       if (tabParam === 'subscription') {
         setActiveTab('subscription');
       }
+      if (params.get('mp_status') === 'approved') {
+        setPaymentSuccessMsg('¡Tu cuota mensual fue abonada con éxito a través de Mercado Pago! Tu perfil y catálogo han sido reactivados por 30 días.');
+        window.history.replaceState({}, '', window.location.pathname + (tabParam ? `?tab=${tabParam}` : ''));
+      }
     }
   }, []);
+
 
   React.useEffect(() => {
     async function loadRealData() {
@@ -88,13 +97,26 @@ export default function AdminPage() {
         const cityName = targetCommerce?.city_name || profile?.city_name || user.user_metadata?.city_name || 'Rosario';
         const cleanSlug = merchantName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || 'comercio';
 
-        const hasActiveSub = targetCommerce?.is_subscription_active ?? (rawType === 'particular' ? false : (user.user_metadata?.is_subscription_active ?? false));
+        let hasActiveSub = targetCommerce?.is_subscription_active ?? (rawType === 'particular' ? false : (user.user_metadata?.is_subscription_active ?? false));
+
+        if (targetCommerce?.id) {
+          try {
+            const cycleRes = await getCommerceSubscriptionLifecycleAction(targetCommerce.id, merchantName);
+            if (cycleRes.success && cycleRes.lifecycle) {
+              setLifecycle(cycleRes.lifecycle);
+              hasActiveSub = cycleRes.lifecycle.isActive;
+            }
+          } catch (cycleErr) {
+            console.warn('Error verificando lifecycle de suscripción:', cycleErr);
+          }
+        }
         setIsSubscriptionActive(Boolean(hasActiveSub));
 
-        const rawTier = (targetCommerce?.subscription_tier || 'BRONCE').toUpperCase();
+        const rawTier = (targetCommerce?.subscription_tier || lifecycle?.tier || 'BRONCE').toUpperCase();
         const mappedPlan: 'Bronce' | 'Plata' | 'Oro' =
           rawTier.includes('ORO') ? 'Oro' :
           rawTier.includes('PLATA') ? 'Plata' : 'Bronce';
+
 
         const resolvedCommerce: Commerce = {
           id: targetCommerce?.id || `comm-${user.id}`,
@@ -252,6 +274,27 @@ export default function AdminPage() {
           {/* Main Tab Content */}
           <div className="flex-1 space-y-8">
 
+            {/* AVISO DE PAGO EXITOSO */}
+            {paymentSuccessMsg && (
+              <div className="bg-emerald-500/10 border-2 border-emerald-500 rounded-3xl p-5 sm:p-6 shadow-sm flex items-start sm:items-center justify-between gap-4 animate-in fade-in">
+                <div className="flex items-start sm:items-center gap-3.5">
+                  <div className="p-3 bg-emerald-600 text-white rounded-2xl shrink-0 font-black text-xl shadow-xs">
+                    ✓
+                  </div>
+                  <div>
+                    <h4 className="text-base font-black text-emerald-950">¡Pago Registrado con Éxito!</h4>
+                    <p className="text-xs text-emerald-800 font-medium leading-relaxed">{paymentSuccessMsg}</p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setPaymentSuccessMsg(null)}
+                  className="text-emerald-700 hover:text-emerald-900 text-xs font-bold px-3 py-1.5 rounded-xl hover:bg-emerald-100 transition-colors shrink-0 cursor-pointer"
+                >
+                  Cerrar
+                </button>
+              </div>
+            )}
+
             {/* CARTEL INFORMATIVO PARA VECINOS O CUENTAS INACTIVAS */}
             {!isSubscriptionActive && (
               userType === 'particular' ? (
@@ -282,20 +325,20 @@ export default function AdminPage() {
                   </button>
                 </div>
               ) : (
-                <div className="bg-gradient-to-r from-amber-500/10 via-amber-500/5 to-amber-500/10 border-2 border-amber-400 rounded-3xl p-5 sm:p-6 shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                <div className="bg-gradient-to-r from-rose-500/15 via-rose-500/5 to-rose-500/10 border-2 border-rose-400 rounded-3xl p-5 sm:p-6 shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                   <div className="flex items-start sm:items-center gap-3.5">
-                    <div className="p-3 bg-amber-500 text-slate-950 rounded-2xl shrink-0 font-black text-xl shadow-xs">
+                    <div className="p-3 bg-rose-600 text-white rounded-2xl shrink-0 font-black text-xl shadow-xs">
                       ⚠️
                     </div>
                     <div className="space-y-0.5">
-                      <div className="inline-flex items-center gap-1.5 bg-amber-500/20 border border-amber-500/40 text-amber-900 text-[10px] font-black px-2.5 py-0.5 rounded-full uppercase tracking-wider">
-                        Acción Requerida • Cuenta Inactiva
+                      <div className="inline-flex items-center gap-1.5 bg-rose-500/20 border border-rose-500/40 text-rose-900 text-[10px] font-black px-2.5 py-0.5 rounded-full uppercase tracking-wider">
+                        Suscripción Vencida • Perfil Pausado
                       </div>
                       <h3 className="text-base sm:text-lg font-black text-slate-900 mt-0.5">
-                        Tu {userType === 'turismo' ? 'complejo turístico' : 'comercio'} aún no está activo en ON MÁS
+                        Tu {userType === 'turismo' ? 'complejo turístico' : 'comercio'} se encuentra pausado
                       </h3>
-                      <p className="text-xs text-slate-600 font-medium">
-                        Hasta que no contrates un plan no estarás visible en las búsquedas. Elegí un plan para comenzar a publicar.
+                      <p className="text-xs text-slate-600 font-medium leading-relaxed">
+                        El ciclo de tu cuota mensual de 30 días ha finalizado. Tu perfil y catálogo están temporalmente pausados en las búsquedas públicas de ON MÁS. Para reactivarlo al instante, aboná tu cuota de renovación.
                       </p>
                     </div>
                   </div>
@@ -305,11 +348,42 @@ export default function AdminPage() {
                     className="w-full sm:w-auto bg-[#0047BA] hover:bg-[#002878] text-white px-5 py-3 rounded-2xl font-black text-xs shadow-md transition-all active:scale-95 shrink-0 flex items-center justify-center gap-2 cursor-pointer"
                   >
                     <ShieldCheck className="w-4 h-4 text-[#00E5E8]" />
-                    <span>Ver Planes de Suscripción</span>
+                    <span>Renovar Plan con Mercado Pago</span>
                   </button>
                 </div>
               )
             )}
+
+            {/* AVISO DE RENOVACIÓN PRÓXIMA (ÚLTIMOS 5 DÍAS) */}
+            {isSubscriptionActive && lifecycle?.isExpiringSoon && (
+              <div className="bg-gradient-to-r from-amber-500/15 via-amber-500/5 to-amber-500/10 border-2 border-amber-400 rounded-3xl p-5 sm:p-6 shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 animate-in fade-in">
+                <div className="flex items-start sm:items-center gap-3.5">
+                  <div className="p-3 bg-amber-500 text-slate-950 rounded-2xl shrink-0 font-black text-xl shadow-xs">
+                    ⏳
+                  </div>
+                  <div className="space-y-0.5">
+                    <div className="inline-flex items-center gap-1.5 bg-amber-500/20 border border-amber-500/40 text-amber-900 text-[10px] font-black px-2.5 py-0.5 rounded-full uppercase tracking-wider">
+                      Vencimiento Próximo ({lifecycle.daysRemaining} {lifecycle.daysRemaining === 1 ? 'día restante' : 'días restantes'})
+                    </div>
+                    <h3 className="text-base sm:text-lg font-black text-slate-900 mt-0.5">
+                      Tu {lifecycle.tier ? `Plan ${lifecycle.tier}` : 'suscripción'} vence pronto
+                    </h3>
+                    <p className="text-xs text-slate-600 font-medium">
+                      Tu ciclo de 30 días finaliza el {lifecycle.expiresAt ? new Date(lifecycle.expiresAt).toLocaleDateString('es-AR', { day: '2-digit', month: 'long' }) : 'pronto'}. Renovala con anticipación para mantener tu visibilidad ininterrumpida.
+                    </p>
+                  </div>
+                </div>
+
+                <button
+                  onClick={() => setActiveTab('subscription')}
+                  className="w-full sm:w-auto bg-slate-900 hover:bg-slate-800 text-white px-5 py-3 rounded-2xl font-black text-xs shadow-md transition-all active:scale-95 shrink-0 flex items-center justify-center gap-2 cursor-pointer"
+                >
+                  <Sparkles className="w-4 h-4 text-amber-400" />
+                  <span>Abonar Renovación</span>
+                </button>
+              </div>
+            )}
+
 
             {/* TAB 1: DASHBOARD & KPIS */}
             {activeTab === 'dashboard' && (
@@ -458,12 +532,18 @@ export default function AdminPage() {
                 userType={userType}
                 isAuthenticated={true}
                 showHistory={true}
-                onPlanActivated={(planName) => {
+                onPlanActivated={async (planName) => {
                   setCommerce({ ...commerce, isSubscriptionActive: true });
                   setIsSubscriptionActive(true);
                   if (userType === 'particular') {
                     setUserType(planName.toLowerCase().includes('turismo') ? 'turismo' : 'comercio');
                   }
+                  try {
+                    const cycleRes = await getCommerceSubscriptionLifecycleAction(commerce.id, commerce.name);
+                    if (cycleRes.success && cycleRes.lifecycle) {
+                      setLifecycle(cycleRes.lifecycle);
+                    }
+                  } catch {}
                 }}
               />
             )}

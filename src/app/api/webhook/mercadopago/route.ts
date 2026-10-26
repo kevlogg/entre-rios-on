@@ -102,9 +102,7 @@ export async function POST(req: Request) {
             amount: paymentInfo.transaction_amount || 0,
             city_name: comm?.city_name || 'Entre Ríos / Santa Fe',
             status: 'APPROVED',
-            notes: `Procesado automáticamente vía Mercado Pago Checkout Pro. ID Transacción: ${paymentId}`,
           });
-
 
           console.log(`[MercadoPago Webhook] Registro de pago insertado en cash_payments con status APPROVED.`);
         }

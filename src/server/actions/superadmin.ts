@@ -1093,10 +1093,13 @@ export async function approveCashPaymentAction(
     const planName = (payment?.plan_name || 'BRONCE').toUpperCase();
     const resolvedTier = planName.includes('ORO') ? 'ORO' : planName.includes('PLATA') ? 'PLATA' : 'BRONCE';
 
-    // 2. Marcar pago como APPROVED
+    // 2. Marcar pago como APPROVED y renovar fecha de inicio del ciclo de 30 días
     const { error: payErr } = await adminSupabase
       .from('cash_payments')
-      .update({ status: 'APPROVED' })
+      .update({ 
+        status: 'APPROVED',
+        created_at: new Date().toISOString()
+      })
       .eq('id', paymentId);
 
     if (payErr) {
