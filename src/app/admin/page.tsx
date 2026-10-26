@@ -532,6 +532,7 @@ export default function AdminPage() {
                 userType={userType}
                 isAuthenticated={true}
                 showHistory={true}
+                lifecycle={lifecycle}
                 onPlanActivated={async (planName) => {
                   setCommerce({ ...commerce, isSubscriptionActive: true });
                   setIsSubscriptionActive(true);

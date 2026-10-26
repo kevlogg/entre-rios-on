@@ -4,7 +4,8 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
 import { ShieldCheck, Check, Sparkles, Star, ArrowRight, Building2, Zap, DollarSign, Award, XCircle, X, Clock, Send, CheckCircle2, History, User, Store, Palmtree } from 'lucide-react';
-import { createSubscriptionPreferenceAction } from '@/server/actions/subscription';
+import { createSubscriptionPreferenceAction, getCommerceSubscriptionLifecycleAction } from '@/server/actions/subscription';
+import type { SubscriptionLifecycle } from '@/lib/services/subscription-lifecycle';
 import { 
   createCashPaymentAction, 
   getPendingCashPaymentForCommerceAction, 
@@ -25,6 +26,7 @@ interface SubscriptionPlansProps {
   isAuthenticated?: boolean;
   showHistory?: boolean;
   allowDirectPayment?: boolean;
+  lifecycle?: SubscriptionLifecycle | null;
   onPlanActivated?: (planName: string) => void;
 }
 
@@ -94,6 +96,7 @@ export function SubscriptionPlans({
   isAuthenticated,
   showHistory = false,
   allowDirectPayment = true,
+  lifecycle,
   onPlanActivated,
 }: SubscriptionPlansProps) {
   const [isUserLoggedIn, setIsUserLoggedIn] = useState<boolean>(isAuthenticated ?? false);
@@ -101,6 +104,13 @@ export function SubscriptionPlans({
   const [activatedSuccess, setActivatedSuccess] = useState<string | null>(null);
   const [pendingPayment, setPendingPayment] = useState<{ id: string; planName: string; amount: number; notes?: string } | null>(null);
   const [history, setHistory] = useState<Array<{ id: string; planName: string; amount: number; status: string; createdAt: string; notes?: string }>>([]);
+  const [currentLifecycle, setCurrentLifecycle] = useState<SubscriptionLifecycle | null>(lifecycle || null);
+
+  useEffect(() => {
+    if (lifecycle !== undefined) {
+      setCurrentLifecycle(lifecycle);
+    }
+  }, [lifecycle]);
 
   const isParticular = userType === 'particular';
   // If user is registered as turismo, track is strictly turismo. If comercio, strictly comercio.
@@ -196,6 +206,12 @@ export function SubscriptionPlans({
         if (histRes.success && Array.isArray(histRes.data)) {
           setHistory(histRes.data);
         }
+      }
+
+      // Refrescar ciclo de suscripción de 30 días
+      const cycleRes = await getCommerceSubscriptionLifecycleAction(commerceId, commerceName);
+      if (cycleRes.success && cycleRes.lifecycle) {
+        setCurrentLifecycle(cycleRes.lifecycle);
       }
     } catch (e) {
       console.warn('Error verificando pago pendiente e historial:', e);
@@ -365,6 +381,174 @@ export function SubscriptionPlans({
     );
   };
 
+  const formatExpiryDate = (isoString?: string | null) => {
+    if (!isoString) return 'próximamente';
+    try {
+      return new Date(isoString).toLocaleDateString('es-AR', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+      });
+    } catch {
+      return 'próximamente';
+    }
+  };
+
+  const renderCardAction = (tier: 'BRONCE' | 'PLATA' | 'ORO', planDisplayName: string, price: number) => {
+    if (!isUserLoggedIn) {
+      return (
+        <div className={`space-y-2 pt-4 border-t ${tier === 'ORO' ? 'border-purple-800/80' : 'border-slate-200'}`}>
+          <Link
+            href={`/login?mode=signup&type=${selectedTrack}`}
+            className={`w-full py-3.5 rounded-2xl font-black text-xs shadow-md transition-transform active:scale-95 cursor-pointer flex items-center justify-center gap-2 text-center ${
+              tier === 'ORO'
+                ? 'bg-gradient-to-r from-amber-400 via-amber-500 to-amber-600 hover:from-amber-300 hover:to-amber-500 text-slate-950 shadow-xl'
+                : tier === 'PLATA'
+                ? 'bg-gradient-to-r from-[#00ADB5] to-[#0047BA] hover:from-[#00969d] hover:to-[#002878] text-white shadow-lg'
+                : 'bg-[#0047BA] hover:bg-[#002878] text-white'
+            }`}
+          >
+            <span>Registrar mi {selectedTrack === 'turismo' ? 'servicio turístico' : 'comercio'}</span>
+            <ArrowRight className="w-4 h-4" />
+          </Link>
+          <Link
+            href="/login?mode=login&redirectTo=/planes"
+            className={`w-full py-2.5 rounded-xl font-bold text-xs transition-colors flex items-center justify-center gap-1.5 shadow-2xs text-center ${
+              tier === 'ORO'
+                ? 'bg-white/10 hover:bg-white/20 text-white border border-white/20'
+                : 'bg-white border border-slate-300 hover:bg-slate-100 text-slate-800'
+            }`}
+          >
+            <span>Iniciar sesión para contratar</span>
+          </Link>
+        </div>
+      );
+    }
+
+    if (!allowDirectPayment) {
+      return (
+        <div className={`space-y-2 pt-4 border-t ${tier === 'ORO' ? 'border-purple-800/80' : 'border-slate-200'}`}>
+          <Link
+            href="/admin?tab=subscription"
+            className={`w-full py-3.5 rounded-2xl font-black text-xs transition-transform active:scale-95 cursor-pointer shadow-md flex items-center justify-center gap-2 text-center ${
+              tier === 'ORO'
+                ? 'bg-gradient-to-r from-amber-400 via-amber-500 to-amber-600 text-slate-950'
+                : tier === 'PLATA'
+                ? 'bg-gradient-to-r from-[#00ADB5] to-[#0047BA] text-white'
+                : 'bg-[#0047BA] text-white'
+            }`}
+          >
+            <span>Gestionar en mi Panel de Control</span>
+            <ArrowRight className="w-4 h-4" />
+          </Link>
+          <p className={`text-[11px] text-center font-medium ${tier === 'ORO' ? 'text-purple-200/80' : 'text-slate-500'}`}>
+            Los pagos y reportes se realizan exclusivamente desde tu panel.
+          </p>
+        </div>
+      );
+    }
+
+    const isThisPlanActive = Boolean(currentLifecycle?.isActive && currentLifecycle.tier.toUpperCase() === tier);
+    const hasAnyActivePlan = Boolean(currentLifecycle?.isActive);
+
+    if (isThisPlanActive && currentLifecycle) {
+      return (
+        <div className={`space-y-2.5 pt-4 border-t ${tier === 'ORO' ? 'border-purple-800/80' : 'border-slate-200'}`}>
+          <div className={`p-4 rounded-2xl text-center space-y-1 border-2 shadow-sm ${
+            tier === 'ORO'
+              ? 'bg-amber-400/15 border-amber-400 text-amber-200'
+              : tier === 'PLATA'
+              ? 'bg-emerald-50 border-emerald-400 text-emerald-950'
+              : 'bg-emerald-50 border-emerald-400 text-emerald-950'
+          }`}>
+            <div className={`inline-flex items-center gap-1.5 text-xs font-black uppercase tracking-wider ${
+              tier === 'ORO' ? 'text-amber-300' : 'text-emerald-700'
+            }`}>
+              <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+              <span>Plan Actual Activo</span>
+            </div>
+            <p className="text-sm font-black">
+              Válido hasta el {formatExpiryDate(currentLifecycle.expiresAt)}
+            </p>
+            <p className="text-[11px] font-bold opacity-80">
+              ({currentLifecycle.daysRemaining} {currentLifecycle.daysRemaining === 1 ? 'día restante' : 'días restantes'})
+            </p>
+          </div>
+
+          {currentLifecycle.isExpiringSoon && (
+            <button
+              onClick={() => handleSelectPlan(tier, `${planDisplayName} (Renovación)`)}
+              disabled={Boolean(pendingPayment) || loadingTier === tier}
+              className={`w-full py-3 rounded-2xl font-black text-xs shadow-md transition-all active:scale-95 cursor-pointer flex items-center justify-center gap-2 ${
+                tier === 'ORO'
+                  ? 'bg-gradient-to-r from-amber-400 to-amber-500 text-slate-950 hover:from-amber-300 hover:to-amber-400'
+                  : 'bg-slate-900 hover:bg-slate-800 text-white'
+              }`}
+            >
+              <Sparkles className="w-4 h-4 text-amber-400" />
+              <span>{loadingTier === tier ? 'Procesando...' : `Renovar Cuota Mensual ($${price.toLocaleString('es-AR')})`}</span>
+            </button>
+          )}
+        </div>
+      );
+    }
+
+    if (hasAnyActivePlan && currentLifecycle) {
+      return (
+        <div className={`space-y-2 pt-4 border-t ${tier === 'ORO' ? 'border-purple-800/80' : 'border-slate-200'}`}>
+          <div className={`p-4 rounded-2xl text-center space-y-1 border ${
+            tier === 'ORO'
+              ? 'bg-purple-900/30 border-purple-700/60 text-purple-200'
+              : 'bg-slate-50 border-slate-200 text-slate-600'
+          }`}>
+            <div className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-500">
+              <Clock className="w-3.5 h-3.5" />
+              <span>Suscripción Vigente</span>
+            </div>
+            <p className="text-xs font-medium leading-relaxed">
+              Tu negocio cuenta con <strong>Plan {currentLifecycle.tier}</strong> activo hasta el {formatExpiryDate(currentLifecycle.expiresAt)}.
+            </p>
+          </div>
+        </div>
+      );
+    }
+
+    return (
+      <div className={`space-y-2 pt-4 border-t ${tier === 'ORO' ? 'border-purple-800/80' : 'border-slate-200'}`}>
+        <button
+          onClick={() => handleSelectPlan(tier, `${planDisplayName} ($${price.toLocaleString('es-AR')}${tier === 'ORO' ? '' : ' + IVA'})`)}
+          disabled={Boolean(pendingPayment) || loadingTier === tier}
+          className={`w-full py-3.5 rounded-2xl font-black text-xs transition-transform active:scale-95 cursor-pointer shadow-md flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed ${
+            tier === 'ORO'
+              ? 'bg-gradient-to-r from-amber-400 via-amber-500 to-amber-600 hover:from-amber-300 hover:to-amber-500 text-slate-950 shadow-xl'
+              : tier === 'PLATA'
+              ? 'bg-gradient-to-r from-[#00ADB5] to-[#0047BA] hover:from-[#00969d] hover:to-[#002878] text-white shadow-lg'
+              : 'bg-[#0047BA] hover:bg-[#002878] text-white'
+          }`}
+        >
+          <span>{loadingTier === tier ? 'Procesando...' : `Pagar con MercadoPago ($${price.toLocaleString('es-AR')}${tier === 'ORO' ? '' : ' + IVA'})`}</span>
+          <ArrowRight className="w-4 h-4" />
+        </button>
+
+        <button
+          type="button"
+          onClick={() => openReportModal(planDisplayName, price)}
+          disabled={Boolean(pendingPayment)}
+          className={`w-full py-2.5 rounded-xl font-black text-xs transition-colors flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed shadow-2xs ${
+            tier === 'ORO'
+              ? 'bg-white/10 hover:bg-white/20 text-white border border-white/20'
+              : 'bg-white border border-slate-300 hover:bg-slate-100 text-slate-900'
+          }`}
+        >
+          <DollarSign className={`w-4 h-4 font-black ${tier === 'ORO' ? 'text-amber-400' : 'text-emerald-600'}`} />
+          <span>
+            {pendingPayment ? 'Pago en revisión...' : 'Ya pagué esta cuota (Efectivo / Transf.)'}
+          </span>
+        </button>
+      </div>
+    );
+  };
+
   return (
     <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-sm space-y-8 animate-in fade-in duration-200">
       
@@ -470,6 +654,53 @@ export function SubscriptionPlans({
                 )}
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* BANNER DE SUSCRIPCIÓN ACTIVA VIGENTE */}
+      {isUserLoggedIn && currentLifecycle?.isActive && !pendingPayment && (
+        <div className={`border-2 rounded-3xl p-6 shadow-md space-y-2 animate-in fade-in ${
+          currentLifecycle.isExpiringSoon
+            ? 'bg-amber-50/90 border-amber-400 text-amber-950'
+            : 'bg-emerald-50/90 border-emerald-400 text-emerald-950'
+        }`}>
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div className="flex items-start sm:items-center gap-3.5">
+              <div className={`p-3 rounded-2xl shrink-0 font-black text-2xl shadow-xs ${
+                currentLifecycle.isExpiringSoon ? 'bg-amber-500 text-slate-950' : 'bg-emerald-600 text-white'
+              }`}>
+                {currentLifecycle.isExpiringSoon ? '⏳' : '✓'}
+              </div>
+              <div>
+                <span className={`text-[10px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full border ${
+                  currentLifecycle.isExpiringSoon
+                    ? 'bg-amber-200 text-amber-900 border-amber-300'
+                    : 'bg-emerald-200 text-emerald-900 border-emerald-300'
+                }`}>
+                  {currentLifecycle.isExpiringSoon ? 'Vencimiento Próximo' : 'Suscripción Activa y Vigente'}
+                </span>
+                <h4 className="text-lg font-black text-slate-900 mt-1">
+                  Tu negocio cuenta con el Plan {currentLifecycle.tier} Activo
+                </h4>
+                <p className="text-xs text-slate-700 font-medium mt-0.5 leading-relaxed">
+                  Válido hasta el <strong>{formatExpiryDate(currentLifecycle.expiresAt)}</strong> ({currentLifecycle.daysRemaining} {currentLifecycle.daysRemaining === 1 ? 'día restante' : 'días restantes'} de visibilidad garantizada).
+                  {currentLifecycle.isExpiringSoon ? ' Podés abonar tu renovación anticipada para no pausar tu perfil.' : ' No es necesario realizar ningún pago hasta la fecha de renovación.'}
+                </p>
+              </div>
+            </div>
+
+            {currentLifecycle.isExpiringSoon && (
+              <button
+                type="button"
+                onClick={() => handleSelectPlan(currentLifecycle.tier.toUpperCase() as any, `Renovación Plan ${currentLifecycle.tier}`)}
+                disabled={Boolean(pendingPayment) || loadingTier === currentLifecycle.tier.toUpperCase()}
+                className="w-full sm:w-auto bg-slate-900 hover:bg-slate-800 text-white px-5 py-3 rounded-2xl font-black text-xs shadow-md transition-all active:scale-95 shrink-0 flex items-center justify-center gap-2 cursor-pointer"
+              >
+                <Sparkles className="w-4 h-4 text-amber-400" />
+                <span>{loadingTier === currentLifecycle.tier.toUpperCase() ? 'Procesando...' : 'Abonar Renovación'}</span>
+              </button>
+            )}
           </div>
         </div>
       )}
@@ -591,60 +822,7 @@ export function SubscriptionPlans({
             {renderFeaturesList('bronce')}
           </div>
 
-          {!isUserLoggedIn ? (
-            <div className="space-y-2 pt-4 border-t border-slate-200">
-              <Link
-                href={`/login?mode=signup&type=${selectedTrack}`}
-                className="w-full bg-[#0047BA] hover:bg-[#002878] text-white py-3.5 rounded-2xl font-black text-xs transition-transform active:scale-95 cursor-pointer shadow-md flex items-center justify-center gap-2 text-center"
-              >
-                <span>Registrar mi {selectedTrack === 'turismo' ? 'servicio turístico' : 'comercio'}</span>
-                <ArrowRight className="w-4 h-4" />
-              </Link>
-
-              <Link
-                href="/login?mode=login&redirectTo=/planes"
-                className="w-full bg-white border border-slate-300 hover:bg-slate-100 text-slate-800 py-2.5 rounded-xl font-bold text-xs transition-colors flex items-center justify-center gap-1.5 shadow-2xs text-center"
-              >
-                <span>Iniciar sesión para contratar</span>
-              </Link>
-            </div>
-          ) : !allowDirectPayment ? (
-            <div className="space-y-2 pt-4 border-t border-slate-200">
-              <Link
-                href="/admin?tab=subscription"
-                className="w-full bg-[#0047BA] hover:bg-[#002878] text-white py-3.5 rounded-2xl font-black text-xs transition-transform active:scale-95 cursor-pointer shadow-md flex items-center justify-center gap-2 text-center"
-              >
-                <span>Gestionar en mi Panel de Control</span>
-                <ArrowRight className="w-4 h-4" />
-              </Link>
-              <p className="text-[11px] text-center text-slate-500 font-medium">
-                Los pagos y reportes se realizan exclusivamente desde tu panel.
-              </p>
-            </div>
-          ) : (
-            <div className="space-y-2 pt-4 border-t border-slate-200">
-              <button
-                onClick={() => handleSelectPlan('BRONCE', `${selectedTrack === 'turismo' ? 'Plan Bronce Turismo' : 'Plan Bronce'} ($${planPrices.bronce.toLocaleString('es-AR')} + IVA)`)}
-                disabled={Boolean(pendingPayment) || loadingTier === 'BRONCE'}
-                className="w-full bg-[#0047BA] hover:bg-[#002878] text-white py-3.5 rounded-2xl font-black text-xs transition-transform active:scale-95 cursor-pointer shadow-md flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                <span>{loadingTier === 'BRONCE' ? 'Procesando...' : `Pagar con MercadoPago ($${planPrices.bronce.toLocaleString('es-AR')} + IVA)`}</span>
-                <ArrowRight className="w-4 h-4" />
-              </button>
-
-              <button
-                type="button"
-                onClick={() => openReportModal(selectedTrack === 'turismo' ? 'Bronce Turismo' : 'Bronce', planPrices.bronce)}
-                disabled={Boolean(pendingPayment)}
-                className="w-full bg-white border border-slate-300 hover:bg-slate-100 text-slate-900 py-2.5 rounded-xl font-black text-xs transition-colors flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed shadow-2xs"
-              >
-                <DollarSign className="w-4 h-4 text-emerald-600 font-black" />
-                <span>
-                  {pendingPayment ? 'Pago en revisión...' : 'Ya pagué esta cuota (Efectivo / Transf.)'}
-                </span>
-              </button>
-            </div>
-          )}
+          {renderCardAction('BRONCE', selectedTrack === 'turismo' ? 'Plan Bronce Turismo' : 'Plan Bronce', planPrices.bronce)}
         </div>
 
         {/* 2. PLAN PLATA ($49.000) */}
@@ -684,60 +862,7 @@ export function SubscriptionPlans({
             {renderFeaturesList('plata')}
           </div>
 
-          {!isUserLoggedIn ? (
-            <div className="space-y-2 pt-4 border-t border-slate-200">
-              <Link
-                href={`/login?mode=signup&type=${selectedTrack}`}
-                className="w-full bg-gradient-to-r from-[#00ADB5] to-[#0047BA] hover:from-[#00969d] hover:to-[#002878] text-white py-3.5 rounded-2xl font-black text-xs shadow-lg transition-transform active:scale-95 cursor-pointer flex items-center justify-center gap-2 text-center"
-              >
-                <span>Registrar mi {selectedTrack === 'turismo' ? 'servicio turístico' : 'comercio'}</span>
-                <ArrowRight className="w-4 h-4" />
-              </Link>
-
-              <Link
-                href="/login?mode=login&redirectTo=/planes"
-                className="w-full bg-slate-100 hover:bg-slate-200 text-slate-900 py-2.5 rounded-xl font-bold text-xs transition-colors flex items-center justify-center gap-1.5 shadow-2xs text-center"
-              >
-                <span>Iniciar sesión para contratar</span>
-              </Link>
-            </div>
-          ) : !allowDirectPayment ? (
-            <div className="space-y-2 pt-4 border-t border-slate-200">
-              <Link
-                href="/admin?tab=subscription"
-                className="w-full bg-gradient-to-r from-[#00ADB5] to-[#0047BA] hover:from-[#00969d] hover:to-[#002878] text-white py-3.5 rounded-2xl font-black text-xs shadow-lg transition-transform active:scale-95 cursor-pointer flex items-center justify-center gap-2 text-center"
-              >
-                <span>Gestionar en mi Panel de Control</span>
-                <ArrowRight className="w-4 h-4" />
-              </Link>
-              <p className="text-[11px] text-center text-slate-500 font-medium">
-                Los pagos y reportes se realizan exclusivamente desde tu panel.
-              </p>
-            </div>
-          ) : (
-            <div className="space-y-2 pt-4 border-t border-slate-200">
-              <button
-                onClick={() => handleSelectPlan('PLATA', `${selectedTrack === 'turismo' ? 'Plan Plata Turismo' : 'Plan Plata'} ($${planPrices.plata.toLocaleString('es-AR')} + IVA)`)}
-                disabled={Boolean(pendingPayment) || loadingTier === 'PLATA'}
-                className="w-full bg-gradient-to-r from-[#00ADB5] to-[#0047BA] hover:from-[#00969d] hover:to-[#002878] text-white py-3.5 rounded-2xl font-black text-xs shadow-lg transition-transform active:scale-95 cursor-pointer flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                <span>{loadingTier === 'PLATA' ? 'Procesando...' : `Pagar con MercadoPago ($${planPrices.plata.toLocaleString('es-AR')} + IVA)`}</span>
-                <ArrowRight className="w-4 h-4" />
-              </button>
-
-              <button
-                type="button"
-                onClick={() => openReportModal(selectedTrack === 'turismo' ? 'Plata Turismo' : 'Plata', planPrices.plata)}
-                disabled={Boolean(pendingPayment)}
-                className="w-full bg-slate-100 hover:bg-slate-200 text-slate-900 py-2.5 rounded-xl font-black text-xs transition-colors flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed shadow-2xs"
-              >
-                <DollarSign className="w-4 h-4 text-emerald-600 font-black" />
-                <span>
-                  {pendingPayment ? 'Pago en revisión...' : 'Ya pagué esta cuota (Efectivo / Transf.)'}
-                </span>
-              </button>
-            </div>
-          )}
+          {renderCardAction('PLATA', selectedTrack === 'turismo' ? 'Plan Plata Turismo' : 'Plan Plata', planPrices.plata)}
         </div>
 
         {/* 3. PLAN ORO ($99.000) */}
@@ -777,60 +902,7 @@ export function SubscriptionPlans({
             {renderFeaturesList('oro')}
           </div>
 
-          {!isUserLoggedIn ? (
-            <div className="space-y-2 pt-4 border-t border-purple-800/80">
-              <Link
-                href={`/login?mode=signup&type=${selectedTrack}`}
-                className="w-full bg-gradient-to-r from-amber-400 via-amber-500 to-amber-600 hover:from-amber-300 hover:to-amber-500 text-slate-950 py-3.5 rounded-2xl font-black text-xs shadow-xl transition-transform active:scale-95 cursor-pointer flex items-center justify-center gap-2 text-center"
-              >
-                <span>Registrar mi {selectedTrack === 'turismo' ? 'servicio turístico' : 'comercio'}</span>
-                <ArrowRight className="w-4 h-4" />
-              </Link>
-
-              <Link
-                href="/login?mode=login&redirectTo=/planes"
-                className="w-full bg-white/10 hover:bg-white/20 text-white py-2.5 rounded-xl font-bold text-xs transition-colors flex items-center justify-center gap-1.5 border border-white/20 text-center"
-              >
-                <span>Iniciar sesión para contratar</span>
-              </Link>
-            </div>
-          ) : !allowDirectPayment ? (
-            <div className="space-y-2 pt-4 border-t border-purple-800/80">
-              <Link
-                href="/admin?tab=subscription"
-                className="w-full bg-gradient-to-r from-amber-400 via-amber-500 to-amber-600 hover:from-amber-300 hover:to-amber-500 text-slate-950 py-3.5 rounded-2xl font-black text-xs shadow-xl transition-transform active:scale-95 cursor-pointer flex items-center justify-center gap-2 text-center"
-              >
-                <span>Gestionar en mi Panel de Control</span>
-                <ArrowRight className="w-4 h-4" />
-              </Link>
-              <p className="text-[11px] text-center text-purple-200/80 font-medium">
-                Los pagos y reportes se realizan exclusivamente desde tu panel.
-              </p>
-            </div>
-          ) : (
-            <div className="space-y-2 pt-4 border-t border-purple-800/80">
-              <button
-                onClick={() => handleSelectPlan('ORO', `${selectedTrack === 'turismo' ? 'Plan Oro Turismo VIP' : 'Plan Oro'} ($${planPrices.oro.toLocaleString('es-AR')})`)}
-                disabled={Boolean(pendingPayment) || loadingTier === 'ORO'}
-                className="w-full bg-gradient-to-r from-amber-400 via-amber-500 to-amber-600 hover:from-amber-300 hover:to-amber-500 text-slate-950 py-3.5 rounded-2xl font-black text-xs shadow-xl transition-transform active:scale-95 cursor-pointer flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                <span>{loadingTier === 'ORO' ? 'Procesando...' : `Pagar con MercadoPago ($${planPrices.oro.toLocaleString('es-AR')})`}</span>
-                <ArrowRight className="w-4 h-4" />
-              </button>
-
-              <button
-                type="button"
-                onClick={() => openReportModal(selectedTrack === 'turismo' ? 'Oro Turismo' : 'Oro', planPrices.oro)}
-                disabled={Boolean(pendingPayment)}
-                className="w-full bg-white/10 hover:bg-white/20 text-white py-2.5 rounded-xl font-extrabold text-xs transition-colors flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed border border-white/20"
-              >
-                <DollarSign className="w-3.5 h-3.5 text-amber-400 font-black" />
-                <span>
-                  {pendingPayment ? 'Pago en revisión...' : 'Ya pagué esta cuota (Efectivo / Transf.)'}
-                </span>
-              </button>
-            </div>
-          )}
+          {renderCardAction('ORO', selectedTrack === 'turismo' ? 'Plan Oro Turismo VIP' : 'Plan Oro', planPrices.oro)}
         </div>
 
       </div>
