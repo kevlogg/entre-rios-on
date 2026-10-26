@@ -72,30 +72,24 @@ export function ClientHeroBanner({ provinceId }: ClientHeroBannerProps) {
     const firstSlide = banners[0];
     const { href, isExternal } = buildHref(firstSlide);
     const imgSrc = normalizeImageUrl(firstSlide.imageUrl);
-    const innerContent = (
-      <>
-        <div
-          className="absolute inset-0 bg-cover bg-center filter blur-xl scale-110 opacity-35 pointer-events-none"
-          style={{ backgroundImage: `url(${imgSrc})` }}
-        />
-        <img
-          src={imgSrc}
-          alt={firstSlide.titleLine1 || 'Banner'}
-          className="relative z-10 w-full h-full object-contain object-center"
-        />
-      </>
-    );
-
     return (
       <section aria-label="Banner Principal" className="w-full relative">
         <div className={wrapperClass}>
           {isExternal ? (
             <a href={href} target="_blank" rel="noopener noreferrer" className="absolute inset-0 block w-full h-full">
-              {innerContent}
+              <img
+                src={imgSrc}
+                alt={firstSlide.titleLine1 || 'Banner'}
+                className="w-full h-full object-cover object-center"
+              />
             </a>
           ) : (
             <Link href={href} className="absolute inset-0 block w-full h-full">
-              {innerContent}
+              <img
+                src={imgSrc}
+                alt={firstSlide.titleLine1 || 'Banner'}
+                className="w-full h-full object-cover object-center"
+              />
             </Link>
           )}
         </div>
@@ -118,27 +112,21 @@ export function ClientHeroBanner({ provinceId }: ClientHeroBannerProps) {
             isCurrent ? 'opacity-100 z-10 pointer-events-auto' : 'opacity-0 z-0 pointer-events-none'
           }`;
 
-          const slideContent = (
-            <>
-              <div
-                className="absolute inset-0 bg-cover bg-center filter blur-xl scale-110 opacity-35 pointer-events-none"
-                style={{ backgroundImage: `url(${imgSrc})` }}
-              />
+          return isExternal ? (
+            <a key={slide.id || `slide-${idx}`} href={href} target="_blank" rel="noopener noreferrer" className={slideClass}>
               <img
                 src={imgSrc}
                 alt={slide.titleLine1 || 'Banner Publicitario'}
-                className="relative z-10 w-full h-full object-contain object-center"
+                className="w-full h-full object-cover object-center"
               />
-            </>
-          );
-
-          return isExternal ? (
-            <a key={slide.id || `slide-${idx}`} href={href} target="_blank" rel="noopener noreferrer" className={slideClass}>
-              {slideContent}
             </a>
           ) : (
             <Link key={slide.id || `slide-${idx}`} href={href} className={slideClass}>
-              {slideContent}
+              <img
+                src={imgSrc}
+                alt={slide.titleLine1 || 'Banner Publicitario'}
+                className="w-full h-full object-cover object-center"
+              />
             </Link>
           );
         })}
