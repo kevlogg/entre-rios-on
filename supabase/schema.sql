@@ -129,8 +129,12 @@ CREATE TABLE IF NOT EXISTS public.community_events (
   is_featured BOOLEAN DEFAULT false,
   author_name TEXT NOT NULL,
   author_avatar_url TEXT NOT NULL,
+  status TEXT DEFAULT 'APPROVED' CHECK (status IN ('PENDING', 'APPROVED', 'REJECTED')),
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+
+-- Migración: columna status para moderación de novedades/eventos
+ALTER TABLE public.community_events ADD COLUMN IF NOT EXISTS status TEXT DEFAULT 'APPROVED' CHECK (status IN ('PENDING', 'APPROVED', 'REJECTED'));
 
 -- 6. TABLA DE BANNERS EDITORIALES PORTADA (HERO SLIDES)
 CREATE TABLE IF NOT EXISTS public.banner_slides (

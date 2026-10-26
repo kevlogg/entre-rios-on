@@ -319,22 +319,16 @@ export function SubscriptionPlans({
       if (res.success && res.initPoint) {
         window.location.href = res.initPoint;
       } else {
-        if (onPlanActivated) {
-          onPlanActivated(planName);
-        }
-        setActivatedSuccess(`¡Plan "${planName}" contratado exitosamente! Tu cuenta comercial ha sido activada.`);
-        setTimeout(() => setActivatedSuccess(null), 5000);
+        alert(res.message || 'No se pudo generar el checkout de Mercado Pago. Por favor intentá nuevamente o contactá al soporte.');
       }
-    } catch (err) {
-      if (onPlanActivated) {
-        onPlanActivated(planName);
-      }
-      setActivatedSuccess(`¡Plan "${planName}" contratado exitosamente!`);
-      setTimeout(() => setActivatedSuccess(null), 5000);
+    } catch (err: any) {
+      console.error('Error al iniciar pago con Mercado Pago:', err);
+      alert(err.message || 'Hubo un error inesperado al conectar con Mercado Pago.');
     } finally {
       setLoadingTier(null);
     }
   };
+
 
   const renderFeaturesList = (cardType: 'bronce' | 'plata' | 'oro') => {
     const features = getFeaturesForPlan(cardType, selectedTrack);

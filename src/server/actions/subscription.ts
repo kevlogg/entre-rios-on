@@ -1,63 +1,72 @@
 'use server';
 
-export async function createSubscriptionPreferenceAction(planTier: 'BRONCE' | 'PLATA' | 'ORO', commerceId: string): Promise<{ success: boolean; initPoint?: string; message: string }> {
+import { headers } from 'next/headers';
+import { createPlanSubscriptionPreference, getMercadoPagoSettings } from '@/lib/services/mercadopago';
+import { getSubscriptionPlansAction } from '@/server/actions/superadmin';
+
+export async function createSubscriptionPreferenceAction(
+  planTier: 'BRONCE' | 'PLATA' | 'ORO',
+  commerceId: string
+): Promise<{ success: boolean; initPoint?: string; message: string; notConnected?: boolean }> {
   try {
-    // Definición de planes B2B ON MÁS
-    const plans = {
-      BRONCE: { title: 'Membresía ON MÁS - Plan Bronce', price: 29000 },
-      PLATA: { title: 'Membresía ON MÁS - Plan Plata (Destacado)', price: 49000 },
-      ORO: { title: 'Membresía ON MÁS - Plan Oro (Portada Provincial)', price: 99000 },
-    };
-
-    const selectedPlan = plans[planTier] || plans.BRONCE;
-
-    // Enlace directo de Checkout MercadoPago / Redirección segura
-    const mpAccessToken = process.env.MERCADOPAGO_ACCESS_TOKEN;
-
-    if (mpAccessToken) {
-      const response = await fetch('https://api.mercadopago.com/checkout/preferences', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${mpAccessToken}`,
-        },
-        body: JSON.stringify({
-          items: [
-            {
-              title: selectedPlan.title,
-              quantity: 1,
-              currency_id: 'ARS',
-              unit_price: selectedPlan.price,
-            },
-          ],
-          external_reference: `sub_${commerceId}_${planTier}`,
-          back_urls: {
-            success: 'https://entrerioson.gob.ar/admin?subscription=success',
-            pending: 'https://entrerioson.gob.ar/admin?subscription=pending',
-            failure: 'https://entrerioson.gob.ar/admin?subscription=failure',
-          },
-          auto_return: 'approved',
-        }),
-      });
-
-      const data = await response.json();
-      if (data.init_point) {
-        return {
-          success: true,
-          initPoint: data.init_point,
-          message: 'Preferencia de MercadoPago generada correctamente.',
-        };
-      }
+    // 1. Verificar si la cuenta de Mercado Pago está conectada
+    const mpSettings = await getMercadoPagoSettings();
+    if (!mpSettings.connected || !mpSettings.seller_access_token) {
+      return {
+        success: false,
+        notConnected: true,
+        message: 'La cuenta oficial de cobros de Mercado Pago aún no ha sido conectada por el administrador en el panel SuperAdmin.',
+      };
     }
 
-    // URL de simulación de pago / Checkout B2B seguro
-    const fallbackUrl = `https://mpago.la/pos/b2b_${planTier.toLowerCase()}_${commerceId}`;
+    // 2. Obtener precios dinámicos configurados
+    let price = planTier === 'ORO' ? 95000 : planTier === 'PLATA' ? 55000 : 35000;
+    let planName = planTier === 'ORO' ? 'Plan Oro' : planTier === 'PLATA' ? 'Plan Plata' : 'Plan Bronce';
+
+    try {
+      const plansRes = await getSubscriptionPlansAction();
+      if (plansRes.success && Array.isArray(plansRes.plans)) {
+        const found = plansRes.plans.find((p) => p.id.toUpperCase() === planTier.toUpperCase());
+        if (found) {
+          price = found.price;
+          planName = found.name;
+        }
+      }
+    } catch (e) {
+      console.warn('Error leyendo precios dinámicos para checkout:', e);
+    }
+
+    // 3. Determinar baseUrl de la solicitud
+    let baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://onmasportal.com.ar';
+    try {
+      const headerList = await headers();
+      const proto = headerList.get('x-forwarded-proto') || 'https';
+      const host = headerList.get('x-forwarded-host') || headerList.get('host');
+      if (host) {
+        baseUrl = `${proto}://${host}`;
+      }
+    } catch {}
+
+    // 4. Crear preferencia con 3% Marketplace Fee
+    const result = await createPlanSubscriptionPreference({
+      planTier,
+      planName,
+      price,
+      commerceId: commerceId || 'general',
+      baseUrl,
+    });
+
     return {
       success: true,
-      initPoint: fallbackUrl,
-      message: `Enlace de cobro B2B generado para el ${selectedPlan.title}`,
+      initPoint: result.init_point,
+      message: `Checkout de Mercado Pago generado con éxito para el ${planName}.`,
     };
-  } catch (err) {
-    return { success: false, message: `Error al generar preferencia: ${(err as Error).message}` };
+  } catch (err: unknown) {
+    console.error('Error generando preferencia de Mercado Pago:', err);
+    return {
+      success: false,
+      message: (err as Error).message || 'Error al conectar con la pasarela de Mercado Pago.',
+
+    };
   }
 }

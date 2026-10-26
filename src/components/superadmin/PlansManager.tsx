@@ -22,6 +22,7 @@ import {
   PlanConfigItem, 
   DEFAULT_SUBSCRIPTION_PLANS 
 } from '@/lib/services/plans-config';
+import { MercadoPagoConnectCard } from '@/components/superadmin/MercadoPagoConnectCard';
 
 
 export function PlansManager() {
@@ -124,7 +125,11 @@ export function PlansManager() {
         </div>
       </div>
 
+      {/* Tarjeta Oficial de Conexión de Mercado Pago con Comisión del 3% */}
+      <MercadoPagoConnectCard />
+
       {/* Info Card */}
+
       <div className="bg-emerald-50/90 border border-emerald-200 rounded-2xl p-4 flex items-start gap-3 text-xs text-slate-700">
         <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0 mt-0.5" />
         <div>
