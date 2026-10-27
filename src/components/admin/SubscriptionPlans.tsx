@@ -475,20 +475,39 @@ export function SubscriptionPlans({
             </p>
           </div>
 
-          {currentLifecycle.isExpiringSoon && (
+          {/* Opciones de Renovación: Mercado Pago o Efectivo / Transferencia */}
+          <div className="space-y-2 pt-1">
             <button
               onClick={() => handleSelectPlan(tier, `${planDisplayName} (Renovación)`)}
               disabled={Boolean(pendingPayment) || loadingTier === tier}
-              className={`w-full py-3 rounded-2xl font-black text-xs shadow-md transition-all active:scale-95 cursor-pointer flex items-center justify-center gap-2 ${
+              className={`w-full py-3 rounded-2xl font-black text-xs shadow-md transition-all active:scale-95 cursor-pointer flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed ${
                 tier === 'ORO'
                   ? 'bg-gradient-to-r from-amber-400 to-amber-500 text-slate-950 hover:from-amber-300 hover:to-amber-400'
-                  : 'bg-slate-900 hover:bg-slate-800 text-white'
+                  : tier === 'PLATA'
+                  ? 'bg-gradient-to-r from-[#00ADB5] to-[#0047BA] text-white hover:from-[#00969d] hover:to-[#002878]'
+                  : 'bg-[#0047BA] hover:bg-[#002878] text-white'
               }`}
             >
-              <Sparkles className="w-4 h-4 text-amber-400" />
-              <span>{loadingTier === tier ? 'Procesando...' : `Renovar Cuota Mensual ($${price.toLocaleString('es-AR')})`}</span>
+              <span>{loadingTier === tier ? 'Procesando...' : `Renovar con Mercado Pago ($${price.toLocaleString('es-AR')})`}</span>
+              <ArrowRight className="w-4 h-4" />
             </button>
-          )}
+
+            <button
+              type="button"
+              onClick={() => openReportModal(`${planDisplayName} (Renovación)`, price)}
+              disabled={Boolean(pendingPayment)}
+              className={`w-full py-2.5 rounded-xl font-black text-xs transition-colors flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed shadow-2xs ${
+                tier === 'ORO'
+                  ? 'bg-white/10 hover:bg-white/20 text-white border border-white/20'
+                  : 'bg-white border border-slate-300 hover:bg-slate-100 text-slate-900'
+              }`}
+            >
+              <DollarSign className={`w-4 h-4 font-black ${tier === 'ORO' ? 'text-amber-400' : 'text-emerald-600'}`} />
+              <span>
+                {pendingPayment ? 'Renovación en revisión...' : 'Renovar con Efectivo o Transferencia'}
+              </span>
+            </button>
+          </div>
         </div>
       );
     }
@@ -685,22 +704,38 @@ export function SubscriptionPlans({
                 </h4>
                 <p className="text-xs text-slate-700 font-medium mt-0.5 leading-relaxed">
                   Válido hasta el <strong>{formatExpiryDate(currentLifecycle.expiresAt)}</strong> ({currentLifecycle.daysRemaining} {currentLifecycle.daysRemaining === 1 ? 'día restante' : 'días restantes'} de visibilidad garantizada).
-                  {currentLifecycle.isExpiringSoon ? ' Podés abonar tu renovación anticipada para no pausar tu perfil.' : ' No es necesario realizar ningún pago hasta la fecha de renovación.'}
+                  {currentLifecycle.isExpiringSoon
+                    ? ' Podés abonar tu renovación anticipada por Mercado Pago o avisar tu pago por transferencia / efectivo.'
+                    : ' Podés renovar tu cuota con anticipación por Mercado Pago o por transferencia / efectivo cuando lo desees.'}
                 </p>
               </div>
             </div>
 
-            {currentLifecycle.isExpiringSoon && (
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto shrink-0">
               <button
                 type="button"
                 onClick={() => handleSelectPlan(currentLifecycle.tier.toUpperCase() as any, `Renovación Plan ${currentLifecycle.tier}`)}
                 disabled={Boolean(pendingPayment) || loadingTier === currentLifecycle.tier.toUpperCase()}
-                className="w-full sm:w-auto bg-slate-900 hover:bg-slate-800 text-white px-5 py-3 rounded-2xl font-black text-xs shadow-md transition-all active:scale-95 shrink-0 flex items-center justify-center gap-2 cursor-pointer"
+                className="bg-[#0047BA] hover:bg-[#002878] text-white px-4 py-2.5 rounded-xl font-black text-xs shadow-md transition-all active:scale-95 flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50 text-center"
               >
-                <Sparkles className="w-4 h-4 text-amber-400" />
-                <span>{loadingTier === currentLifecycle.tier.toUpperCase() ? 'Procesando...' : 'Abonar Renovación'}</span>
+                <Sparkles className="w-3.5 h-3.5 text-[#00E5E8]" />
+                <span>{loadingTier === currentLifecycle.tier.toUpperCase() ? 'Procesando...' : 'Renovar con Mercado Pago'}</span>
               </button>
-            )}
+
+              <button
+                type="button"
+                onClick={() => {
+                  const t = currentLifecycle.tier.toLowerCase() as 'bronce' | 'plata' | 'oro';
+                  const p = planPrices[t] || 29000;
+                  openReportModal(`Plan ${currentLifecycle.tier} (Renovación)`, p);
+                }}
+                disabled={Boolean(pendingPayment)}
+                className="bg-white hover:bg-slate-100 text-slate-900 border border-slate-300 px-4 py-2.5 rounded-xl font-black text-xs shadow-xs transition-all active:scale-95 flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50 text-center"
+              >
+                <DollarSign className="w-3.5 h-3.5 text-emerald-600 font-black" />
+                <span>Renovar con Efectivo / Transf.</span>
+              </button>
+            </div>
           </div>
         </div>
       )}

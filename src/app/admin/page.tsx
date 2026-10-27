@@ -348,7 +348,7 @@ export default function AdminPage() {
                     className="w-full sm:w-auto bg-[#0047BA] hover:bg-[#002878] text-white px-5 py-3 rounded-2xl font-black text-xs shadow-md transition-all active:scale-95 shrink-0 flex items-center justify-center gap-2 cursor-pointer"
                   >
                     <ShieldCheck className="w-4 h-4 text-[#00E5E8]" />
-                    <span>Renovar Plan con Mercado Pago</span>
+                    <span>Renovar Suscripción de Plan</span>
                   </button>
                 </div>
               )
