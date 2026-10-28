@@ -42,12 +42,12 @@ export async function generateMetadata({ params }: GeoSectionPageProps): Promise
 
   if (!city || !sectionMeta) {
     return {
-      title: 'Entre Ríos ON MÁS Portal',
+      title: 'ON MÁS Portal',
     };
   }
 
   const provName = prov?.name || city.provinceName || 'Entre Ríos';
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://entreriosonmas.gob.ar';
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://onmasportal.com.ar';
   const title = `${sectionMeta.name} en ${city.name}, ${provName} | ON MÁS`;
   const description = `${sectionMeta.description} Accedé a la guía completa de ${sectionMeta.name.toLowerCase()} en ${city.name} (${provName}) con contacto directo a WhatsApp.`;
   const canonicalUrl = `${baseUrl}/${prov?.slug || 'entre-rios'}/${city.slug}/${seccion}`;
@@ -63,15 +63,15 @@ export async function generateMetadata({ params }: GeoSectionPageProps): Promise
       title,
       description,
       url: canonicalUrl,
-      siteName: 'Entre Ríos ON MÁS Portal',
+      siteName: 'ON MÁS Portal',
       locale: 'es_AR',
       type: 'website',
       images: [
         {
-          url: city.imageUrl || '/logo.png',
+          url: city.imageUrl || '/logo1.png',
           width: 1200,
           height: 630,
-          alt: `Entre Ríos ON MÁS - ${sectionMeta.name} en ${city.name}`,
+          alt: `ON MÁS - ${sectionMeta.name} en ${city.name}`,
         },
       ],
     },

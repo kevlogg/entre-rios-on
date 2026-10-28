@@ -19,16 +19,32 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const city = await getCityBySlug(slug);
 
   if (!city) {
-    return { title: 'Ciudad no encontrada | Entre Ríos ON' };
+    return { title: 'Ciudad no encontrada | ON MÁS' };
   }
 
+  const title = `${city.name} - Comercios, Turismo y Guía Local | ON MÁS`;
+  const description = city.description || `Descubrí los mejores comercios, servicios, turismo y ofertas de ${city.name} en el portal ON MÁS.`;
+  const canonicalUrl = `https://onmasportal.com.ar/ciudad/${city.slug}`;
+
   return {
-    title: `${city.name} - Comercios, Turismo y Guía Provincial | Entre Ríos ON`,
-    description: city.description,
+    title,
+    description,
+    alternates: {
+      canonical: canonicalUrl,
+    },
     openGraph: {
-      title: `${city.name} - Portal Entre Ríos ON`,
-      description: city.description,
-      images: [{ url: city.imageUrl }],
+      title,
+      description,
+      url: canonicalUrl,
+      siteName: 'ON MÁS Portal',
+      type: 'website',
+      images: [{ url: city.imageUrl || '/logo1.png', alt: city.name }],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title,
+      description,
+      images: [city.imageUrl || '/logo1.png'],
     },
   };
 }

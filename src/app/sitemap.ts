@@ -3,7 +3,7 @@ import { getAllCommerces, getUpcomingEvents, getFeaturedProducts } from '@/lib/d
 import { PROVINCES, ALL_CITIES, VALID_SECTION_SLUGS } from '@/lib/constants/locations';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://entreriosonmas.gob.ar';
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://onmasportal.com.ar';
 
   // Base Section Routes
   const mainSections = [

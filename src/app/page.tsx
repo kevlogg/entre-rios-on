@@ -1,10 +1,28 @@
 import React from 'react';
+import type { Metadata } from 'next';
 import { ClientHomeContainer } from '@/components/client-portal/ClientHomeContainer';
 import { ClientFooter } from '@/components/layout/ClientFooter';
 import { ComingSoonView } from '@/components/common/ComingSoonView';
 import { getFeaturedProducts } from '@/lib/dal/portal';
 
 export const revalidate = 60;
+
+export const metadata: Metadata = {
+  title: 'ON MÁS Portal | Directorio Comercial, Catálogo & Turismo del Litoral',
+  description: 'Portal regional de Entre Ríos, Santa Fe y la región. Directorio de comercios e industrias, catálogo unificado con pedidos directos por WhatsApp, turismo y bolsa de empleo.',
+  alternates: {
+    canonical: 'https://onmasportal.com.ar',
+  },
+  openGraph: {
+    title: 'ON MÁS Portal | Directorio Comercial, Catálogo & Turismo del Litoral',
+    description: 'Comprá, vendé y conectá con cientos de comercios verificados de Entre Ríos y Santa Fe sin comisiones.',
+    url: 'https://onmasportal.com.ar',
+    siteName: 'ON MÁS Portal',
+    locale: 'es_AR',
+    type: 'website',
+    images: [{ url: '/logo1.png', width: 1200, height: 630, alt: 'ON MÁS Portal' }],
+  },
+};
 
 // FLAG MODO PRÓXIMAMENTE (true = Muestra pantalla de lanzamiento / false = Muestra sitio completo)
 const SHOW_COMING_SOON = false;

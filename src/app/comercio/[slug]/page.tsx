@@ -22,16 +22,32 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const commerce = await getCommerceBySlug(slug);
 
   if (!commerce) {
-    return { title: 'Comercio no encontrado | Entre Ríos ON' };
+    return { title: 'Comercio no encontrado | ON MÁS' };
   }
 
+  const title = `${commerce.name} - ${commerce.category} en ${commerce.cityName} | ON MÁS`;
+  const description = commerce.description || `Conocé el catálogo de productos, promociones y contacto directo por WhatsApp de ${commerce.name} en ${commerce.cityName}.`;
+  const canonicalUrl = `https://onmasportal.com.ar/comercio/${commerce.slug}`;
+
   return {
-    title: `${commerce.name} - ${commerce.category} en ${commerce.cityName} | Entre Ríos ON`,
-    description: commerce.description,
+    title,
+    description,
+    alternates: {
+      canonical: canonicalUrl,
+    },
     openGraph: {
-      title: `${commerce.name} - ${commerce.cityName}`,
-      description: commerce.description,
-      images: [{ url: commerce.logoUrl }],
+      title,
+      description,
+      url: canonicalUrl,
+      siteName: 'ON MÁS Portal',
+      type: 'profile',
+      images: commerce.logoUrl ? [{ url: commerce.logoUrl, alt: commerce.name }] : undefined,
+    },
+    twitter: {
+      card: 'summary',
+      title,
+      description,
+      images: commerce.logoUrl ? [commerce.logoUrl] : undefined,
     },
   };
 }
@@ -47,7 +63,7 @@ export default async function CommerceDetailPage({ params }: PageProps) {
   const products = await getProductsByCommerce(commerce.id);
 
   const cleanPhone = (commerce.phoneWhatsApp || '').replace(/\D/g, '');
-  const waMsg = `Hola ${commerce.name}, los encontré en el portal Entre Ríos ON y me gustaría consultar su catálogo.`;
+  const waMsg = `Hola ${commerce.name}, los encontré en el portal ON MÁS y me gustaría consultar su catálogo.`;
   const trackingUrl = `/api/lead/whatsapp?phone=${encodeURIComponent(cleanPhone)}&message=${encodeURIComponent(waMsg)}&commerceId=${encodeURIComponent(commerce.id)}&cityId=${encodeURIComponent(commerce.cityId)}`;
 
   const jsonLdData = {
@@ -57,11 +73,12 @@ export default async function CommerceDetailPage({ params }: PageProps) {
     description: commerce.description,
     image: commerce.logoUrl,
     telephone: commerce.phoneWhatsApp,
+    url: `https://onmasportal.com.ar/comercio/${commerce.slug}`,
     address: {
       '@type': 'PostalAddress',
       streetAddress: commerce.address,
       addressLocality: commerce.cityName,
-      addressRegion: 'Entre Ríos',
+      addressRegion: commerce.provinceId === 'santa-fe' ? 'Santa Fe' : 'Entre Ríos',
       addressCountry: 'AR',
     },
     aggregateRating: commerce.rating ? {

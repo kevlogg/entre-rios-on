@@ -35,23 +35,46 @@ const caveat = Caveat({
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://onmasportal.com.ar'),
-  title: 'ON MÁS Portal | Comercio. Comunidad. Oportunidades.',
-  description: 'Portal regional híbrido ON MÁS: Directorio Comercial B2B, Catálogo directo a WhatsApp, Turismo, Gastronomía y Agenda de la Comunidad de Entre Ríos, Santa Fe y la región.',
+  title: {
+    default: 'ON MÁS Portal | Directorio Comercial, Catálogo & Turismo del Litoral',
+    template: '%s | ON MÁS Portal',
+  },
+  description: 'Portal regional de Entre Ríos y Santa Fe: Directorio de comercios e industrias, catálogo con compras directas a WhatsApp, turismo, bolsa de empleo y eventos de la comunidad sin comisiones.',
   keywords: [
     'ON MÁS',
-    'ONMAS',
-    'Entre Ríos',
-    'Santa Fe',
+    'ON+',
+    'ONMAS Portal',
+    'Directorio Comercial Entre Ríos',
+    'Comercios Santa Fe',
     'Paraná',
+    'Rosario',
+    'Santa Fe Capital',
     'Concordia',
     'Colón',
     'Gualeguaychú',
-    'Directorio Comercial',
     'Compras por WhatsApp',
-    'Turismo',
-    'Gastronomía',
+    'Turismo Entre Ríos',
+    'Turismo Santa Fe',
+    'Catálogo sin comisiones',
+    'Bolsa de Empleo Regional',
   ],
   authors: [{ name: 'ON MÁS Portal' }],
+  creator: 'ON MÁS',
+  publisher: 'ON MÁS Portal',
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
+  alternates: {
+    canonical: 'https://onmasportal.com.ar',
+  },
   icons: {
     icon: [
       { url: '/favicon.ico', sizes: 'any' },
@@ -66,7 +89,8 @@ export const metadata: Metadata = {
   },
   openGraph: {
     title: 'ON MÁS Portal | Toda la región en un solo lugar',
-    description: 'Comprá. Vendé. Publicá. Conectá. Toda la región en un solo lugar.',
+    description: 'Comprá, vendé y conectá con cientos de comercios verificados de Entre Ríos y Santa Fe sin comisiones.',
+    url: 'https://onmasportal.com.ar',
     type: 'website',
     locale: 'es_AR',
     siteName: 'ON MÁS Portal',
@@ -81,8 +105,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'ON MÁS Portal | Comercio, Turismo y Medios',
-    description: 'Directorio Comercial B2B, Catálogo directo a WhatsApp y Portal de Medios y Turismo.',
+    title: 'ON MÁS Portal | Comercio, Turismo y Oportunidades',
+    description: 'Directorio Comercial B2B, Catálogo directo a WhatsApp y Portal de Turismo y Empleos.',
     images: ['/logo1.png'],
   },
 };
@@ -92,16 +116,35 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const jsonLd = {
+  const orgJsonLd = {
     '@context': 'https://schema.org',
     '@type': 'Organization',
     name: 'ON MÁS Portal',
-    url: 'https://onmas.gob.ar',
-    logo: 'https://entreriosonmas.gob.ar/logo1.png',
+    url: 'https://onmasportal.com.ar',
+    logo: 'https://onmasportal.com.ar/logo1.png',
+    description: 'Portal regional comercial, catálogo directo a WhatsApp, turismo y oportunidades de Entre Ríos y Santa Fe.',
     sameAs: [
-      'https://facebook.com',
       'https://instagram.com/onmasportal',
     ],
+    contactPoint: {
+      '@type': 'ContactPoint',
+      telephone: '+54-9-342-6514889',
+      contactType: 'customer support',
+      areaServed: ['AR-E', 'AR-S', 'AR'],
+      availableLanguage: 'Spanish',
+    },
+  };
+
+  const webSiteJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    name: 'ON MÁS Portal',
+    url: 'https://onmasportal.com.ar',
+    potentialAction: {
+      '@type': 'SearchAction',
+      target: 'https://onmasportal.com.ar/catalogo?q={search_term_string}',
+      'query-input': 'required name=search_term_string',
+    },
   };
 
   return (
@@ -119,7 +162,11 @@ export default function RootLayout({
         <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, '\\u003c') }}
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(orgJsonLd).replace(/</g, '\\u003c') }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(webSiteJsonLd).replace(/</g, '\\u003c') }}
         />
         <script
           dangerouslySetInnerHTML={{

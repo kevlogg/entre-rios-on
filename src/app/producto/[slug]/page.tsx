@@ -17,16 +17,32 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const product = await getProductBySlug(slug);
 
   if (!product) {
-    return { title: 'Producto no encontrado | ON MÁS Portal Regional' };
+    return { title: 'Producto no encontrado | ON MÁS' };
   }
 
+  const title = `${product.title} - ${product.commerceName} (${product.cityName}) | ON MÁS`;
+  const description = product.description || `Comprá ${product.title} en ${product.commerceName} (${product.cityName}). Catálogo directo con pedidos a WhatsApp en ON MÁS.`;
+  const canonicalUrl = `https://onmasportal.com.ar/producto/${product.slug}`;
+
   return {
-    title: `${product.title} - ${product.commerceName} (${product.cityName}) | ON MÁS`,
-    description: product.description,
+    title,
+    description,
+    alternates: {
+      canonical: canonicalUrl,
+    },
     openGraph: {
-      title: product.title,
-      description: product.description,
-      images: [{ url: product.imageUrl }],
+      title,
+      description,
+      url: canonicalUrl,
+      siteName: 'ON MÁS Portal',
+      type: 'website',
+      images: product.imageUrl ? [{ url: product.imageUrl, alt: product.title }] : undefined,
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title,
+      description,
+      images: product.imageUrl ? [product.imageUrl] : undefined,
     },
   };
 }
@@ -51,11 +67,13 @@ export default async function ProductDetailPage({ params }: PageProps) {
     name: product.title,
     description: product.description,
     image: product.imageUrl,
+    url: `https://onmasportal.com.ar/producto/${product.slug}`,
     offers: {
       '@type': 'Offer',
       price: product.price || 0,
       priceCurrency: product.currency || 'ARS',
       availability: 'https://schema.org/InStock',
+      url: `https://onmasportal.com.ar/producto/${product.slug}`,
       seller: {
         '@type': 'Organization',
         name: product.commerceName,
