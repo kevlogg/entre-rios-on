@@ -109,6 +109,15 @@ export const metadata: Metadata = {
     description: 'Directorio Comercial B2B, Catálogo directo a WhatsApp y Portal de Turismo y Empleos.',
     images: ['/logo1.png'],
   },
+  verification: {
+    google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION || undefined,
+  },
+  other: {
+    'geo.region': 'AR-E',
+    'geo.placename': 'Entre Ríos, Santa Fe, Argentina',
+    'geo.position': '-31.7333;-60.5333',
+    'ICBM': '-31.7333, -60.5333',
+  },
 };
 
 export default function RootLayout({
@@ -150,6 +159,12 @@ export default function RootLayout({
   return (
     <html lang="es" className={`${inter.variable} ${caveat.variable}`} style={{ colorScheme: 'light' }}>
       <head>
+        {/* Preconnect & DNS-Prefetch para optimizar Core Web Vitals */}
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link rel="dns-prefetch" href="https://res.cloudinary.com" />
+        <link rel="dns-prefetch" href="https://images.unsplash.com" />
+
         <meta name="color-scheme" content="light only" />
         <meta name="supported-color-schemes" content="light" />
         <meta name="theme-color" content="#0047BA" />

@@ -3,14 +3,26 @@ import { Metadata } from 'next';
 import Link from 'next/link';
 import { DynamicLayoutWrapper } from '@/components/layout/DynamicLayoutWrapper';
 import { SubscriptionPlans } from '@/components/admin/SubscriptionPlans';
-import { Sparkles, ArrowLeft, Rocket, Store, ArrowRight } from 'lucide-react';
+import { Sparkles, ArrowLeft, Rocket, Store, ArrowRight, HelpCircle } from 'lucide-react';
 import { createClient } from '@/lib/supabase/server';
+import { JsonLd } from '@/components/common/JsonLd';
 
 export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
   title: 'Planes & Precios para Comercios | ON MÁS Portal',
-  description: 'Conocé los planes oficiales de suscripción para comercios y servicios. Elegí el plan que mejor se adapte a tu negocio y publicá tu catálogo.',
+  description: 'Conocé los planes oficiales de suscripción para comercios y servicios en Entre Ríos y Santa Fe. Publicá tu catálogo digital sin comisiones por venta.',
+  alternates: {
+    canonical: 'https://onmasportal.com.ar/planes',
+  },
+  openGraph: {
+    title: 'Planes & Precios para Comercios | ON MÁS Portal',
+    description: 'Publicá tu negocio y catálogo digital en ON MÁS con ventas directas por WhatsApp sin comisiones.',
+    url: 'https://onmasportal.com.ar/planes',
+    siteName: 'ON MÁS Portal',
+    type: 'website',
+    images: [{ url: '/logo1.png', width: 1200, height: 630, alt: 'Planes ON MÁS' }],
+  },
 };
 
 export default async function PlanesPublicPage() {
@@ -81,8 +93,41 @@ export default async function PlanesPublicPage() {
     </div>
   );
 
+  const faqs = [
+    {
+      q: '¿Cómo publico mi comercio en el portal ON MÁS?',
+      a: 'Podés registrar tu comercio creando una cuenta desde el botón Publicá tu Negocio o contactando a nuestro equipo por WhatsApp. Una vez verificado tu comercio, podrás elegir tu plan y cargar tu catálogo inmediatamente.',
+    },
+    {
+      q: '¿ON MÁS cobra comisiones por las ventas que realiza mi comercio?',
+      a: 'No, en ON MÁS no cobramos ninguna comisión por venta. Tus clientes te contactan y pagan directamente a través de WhatsApp o mediante tu propia cuenta de Mercado Pago vinculada.',
+    },
+    {
+      q: '¿Qué límites de productos tienen los planes?',
+      a: 'El Plan Bronce permite publicar hasta 25 productos, el Plan Plata hasta 60 productos con soporte prioritario, y el Plan Oro permite publicaciones ilimitadas con máxima exposición en el portal.',
+    },
+    {
+      q: '¿Qué medios de pago aceptan para abonar la suscripción?',
+      a: 'Aceptamos pagos online mediante suscripción automática con Mercado Pago (tarjetas de crédito, débito o dinero en cuenta) y también transferencias bancarias o pagos en efectivo.',
+    },
+  ];
+
+  const faqJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: faqs.map((f) => ({
+      '@type': 'Question',
+      name: f.q,
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: f.a,
+      },
+    })),
+  };
+
   return (
     <DynamicLayoutWrapper heroContent={heroContent}>
+      <JsonLd data={faqJsonLd} />
       <div className="space-y-8">
         {isAuthenticated && (
           <div className="bg-gradient-to-r from-blue-50 to-cyan-50 border border-blue-200 rounded-3xl p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-sm">
@@ -128,6 +173,28 @@ export default async function PlanesPublicPage() {
             showHistory={false}
             allowDirectPayment={false}
           />
+        </div>
+
+        {/* Sección de Preguntas Frecuentes para SEO y Conversión */}
+        <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-300/70 shadow-xs space-y-6">
+          <div className="flex items-center gap-2.5 border-b border-slate-200 pb-4">
+            <HelpCircle className="w-5 h-5 text-[#0047BA]" />
+            <h3 className="text-xl font-black text-slate-900">Preguntas Frecuentes sobre los Planes</h3>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {faqs.map((item, idx) => (
+              <div key={idx} className="p-4 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-2">
+                <h4 className="text-sm font-black text-slate-900 flex items-start gap-2">
+                  <span className="text-[#0047BA] font-extrabold">Q.</span>
+                  <span>{item.q}</span>
+                </h4>
+                <p className="text-xs text-slate-600 leading-relaxed font-medium pl-5">
+                  {item.a}
+                </p>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     </DynamicLayoutWrapper>

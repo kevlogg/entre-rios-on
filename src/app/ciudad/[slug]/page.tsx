@@ -72,7 +72,7 @@ export default async function CityDetailPage({ params }: PageProps) {
     description: city.description,
     containedInPlace: {
       '@type': 'State',
-      name: 'Entre Ríos',
+      name: city.provinceName || 'Entre Ríos',
       containedInPlace: {
         '@type': 'Country',
         name: 'Argentina',
@@ -81,9 +81,35 @@ export default async function CityDetailPage({ params }: PageProps) {
     image: city.imageUrl,
   };
 
+  const breadcrumbJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      {
+        '@type': 'ListItem',
+        position: 1,
+        name: 'Inicio',
+        item: 'https://onmasportal.com.ar',
+      },
+      {
+        '@type': 'ListItem',
+        position: 2,
+        name: 'Ciudades',
+        item: 'https://onmasportal.com.ar/comercios',
+      },
+      {
+        '@type': 'ListItem',
+        position: 3,
+        name: city.name,
+        item: `https://onmasportal.com.ar/ciudad/${city.slug}`,
+      },
+    ],
+  };
+
   return (
     <DynamicLayoutWrapper selectedCityId={city.id}>
       <JsonLd data={jsonLdData} />
+      <JsonLd data={breadcrumbJsonLd} />
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-10 w-full">
         {/* Breadcrumb Navigation */}
         <div className="flex items-center gap-2 text-xs font-bold text-slate-500">

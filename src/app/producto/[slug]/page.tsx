@@ -81,9 +81,41 @@ export default async function ProductDetailPage({ params }: PageProps) {
     },
   };
 
+  const breadcrumbJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      {
+        '@type': 'ListItem',
+        position: 1,
+        name: 'Inicio',
+        item: 'https://onmasportal.com.ar',
+      },
+      {
+        '@type': 'ListItem',
+        position: 2,
+        name: 'Catálogo',
+        item: 'https://onmasportal.com.ar/catalogo',
+      },
+      {
+        '@type': 'ListItem',
+        position: 3,
+        name: product.commerceName,
+        item: `https://onmasportal.com.ar/comercio/${commerce?.slug || product.commerceId}`,
+      },
+      {
+        '@type': 'ListItem',
+        position: 4,
+        name: product.title,
+        item: `https://onmasportal.com.ar/producto/${product.slug}`,
+      },
+    ],
+  };
+
   return (
     <DynamicLayoutWrapper>
       <JsonLd data={jsonLdData} />
+      <JsonLd data={breadcrumbJsonLd} />
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 w-full">
         <ProductDetailView 
           product={product} 

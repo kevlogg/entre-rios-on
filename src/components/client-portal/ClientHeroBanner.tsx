@@ -117,6 +117,10 @@ export function ClientHeroBanner({ provinceId }: ClientHeroBannerProps) {
               <img
                 src={imgSrc}
                 alt={slide.titleLine1 || 'Banner Publicitario'}
+                loading={idx === 0 ? 'eager' : 'lazy'}
+                decoding={idx === 0 ? 'sync' : 'async'}
+                // @ts-ignore
+                fetchpriority={idx === 0 ? 'high' : 'auto'}
                 className="w-full h-full object-cover object-center"
               />
             </a>
@@ -125,6 +129,10 @@ export function ClientHeroBanner({ provinceId }: ClientHeroBannerProps) {
               <img
                 src={imgSrc}
                 alt={slide.titleLine1 || 'Banner Publicitario'}
+                loading={idx === 0 ? 'eager' : 'lazy'}
+                decoding={idx === 0 ? 'sync' : 'async'}
+                // @ts-ignore
+                fetchpriority={idx === 0 ? 'high' : 'auto'}
                 className="w-full h-full object-cover object-center"
               />
             </Link>

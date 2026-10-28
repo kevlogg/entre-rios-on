@@ -134,6 +134,34 @@ export function ClientFooter() {
 
         </div>
 
+        {/* SEO Regional Directory & Cities Interlinking */}
+        <div className="py-5 border-b border-slate-300/80 space-y-2">
+          <span className="text-[11px] font-black uppercase tracking-wider text-slate-800 block">
+            Directorio Comercial por Ciudad & Región
+          </span>
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-slate-600 font-medium">
+            <Link href="/entre-rios/parana/comercios" className="hover:text-[#0047BA] transition-colors">Comercios en Paraná</Link>
+            <span className="text-slate-300">•</span>
+            <Link href="/santa-fe/santa-fe/comercios" className="hover:text-[#0047BA] transition-colors">Comercios en Santa Fe</Link>
+            <span className="text-slate-300">•</span>
+            <Link href="/santa-fe/rosario/comercios" className="hover:text-[#0047BA] transition-colors">Comercios en Rosario</Link>
+            <span className="text-slate-300">•</span>
+            <Link href="/entre-rios/concordia/comercios" className="hover:text-[#0047BA] transition-colors">Comercios en Concordia</Link>
+            <span className="text-slate-300">•</span>
+            <Link href="/entre-rios/colon/turismo" className="hover:text-[#0047BA] transition-colors">Turismo en Colón</Link>
+            <span className="text-slate-300">•</span>
+            <Link href="/entre-rios/gualeguaychu/comercios" className="hover:text-[#0047BA] transition-colors">Comercios en Gualeguaychú</Link>
+            <span className="text-slate-300">•</span>
+            <Link href="/santa-fe/rafaela/catalogo" className="hover:text-[#0047BA] transition-colors">Catálogo en Rafaela</Link>
+            <span className="text-slate-300">•</span>
+            <Link href="/entre-rios/concepcion-del-uruguay/comercios" className="hover:text-[#0047BA] transition-colors">Concepción del Uruguay</Link>
+            <span className="text-slate-300">•</span>
+            <Link href="/empleos" className="hover:text-[#0047BA] transition-colors">Bolsa de Empleo</Link>
+            <span className="text-slate-300">•</span>
+            <Link href="/turismo" className="hover:text-[#0047BA] transition-colors">Guía Turística del Litoral</Link>
+          </div>
+        </div>
+
         {/* Bottom copyright */}
         <div className="pt-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-[11px] text-slate-600 font-medium">
           <p>

@@ -88,9 +88,41 @@ export default async function CommerceDetailPage({ params }: PageProps) {
     } : undefined,
   };
 
+  const breadcrumbJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      {
+        '@type': 'ListItem',
+        position: 1,
+        name: 'Inicio',
+        item: 'https://onmasportal.com.ar',
+      },
+      {
+        '@type': 'ListItem',
+        position: 2,
+        name: 'Comercios',
+        item: 'https://onmasportal.com.ar/comercios',
+      },
+      {
+        '@type': 'ListItem',
+        position: 3,
+        name: commerce.cityName,
+        item: `https://onmasportal.com.ar/ciudad/${commerce.cityId || 'parana'}`,
+      },
+      {
+        '@type': 'ListItem',
+        position: 4,
+        name: commerce.name,
+        item: `https://onmasportal.com.ar/comercio/${commerce.slug}`,
+      },
+    ],
+  };
+
   return (
     <DynamicLayoutWrapper>
       <JsonLd data={jsonLdData} />
+      <JsonLd data={breadcrumbJsonLd} />
       <ProfileViewTracker commerceId={commerce.id} />
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 w-full">
         {/* Breadcrumb Glass Badge */}
