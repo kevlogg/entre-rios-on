@@ -64,14 +64,14 @@ const getFeaturesForPlan = (cardType: 'bronce' | 'plata' | 'oro', track: 'comerc
   const isTurismo = track === 'turismo';
   const catalogText = isTurismo
     ? (cardType === 'bronce'
-        ? 'Hasta 5 servicios o tipos de alojamiento / cabañas'
+        ? 'Hasta 25 servicios o tipos de alojamiento / cabañas'
         : cardType === 'plata'
-        ? 'Hasta 20 servicios o tipos de alojamiento / paquetes'
+        ? 'Hasta 60 servicios o tipos de alojamiento / paquetes'
         : 'Servicios y alojamientos ILIMITADOS')
     : (cardType === 'bronce'
-        ? 'Catálogo de hasta 5 productos / servicios'
+        ? 'Catálogo de hasta 25 productos / servicios'
         : cardType === 'plata'
-        ? 'Catálogo de hasta 20 productos / servicios'
+        ? 'Catálogo de hasta 60 productos / servicios'
         : 'Catálogo ILIMITADO de productos y servicios');
 
   const maxIncluded = cardType === 'bronce' ? 3 : cardType === 'plata' ? 6 : 11;

@@ -21,7 +21,8 @@ import {
   Award,
   DollarSign,
   Trash2,
-  AlertTriangle
+  AlertTriangle,
+  ShoppingBag
 } from 'lucide-react';
 import { 
   toggleCommerceVerificationAction, 
@@ -235,6 +236,7 @@ export function CommerceApprovalTable({ commerces: initialCommerces }: CommerceA
               <th className="pb-3 px-3">Cuenta / Nombre</th>
               <th className="pb-3 px-3">Localidad</th>
               <th className="pb-3 px-3">Categoría & Plan</th>
+              <th className="pb-3 px-3 text-center">Productos</th>
               <th className="pb-3 px-3 text-center">Insignia Verificado</th>
               <th className="pb-3 px-3 text-center">Estado del Plan</th>
               <th className="pb-3 px-3 text-right">Acciones</th>
@@ -242,6 +244,8 @@ export function CommerceApprovalTable({ commerces: initialCommerces }: CommerceA
           </thead>
           <tbody className="divide-y divide-slate-100 font-medium text-slate-700">
             {filteredCommerces.map((comm) => {
+              const maxProd = comm.plan === 'Oro' ? '∞' : comm.plan === 'Plata' ? '60' : '25';
+              const pCount = comm.productCount ?? 0;
               return (
                 <tr key={comm.id} className="hover:bg-slate-50/90 transition-colors group">
                   <td className="py-3.5 px-3">
@@ -291,6 +295,21 @@ export function CommerceApprovalTable({ commerces: initialCommerces }: CommerceA
                         </span>
                       )}
                     </div>
+                  </td>
+
+                  <td className="py-3.5 px-3 text-center">
+                    <span 
+                      className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl text-xs font-black border shadow-2xs ${
+                        pCount > 0 
+                          ? 'bg-cyan-50/80 text-[#0047BA] border-cyan-200' 
+                          : 'bg-slate-100 text-slate-500 border-slate-200'
+                      }`}
+                      title={`${pCount} productos o servicios subidos por el comercio`}
+                    >
+                      <ShoppingBag className={`w-3.5 h-3.5 ${pCount > 0 ? 'text-[#00ADB5]' : 'text-slate-400'}`} />
+                      <span>{pCount}</span>
+                      <span className="text-[10px] text-slate-400 font-bold">/ {maxProd}</span>
+                    </span>
                   </td>
 
                   <td className="py-3.5 px-3 text-center">
@@ -447,6 +466,19 @@ export function CommerceApprovalTable({ commerces: initialCommerces }: CommerceA
                     <option value="Plata">Cambiar a Plata</option>
                     <option value="Oro">Cambiar a Oro</option>
                   </select>
+                </div>
+              </div>
+
+              <div>
+                <span className="text-slate-400 block font-bold text-[10px] uppercase">Productos en Catálogo:</span>
+                <div className="flex items-center gap-2 mt-1">
+                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl text-xs font-black bg-white border border-slate-200 shadow-2xs">
+                    <ShoppingBag className="w-3.5 h-3.5 text-[#00ADB5]" />
+                    <strong className="text-slate-900">{selectedCommerce.productCount ?? 0}</strong>
+                    <span className="text-[11px] text-slate-500 font-bold">
+                      subidos (Límite: {selectedCommerce.plan === 'Oro' ? 'Ilimitado' : selectedCommerce.plan === 'Plata' ? '60 máx' : '25 máx'})
+                    </span>
+                  </span>
                 </div>
               </div>
             </div>

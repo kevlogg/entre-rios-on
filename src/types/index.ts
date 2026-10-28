@@ -43,6 +43,7 @@ export interface Commerce {
   plan?: 'Bronce' | 'Plata' | 'Oro';
   viewsCount?: number;
   whatsappClicksCount?: number;
+  productCount?: number;
   legalName?: string;
   ownerId?: string;
 }

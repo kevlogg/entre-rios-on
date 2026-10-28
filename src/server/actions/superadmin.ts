@@ -1611,10 +1611,10 @@ export async function getSubscriptionPlansAction(): Promise<{
               price: Number(p.price) || (p.id === 'oro' ? 99000 : p.id === 'plata' ? 49000 : 29000),
               period: String(p.period || 'mes'),
               badge: String(p.badge || (p.id === 'oro' ? 'MÁXIMO ALCANCE • VIP' : p.id === 'plata' ? 'Mayor Visibilidad' : 'Presencia Básica')),
-              catalogLimitText: String(p.catalog_limit_text || (p.id === 'oro' ? 'Catálogo ILIMITADO de productos y servicios' : p.id === 'plata' ? 'Catálogo de hasta 20 productos / servicios' : 'Catálogo de hasta 5 productos / servicios')),
+              catalogLimitText: String(p.catalog_limit_text || (p.id === 'oro' ? 'Catálogo ILIMITADO de productos y servicios' : p.id === 'plata' ? 'Catálogo de hasta 60 productos / servicios' : 'Catálogo de hasta 25 productos / servicios')),
               description: String(p.description || ''),
               targetAudience: String(p.target_audience || 'Comercios y Turismo'),
-              features: Array.isArray(feats) ? feats : [],
+              features: Array.isArray(feats) ? feats.map((f: string) => f.replace(/hasta 5 /gi, 'hasta 25 ').replace(/hasta 20 /gi, 'hasta 60 ')) : [],
             };
           });
 
@@ -1641,14 +1641,21 @@ export async function getSubscriptionPlansAction(): Promise<{
             const fullPlans = DEFAULT_SUBSCRIPTION_PLANS.map((d) => {
               const saved = mapById.get(d.id);
               if (saved) {
+                const normLimit = (saved.catalogLimitText || d.catalogLimitText)
+                  .replace(/hasta 5 /gi, 'hasta 25 ')
+                  .replace(/hasta 20 /gi, 'hasta 60 ');
+                const rawFeatures = Array.isArray(saved.features) && saved.features.length > 0 ? saved.features : d.features;
+                const normFeatures = rawFeatures.map((f: string) =>
+                  f.replace(/hasta 5 /gi, 'hasta 25 ').replace(/hasta 20 /gi, 'hasta 60 ')
+                );
                 return {
                   ...d,
                   name: saved.name || d.name,
                   price: typeof saved.price === 'number' ? saved.price : d.price,
                   badge: saved.badge || d.badge,
-                  catalogLimitText: saved.catalogLimitText || d.catalogLimitText,
+                  catalogLimitText: normLimit,
                   description: saved.description || d.description,
-                  features: Array.isArray(saved.features) && saved.features.length > 0 ? saved.features : d.features,
+                  features: normFeatures,
                 };
               }
               return d;

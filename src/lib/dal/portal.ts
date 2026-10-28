@@ -968,7 +968,20 @@ export async function getAllCommerces(includeInactive: boolean = false): Promise
         query = query.or('is_subscription_active.eq.true,is_subscription_active.is.null');
       }
 
-      const { data, error } = await query;
+      const [{ data, error }, { data: productsData }] = await Promise.all([
+        query,
+        supabase.from('products').select('commerce_id'),
+      ]);
+
+      const productCountMap = new Map<string, number>();
+      if (Array.isArray(productsData)) {
+        for (const p of productsData) {
+          if (p.commerce_id) {
+            productCountMap.set(p.commerce_id, (productCountMap.get(p.commerce_id) || 0) + 1);
+          }
+        }
+      }
+
       if (!error && Array.isArray(data)) {
         return data.map((c) => {
           const rawTier = (c.subscription_tier || 'BRONCE').toUpperCase();
@@ -996,6 +1009,7 @@ export async function getAllCommerces(includeInactive: boolean = false): Promise
             address: c.address,
             website: c.website,
             plan,
+            productCount: productCountMap.get(c.id) || 0,
           };
         });
       }
@@ -1005,7 +1019,10 @@ export async function getAllCommerces(includeInactive: boolean = false): Promise
   }
 
   await simulateNetworkDelay();
-  const allCommerces = Object.values(COMMERCES_MOCK);
+  const allCommerces = Object.values(COMMERCES_MOCK).map((c) => ({
+    ...c,
+    productCount: Object.values(PRODUCTS_MOCK).filter((p) => p.commerceId === c.id).length,
+  }));
   if (includeInactive) return allCommerces;
   return allCommerces.filter((c) => c.isSubscriptionActive !== false);
 }

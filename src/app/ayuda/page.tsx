@@ -20,7 +20,7 @@ const FAQS = [
   },
   {
     q: '¿Qué beneficios tienen los planes abonados?',
-    a: 'Los planes Bronce, Plata u Oro te permiten ampliar tu catálogo (hasta 5, 20 o ilimitados productos), obtener insignias de verificación, destacarte en la portada y acceder a métricas en tiempo real.',
+    a: 'Los planes Bronce, Plata u Oro te permiten ampliar tu catálogo (hasta 25, 60 o ilimitados productos), obtener insignias de verificación, destacarte en la portada y acceder a métricas en tiempo real.',
   },
   {
     q: '¿Cómo funciona la PWA (App Instalable)?',
