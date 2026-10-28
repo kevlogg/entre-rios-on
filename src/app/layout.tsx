@@ -110,7 +110,7 @@ export const metadata: Metadata = {
     images: ['/logo1.png'],
   },
   verification: {
-    google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION || undefined,
+    google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION || 'googleea6e92e30f6ba60c',
   },
   other: {
     'geo.region': 'AR-E',
