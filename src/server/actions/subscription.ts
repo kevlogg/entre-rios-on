@@ -19,6 +19,24 @@ export async function createSubscriptionPreferenceAction(
       };
     }
 
+    // 1b. Verificar si es un alta nueva y si el tramo KevDev está bloqueado
+    try {
+      const lifecycleRes = await getCommerceSubscriptionLifecycleAction(commerceId);
+      const isAlreadyActive = lifecycleRes.success && lifecycleRes.lifecycle?.isActive;
+      if (!isAlreadyActive) {
+        const { getKevDevTierStatusAction } = await import('@/server/actions/superadmin');
+        const tierStatus = await getKevDevTierStatusAction();
+        if (tierStatus.isRegistrationLocked) {
+          return {
+            success: false,
+            message: 'El cupo de comercios activos para el tramo actual ha sido alcanzado. Por favor, hablá con Soporte para activar tu comercio.',
+          };
+        }
+      }
+    } catch (e) {
+      console.warn('Note checking tier status for MP preference:', e);
+    }
+
     // 2. Obtener precios dinámicos configurados
     let price = planTier === 'ORO' ? 95000 : planTier === 'PLATA' ? 55000 : 35000;
     let planName = planTier === 'ORO' ? 'Plan Oro' : planTier === 'PLATA' ? 'Plan Plata' : 'Plan Bronce';

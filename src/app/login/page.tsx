@@ -4,7 +4,7 @@ import React, { useState, Suspense } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
-import { Mail, Lock, ArrowRight, Sparkles, MapPin, KeyRound, User, Store, Palmtree, CheckCircle2, Globe } from 'lucide-react';
+import { Mail, Lock, ArrowRight, Sparkles, MapPin, KeyRound, User, Store, Palmtree, CheckCircle2, Globe, MessageCircle } from 'lucide-react';
 import { getCitiesByProvince } from '@/lib/constants/locations';
 
 type UserType = 'particular' | 'comercio' | 'turismo';
@@ -95,6 +95,12 @@ function LoginFormContent() {
 
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  const [lockedModal, setLockedModal] = useState<{
+    isOpen: boolean;
+    reason: string;
+    whatsapp: string;
+    message: string;
+  } | null>(null);
 
   const supabase = createClient();
   const availableCities = getCitiesByProvince(provinceId);
@@ -167,6 +173,25 @@ function LoginFormContent() {
         const fullName = `${firstName} ${lastName}`.trim();
 
         const needsBusiness = userType === 'comercio' || userType === 'turismo';
+        if (needsBusiness) {
+          try {
+            const { checkCommerceRegistrationAllowedAction } = await import('@/server/actions/superadmin');
+            const regCheck = await checkCommerceRegistrationAllowedAction();
+            if (!regCheck.allowed) {
+              setLoading(false);
+              setLockedModal({
+                isOpen: true,
+                reason: regCheck.reason || 'Cupo de comercios completado para este tramo. Por favor, hablá con soporte para activar tu comercio.',
+                whatsapp: regCheck.supportWhatsApp || '5493426514889',
+                message: regCheck.supportMessage || 'Hola, quiero consultar para habilitar mi comercio en ON MÁS.',
+              });
+              return;
+            }
+          } catch (chkErr) {
+            console.warn('Note checking registration allowed:', chkErr);
+          }
+        }
+
         const computedRole = needsBusiness ? 'MERCHANT_ADMIN' : 'PUBLIC_USER';
         const computedRedirect = needsBusiness ? '/admin' : (redirectTo === '/admin' ? '/' : redirectTo);
 
@@ -835,6 +860,48 @@ function LoginFormContent() {
           </button>
         )}
       </div>
+
+      {/* MODAL BLOQUEO DE CUPO / FRENO DE TRAMO KEVDEV */}
+      {lockedModal?.isOpen && (
+        <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in">
+          <div className="bg-white rounded-3xl max-w-md w-full p-6 sm:p-7 shadow-2xl border border-slate-200 text-center space-y-4">
+            <div className="w-14 h-14 bg-amber-100 text-amber-600 rounded-2xl flex items-center justify-center mx-auto text-2xl font-black shadow-inner">
+              🔒
+            </div>
+            <div className="space-y-1.5">
+              <span className="bg-amber-100 text-amber-900 border border-amber-300 text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-wider">
+                Freno de Cupo por Tramo
+              </span>
+              <h3 className="text-xl font-black text-slate-900 mt-2">
+                Hablá con Soporte para Activar tu Comercio
+              </h3>
+              <p className="text-xs text-slate-600 font-medium leading-relaxed">
+                {lockedModal.reason}
+              </p>
+            </div>
+
+            <div className="pt-2 space-y-2">
+              <a
+                href={`https://wa.me/${lockedModal.whatsapp}?text=${encodeURIComponent(lockedModal.message)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-full bg-[#25D366] hover:bg-[#20ba5a] text-white py-3 px-4 rounded-2xl font-black text-xs shadow-md transition-all active:scale-95 flex items-center justify-center gap-2"
+              >
+                <MessageCircle className="w-4 h-4 fill-current" />
+                <span>Hablar con Soporte por WhatsApp</span>
+              </a>
+
+              <button
+                type="button"
+                onClick={() => setLockedModal(null)}
+                className="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 py-2.5 px-4 rounded-xl font-bold text-xs transition-colors cursor-pointer"
+              >
+                Entendido / Volver
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

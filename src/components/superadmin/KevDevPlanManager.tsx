@@ -14,8 +14,10 @@ import {
   Sparkles,
   Cpu,
   RefreshCw,
-  Award
+  Award,
+  AlertTriangle
 } from 'lucide-react';
+import { getKevDevTierStatusAction } from '@/server/actions/superadmin';
 
 interface PaymentRecord {
   id: string;
@@ -68,6 +70,7 @@ export function KevDevPlanManager({ onPaymentsLoaded }: KevDevPlanManagerProps =
   const [isSynced, setIsSynced] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [paymentStatus, setPaymentStatus] = useState<string>('AL_DIA');
+  const [tierStatus, setTierStatus] = useState<any>(null);
 
   const fetchPayments = async () => {
     setIsLoading(true);
@@ -91,8 +94,20 @@ export function KevDevPlanManager({ onPaymentsLoaded }: KevDevPlanManagerProps =
     }
   };
 
+  const loadTierStatus = async () => {
+    try {
+      const res = await getKevDevTierStatusAction();
+      if (res.success) {
+        setTierStatus(res);
+      }
+    } catch (err) {
+      console.warn('[KevDevPlanManager] Error cargando tierStatus:', err);
+    }
+  };
+
   useEffect(() => {
     fetchPayments();
+    loadTierStatus();
   }, []);
 
   const tramos = [
@@ -238,6 +253,41 @@ export function KevDevPlanManager({ onPaymentsLoaded }: KevDevPlanManagerProps =
       {/* TAB 1: STATUS & ACTIVE PLAN SUMMARY */}
       {activeTab === 'status' && (
         <div className="space-y-6">
+          {/* ADVERTENCIA CONTRACTUAL DE CAPACIDAD POR TRAMO */}
+          <div className="bg-gradient-to-r from-amber-500/15 via-amber-500/5 to-amber-500/10 border-2 border-amber-400 rounded-3xl p-6 shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-5">
+            <div className="flex items-start gap-4">
+              <div className="p-3.5 bg-amber-500 text-slate-950 rounded-2xl shrink-0 font-black text-2xl shadow-xs">
+                ⚠️
+              </div>
+              <div className="space-y-1">
+                <div className="inline-flex items-center gap-1.5 bg-amber-500/20 border border-amber-500/40 text-amber-950 text-[10px] font-black px-3 py-0.5 rounded-full uppercase tracking-wider">
+                  Advertencia Contractual de Capacidad
+                </div>
+                <h4 className="text-base sm:text-lg font-black text-slate-900 mt-1">
+                  Cada tramo corresponde a una cantidad de comercios activos en plataforma
+                </h4>
+                <p className="text-xs text-slate-700 font-medium leading-relaxed max-w-2xl">
+                  El abono mensual se actualiza al iniciar cada nuevo tramo. Al inscribirse el <strong>comercio 16</strong> (o al superar el límite de cualquier tramo), el sistema implementa un <strong>freno automático de registro</strong> indicándole al comercio contactar a soporte, asegurando que se coordine previamente con KevDev el ajuste al siguiente tramo.
+                </p>
+              </div>
+            </div>
+
+            {tierStatus && (
+              <div className="bg-white/90 backdrop-blur-xs p-4 rounded-2xl border border-amber-300 shadow-xs text-center shrink-0 min-w-[210px]">
+                <span className="text-[10px] font-black uppercase tracking-wider text-amber-900 block">
+                  Ocupación Actual
+                </span>
+                <div className="text-2xl font-black text-slate-900 mt-0.5">
+                  <span className="text-[#0047BA]">{tierStatus.activeCommercesCount}</span>
+                  <span className="text-xs text-slate-400 font-bold"> / {tierStatus.maxCommerces}</span>
+                </div>
+                <span className={`text-[11px] font-bold block mt-1 ${tierStatus.remainingSlots === 0 ? 'text-rose-600 font-black' : 'text-slate-600'}`}>
+                  {tierStatus.remainingSlots > 0 ? `Quedan ${tierStatus.remainingSlots} cupos libres` : '⚠️ Límite del tramo alcanzado'}
+                </span>
+              </div>
+            )}
+          </div>
+
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {/* Card 1: Active Tier */}
             <div className="bg-white rounded-3xl p-6 border border-slate-200 shadow-sm relative overflow-hidden group hover:border-[#00ADB5] transition-all">
@@ -250,13 +300,13 @@ export function KevDevPlanManager({ onPaymentsLoaded }: KevDevPlanManagerProps =
                 </span>
               </div>
               <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Tramo de Capacidad</p>
-              <h3 className="text-2xl font-black text-slate-900 mt-1">Tramo 1: Semilla</h3>
+              <h3 className="text-2xl font-black text-slate-900 mt-1">{tierStatus?.currentTramo?.name || 'Tramo 1: Semilla'}</h3>
               <p className="text-xs text-slate-500 mt-2 font-medium">
-                Suscripción actual para inicio ágil con hasta <strong className="text-slate-800">15 comercios</strong> activos.
+                Suscripción actual para inicio ágil con hasta <strong className="text-slate-800">{tierStatus?.maxCommerces || 15} comercios</strong> activos.
               </p>
               <div className="mt-4 pt-4 border-t border-slate-100 flex items-center justify-between text-xs font-extrabold">
                 <span className="text-slate-500">Capacidad Máxima:</span>
-                <span className="text-[#0047BA]">15 Comercios</span>
+                <span className="text-[#0047BA]">{tierStatus?.maxCommerces || 15} Comercios ({tierStatus?.activeCommercesCount || 0} ocupados)</span>
               </div>
             </div>
 

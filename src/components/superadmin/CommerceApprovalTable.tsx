@@ -22,15 +22,23 @@ import {
   DollarSign,
   Trash2,
   AlertTriangle,
-  ShoppingBag
+  ShoppingBag,
+  Lock,
+  Unlock,
+  Zap,
+  TrendingUp,
+  Layers
 } from 'lucide-react';
 import { 
   toggleCommerceVerificationAction, 
   toggleCommerceSubscriptionAction,
   getCommercePaymentHistoryAction,
   deleteCommerceAction,
-  updateCommercePlanAction
+  updateCommercePlanAction,
+  getKevDevTierStatusAction,
+  updateKevDevTierConfigAction
 } from '@/server/actions/superadmin';
+import { KevDevTierConfig, KevDevTramo } from '@/lib/services/kevdev-tier';
 
 interface CommerceApprovalTableProps {
   commerces: Commerce[];
@@ -51,9 +59,80 @@ export function CommerceApprovalTable({ commerces: initialCommerces }: CommerceA
   const [commerceToDelete, setCommerceToDelete] = useState<Commerce | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
 
+  // KevDev Tier & Capacity State
+  const [tierStatus, setTierStatus] = useState<{
+    config: KevDevTierConfig;
+    currentTramo: KevDevTramo;
+    nextTramo: KevDevTramo | null;
+    activeCommercesCount: number;
+    totalCommercesCount: number;
+    maxCommerces: number;
+    remainingSlots: number;
+    isLimitReached: boolean;
+    isRegistrationLocked: boolean;
+    tramos: KevDevTramo[];
+  } | null>(null);
+  const [isUpdatingTier, setIsUpdatingTier] = useState(false);
+
+  const loadTierStatus = async () => {
+    try {
+      const res = await getKevDevTierStatusAction();
+      if (res.success) {
+        setTierStatus(res);
+      }
+    } catch (e) {
+      console.warn('Error cargando estado de tramos KevDev:', e);
+    }
+  };
+
   React.useEffect(() => {
     setCommerces(initialCommerces);
+    loadTierStatus();
   }, [initialCommerces]);
+
+  const handleToggleLock = async () => {
+    if (!tierStatus || isUpdatingTier) return;
+    setIsUpdatingTier(true);
+    try {
+      const nextLock = !tierStatus.config.isLockActive;
+      const res = await updateKevDevTierConfigAction({ isLockActive: nextLock });
+      if (res.success) {
+        await loadTierStatus();
+      } else {
+        alert(res.message);
+      }
+    } catch (e: any) {
+      alert(e.message || 'Error al actualizar el freno de tramo');
+    } finally {
+      setIsUpdatingTier(false);
+    }
+  };
+
+  const handleAdvanceTier = async () => {
+    if (!tierStatus || !tierStatus.nextTramo || isUpdatingTier) return;
+    const confirmNext = window.confirm(
+      `¿Confirmás avanzar al ${tierStatus.nextTramo.name} (${tierStatus.nextTramo.range})?\n\nEste tramo permite hasta ${tierStatus.nextTramo.maxCommerces} comercios activos con abono de ${tierStatus.nextTramo.abono}.`
+    );
+    if (!confirmNext) return;
+
+    setIsUpdatingTier(true);
+    try {
+      const res = await updateKevDevTierConfigAction({
+        currentTierId: tierStatus.nextTramo.id,
+        isLockActive: true,
+        unlockedByDev: false,
+      });
+      if (res.success) {
+        await loadTierStatus();
+      } else {
+        alert(res.message);
+      }
+    } catch (e: any) {
+      alert(e.message || 'Error al avanzar de tramo');
+    } finally {
+      setIsUpdatingTier(false);
+    }
+  };
 
   const toggleVerification = async (id: string) => {
     const target = commerces.find((c) => c.id === id);
@@ -75,7 +154,11 @@ export function CommerceApprovalTable({ commerces: initialCommerces }: CommerceA
     if (!target) return;
 
     try {
-      await toggleCommerceSubscriptionAction(id, target.isSubscriptionActive);
+      const res = await toggleCommerceSubscriptionAction(id, target.isSubscriptionActive);
+      if (res && !res.success) {
+        alert(res.message);
+        return;
+      }
     } catch (err) {
       console.warn('Subscription Server Action fallback:', err);
     }
@@ -87,6 +170,7 @@ export function CommerceApprovalTable({ commerces: initialCommerces }: CommerceA
     if (selectedCommerce && selectedCommerce.id === id) {
       setSelectedCommerce({ ...selectedCommerce, isSubscriptionActive: nextState });
     }
+    loadTierStatus();
   };
 
   const handleOpenDetailModal = async (comm: Commerce) => {
@@ -147,9 +231,136 @@ export function CommerceApprovalTable({ commerces: initialCommerces }: CommerceA
     return matchesSearch && matchesCity && matchesType;
   });
 
+  const activeCommercesCount = commerces.filter((c) => c.isSubscriptionActive).length;
+  const currentMaxCommerces = tierStatus?.maxCommerces || 15;
+  const liveRemainingSlots = Math.max(0, currentMaxCommerces - activeCommercesCount);
+  const liveIsLimitReached = activeCommercesCount >= currentMaxCommerces;
+  const liveIsLocked = liveIsLimitReached && Boolean(tierStatus?.config.isLockActive) && !Boolean(tierStatus?.config.unlockedByDev);
+
   return (
     <div className="bg-white rounded-3xl p-6 border border-slate-200 shadow-xs space-y-6">
       
+      {/* ======================================================== */}
+      {/* BANNER DE CONTROL DE CAPACIDAD & TRAMO KEVDEV            */}
+      {/* ======================================================== */}
+      {tierStatus && (
+        <div className={`relative overflow-hidden rounded-3xl p-5 sm:p-6 text-white border shadow-md transition-all ${
+          liveIsLocked
+            ? 'bg-gradient-to-r from-slate-950 via-rose-950 to-slate-900 border-rose-500/50'
+            : liveRemainingSlots <= 3
+            ? 'bg-gradient-to-r from-slate-950 via-amber-950 to-slate-900 border-amber-500/50'
+            : 'bg-gradient-to-r from-slate-950 via-[#002878] to-[#0047BA] border-white/10'
+        }`}>
+          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-5">
+            {/* Información del Tramo */}
+            <div className="space-y-2">
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="bg-white/10 text-cyan-300 border border-cyan-400/30 text-[10px] font-black px-3 py-0.5 rounded-full uppercase tracking-wider flex items-center gap-1.5">
+                  <Zap className="w-3.5 h-3.5 text-cyan-400" />
+                  <span>Escalabilidad KevDev • {tierStatus.currentTramo.name}</span>
+                </span>
+
+                {liveIsLocked ? (
+                  <span className="bg-rose-500 text-white text-[10px] font-black px-3 py-0.5 rounded-full uppercase tracking-wider flex items-center gap-1 animate-pulse shadow-sm">
+                    <Lock className="w-3 h-3" /> Freno Activo en Comercio {currentMaxCommerces + 1}
+                  </span>
+                ) : (
+                  <span className="bg-emerald-500/20 text-emerald-300 border border-emerald-400/40 text-[10px] font-black px-3 py-0.5 rounded-full uppercase tracking-wider flex items-center gap-1">
+                    <Unlock className="w-3 h-3 text-emerald-400" /> Registro Habilitado
+                  </span>
+                )}
+              </div>
+
+              <h4 className="text-xl sm:text-2xl font-black tracking-tight text-white flex items-center gap-2">
+                <span>Capacidad de Comercios Activos:</span>
+                <span className={liveIsLimitReached ? 'text-rose-400' : 'text-[#00E5E8]'}>
+                  {activeCommercesCount} / {currentMaxCommerces}
+                </span>
+              </h4>
+
+              <p className="text-xs text-slate-200 font-medium leading-relaxed max-w-2xl">
+                {liveIsLocked ? (
+                  <span className="text-rose-200 font-bold">
+                    ⚠️ <strong>Límite alcanzado ({activeCommercesCount}/{currentMaxCommerces}):</strong> Se activó el freno automático de seguridad para nuevos registros. Cuando el comercio {currentMaxCommerces + 1} intente registrarse o activar plan, se le indicará hablar con soporte hasta coordinar el pase al tramo superior ({tierStatus.nextTramo?.name || 'Tramo Superior'}).
+                  </span>
+                ) : liveRemainingSlots <= 3 ? (
+                  <span className="text-amber-200 font-bold">
+                    ⚡ <strong>Atención:</strong> Quedan solo <strong>{liveRemainingSlots} {liveRemainingSlots === 1 ? 'cupo' : 'cupos'}</strong> para alcanzar el tope de {currentMaxCommerces} comercios del {tierStatus.currentTramo.name}. Al inscribirse el comercio {currentMaxCommerces + 1}, entrará en vigencia el freno automático.
+                  </span>
+                ) : (
+                  <span>
+                    El <strong>{tierStatus.currentTramo.name}</strong> ({tierStatus.currentTramo.range}) tiene un abono de {tierStatus.currentTramo.abono}. Te quedan <strong className="text-cyan-300">{liveRemainingSlots} cupos libres</strong> antes de requerir la ampliación de tramo.
+                  </span>
+                )}
+              </p>
+            </div>
+
+            {/* Contador de Cupos y Controles de Traba */}
+            <div className="flex flex-col sm:flex-row lg:flex-col items-start sm:items-center lg:items-end gap-3 shrink-0">
+              <div className="bg-white/10 backdrop-blur-md px-4 py-2.5 rounded-2xl border border-white/20 text-right space-y-0.5 min-w-[210px]">
+                <span className="text-[10px] font-extrabold uppercase text-slate-300 block">Cupos Disponibles</span>
+                <div className="text-2xl font-black text-white flex items-center justify-end gap-2">
+                  <span className={liveRemainingSlots === 0 ? 'text-rose-400' : 'text-[#00E5E8]'}>
+                    {liveRemainingSlots}
+                  </span>
+                  <span className="text-xs text-slate-300 font-bold">/ {currentMaxCommerces} libres</span>
+                </div>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-2">
+                <button
+                  type="button"
+                  disabled={isUpdatingTier}
+                  onClick={handleToggleLock}
+                  className={`px-3 py-1.5 rounded-xl font-black text-xs transition-all active:scale-95 cursor-pointer flex items-center gap-1.5 border shadow-2xs ${
+                    tierStatus.config.isLockActive
+                      ? 'bg-rose-500/20 hover:bg-rose-500/30 text-rose-200 border-rose-500/40'
+                      : 'bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-200 border-emerald-500/40'
+                  }`}
+                  title="Activar o desactivar el freno automático de inicio de nuevo tramo"
+                >
+                  {tierStatus.config.isLockActive ? <Lock className="w-3.5 h-3.5" /> : <Unlock className="w-3.5 h-3.5" />}
+                  <span>Traba: {tierStatus.config.isLockActive ? 'Activa' : 'Desactivada'}</span>
+                </button>
+
+                {tierStatus.nextTramo && (
+                  <button
+                    type="button"
+                    disabled={isUpdatingTier}
+                    onClick={handleAdvanceTier}
+                    className="bg-[#00ADB5] hover:bg-[#00969d] text-white px-3 py-1.5 rounded-xl font-black text-xs transition-all active:scale-95 cursor-pointer flex items-center gap-1.5 shadow-2xs"
+                    title={`Avanzar al ${tierStatus.nextTramo.name} (${tierStatus.nextTramo.range})`}
+                  >
+                    <TrendingUp className="w-3.5 h-3.5" />
+                    <span>Habilitar {tierStatus.nextTramo.name}</span>
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Barra de Progreso de Capacidad */}
+          <div className="mt-4 pt-4 border-t border-white/10 space-y-1.5">
+            <div className="flex items-center justify-between text-[11px] font-extrabold text-slate-300">
+              <span>Ocupación del Tramo: {Math.round((activeCommercesCount / currentMaxCommerces) * 100)}%</span>
+              <span>Tope: {currentMaxCommerces} comercios activos</span>
+            </div>
+            <div className="w-full h-2.5 bg-black/40 rounded-full overflow-hidden p-0.5 border border-white/10">
+              <div
+                className={`h-full rounded-full transition-all duration-500 ${
+                  activeCommercesCount >= currentMaxCommerces
+                    ? 'bg-gradient-to-r from-amber-500 to-rose-500'
+                    : liveRemainingSlots <= 3
+                    ? 'bg-gradient-to-r from-amber-400 to-amber-500'
+                    : 'bg-gradient-to-r from-[#00ADB5] to-[#00E5E8]'
+                }`}
+                style={{ width: `${Math.min(100, Math.round((activeCommercesCount / currentMaxCommerces) * 100))}%` }}
+              />
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Table Header Controls */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-100 pb-4">
         <div>

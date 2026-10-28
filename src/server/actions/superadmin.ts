@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabase/server';
 import { createClient as createSupabaseJSClient } from '@supabase/supabase-js';
 import { uploadImageServerAction } from '@/server/actions/storage';
 import { PlanConfigItem, DEFAULT_SUBSCRIPTION_PLANS } from '@/lib/services/plans-config';
+import { KevDevTierConfig, DEFAULT_KEVDEV_TIER_CONFIG, KEVDEV_TRAMOS, getTramoById, KevDevTramo } from '@/lib/services/kevdev-tier';
 
 export async function toggleCommerceVerificationAction(
   commerceId: string,
@@ -38,6 +39,17 @@ export async function toggleCommerceSubscriptionAction(
     const adminSupabase = getAdminClient();
     const client = adminSupabase || (await createClient());
     const newStatus = !currentStatus;
+
+    // Si se intenta activar el comercio, validar si el tramo KevDev está bloqueado
+    if (newStatus) {
+      const tierStatus = await getKevDevTierStatusAction();
+      if (tierStatus.isRegistrationLocked) {
+        return {
+          success: false,
+          message: `Límite del tramo alcanzado: Tu plataforma está en ${tierStatus.currentTramo.name} (${tierStatus.activeCommercesCount} de ${tierStatus.maxCommerces} comercios activos). Para activar nuevos comercios, debés acordar con KevDev la ampliación al siguiente tramo.`,
+        };
+      }
+    }
 
     const { error } = await client
       .from('commerces')
@@ -973,6 +985,17 @@ export async function createCashPaymentAction(paymentData: {
       return { success: false, message: 'No se pudo conectar con Supabase.' };
     }
 
+    // Si es un alta nueva (no renovación mensual), verificar si el tramo KevDev está bloqueado
+    if (paymentData.paymentType !== 'MONTHLY_RENEWAL') {
+      const tierStatus = await getKevDevTierStatusAction();
+      if (tierStatus.isRegistrationLocked) {
+        return {
+          success: false,
+          message: 'El cupo de comercios activos para el tramo actual ha sido alcanzado. Por favor, hablá con Soporte para activar tu comercio.',
+        };
+      }
+    }
+
     let resolvedName = paymentData.commerceName || 'Comercio Adherido';
     let resolvedOwner = paymentData.ownerName || 'Titular';
     let resolvedPhone = paymentData.phoneWhatsApp || '5493426514889';
@@ -1121,6 +1144,18 @@ export async function approveCashPaymentAction(
 
     const planName = (payment?.plan_name || 'BRONCE').toUpperCase();
     const resolvedTier = planName.includes('ORO') ? 'ORO' : planName.includes('PLATA') ? 'PLATA' : 'BRONCE';
+
+    // Verificar si es un alta nueva y el tramo KevDev está bloqueado
+    const isRenewal = payment?.payment_type === 'MONTHLY_RENEWAL' || payment?.paymentType === 'MONTHLY_RENEWAL';
+    if (!isRenewal) {
+      const tierStatus = await getKevDevTierStatusAction();
+      if (tierStatus.isRegistrationLocked) {
+        return {
+          success: false,
+          message: `Límite del tramo alcanzado: Tu plataforma está en ${tierStatus.currentTramo.name} (${tierStatus.activeCommercesCount} de ${tierStatus.maxCommerces} comercios activos). Para activar altas de nuevos comercios, debés acordar con KevDev la ampliación al siguiente tramo.`,
+        };
+      }
+    }
 
     // 2. Marcar pago como APPROVED y renovar fecha de inicio del ciclo de 30 días
     const { error: payErr } = await adminSupabase
@@ -1895,3 +1930,196 @@ export async function saveSideBannersAction(banners: any[]): Promise<{ success: 
     return { success: false, message: `Error: ${(err as Error).message}` };
   }
 }
+
+// ========================================================
+// CONTROL DE CAPACIDAD DE COMERCIOS & TRAMOS KEVDEV
+// ========================================================
+
+export async function getKevDevTierStatusAction(): Promise<{
+  success: boolean;
+  config: KevDevTierConfig;
+  currentTramo: KevDevTramo;
+  nextTramo: KevDevTramo | null;
+  activeCommercesCount: number;
+  totalCommercesCount: number;
+  maxCommerces: number;
+  remainingSlots: number;
+  isLimitReached: boolean;
+  isRegistrationLocked: boolean;
+  tramos: KevDevTramo[];
+}> {
+  try {
+    const adminSupabase = getAdminClient();
+    const client = adminSupabase || (await createClient());
+
+    let config: KevDevTierConfig = { ...DEFAULT_KEVDEV_TIER_CONFIG };
+
+    if (client) {
+      const { data: row, error: cfgErr } = await client
+        .from('province_configs')
+        .select('banner_desktop')
+        .eq('id', 'config_kevdev_tier')
+        .maybeSingle();
+
+      if (!cfgErr && row && row.banner_desktop) {
+        try {
+          const parsed = JSON.parse(row.banner_desktop);
+          if (parsed && typeof parsed.currentTierId === 'number') {
+            config = { ...config, ...parsed };
+          }
+        } catch (e) {
+          console.warn('Error parseando config_kevdev_tier:', e);
+        }
+      }
+    }
+
+    let activeCount = 0;
+    let totalCount = 0;
+
+    if (client) {
+      const { count: actCount } = await client
+        .from('commerces')
+        .select('id', { count: 'exact', head: true })
+        .eq('is_subscription_active', true);
+
+      const { count: totCount } = await client
+        .from('commerces')
+        .select('id', { count: 'exact', head: true });
+
+      activeCount = actCount || 0;
+      totalCount = totCount || 0;
+    }
+
+    const currentTramo = getTramoById(config.currentTierId);
+    const nextTramo = KEVDEV_TRAMOS.find((t) => t.id === config.currentTierId + 1) || null;
+    const maxCommerces = config.customMaxCommerces || currentTramo.maxCommerces;
+    const remainingSlots = Math.max(0, maxCommerces - activeCount);
+    const isLimitReached = activeCount >= maxCommerces;
+    const isRegistrationLocked = isLimitReached && Boolean(config.isLockActive) && !Boolean(config.unlockedByDev);
+
+    return {
+      success: true,
+      config,
+      currentTramo,
+      nextTramo,
+      activeCommercesCount: activeCount,
+      totalCommercesCount: totalCount,
+      maxCommerces,
+      remainingSlots,
+      isLimitReached,
+      isRegistrationLocked,
+      tramos: KEVDEV_TRAMOS,
+    };
+  } catch (err: any) {
+    console.warn('Error en getKevDevTierStatusAction:', err);
+    const defaultTramo = KEVDEV_TRAMOS[0];
+    return {
+      success: false,
+      config: DEFAULT_KEVDEV_TIER_CONFIG,
+      currentTramo: defaultTramo,
+      nextTramo: KEVDEV_TRAMOS[1],
+      activeCommercesCount: 0,
+      totalCommercesCount: 0,
+      maxCommerces: defaultTramo.maxCommerces,
+      remainingSlots: defaultTramo.maxCommerces,
+      isLimitReached: false,
+      isRegistrationLocked: false,
+      tramos: KEVDEV_TRAMOS,
+    };
+  }
+}
+
+export async function updateKevDevTierConfigAction(
+  updates: Partial<KevDevTierConfig>
+): Promise<{ success: boolean; message: string; config?: KevDevTierConfig }> {
+  try {
+    const adminSupabase = getAdminClient();
+    const client = adminSupabase || (await createClient());
+
+    let currentConfig: KevDevTierConfig = { ...DEFAULT_KEVDEV_TIER_CONFIG };
+
+    if (client) {
+      const { data: row } = await client
+        .from('province_configs')
+        .select('banner_desktop')
+        .eq('id', 'config_kevdev_tier')
+        .maybeSingle();
+
+      if (row && row.banner_desktop) {
+        try {
+          currentConfig = { ...currentConfig, ...JSON.parse(row.banner_desktop) };
+        } catch {}
+      }
+    }
+
+    const mergedConfig: KevDevTierConfig = {
+      ...currentConfig,
+      ...updates,
+      updatedAt: new Date().toISOString(),
+    };
+
+    if (client) {
+      const { error } = await client.from('province_configs').upsert({
+        id: 'config_kevdev_tier',
+        name: 'Configuración de Tramos y Freno KevDev',
+        banner_desktop: JSON.stringify(mergedConfig),
+        banner_mobile: `tramo_${mergedConfig.currentTierId}`,
+        updated_at: new Date().toISOString(),
+      });
+
+      if (error) {
+        return { success: false, message: `Error guardando tramo: ${error.message}` };
+      }
+    }
+
+    revalidatePath('/superadmin');
+    revalidatePath('/admin');
+    revalidatePath('/login');
+    return { success: true, message: 'Configuración de tramo actualizada con éxito.', config: mergedConfig };
+  } catch (err: any) {
+    return { success: false, message: `Error inesperado: ${err.message}` };
+  }
+}
+
+export async function checkCommerceRegistrationAllowedAction(): Promise<{
+  allowed: boolean;
+  reason?: string;
+  supportWhatsApp: string;
+  supportMessage: string;
+  currentTierName: string;
+  activeCount: number;
+  maxAllowed: number;
+}> {
+  try {
+    const status = await getKevDevTierStatusAction();
+    if (status.isRegistrationLocked) {
+      return {
+        allowed: false,
+        reason: `Cupo de comercios completado para el ${status.currentTramo.name} (${status.activeCommercesCount} de ${status.maxCommerces} activos). Por favor, contactá a Soporte y Administración para activar tu comercio.`,
+        supportWhatsApp: status.config.supportWhatsApp || '5493426514889',
+        supportMessage: status.config.supportMessage || 'Hola, quiero consultar para habilitar mi comercio en ON MÁS.',
+        currentTierName: status.currentTramo.name,
+        activeCount: status.activeCommercesCount,
+        maxAllowed: status.maxCommerces,
+      };
+    }
+    return {
+      allowed: true,
+      supportWhatsApp: status.config.supportWhatsApp || '5493426514889',
+      supportMessage: status.config.supportMessage || 'Hola, quiero consultar para habilitar mi comercio en ON MÁS.',
+      currentTierName: status.currentTramo.name,
+      activeCount: status.activeCommercesCount,
+      maxAllowed: status.maxCommerces,
+    };
+  } catch {
+    return {
+      allowed: true,
+      supportWhatsApp: '5493426514889',
+      supportMessage: 'Hola, quiero consultar sobre mi comercio.',
+      currentTierName: 'Tramo 1: Semilla',
+      activeCount: 0,
+      maxAllowed: 15,
+    };
+  }
+}
+
