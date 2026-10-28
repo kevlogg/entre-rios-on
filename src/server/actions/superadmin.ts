@@ -46,7 +46,7 @@ export async function toggleCommerceSubscriptionAction(
       if (tierStatus.isRegistrationLocked) {
         return {
           success: false,
-          message: `Límite del tramo alcanzado: Tu plataforma está en ${tierStatus.currentTramo.name} (${tierStatus.activeCommercesCount} de ${tierStatus.maxCommerces} comercios activos). Para activar nuevos comercios, debés acordar con KevDev la ampliación al siguiente tramo.`,
+          message: `Límite de capacidad alcanzado (${tierStatus.activeCommercesCount} de ${tierStatus.maxCommerces} comercios activos). Para habilitar nuevos comercios, comunicate con Soporte Técnico para ampliar la capacidad.`,
         };
       }
     }
@@ -991,7 +991,7 @@ export async function createCashPaymentAction(paymentData: {
       if (tierStatus.isRegistrationLocked) {
         return {
           success: false,
-          message: 'El cupo de comercios activos para el tramo actual ha sido alcanzado. Por favor, hablá con Soporte para activar tu comercio.',
+          message: 'Por favor, comunicate con Soporte para activar tu comercio.',
         };
       }
     }
@@ -1152,7 +1152,7 @@ export async function approveCashPaymentAction(
       if (tierStatus.isRegistrationLocked) {
         return {
           success: false,
-          message: `Límite del tramo alcanzado: Tu plataforma está en ${tierStatus.currentTramo.name} (${tierStatus.activeCommercesCount} de ${tierStatus.maxCommerces} comercios activos). Para activar altas de nuevos comercios, debés acordar con KevDev la ampliación al siguiente tramo.`,
+          message: `Límite de capacidad alcanzado (${tierStatus.activeCommercesCount} de ${tierStatus.maxCommerces} comercios activos). Para habilitar nuevos comercios, comunicate con Soporte Técnico para ampliar la capacidad.`,
         };
       }
     }
@@ -2095,7 +2095,7 @@ export async function checkCommerceRegistrationAllowedAction(): Promise<{
     if (status.isRegistrationLocked) {
       return {
         allowed: false,
-        reason: `Cupo de comercios completado para el ${status.currentTramo.name} (${status.activeCommercesCount} de ${status.maxCommerces} activos). Por favor, contactá a Soporte y Administración para activar tu comercio.`,
+        reason: 'Para registrar y activar tu comercio en la plataforma, por favor comunicate con nuestro equipo de Soporte y Atención al Cliente.',
         supportWhatsApp: status.config.supportWhatsApp || '5493426514889',
         supportMessage: status.config.supportMessage || 'Hola, quiero consultar para habilitar mi comercio en ON MÁS.',
         currentTierName: status.currentTramo.name,

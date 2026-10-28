@@ -39,6 +39,8 @@ import {
   updateKevDevTierConfigAction
 } from '@/server/actions/superadmin';
 import { KevDevTierConfig, KevDevTramo } from '@/lib/services/kevdev-tier';
+import { getSuperAdminSession } from '@/lib/security/superadmin-auth';
+import { createClient } from '@/lib/supabase/client';
 
 interface CommerceApprovalTableProps {
   commerces: Commerce[];
@@ -73,6 +75,7 @@ export function CommerceApprovalTable({ commerces: initialCommerces }: CommerceA
     tramos: KevDevTramo[];
   } | null>(null);
   const [isUpdatingTier, setIsUpdatingTier] = useState(false);
+  const [isDeveloper, setIsDeveloper] = useState(false);
 
   const loadTierStatus = async () => {
     try {
@@ -88,6 +91,23 @@ export function CommerceApprovalTable({ commerces: initialCommerces }: CommerceA
   React.useEffect(() => {
     setCommerces(initialCommerces);
     loadTierStatus();
+
+    // Comprobar si el usuario logueado en el SuperAdmin es el desarrollador (loggia.1996@gmail.com)
+    try {
+      const session = getSuperAdminSession();
+      if (session?.email?.trim().toLowerCase() === 'loggia.1996@gmail.com') {
+        setIsDeveloper(true);
+      }
+    } catch {}
+
+    try {
+      const supabase = createClient();
+      supabase.auth.getUser().then(({ data: { user } }) => {
+        if (user?.email?.trim().toLowerCase() === 'loggia.1996@gmail.com') {
+          setIsDeveloper(true);
+        }
+      }).catch(() => {});
+    } catch {}
   }, [initialCommerces]);
 
   const handleToggleLock = async () => {
@@ -252,21 +272,33 @@ export function CommerceApprovalTable({ commerces: initialCommerces }: CommerceA
             : 'bg-gradient-to-r from-slate-950 via-[#002878] to-[#0047BA] border-white/10'
         }`}>
           <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-5">
-            {/* Información del Tramo */}
+            {/* Información del Tramo / Capacidad */}
             <div className="space-y-2">
               <div className="flex flex-wrap items-center gap-2">
                 <span className="bg-white/10 text-cyan-300 border border-cyan-400/30 text-[10px] font-black px-3 py-0.5 rounded-full uppercase tracking-wider flex items-center gap-1.5">
                   <Zap className="w-3.5 h-3.5 text-cyan-400" />
-                  <span>Escalabilidad KevDev • {tierStatus.currentTramo.name}</span>
+                  <span>
+                    {isDeveloper 
+                      ? `Escalabilidad KevDev • ${tierStatus.currentTramo.name}` 
+                      : 'Capacidad de la Plataforma'}
+                  </span>
                 </span>
+
+                {isDeveloper && (
+                  <span className="bg-cyan-500/20 text-cyan-200 border border-cyan-400/30 text-[10px] font-black px-2.5 py-0.5 rounded-full uppercase tracking-wider">
+                    🧪 Control Desarrollador (loggia.1996@gmail.com)
+                  </span>
+                )}
 
                 {liveIsLocked ? (
                   <span className="bg-rose-500 text-white text-[10px] font-black px-3 py-0.5 rounded-full uppercase tracking-wider flex items-center gap-1 animate-pulse shadow-sm">
-                    <Lock className="w-3 h-3" /> Freno Activo en Comercio {currentMaxCommerces + 1}
+                    <Lock className="w-3 h-3" /> 
+                    {isDeveloper ? `Freno Activo en Comercio ${currentMaxCommerces + 1}` : 'Límite de Capacidad Alcanzado'}
                   </span>
                 ) : (
                   <span className="bg-emerald-500/20 text-emerald-300 border border-emerald-400/40 text-[10px] font-black px-3 py-0.5 rounded-full uppercase tracking-wider flex items-center gap-1">
-                    <Unlock className="w-3 h-3 text-emerald-400" /> Registro Habilitado
+                    <Unlock className="w-3 h-3 text-emerald-400" /> 
+                    {isDeveloper ? 'Registro Habilitado' : 'Capacidad Disponible'}
                   </span>
                 )}
               </div>
@@ -279,18 +311,34 @@ export function CommerceApprovalTable({ commerces: initialCommerces }: CommerceA
               </h4>
 
               <p className="text-xs text-slate-200 font-medium leading-relaxed max-w-2xl">
-                {liveIsLocked ? (
-                  <span className="text-rose-200 font-bold">
-                    ⚠️ <strong>Límite alcanzado ({activeCommercesCount}/{currentMaxCommerces}):</strong> Se activó el freno automático de seguridad para nuevos registros. Cuando el comercio {currentMaxCommerces + 1} intente registrarse o activar plan, se le indicará hablar con soporte hasta coordinar el pase al tramo superior ({tierStatus.nextTramo?.name || 'Tramo Superior'}).
-                  </span>
-                ) : liveRemainingSlots <= 3 ? (
-                  <span className="text-amber-200 font-bold">
-                    ⚡ <strong>Atención:</strong> Quedan solo <strong>{liveRemainingSlots} {liveRemainingSlots === 1 ? 'cupo' : 'cupos'}</strong> para alcanzar el tope de {currentMaxCommerces} comercios del {tierStatus.currentTramo.name}. Al inscribirse el comercio {currentMaxCommerces + 1}, entrará en vigencia el freno automático.
-                  </span>
+                {isDeveloper ? (
+                  liveIsLocked ? (
+                    <span className="text-rose-200 font-bold">
+                      ⚠️ <strong>Límite alcanzado ({activeCommercesCount}/{currentMaxCommerces}):</strong> Se activó el freno automático de seguridad para nuevos registros. Cuando el comercio {currentMaxCommerces + 1} intente registrarse o activar plan, se le indicará hablar con soporte hasta coordinar el pase al tramo superior ({tierStatus.nextTramo?.name || 'Tramo Superior'}).
+                    </span>
+                  ) : liveRemainingSlots <= 3 ? (
+                    <span className="text-amber-200 font-bold">
+                      ⚡ <strong>Atención:</strong> Quedan solo <strong>{liveRemainingSlots} {liveRemainingSlots === 1 ? 'cupo' : 'cupos'}</strong> para alcanzar el tope de {currentMaxCommerces} comercios del {tierStatus.currentTramo.name}. Al inscribirse el comercio {currentMaxCommerces + 1}, entrará en vigencia el freno automático.
+                    </span>
+                  ) : (
+                    <span>
+                      El <strong>{tierStatus.currentTramo.name}</strong> ({tierStatus.currentTramo.range}) tiene un abono de {tierStatus.currentTramo.abono}. Te quedan <strong className="text-cyan-300">{liveRemainingSlots} cupos libres</strong> antes de requerir la ampliación de tramo.
+                    </span>
+                  )
                 ) : (
-                  <span>
-                    El <strong>{tierStatus.currentTramo.name}</strong> ({tierStatus.currentTramo.range}) tiene un abono de {tierStatus.currentTramo.abono}. Te quedan <strong className="text-cyan-300">{liveRemainingSlots} cupos libres</strong> antes de requerir la ampliación de tramo.
-                  </span>
+                  liveIsLocked ? (
+                    <span className="text-rose-200 font-bold">
+                      ⚠️ <strong>Límite alcanzado ({activeCommercesCount}/{currentMaxCommerces}):</strong> Se ha completado la capacidad de comercios activos de tu plan. Para habilitar el registro de nuevos comercios, comunicate con Soporte Técnico.
+                    </span>
+                  ) : liveRemainingSlots <= 3 ? (
+                    <span className="text-amber-200 font-bold">
+                      ⚡ <strong>Atención:</strong> Quedan solo <strong>{liveRemainingSlots} {liveRemainingSlots === 1 ? 'cupo' : 'cupos'}</strong> para alcanzar el límite de {currentMaxCommerces} comercios activos de tu plan.
+                    </span>
+                  ) : (
+                    <span>
+                      Tu plataforma cuenta actualmente con <strong>{activeCommercesCount} de {currentMaxCommerces} comercios activos</strong>. Tenés <strong className="text-cyan-300">{liveRemainingSlots} cupos libres</strong> disponibles.
+                    </span>
+                  )
                 )}
               </p>
             </div>
@@ -307,35 +355,51 @@ export function CommerceApprovalTable({ commerces: initialCommerces }: CommerceA
                 </div>
               </div>
 
-              <div className="flex flex-wrap items-center gap-2">
-                <button
-                  type="button"
-                  disabled={isUpdatingTier}
-                  onClick={handleToggleLock}
-                  className={`px-3 py-1.5 rounded-xl font-black text-xs transition-all active:scale-95 cursor-pointer flex items-center gap-1.5 border shadow-2xs ${
-                    tierStatus.config.isLockActive
-                      ? 'bg-rose-500/20 hover:bg-rose-500/30 text-rose-200 border-rose-500/40'
-                      : 'bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-200 border-emerald-500/40'
-                  }`}
-                  title="Activar o desactivar el freno automático de inicio de nuevo tramo"
-                >
-                  {tierStatus.config.isLockActive ? <Lock className="w-3.5 h-3.5" /> : <Unlock className="w-3.5 h-3.5" />}
-                  <span>Traba: {tierStatus.config.isLockActive ? 'Activa' : 'Desactivada'}</span>
-                </button>
-
-                {tierStatus.nextTramo && (
+              {/* Botones de Traba: VISIBLES ÚNICAMENTE PARA loggia.1996@gmail.com */}
+              {isDeveloper ? (
+                <div className="flex flex-wrap items-center gap-2">
                   <button
                     type="button"
                     disabled={isUpdatingTier}
-                    onClick={handleAdvanceTier}
-                    className="bg-[#00ADB5] hover:bg-[#00969d] text-white px-3 py-1.5 rounded-xl font-black text-xs transition-all active:scale-95 cursor-pointer flex items-center gap-1.5 shadow-2xs"
-                    title={`Avanzar al ${tierStatus.nextTramo.name} (${tierStatus.nextTramo.range})`}
+                    onClick={handleToggleLock}
+                    className={`px-3 py-1.5 rounded-xl font-black text-xs transition-all active:scale-95 cursor-pointer flex items-center gap-1.5 border shadow-2xs ${
+                      tierStatus.config.isLockActive
+                        ? 'bg-rose-500/20 hover:bg-rose-500/30 text-rose-200 border-rose-500/40'
+                        : 'bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-200 border-emerald-500/40'
+                    }`}
+                    title="Activar o desactivar el freno automático de inicio de nuevo tramo"
                   >
-                    <TrendingUp className="w-3.5 h-3.5" />
-                    <span>Habilitar {tierStatus.nextTramo.name}</span>
+                    {tierStatus.config.isLockActive ? <Lock className="w-3.5 h-3.5" /> : <Unlock className="w-3.5 h-3.5" />}
+                    <span>Traba: {tierStatus.config.isLockActive ? 'Activa' : 'Desactivada'}</span>
                   </button>
-                )}
-              </div>
+
+                  {tierStatus.nextTramo && (
+                    <button
+                      type="button"
+                      disabled={isUpdatingTier}
+                      onClick={handleAdvanceTier}
+                      className="bg-[#00ADB5] hover:bg-[#00969d] text-white px-3 py-1.5 rounded-xl font-black text-xs transition-all active:scale-95 cursor-pointer flex items-center gap-1.5 shadow-2xs"
+                      title={`Avanzar al ${tierStatus.nextTramo.name} (${tierStatus.nextTramo.range})`}
+                    >
+                      <TrendingUp className="w-3.5 h-3.5" />
+                      <span>Habilitar {tierStatus.nextTramo.name}</span>
+                    </button>
+                  )}
+                </div>
+              ) : (
+                /* Para el cliente administrador no-developer: botón de contacto directo si está en o cerca del límite */
+                (liveRemainingSlots <= 3 || liveIsLocked) && (
+                  <a
+                    href="https://wa.me/5491124707166?text=Hola%20Kevin,%20te%20contacto%20desde%20ON%20M%C3%81S%20para%20consultar%20por%20la%20ampliaci%C3%B3n%20de%20capacidad%20de%20comercios."
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="bg-[#25D366] hover:bg-[#20ba5a] text-white px-3.5 py-2 rounded-xl font-black text-xs transition-all active:scale-95 flex items-center gap-1.5 shadow-md"
+                  >
+                    <MessageCircle className="w-3.5 h-3.5" />
+                    <span>Contactar a Soporte</span>
+                  </a>
+                )
+              )}
             </div>
           </div>
 

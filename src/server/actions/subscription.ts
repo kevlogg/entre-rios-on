@@ -29,7 +29,7 @@ export async function createSubscriptionPreferenceAction(
         if (tierStatus.isRegistrationLocked) {
           return {
             success: false,
-            message: 'El cupo de comercios activos para el tramo actual ha sido alcanzado. Por favor, hablá con Soporte para activar tu comercio.',
+            message: 'Por favor, comunicate con Soporte para activar tu comercio.',
           };
         }
       }

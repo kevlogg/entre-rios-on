@@ -181,7 +181,7 @@ function LoginFormContent() {
               setLoading(false);
               setLockedModal({
                 isOpen: true,
-                reason: regCheck.reason || 'Cupo de comercios completado para este tramo. Por favor, hablá con soporte para activar tu comercio.',
+                reason: regCheck.reason || 'Para registrar y activar tu comercio en la plataforma, por favor comunicate con nuestro equipo de Soporte y Atención al Cliente.',
                 whatsapp: regCheck.supportWhatsApp || '5493426514889',
                 message: regCheck.supportMessage || 'Hola, quiero consultar para habilitar mi comercio en ON MÁS.',
               });
@@ -869,14 +869,14 @@ function LoginFormContent() {
               🔒
             </div>
             <div className="space-y-1.5">
-              <span className="bg-amber-100 text-amber-900 border border-amber-300 text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-wider">
-                Freno de Cupo por Tramo
+              <span className="bg-cyan-100 text-[#0047BA] border border-cyan-300 text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-wider">
+                Atención al Comercio
               </span>
               <h3 className="text-xl font-black text-slate-900 mt-2">
                 Hablá con Soporte para Activar tu Comercio
               </h3>
               <p className="text-xs text-slate-600 font-medium leading-relaxed">
-                {lockedModal.reason}
+                Para registrar y activar tu comercio en la plataforma, por favor comunicate con nuestro equipo de Soporte y Atención al Cliente por WhatsApp.
               </p>
             </div>
 
