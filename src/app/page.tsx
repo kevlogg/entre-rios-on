@@ -43,6 +43,11 @@ export default async function ClientHomePage({ searchParams }: ClientHomePagePro
 
   return (
     <div className="min-h-screen flex flex-col bg-[#e2e8f0]">
+      {/* Encabezado H1 Semántico Principal para Google & Motores de Búsqueda */}
+      <h1 className="sr-only">
+        ON MÁS Portal | Directorio Comercial, Catálogo de Productos y Turismo de Entre Ríos y Santa Fe
+      </h1>
+
       {/* Contenedor principal */}
       <main className="w-full flex-1 bg-[#e2e8f0]">
         <ClientHomeContainer initialProducts={products} />
