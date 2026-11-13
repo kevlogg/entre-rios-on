@@ -915,33 +915,35 @@ export function ClientHeader({ withBackground = false, portal = 'auto' }: Client
               </Link>
             )}
 
-            {/* Mi Cuenta / Iniciar sesión */}
-            {!currentUser ? (
-              <Link
-                href="/login"
-                className="flex items-center gap-1.5 text-xs font-bold text-slate-800 hover:text-[#0047BA] transition-colors p-1.5 sm:py-1.5 sm:px-2 rounded-lg hover:bg-slate-200/80"
-                title="Mi Cuenta"
-              >
-                <User className="w-4 h-4 text-slate-700" />
-                <span className="hidden sm:inline">Mi cuenta</span>
-              </Link>
-            ) : (
-              <Link
-                href="/admin"
-                className="flex items-center gap-1.5 text-xs font-bold text-slate-800 hover:text-[#0047BA] transition-colors p-1 sm:py-1 sm:px-2 rounded-lg hover:bg-slate-200/80"
-                title="Mi Panel de Control"
-              >
-                {userCommerce?.logoUrl ? (
-                  <div className="relative w-6 h-6 rounded-md overflow-hidden border border-slate-300 bg-white shrink-0">
-                    <Image src={userCommerce.logoUrl} alt={userCommerce.name} fill className="object-cover" />
-                  </div>
-                ) : (
-                  <div className="w-6 h-6 rounded-md bg-gradient-to-tr from-[#00ADB5] to-[#0047BA] text-white flex items-center justify-center font-black text-xs shrink-0">
-                    {userCommerce?.initial || 'M'}
-                  </div>
-                )}
-                <span className="hidden sm:inline truncate max-w-[100px]">{userCommerce?.name || 'Mi Comercio'}</span>
-              </Link>
+            {/* Mi Cuenta / Iniciar sesión (Exclusivo del portal comercial) */}
+            {effectivePortal === 'comercial' && (
+              !currentUser ? (
+                <Link
+                  href="/login"
+                  className="flex items-center gap-1.5 text-xs font-bold text-slate-800 hover:text-[#0047BA] transition-colors p-1.5 sm:py-1.5 sm:px-2 rounded-lg hover:bg-slate-200/80"
+                  title="Mi Cuenta"
+                >
+                  <User className="w-4 h-4 text-slate-700" />
+                  <span className="hidden sm:inline">Mi cuenta</span>
+                </Link>
+              ) : (
+                <Link
+                  href="/admin"
+                  className="flex items-center gap-1.5 text-xs font-bold text-slate-800 hover:text-[#0047BA] transition-colors p-1 sm:py-1 sm:px-2 rounded-lg hover:bg-slate-200/80"
+                  title="Mi Panel de Control"
+                >
+                  {userCommerce?.logoUrl ? (
+                    <div className="relative w-6 h-6 rounded-md overflow-hidden border border-slate-300 bg-white shrink-0">
+                      <Image src={userCommerce.logoUrl} alt={userCommerce.name} fill className="object-cover" />
+                    </div>
+                  ) : (
+                    <div className="w-6 h-6 rounded-md bg-gradient-to-tr from-[#00ADB5] to-[#0047BA] text-white flex items-center justify-center font-black text-xs shrink-0">
+                      {userCommerce?.initial || 'M'}
+                    </div>
+                  )}
+                  <span className="hidden sm:inline truncate max-w-[100px]">{userCommerce?.name || 'Mi Comercio'}</span>
+                </Link>
+              )
             )}
 
             {/* Acceso Rápido: Turismo en Comunidad / Catálogo en Comercial */}
