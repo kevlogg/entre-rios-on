@@ -234,7 +234,7 @@ export default function EmpleosPage() {
   };
 
   return (
-    <DynamicLayoutWrapper>
+    <DynamicLayoutWrapper portal="comunidad" showSideBanners={false}>
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 w-full">
         
         {/* Breadcrumb Glass Badge */}

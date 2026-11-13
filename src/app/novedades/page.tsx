@@ -268,7 +268,7 @@ export default function NovedadesPage() {
   );
 
   return (
-    <DynamicLayoutWrapper heroContent={heroContent}>
+    <DynamicLayoutWrapper heroContent={heroContent} portal="comunidad" showSideBanners={false}>
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 w-full">
 
         {/* Mensaje de Éxito / Notificación de Nota Pendiente */}

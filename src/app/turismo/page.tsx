@@ -49,7 +49,7 @@ export default async function TurismoPage() {
   );
 
   return (
-    <DynamicLayoutWrapper heroContent={heroContent}>
+    <DynamicLayoutWrapper heroContent={heroContent} portal="comunidad" showSideBanners={false}>
       <div className="space-y-8 w-full">
         {/* Tourist Circuits Pills */}
         <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none text-xs font-bold">

@@ -59,7 +59,7 @@ export default async function NovedadDetailPage({ params }: PageProps) {
   };
 
   return (
-    <DynamicLayoutWrapper>
+    <DynamicLayoutWrapper portal="comunidad" showSideBanners={false}>
       <JsonLd data={jsonLdData} />
       <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 w-full">
         {/* Breadcrumb Navigation */}

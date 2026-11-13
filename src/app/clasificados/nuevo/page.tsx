@@ -50,7 +50,7 @@ export default function NuevoClasificadoPage() {
   };
 
   return (
-    <DynamicLayoutWrapper>
+    <DynamicLayoutWrapper portal="comunidad" showSideBanners={false}>
       <main className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6 w-full">
         {/* Breadcrumb */}
         <div className="flex items-center gap-2 text-xs font-bold text-slate-500">

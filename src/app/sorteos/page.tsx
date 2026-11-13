@@ -46,7 +46,7 @@ export default function SorteosPage() {
 
   if (!activeRaffle) {
     return (
-      <DynamicLayoutWrapper>
+      <DynamicLayoutWrapper portal="comunidad" showSideBanners={false}>
         <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16 text-center space-y-6 w-full">
           {/* Breadcrumb Glass Badge */}
           <div className="bg-white/15 backdrop-blur-md border border-white/25 px-4 py-2 rounded-2xl w-fit mx-auto flex items-center gap-2 text-xs font-extrabold text-white shadow-xs mb-6">
@@ -123,7 +123,7 @@ export default function SorteosPage() {
   };
 
   return (
-    <DynamicLayoutWrapper>
+    <DynamicLayoutWrapper portal="comunidad" showSideBanners={false}>
       <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 w-full">
         {/* Breadcrumb Glass Badge */}
         <div className="bg-white/15 backdrop-blur-md border border-white/25 px-4 py-2 rounded-2xl w-fit flex items-center gap-2 text-xs font-extrabold text-white shadow-xs">
