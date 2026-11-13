@@ -14,13 +14,14 @@ export async function middleware(request: NextRequest) {
     return sessionResponse;
   }
 
-  const hostname = request.headers.get('host') || '';
+  const hostname = (request.headers.get('host') || request.nextUrl.hostname || '').toLowerCase();
   const pathname = request.nextUrl.pathname;
 
   // 2. Detección de Subdominio Comercial (tucompra.onmasportal.com.ar / tucompra.localhost)
   const isTuCompraSubdomain =
     hostname.startsWith('tucompra.') ||
     hostname.startsWith('comercial.') ||
+    hostname.includes('tucompra') ||
     request.nextUrl.searchParams.get('subdomain') === 'tucompra';
 
   // CASO A: Estamos en el subdominio comercial (tucompra.onmasportal.com.ar)
@@ -28,14 +29,8 @@ export async function middleware(request: NextRequest) {
     // Si visita la raíz '/', reescribimos internamente a '/comercial'
     // La barra de direcciones del navegador se mantiene en 'https://tucompra.onmasportal.com.ar/'
     if (pathname === '/') {
-      const url = request.nextUrl.clone();
-      url.pathname = '/comercial';
-
-      const rewriteResponse = NextResponse.rewrite(url, {
-        request: {
-          headers: request.headers,
-        },
-      });
+      const url = new URL('/comercial', request.url);
+      const rewriteResponse = NextResponse.rewrite(url);
 
       // Preservar cookies de sesión de Supabase
       sessionResponse.cookies.getAll().forEach((cookie) => {
