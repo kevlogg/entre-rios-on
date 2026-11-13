@@ -1,31 +1,112 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import { ExternalLink, ShoppingBag, Palmtree, Gift, Briefcase, Calendar, Store } from 'lucide-react';
 
-export function ClientFooter() {
+export interface ClientFooterProps {
+  portal?: 'comunidad' | 'comercial' | 'auto';
+}
+
+export function ClientFooter({ portal = 'auto' }: ClientFooterProps = {}) {
+  const pathname = usePathname();
+
+  const [effectivePortal, setEffectivePortal] = useState<'comunidad' | 'comercial'>(() => {
+    if (portal !== 'auto') return portal;
+    if (typeof window !== 'undefined') {
+      if (
+        window.location.hostname.startsWith('tucompra.') ||
+        window.location.hostname.startsWith('comercial.')
+      ) {
+        return 'comercial';
+      }
+    }
+    if (
+      pathname?.startsWith('/comercial') ||
+      pathname?.startsWith('/catalogo') ||
+      pathname?.startsWith('/comercios') ||
+      pathname?.startsWith('/comercio') ||
+      pathname?.startsWith('/comercio-online') ||
+      pathname?.startsWith('/producto') ||
+      pathname?.startsWith('/planes') ||
+      pathname?.startsWith('/vender-on') ||
+      pathname?.startsWith('/admin') ||
+      pathname?.startsWith('/oportunidades') ||
+      pathname?.startsWith('/mi-sitio-web') ||
+      pathname?.startsWith('/supermercado')
+    ) {
+      return 'comercial';
+    }
+    return 'comunidad';
+  });
+
+  useEffect(() => {
+    if (portal !== 'auto') {
+      setEffectivePortal(portal);
+      return;
+    }
+    const isCommercialHost =
+      typeof window !== 'undefined' &&
+      (window.location.hostname.startsWith('tucompra.') ||
+        window.location.hostname.startsWith('comercial.'));
+    const isCommercialPath =
+      pathname?.startsWith('/comercial') ||
+      pathname?.startsWith('/catalogo') ||
+      pathname?.startsWith('/comercios') ||
+      pathname?.startsWith('/comercio') ||
+      pathname?.startsWith('/comercio-online') ||
+      pathname?.startsWith('/producto') ||
+      pathname?.startsWith('/planes') ||
+      pathname?.startsWith('/vender-on') ||
+      pathname?.startsWith('/admin') ||
+      pathname?.startsWith('/oportunidades') ||
+      pathname?.startsWith('/mi-sitio-web') ||
+      pathname?.startsWith('/supermercado');
+
+    if (isCommercialHost || isCommercialPath) {
+      setEffectivePortal('comercial');
+    } else {
+      setEffectivePortal('comunidad');
+    }
+  }, [portal, pathname]);
+
+  const isDev =
+    typeof window !== 'undefined' &&
+    (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
+
+  const commercialUrl =
+    process.env.NEXT_PUBLIC_COMMERCIAL_URL ||
+    (isDev ? '/comercial' : 'https://tucompra.onmasportal.com.ar');
+
+  const communityUrl =
+    process.env.NEXT_PUBLIC_COMMUNITY_URL ||
+    (isDev ? '/' : 'https://onmasportal.com.ar');
+
   return (
     <footer className="w-full bg-[#e2e8f0] border-t border-slate-300 pt-10 pb-8 text-slate-700">
       <div className="max-w-[1480px] mx-auto px-4 sm:px-6 lg:px-8">
         
-        {/* Main Grid matching mockup */}
+        {/* Main Grid matching layout */}
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-8 pb-8 border-b border-slate-300/80">
           
           {/* Brand Column */}
           <div className="col-span-2 md:col-span-3 lg:col-span-1 space-y-3 flex flex-col items-center sm:items-start text-center sm:text-left">
-            <Link href="/" className="inline-block">
+            <Link href={effectivePortal === 'comercial' ? commercialUrl : '/'} className="inline-block">
               <div className="relative w-[104px] h-[60px] sm:w-[121px] sm:h-[70px]">
                 <Image
                   src="/logo1.png"
-                  alt="ON+ PORTAL COMERCIAL"
+                  alt={effectivePortal === 'comercial' ? 'ON+ PORTAL COMERCIAL' : 'ON+ COMUNIDAD'}
                   fill
                   className="object-contain"
                 />
               </div>
             </Link>
             <p className="text-xs text-slate-600 font-medium leading-tight">
-              Tu negocio, más cerca<br className="hidden sm:inline" /> de más personas.
+              {effectivePortal === 'comercial'
+                ? 'Tu negocio y tus compras, más cerca de más personas.'
+                : 'Cultura, agenda de eventos, turismo y comunidad del Litoral.'}
             </p>
             
             {/* Social media icons (SVG) */}
@@ -57,60 +138,74 @@ export function ClientFooter() {
             </div>
           </div>
 
-          {/* Col 1: Explorar */}
+          {/* Col 1: Comunidad & Cultura */}
           <div className="space-y-2">
-            <h4 className="text-xs font-black text-slate-900 tracking-wider">
-              Explorar
+            <h4 className="text-xs font-black text-slate-900 tracking-wider flex items-center gap-1.5">
+              <Calendar className="w-3.5 h-3.5 text-[#0047BA]" />
+              <span>Comunidad & Cultura</span>
             </h4>
             <ul className="space-y-1.5 text-xs text-slate-700 font-semibold">
-              <li><Link href="/" className="hover:text-[#0047BA] transition-colors">Inicio</Link></li>
-              <li><Link href="/catalogo" className="hover:text-[#0047BA] transition-colors">Categorías</Link></li>
-              <li><Link href="/comercios" className="hover:text-[#0047BA] transition-colors">Comercios</Link></li>
-              <li><Link href="/catalogo?categoria=industria" className="hover:text-[#0047BA] transition-colors">Industrias</Link></li>
-              <li><Link href="/turismo" className="hover:text-[#0047BA] transition-colors">Turismo</Link></li>
-              <li><Link href="/supermercado" className="hover:text-[#0047BA] transition-colors">Supermercado</Link></li>
-            </ul>
-          </div>
-
-          {/* Col 2: Para comercios */}
-          <div className="space-y-2">
-            <h4 className="text-xs font-black text-slate-900 tracking-wider">
-              Para comercios
-            </h4>
-            <ul className="space-y-1.5 text-xs text-slate-700 font-semibold">
-              <li><Link href="/planes" className="hover:text-[#0047BA] transition-colors">Publicá tu negocio</Link></li>
-              <li><Link href="/planes" className="hover:text-[#0047BA] transition-colors">Planes</Link></li>
-              <li><Link href="/oportunidades" className="hover:text-[#0047BA] transition-colors">Oportunidades</Link></li>
-              <li><Link href="/novedades" className="hover:text-[#0047BA] transition-colors">Novedades</Link></li>
-              <li><Link href="/ayuda" className="hover:text-[#0047BA] transition-colors">Centro de ayuda</Link></li>
-            </ul>
-          </div>
-
-          {/* Col 3: Comunidad */}
-          <div className="space-y-2">
-            <h4 className="text-xs font-black text-slate-900 tracking-wider">
-              Novedades
-            </h4>
-            <ul className="space-y-1.5 text-xs text-slate-700 font-semibold">
-              <li><Link href="/clasificados" className="hover:text-[#0047BA] transition-colors">Empleos y avisos</Link></li>
-              <li><Link href="/novedades" className="hover:text-[#0047BA] transition-colors">Eventos & Agenda</Link></li>
-              <li><Link href="/oportunidades" className="hover:text-[#0047BA] transition-colors">Ofertas y descuentos</Link></li>
+              <li><Link href="/" className="hover:text-[#0047BA] transition-colors">Portada Comunidad</Link></li>
+              <li><Link href="/novedades" className="hover:text-[#0047BA] transition-colors">Agenda de Eventos</Link></li>
+              <li><Link href="/turismo" className="hover:text-[#0047BA] transition-colors">Turismo & Paseos</Link></li>
               <li><Link href="/sorteos" className="hover:text-[#0047BA] transition-colors">Sorteos ON+</Link></li>
-              <li><Link href="/novedades" className="hover:text-[#0047BA] transition-colors">Notas y novedades</Link></li>
+              <li><Link href="/empleos" className="hover:text-[#0047BA] transition-colors">Bolsa de Empleo</Link></li>
+              <li><Link href="/clasificados/nuevo" className="hover:text-[#0047BA] transition-colors">Publicar Aviso</Link></li>
+            </ul>
+          </div>
+
+          {/* Col 2: ON+ Comercial / Tu Compra */}
+          <div className="space-y-2">
+            <h4 className="text-xs font-black text-slate-900 tracking-wider flex items-center gap-1.5">
+              <ShoppingBag className="w-3.5 h-3.5 text-[#00ADB5]" />
+              <span>ON+ Comercial</span>
+            </h4>
+            <ul className="space-y-1.5 text-xs text-slate-700 font-semibold">
+              <li>
+                <a
+                  href={commercialUrl}
+                  target={commercialUrl.startsWith('http') ? '_blank' : undefined}
+                  rel={commercialUrl.startsWith('http') ? 'noopener noreferrer' : undefined}
+                  className="hover:text-[#0047BA] transition-colors flex items-center gap-1 text-[#0047BA] font-extrabold"
+                >
+                  <span>Tu Compra (Directorio)</span>
+                  <ExternalLink className="w-3 h-3" />
+                </a>
+              </li>
+              <li><Link href="/catalogo" className="hover:text-[#0047BA] transition-colors">Catálogo de Productos</Link></li>
+              <li><Link href="/comercios" className="hover:text-[#0047BA] transition-colors">Comercios e Industria</Link></li>
+              <li><Link href="/oportunidades" className="hover:text-[#0047BA] transition-colors">Ofertas & Promociones</Link></li>
+              <li><Link href="/planes" className="hover:text-[#0047BA] transition-colors">Planes para Comercios</Link></li>
+              <li><Link href="/vender-on" className="hover:text-[#0047BA] transition-colors">Sumar mi Negocio</Link></li>
+            </ul>
+          </div>
+
+          {/* Col 3: Turismo Regional */}
+          <div className="space-y-2">
+            <h4 className="text-xs font-black text-slate-900 tracking-wider flex items-center gap-1.5">
+              <Palmtree className="w-3.5 h-3.5 text-emerald-600" />
+              <span>Turismo Litoral</span>
+            </h4>
+            <ul className="space-y-1.5 text-xs text-slate-700 font-semibold">
+              <li><Link href="/turismo" className="hover:text-[#0047BA] transition-colors">Complejos Termales</Link></li>
+              <li><Link href="/turismo" className="hover:text-[#0047BA] transition-colors">Playas & Costaneras</Link></li>
+              <li><Link href="/turismo" className="hover:text-[#0047BA] transition-colors">Enoturismo & Bodegas</Link></li>
+              <li><Link href="/turismo" className="hover:text-[#0047BA] transition-colors">Posadas & Alojamientos</Link></li>
+              <li><Link href="/ayuda" className="hover:text-[#0047BA] transition-colors">Centro de Ayuda</Link></li>
             </ul>
           </div>
 
           {/* Col 4: Sobre ON+ */}
           <div className="space-y-2">
             <h4 className="text-xs font-black text-slate-900 tracking-wider">
-              Sobre ON+
+              Institucional
             </h4>
             <ul className="space-y-1.5 text-xs text-slate-700 font-semibold">
               <li><Link href="/quienes-somos" className="hover:text-[#0047BA] transition-colors">Quiénes somos</Link></li>
-              <li><Link href="/novedades" className="hover:text-[#0047BA] transition-colors">Nuestro impacto</Link></li>
               <li><Link href="/terminos" className="hover:text-[#0047BA] transition-colors">Términos y condiciones</Link></li>
               <li><Link href="/privacidad" className="hover:text-[#0047BA] transition-colors">Política de privacidad</Link></li>
-              <li><Link href="/ayuda" className="hover:text-[#0047BA] transition-colors">Contacto</Link></li>
+              <li><Link href="/ayuda" className="hover:text-[#0047BA] transition-colors">Contacto & Soporte</Link></li>
+              <li><Link href="/admin" className="hover:text-[#0047BA] transition-colors">Panel del Comercio</Link></li>
             </ul>
           </div>
 
@@ -128,7 +223,7 @@ export function ClientFooter() {
               />
             </div>
             <p className="text-[11px] text-slate-600 leading-snug pt-1 max-w-xs sm:max-w-none">
-              Medios, tecnología y soluciones, para el desarrollo regional.
+              Medios, tecnología y soluciones para el desarrollo regional.
             </p>
           </div>
 
@@ -137,35 +232,35 @@ export function ClientFooter() {
         {/* SEO Regional Directory & Cities Interlinking */}
         <div className="py-5 border-b border-slate-300/80 space-y-2">
           <span className="text-[11px] font-black uppercase tracking-wider text-slate-800 block">
-            Directorio Comercial por Ciudad & Región
+            Directorio Regional por Ciudad & Destino
           </span>
           <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-slate-600 font-medium">
-            <Link href="/entre-rios/parana/comercios" className="hover:text-[#0047BA] transition-colors">Comercios en Paraná</Link>
+            <Link href="/entre-rios/parana/comercios" className="hover:text-[#0047BA] transition-colors">Paraná</Link>
             <span className="text-slate-300">•</span>
-            <Link href="/santa-fe/santa-fe/comercios" className="hover:text-[#0047BA] transition-colors">Comercios en Santa Fe</Link>
+            <Link href="/santa-fe/santa-fe/comercios" className="hover:text-[#0047BA] transition-colors">Santa Fe</Link>
             <span className="text-slate-300">•</span>
-            <Link href="/santa-fe/rosario/comercios" className="hover:text-[#0047BA] transition-colors">Comercios en Rosario</Link>
+            <Link href="/santa-fe/rosario/comercios" className="hover:text-[#0047BA] transition-colors">Rosario</Link>
             <span className="text-slate-300">•</span>
-            <Link href="/entre-rios/concordia/comercios" className="hover:text-[#0047BA] transition-colors">Comercios en Concordia</Link>
+            <Link href="/entre-rios/concordia/comercios" className="hover:text-[#0047BA] transition-colors">Concordia</Link>
             <span className="text-slate-300">•</span>
-            <Link href="/entre-rios/colon/turismo" className="hover:text-[#0047BA] transition-colors">Turismo en Colón</Link>
+            <Link href="/entre-rios/colon/turismo" className="hover:text-[#0047BA] transition-colors">Colón</Link>
             <span className="text-slate-300">•</span>
-            <Link href="/entre-rios/gualeguaychu/comercios" className="hover:text-[#0047BA] transition-colors">Comercios en Gualeguaychú</Link>
+            <Link href="/entre-rios/gualeguaychu/comercios" className="hover:text-[#0047BA] transition-colors">Gualeguaychú</Link>
             <span className="text-slate-300">•</span>
-            <Link href="/santa-fe/rafaela/catalogo" className="hover:text-[#0047BA] transition-colors">Catálogo en Rafaela</Link>
+            <Link href="/santa-fe/rafaela/catalogo" className="hover:text-[#0047BA] transition-colors">Rafaela</Link>
             <span className="text-slate-300">•</span>
             <Link href="/entre-rios/concepcion-del-uruguay/comercios" className="hover:text-[#0047BA] transition-colors">Concepción del Uruguay</Link>
             <span className="text-slate-300">•</span>
             <Link href="/empleos" className="hover:text-[#0047BA] transition-colors">Bolsa de Empleo</Link>
             <span className="text-slate-300">•</span>
-            <Link href="/turismo" className="hover:text-[#0047BA] transition-colors">Guía Turística del Litoral</Link>
+            <Link href="/turismo" className="hover:text-[#0047BA] transition-colors">Guía Turística</Link>
           </div>
         </div>
 
         {/* Bottom copyright */}
         <div className="pt-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-[11px] text-slate-600 font-medium">
           <p>
-            © {new Date().getFullYear()} ON+ PORTAL COMERCIAL. Todos los derechos reservados
+            © {new Date().getFullYear()} {effectivePortal === 'comercial' ? 'ON+ PORTAL COMERCIAL' : 'ON+ COMUNIDAD & TURISMO'}. Todos los derechos reservados
             <Link href="/superadmin" className="hover:text-slate-400 transition-colors select-none cursor-default">.</Link>
           </p>
           <div className="flex items-center gap-4">

@@ -28,7 +28,9 @@ import {
   WashingMachine,
   Dumbbell,
   UtensilsCrossed,
-  Palmtree
+  Palmtree,
+  Gift,
+  ExternalLink
 } from 'lucide-react';
 import { trackSearchQuery, trackCitySelect } from '@/lib/analytics/events';
 import { PROVINCES, getCitiesByProvince, getProvinceBySlug, getCityBySlug } from '@/lib/constants/locations';
@@ -217,13 +219,73 @@ export const PROVINCE_THEMES: Record<string, {
   },
 };
 
-interface ClientHeaderProps {
+export interface ClientHeaderProps {
   withBackground?: boolean;
+  portal?: 'comunidad' | 'comercial' | 'auto';
 }
 
-export function ClientHeader({ withBackground = false }: ClientHeaderProps = {}) {
+export function ClientHeader({ withBackground = false, portal = 'auto' }: ClientHeaderProps = {}) {
   const pathname = usePathname();
   const router = useRouter();
+
+  const [effectivePortal, setEffectivePortal] = useState<'comunidad' | 'comercial'>(() => {
+    if (portal !== 'auto') return portal;
+    if (typeof window !== 'undefined') {
+      if (
+        window.location.hostname.startsWith('tucompra.') ||
+        window.location.hostname.startsWith('comercial.')
+      ) {
+        return 'comercial';
+      }
+    }
+    if (
+      pathname?.startsWith('/comercial') ||
+      pathname?.startsWith('/catalogo') ||
+      pathname?.startsWith('/comercios') ||
+      pathname?.startsWith('/comercio') ||
+      pathname?.startsWith('/comercio-online') ||
+      pathname?.startsWith('/producto') ||
+      pathname?.startsWith('/planes') ||
+      pathname?.startsWith('/vender-on') ||
+      pathname?.startsWith('/admin') ||
+      pathname?.startsWith('/oportunidades') ||
+      pathname?.startsWith('/mi-sitio-web') ||
+      pathname?.startsWith('/supermercado')
+    ) {
+      return 'comercial';
+    }
+    return 'comunidad';
+  });
+
+  useEffect(() => {
+    if (portal !== 'auto') {
+      setEffectivePortal(portal);
+      return;
+    }
+    const isCommercialHost =
+      typeof window !== 'undefined' &&
+      (window.location.hostname.startsWith('tucompra.') ||
+        window.location.hostname.startsWith('comercial.'));
+    const isCommercialPath =
+      pathname?.startsWith('/comercial') ||
+      pathname?.startsWith('/catalogo') ||
+      pathname?.startsWith('/comercios') ||
+      pathname?.startsWith('/comercio') ||
+      pathname?.startsWith('/comercio-online') ||
+      pathname?.startsWith('/producto') ||
+      pathname?.startsWith('/planes') ||
+      pathname?.startsWith('/vender-on') ||
+      pathname?.startsWith('/admin') ||
+      pathname?.startsWith('/oportunidades') ||
+      pathname?.startsWith('/mi-sitio-web') ||
+      pathname?.startsWith('/supermercado');
+
+    if (isCommercialHost || isCommercialPath) {
+      setEffectivePortal('comercial');
+    } else {
+      setEffectivePortal('comunidad');
+    }
+  }, [portal, pathname]);
 
   const [selectedProvince, setSelectedProvince] = useState<string>('');
   const [searchQuery, setSearchQuery] = useState('');
@@ -482,6 +544,26 @@ export function ClientHeader({ withBackground = false }: ClientHeaderProps = {})
     return { categories, commerces, products, totalCount };
   }, [searchQuery, allCommerces, allProducts]);
 
+  const isDev =
+    typeof window !== 'undefined' &&
+    (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
+
+  const commercialUrl =
+    process.env.NEXT_PUBLIC_COMMERCIAL_URL ||
+    (isDev ? '/comercial' : 'https://tucompra.onmasportal.com.ar');
+
+  const communityUrl =
+    process.env.NEXT_PUBLIC_COMMUNITY_URL ||
+    (isDev ? '/' : 'https://onmasportal.com.ar');
+
+  const isTuCompraHost =
+    typeof window !== 'undefined' &&
+    (window.location.hostname.startsWith('tucompra.') ||
+      window.location.hostname.startsWith('comercial.'));
+
+  const commercialHomeUrl = isTuCompraHost ? '/' : '/comercial';
+  const logoHref = effectivePortal === 'comercial' ? commercialHomeUrl : '/';
+
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const q = searchQuery.trim();
@@ -489,7 +571,11 @@ export function ClientHeader({ withBackground = false }: ClientHeaderProps = {})
 
     trackSearchQuery(q);
     setIsSearchFocused(false);
-    router.push(`/catalogo?q=${encodeURIComponent(q)}`);
+    if (effectivePortal === 'comunidad') {
+      router.push(`/novedades?q=${encodeURIComponent(q)}`);
+    } else {
+      router.push(`/catalogo?q=${encodeURIComponent(q)}`);
+    }
   };
 
   const handleCategoriesMouseEnter = () => {
@@ -503,17 +589,44 @@ export function ClientHeader({ withBackground = false }: ClientHeaderProps = {})
     }, 200);
   };
 
-  // Enlaces de la barra superior: Inicio, Categorías, Comercios e Industria, Turismo, Vender ON+, Ayuda, Novedades, Oportunidades
-  const subNavLinks = [
-    { name: 'INICIO', href: '/', isCategory: false },
-    { name: 'CATEGORÍAS', href: '/catalogo', isCategory: true },
-    { name: 'COMERCIOS E INDUSTRIA', href: '/comercios', isCategory: false },
-    { name: 'TURISMO', href: '/turismo', isCategory: false },
-    { name: 'VENDER ON+', href: '/vender-on', isCategory: false },
-    { name: 'AYUDA', href: '/ayuda', isCategory: false },
-    { name: 'NOVEDADES', href: '/novedades', isCategory: false },
-    { name: 'OPORTUNIDADES', href: '/oportunidades', isCategory: false },
-  ];
+  // Enlaces de la barra superior según portal activo (Comunidad vs Comercial)
+  const subNavLinks = useMemo(() => {
+    if (effectivePortal === 'comunidad') {
+      return [
+        { name: 'INICIO', href: '/', isCategory: false, isExternal: false, isHighlight: false },
+        { name: 'AGENDA & NOVEDADES', href: '/novedades', isCategory: false, isExternal: false, isHighlight: false },
+        { name: 'TURISMO & TERMAS', href: '/turismo', isCategory: false, isExternal: false, isHighlight: false },
+        { name: 'SORTEOS ON+', href: '/sorteos', isCategory: false, isExternal: false, isHighlight: false },
+        { name: 'BOLSA DE EMPLEO', href: '/empleos', isCategory: false, isExternal: false, isHighlight: false },
+        { name: 'PUBLICAR AVISO', href: '/clasificados/nuevo', isCategory: false, isExternal: false, isHighlight: false },
+        { 
+          name: '🛒 ON+ COMERCIAL', 
+          href: commercialUrl, 
+          isCategory: false, 
+          isExternal: commercialUrl.startsWith('http'), 
+          isHighlight: true 
+        },
+      ];
+    }
+
+    return [
+      { name: 'INICIO', href: commercialHomeUrl, isCategory: false, isExternal: false, isHighlight: false },
+      { name: 'CATEGORÍAS', href: '/catalogo', isCategory: true, isExternal: false, isHighlight: false },
+      { name: 'COMERCIOS E INDUSTRIA', href: '/comercios', isCategory: false, isExternal: false, isHighlight: false },
+      { name: 'TURISMO', href: '/turismo', isCategory: false, isExternal: false, isHighlight: false },
+      { name: 'VENDER ON+', href: '/vender-on', isCategory: false, isExternal: false, isHighlight: false },
+      { name: 'AYUDA', href: '/ayuda', isCategory: false, isExternal: false, isHighlight: false },
+      { name: 'NOVEDADES', href: '/novedades', isCategory: false, isExternal: false, isHighlight: false },
+      { name: 'OPORTUNIDADES', href: '/oportunidades', isCategory: false, isExternal: false, isHighlight: false },
+      { 
+        name: '🏛️ ON+ COMUNIDAD', 
+        href: communityUrl, 
+        isCategory: false, 
+        isExternal: communityUrl.startsWith('http'), 
+        isHighlight: true 
+      },
+    ];
+  }, [effectivePortal, commercialUrl, communityUrl, commercialHomeUrl]);
 
   return (
     <header className="sticky top-0 z-50 shadow-sm bg-[#e2e8f0]">
@@ -521,13 +634,13 @@ export function ClientHeader({ withBackground = false }: ClientHeaderProps = {})
       <div className="bg-[#e2e8f0] border-b border-slate-300">
         <div className="max-w-[1480px] mx-auto px-2 min-[360px]:px-3 sm:px-6 lg:px-8 h-16 sm:h-20 flex items-center justify-between gap-2 sm:gap-4">
           
-          {/* Left: Logo ON+ Portal Comercial + Province Selector */}
+          {/* Left: Logo ON+ Portal + Province Selector */}
           <div className="flex items-center gap-2 sm:gap-4 min-w-0 flex-1 sm:flex-initial">
-            <Link href="/" className="flex items-center group shrink-0">
+            <Link href={logoHref} className="flex items-center group shrink-0">
               <div className="relative w-[62px] h-9 sm:w-[96px] sm:h-14 lg:w-[116px] lg:h-[67px] flex items-center">
                 <Image
                   src="/logo1.png"
-                  alt="ON+ PORTAL COMERCIAL"
+                  alt={effectivePortal === 'comercial' ? 'ON+ PORTAL COMERCIAL' : 'ON+ COMUNIDAD'}
                   fill
                   priority
                   className="object-contain group-hover:scale-105 transition-transform duration-200"
@@ -776,16 +889,31 @@ export function ClientHeader({ withBackground = false }: ClientHeaderProps = {})
               <Search className="w-4.5 h-4.5 sm:w-5 sm:h-5" />
             </button>
 
-            {/* Suscripciones (Visible a partir de md para no saturar mobile) */}
-            <Link
-              href="/planes"
-              className="hidden md:flex items-center gap-2 text-xs sm:text-sm font-black text-slate-900 bg-white/80 hover:bg-white border border-slate-300 hover:border-[#0047BA]/50 shadow-2xs hover:shadow-xs transition-all py-1.5 px-3 rounded-xl group cursor-pointer"
-            >
-              <div className="w-6 h-6 rounded-lg bg-gradient-to-tr from-[#00ADB5] via-[#0047BA] to-[#7B2CBF] text-white flex items-center justify-center shadow-xs shrink-0 group-hover:scale-110 transition-transform">
-                <Store className="w-3.5 h-3.5 fill-current" />
-              </div>
-              <span className="tracking-tight group-hover:text-[#0047BA] transition-colors">Suscripciones</span>
-            </Link>
+            {/* Botón Destacado: En Comunidad lleva a Comercial / En Comercial lleva a Suscripciones */}
+            {effectivePortal === 'comunidad' ? (
+              <a
+                href={commercialUrl}
+                target={commercialUrl.startsWith('http') ? '_blank' : undefined}
+                rel={commercialUrl.startsWith('http') ? 'noopener noreferrer' : undefined}
+                className="hidden md:flex items-center gap-2 text-xs sm:text-sm font-black text-slate-900 bg-white/80 hover:bg-white border border-slate-300 hover:border-[#0047BA]/50 shadow-2xs hover:shadow-xs transition-all py-1.5 px-3 rounded-xl group cursor-pointer hover:scale-105"
+                title="Ir a ON+ Comercial / Tu Compra"
+              >
+                <div className="w-6 h-6 rounded-lg bg-gradient-to-tr from-[#00ADB5] via-[#0047BA] to-[#7B2CBF] text-white flex items-center justify-center shadow-xs shrink-0 group-hover:scale-110 transition-transform">
+                  <ShoppingBag className="w-3.5 h-3.5 fill-current" />
+                </div>
+                <span className="tracking-tight group-hover:text-[#0047BA] transition-colors">ON+ Comercial ↗</span>
+              </a>
+            ) : (
+              <Link
+                href="/planes"
+                className="hidden md:flex items-center gap-2 text-xs sm:text-sm font-black text-slate-900 bg-white/80 hover:bg-white border border-slate-300 hover:border-[#0047BA]/50 shadow-2xs hover:shadow-xs transition-all py-1.5 px-3 rounded-xl group cursor-pointer"
+              >
+                <div className="w-6 h-6 rounded-lg bg-gradient-to-tr from-[#00ADB5] via-[#0047BA] to-[#7B2CBF] text-white flex items-center justify-center shadow-xs shrink-0 group-hover:scale-110 transition-transform">
+                  <Store className="w-3.5 h-3.5 fill-current" />
+                </div>
+                <span className="tracking-tight group-hover:text-[#0047BA] transition-colors">Suscripciones</span>
+              </Link>
+            )}
 
             {/* Mi Cuenta / Iniciar sesión */}
             {!currentUser ? (
@@ -816,14 +944,24 @@ export function ClientHeader({ withBackground = false }: ClientHeaderProps = {})
               </Link>
             )}
 
-            {/* Carrito / Bolsa */}
-            <Link
-              href="/catalogo"
-              className="p-1.5 sm:p-2 text-slate-800 hover:text-[#0047BA] hover:bg-slate-200/80 rounded-lg transition-colors cursor-pointer"
-              title="Catálogo & Pedidos"
-            >
-              <ShoppingBag className="w-4.5 h-4.5 sm:w-5 sm:h-5 text-slate-800" />
-            </Link>
+            {/* Acceso Rápido: Turismo en Comunidad / Catálogo en Comercial */}
+            {effectivePortal === 'comunidad' ? (
+              <Link
+                href="/turismo"
+                className="p-1.5 sm:p-2 text-slate-800 hover:text-[#0047BA] hover:bg-slate-200/80 rounded-lg transition-colors cursor-pointer"
+                title="Guía Turística del Litoral"
+              >
+                <Palmtree className="w-4.5 h-4.5 sm:w-5 sm:h-5 text-slate-800" />
+              </Link>
+            ) : (
+              <Link
+                href="/catalogo"
+                className="p-1.5 sm:p-2 text-slate-800 hover:text-[#0047BA] hover:bg-slate-200/80 rounded-lg transition-colors cursor-pointer"
+                title="Catálogo & Pedidos"
+              >
+                <ShoppingBag className="w-4.5 h-4.5 sm:w-5 sm:h-5 text-slate-800" />
+              </Link>
+            )}
 
             {/* Mobile Menu Toggle */}
             <button
@@ -956,6 +1094,26 @@ export function ClientHeader({ withBackground = false }: ClientHeaderProps = {})
                 );
               }
 
+              if (item.isHighlight) {
+                const isComunidadTarget = effectivePortal === 'comercial';
+                return (
+                  <a
+                    key={item.name}
+                    href={item.href}
+                    target={item.isExternal ? '_blank' : undefined}
+                    rel={item.isExternal ? 'noopener noreferrer' : undefined}
+                    className={`px-3 py-1.5 rounded-full text-[11px] sm:text-xs font-black tracking-wider transition-all whitespace-nowrap shrink-0 flex items-center gap-1.5 shadow-sm hover:scale-105 cursor-pointer ${
+                      isComunidadTarget
+                        ? 'bg-emerald-500 hover:bg-emerald-400 text-white'
+                        : 'bg-white hover:bg-slate-100 text-[#0047BA]'
+                    }`}
+                  >
+                    <span>{item.name}</span>
+                    {item.isExternal && <ExternalLink className="w-3 h-3 shrink-0" />}
+                  </a>
+                );
+              }
+
               return (
                 <Link
                   key={item.name}
@@ -1025,27 +1183,57 @@ export function ClientHeader({ withBackground = false }: ClientHeaderProps = {})
           </div>
 
           <div className="flex flex-col gap-1">
-            {subNavLinks.map((item) => (
-              <Link
-                key={item.name}
-                href={item.href}
-                onClick={() => setIsMobileMenuOpen(false)}
-                className="py-2 px-3 rounded-lg text-xs font-bold text-slate-800 hover:bg-slate-200/80 hover:text-[#0047BA]"
-              >
-                {item.name}
-              </Link>
-            ))}
+            {subNavLinks.map((item) => {
+              if (item.isExternal) {
+                return (
+                  <a
+                    key={item.name}
+                    href={item.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="py-2 px-3 rounded-lg text-xs font-bold text-slate-800 hover:bg-slate-200/80 hover:text-[#0047BA] flex items-center justify-between"
+                  >
+                    <span>{item.name}</span>
+                    <ExternalLink className="w-3.5 h-3.5 text-slate-500" />
+                  </a>
+                );
+              }
+              return (
+                <Link
+                  key={item.name}
+                  href={item.href}
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="py-2 px-3 rounded-lg text-xs font-bold text-slate-800 hover:bg-slate-200/80 hover:text-[#0047BA]"
+                >
+                  {item.name}
+                </Link>
+              );
+            })}
           </div>
 
           <div className="pt-2 border-t border-slate-300/80 flex gap-2">
-            <Link
-              href="/planes"
-              onClick={() => setIsMobileMenuOpen(false)}
-              className="flex-1 text-center py-2.5 bg-gradient-to-r from-[#0047BA] via-[#6C1CD1] to-[#E5007D] text-white text-xs font-black rounded-xl shadow-sm flex items-center justify-center gap-2"
-            >
-              <Store className="w-4 h-4 text-white" />
-              <span>Suscripciones</span>
-            </Link>
+            {effectivePortal === 'comunidad' ? (
+              <a
+                href={commercialUrl}
+                target={commercialUrl.startsWith('http') ? '_blank' : undefined}
+                rel={commercialUrl.startsWith('http') ? 'noopener noreferrer' : undefined}
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="flex-1 text-center py-2.5 bg-gradient-to-r from-[#0047BA] via-[#6C1CD1] to-[#E5007D] text-white text-xs font-black rounded-xl shadow-sm flex items-center justify-center gap-2 hover:scale-[1.01] transition-transform"
+              >
+                <ShoppingBag className="w-4 h-4 text-white" />
+                <span>Ir a ON+ Comercial / Tu Compra ↗</span>
+              </a>
+            ) : (
+              <Link
+                href="/planes"
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="flex-1 text-center py-2.5 bg-gradient-to-r from-[#0047BA] via-[#6C1CD1] to-[#E5007D] text-white text-xs font-black rounded-xl shadow-sm flex items-center justify-center gap-2"
+              >
+                <Store className="w-4 h-4 text-white" />
+                <span>Suscripciones</span>
+              </Link>
+            )}
           </div>
         </div>
       )}

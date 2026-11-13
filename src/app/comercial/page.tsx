@@ -1,0 +1,61 @@
+import React from 'react';
+import type { Metadata } from 'next';
+import { ClientHomeContainer } from '@/components/client-portal/ClientHomeContainer';
+import { ClientFooter } from '@/components/layout/ClientFooter';
+import { ComingSoonView } from '@/components/common/ComingSoonView';
+import { getFeaturedProducts } from '@/lib/dal/portal';
+
+export const revalidate = 60;
+
+export const metadata: Metadata = {
+  title: 'ON MÁS Portal Comercial | Tu Compra, Directorio Comercial & Catálogo',
+  description: 'Portal regional de compras y comercios de Entre Ríos, Santa Fe y la región. Directorio de comercios e industrias, catálogo unificado con pedidos directos por WhatsApp y tiendas online.',
+  alternates: {
+    canonical: 'https://tucompra.onmasportal.com.ar',
+  },
+  openGraph: {
+    title: 'ON MÁS Portal Comercial | Tu Compra del Litoral',
+    description: 'Comprá, vendé y conectá con cientos de comercios verificados de Entre Ríos y Santa Fe sin comisiones.',
+    url: 'https://tucompra.onmasportal.com.ar',
+    siteName: 'ON MÁS Portal Comercial',
+    locale: 'es_AR',
+    type: 'website',
+    images: [{ url: '/logo1.png', width: 1200, height: 630, alt: 'ON MÁS Portal Comercial' }],
+  },
+};
+
+// FLAG MODO PRÓXIMAMENTE (true = Muestra pantalla de lanzamiento / false = Muestra sitio completo)
+const SHOW_COMING_SOON = false;
+
+interface CommercialHomePageProps {
+  searchParams?: Promise<{ preview?: string; view?: string }>;
+}
+
+export default async function CommercialHomePage({ searchParams }: CommercialHomePageProps) {
+  const resolvedParams = searchParams ? await searchParams : {};
+  const isPreviewMode = resolvedParams.preview === 'true' || resolvedParams.view === 'live';
+
+  if (SHOW_COMING_SOON && !isPreviewMode) {
+    return <ComingSoonView />;
+  }
+
+  const products = await getFeaturedProducts();
+
+  return (
+    <div className="min-h-screen flex flex-col bg-[#e2e8f0]">
+      {/* Encabezado H1 Semántico Principal para Google & Motores de Búsqueda */}
+      <h1 className="sr-only">
+        ON MÁS Portal Comercial | Tu Compra, Directorio Comercial, Catálogo de Productos y Tiendas Online de Entre Ríos y Santa Fe
+      </h1>
+
+      {/* Contenedor principal con Header Comercial y contenido completo */}
+      <main className="w-full flex-1 bg-[#e2e8f0]">
+        <ClientHomeContainer initialProducts={products} />
+      </main>
+
+      {/* Footer oficial */}
+      <ClientFooter portal="comercial" />
+    </div>
+  );
+}
+
