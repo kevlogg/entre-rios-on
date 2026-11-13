@@ -50,7 +50,7 @@ export default async function CommercialHomePage({ searchParams }: CommercialHom
 
       {/* Contenedor principal con Header Comercial y contenido completo */}
       <main className="w-full flex-1 bg-[#e2e8f0]">
-        <ClientHomeContainer initialProducts={products} />
+        <ClientHomeContainer initialProducts={products} portal="comercial" />
       </main>
 
       {/* Footer oficial */}

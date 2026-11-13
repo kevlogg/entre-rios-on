@@ -19,9 +19,10 @@ import { Product } from '@/types';
 interface ClientHomeContainerProps {
   provinceId?: string;
   initialProducts?: Product[];
+  portal?: 'comunidad' | 'comercial';
 }
 
-export function ClientHomeContainer({ provinceId, initialProducts = [] }: ClientHomeContainerProps) {
+export function ClientHomeContainer({ provinceId, initialProducts = [], portal = 'comercial' }: ClientHomeContainerProps) {
   const pathname = usePathname();
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [activeProvince, setActiveProvince] = useState<string | null>(provinceId || null);
@@ -80,7 +81,7 @@ export function ClientHomeContainer({ provinceId, initialProducts = [] }: Client
   return (
     <div className="w-full bg-[#e2e8f0] text-slate-900 min-h-screen flex flex-col">
       {/* 1. Header Oficial (Top Bar Blanca + Subnav Degradé ON+) */}
-      <ClientHeader />
+      <ClientHeader portal={portal} />
 
       {/* 2. Main Content Container */}
       <div className="w-full max-w-[1540px] mx-auto px-2 min-[360px]:px-3 sm:px-4 lg:px-6 py-2 sm:py-3 flex-1">
