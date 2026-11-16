@@ -284,6 +284,72 @@ Respondé EXCLUSIVAMENTE en formato JSON válido con la siguiente estructura:
 }
 
 /**
+ * Downloads full-resolution scraped image respecting anti-hotlinking headers,
+ * and uploads it directly to Supabase Storage so that it serves at 100% crystal-clear quality.
+ */
+async function persistImageToSupabaseStorage(
+  imageUrl: string,
+  referer: string,
+  portalId: string
+): Promise<string> {
+  if (!imageUrl || imageUrl.startsWith('/images/')) return imageUrl;
+
+  // Upgrade El Once image thumbnails (xs_, s_, m_) to original HD (o_)
+  let targetUrl = imageUrl;
+  if (portalId === 'elonce') {
+    targetUrl = imageUrl.replace(/\/(xs_|s_|m_|l_)/, '/o_');
+  }
+
+  try {
+    const supabase = createAdminClient();
+    let res = await fetch(targetUrl, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
+        'Referer': referer,
+        'Accept': 'image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8',
+      },
+    });
+
+    // Fallback if o_ fails on El Once: retry original imageUrl
+    if (!res.ok && targetUrl !== imageUrl) {
+      res = await fetch(imageUrl, {
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
+          'Referer': referer,
+        },
+      });
+    }
+
+    if (!res.ok) return imageUrl;
+
+    const buffer = Buffer.from(await res.arrayBuffer());
+    if (buffer.length < 500) return imageUrl; // Too small or error response
+
+    const contentType = res.headers.get('content-type') || 'image/jpeg';
+    const ext = contentType.includes('webp') ? 'webp' : contentType.includes('png') ? 'png' : 'jpg';
+    const storagePath = `news/${Date.now()}-${portalId}-${Math.random().toString(36).substring(2, 7)}.${ext}`;
+
+    const { error: uploadError } = await supabase.storage
+      .from('commerces')
+      .upload(storagePath, buffer, {
+        contentType,
+        upsert: true,
+      });
+
+    if (uploadError) {
+      console.warn('Storage upload error for news:', uploadError.message);
+      return imageUrl;
+    }
+
+    const { data: pubData } = supabase.storage.from('commerces').getPublicUrl(storagePath);
+    return pubData.publicUrl || imageUrl;
+  } catch (err) {
+    console.warn('Error persisting image to Supabase:', err);
+    return imageUrl;
+  }
+}
+
+/**
  * Main function: Syncs exactly 5 news articles daily (1 per portal),
  * rewrites them with Gemini and saves them to Supabase.
  */
@@ -366,6 +432,13 @@ export async function syncDailyRegionalNews(force = false): Promise<{
         continue;
       }
 
+      // 3.5 Persist image directly into Supabase Storage to avoid hotlinking blocks & ensure HD quality
+      const persistedImageUrl = await persistImageToSupabaseStorage(
+        scraped.imageUrl || '',
+        portal.url,
+        portal.id
+      );
+
       // 4. Insert into Supabase `community_events`
       const formattedDate = new Date().toLocaleDateString('es-AR', {
         day: 'numeric',
@@ -384,7 +457,7 @@ export async function syncDailyRegionalNews(force = false): Promise<{
         province_id: portal.provinceId,
         city_id: rewritten.cityId || portal.defaultCityId,
         city_name: rewritten.cityName || portal.defaultCityName,
-        image_url: scraped.imageUrl || FALLBACK_IMAGES[portal.defaultCityId] || FALLBACK_IMAGES.default,
+        image_url: persistedImageUrl || FALLBACK_IMAGES[portal.defaultCityId] || FALLBACK_IMAGES.default,
         read_time_minutes: rewritten.readTimeMinutes || 3,
         excerpt: rewritten.excerpt,
         full_story: storyWithTracking,

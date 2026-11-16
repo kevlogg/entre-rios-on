@@ -114,6 +114,8 @@ export default async function NovedadDetailPage({ params }: PageProps) {
               alt={article.title}
               fill
               priority
+              sizes="(max-width: 768px) 100vw, 1200px"
+              quality={90}
               className="object-cover object-center"
             />
           </div>

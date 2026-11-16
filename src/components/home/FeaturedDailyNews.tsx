@@ -63,7 +63,8 @@ export function FeaturedDailyNews({ articles }: FeaturedDailyNewsProps) {
                 alt={mainArticle.title}
                 fill
                 priority
-                sizes="(max-width: 1024px) 100vw, 60vw"
+                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 70vw, 850px"
+                quality={90}
                 className="object-cover object-center group-hover:scale-103 transition-transform duration-500"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-slate-950/20 to-transparent" />
@@ -136,7 +137,8 @@ export function FeaturedDailyNews({ articles }: FeaturedDailyNewsProps) {
                   src={item.imageUrl || '/images/city-santa-fe.jpg'}
                   alt={item.title}
                   fill
-                  sizes="100px"
+                  sizes="(max-width: 640px) 160px, 200px"
+                  quality={90}
                   className="object-cover object-center group-hover:scale-105 transition-transform duration-300"
                 />
               </div>
