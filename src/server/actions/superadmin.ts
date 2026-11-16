@@ -2123,3 +2123,34 @@ export async function checkCommerceRegistrationAllowedAction(): Promise<{
   }
 }
 
+export async function triggerSyncRegionalNewsAction(): Promise<{
+  success: boolean;
+  message: string;
+  importedCount?: number;
+  results?: Array<{ portal: string; title: string; success: boolean; error?: string }>;
+}> {
+  try {
+    const { syncDailyRegionalNews } = await import('@/lib/services/news-aggregator');
+    const result = await syncDailyRegionalNews();
+
+    revalidatePath('/');
+    revalidatePath('/novedades');
+    revalidatePath('/superadmin');
+
+    return {
+      success: result.success,
+      message: result.success
+        ? `¡Sincronización completada! Se procesaron y redactaron con IA ${result.importedCount} noticias de la región.`
+        : 'No se encontraron nuevas noticias para procesar (ya estaban actualizadas).',
+      importedCount: result.importedCount,
+      results: result.results,
+    };
+  } catch (err: any) {
+    console.error('Error in triggerSyncRegionalNewsAction:', err);
+    return {
+      success: false,
+      message: `Error al sincronizar noticias: ${err?.message || 'Error desconocido'}`,
+    };
+  }
+}
+

@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import { ClientHeader } from '@/components/layout/ClientHeader';
 import { ClientFooter } from '@/components/layout/ClientFooter';
+import { FeaturedDailyNews } from '@/components/home/FeaturedDailyNews';
 import { 
   getUpcomingEvents, 
   getTourismServices, 
@@ -67,6 +68,9 @@ export default async function CommunityHomePage() {
       {/* Contenido Principal */}
       <main className="w-full flex-1 max-w-[1480px] mx-auto px-3 sm:px-6 lg:px-8 py-5 space-y-10">
         
+        {/* Las 5 Noticias del Día (Santa Fe & Región - Opción B) */}
+        <FeaturedDailyNews articles={events} />
+
         {/* Barra de Accesos Rápidos a Secciones Comunitarias */}
         <section aria-label="Secciones Comunitarias" className="w-full">
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">

@@ -1201,7 +1201,7 @@ export async function getUpcomingEvents(cityId?: string): Promise<CommunityEvent
     try {
       const { createPublicClient } = await import('@/lib/supabase/public');
       const supabase = createPublicClient();
-      let query = supabase.from('community_events').select('*').order('date', { ascending: true });
+      let query = supabase.from('community_events').select('*').order('created_at', { ascending: false });
       if (cityId && cityId !== 'all') {
         query = query.eq('city_id', cityId);
       }

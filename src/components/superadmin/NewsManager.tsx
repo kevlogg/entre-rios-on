@@ -17,7 +17,8 @@ import {
   Users,
   Clock,
   ShieldCheck,
-  Pencil
+  Pencil,
+  RefreshCw
 } from 'lucide-react';
 import {
   createCommunityArticleAction,
@@ -25,7 +26,8 @@ import {
   getAllCommunityArticlesAction,
   approveCommunityArticleAction,
   rejectCommunityArticleAction,
-  deleteCommunityArticleAction
+  deleteCommunityArticleAction,
+  triggerSyncRegionalNewsAction
 } from '@/server/actions/superadmin';
 import { uploadImageToSupabase } from '@/lib/supabase/storage';
 import { getUpcomingEvents } from '@/lib/dal/portal';
@@ -92,6 +94,29 @@ export function NewsManager({ events: initialEvents }: NewsManagerProps) {
   useEffect(() => {
     loadAllEvents();
   }, []);
+
+  const [isSyncing, setIsSyncing] = useState(false);
+
+  const handleSyncRegionalNews = async () => {
+    if (isSyncing) return;
+    setIsSyncing(true);
+    setErrorMsg(null);
+    setSuccessMsg(null);
+
+    try {
+      const res = await triggerSyncRegionalNewsAction();
+      if (res.success) {
+        setSuccessMsg(res.message);
+        await loadAllEvents();
+      } else {
+        setErrorMsg(res.message || 'Error al sincronizar noticias');
+      }
+    } catch (err: any) {
+      setErrorMsg(err.message || 'Error al conectar con el servidor');
+    } finally {
+      setIsSyncing(false);
+    }
+  };
 
   const handleOpenNewModal = () => {
     setEditingArticle(null);
@@ -350,14 +375,33 @@ export function NewsManager({ events: initialEvents }: NewsManagerProps) {
             </p>
           </div>
 
-          <button
-            onClick={handleOpenNewModal}
-            className="bg-gradient-to-r from-[#00ADB5] to-[#007C8A] hover:from-[#00E5E8] hover:to-[#00ADB5] text-white px-5 py-2.5 rounded-2xl font-extrabold text-xs shadow-md flex items-center justify-center gap-2 transition-transform active:scale-95 cursor-pointer"
-          >
-            <Plus className="w-4 h-4" />
-            <span>Nueva Publicación Directa (SuperAdmin)</span>
-          </button>
+          <div className="flex flex-wrap items-center gap-2.5">
+            <button
+              onClick={handleSyncRegionalNews}
+              disabled={isSyncing}
+              className="bg-gradient-to-r from-[#0047BA] to-[#005FE3] hover:opacity-95 text-white px-4 py-2.5 rounded-2xl font-extrabold text-xs shadow-md flex items-center justify-center gap-2 transition-transform active:scale-95 cursor-pointer disabled:opacity-50"
+              title="Obtiene 1 noticia de cada uno de los 5 portales de Santa Fe y las redacta con IA"
+            >
+              <RefreshCw className={`w-4 h-4 ${isSyncing ? 'animate-spin' : ''}`} />
+              <span>{isSyncing ? 'Sincronizando con IA...' : 'Sincronizar 5 Noticias de Hoy (IA)'}</span>
+            </button>
+
+            <button
+              onClick={handleOpenNewModal}
+              className="bg-gradient-to-r from-[#00ADB5] to-[#007C8A] hover:from-[#00E5E8] hover:to-[#00ADB5] text-white px-4 py-2.5 rounded-2xl font-extrabold text-xs shadow-md flex items-center justify-center gap-2 transition-transform active:scale-95 cursor-pointer"
+            >
+              <Plus className="w-4 h-4" />
+              <span>Nueva Publicación Directa</span>
+            </button>
+          </div>
         </div>
+
+        {errorMsg && (
+          <div className="bg-rose-50 border border-rose-300 rounded-2xl p-4 flex items-center gap-3 text-rose-800 text-xs font-bold animate-in fade-in duration-150">
+            <X className="w-5 h-5 text-rose-600 shrink-0 cursor-pointer" onClick={() => setErrorMsg(null)} />
+            <span>{errorMsg}</span>
+          </div>
+        )}
 
         {successMsg && (
           <div className="bg-emerald-50 border border-emerald-300 rounded-2xl p-4 flex items-center gap-3 text-emerald-800 text-xs font-bold animate-in fade-in duration-150">

@@ -123,15 +123,28 @@ export default async function NovedadDetailPage({ params }: PageProps) {
             <p className="font-bold text-slate-900 text-lg sm:text-xl leading-snug border-l-4 border-[#00ADB5] pl-4">
               {article.excerpt}
             </p>
-            <p>
-              Nuestra región continúa consolidando su matriz comercial y turística mediante el desarrollo de circuitos integrados que conectan la producción local, la gastronomía y los comercios adheridos.
-            </p>
-            <p>
-              Productores, comercios, pymes y emprendedores coinciden en el impacto positivo del portal unificado ON MÁS, permitiendo a los usuarios consultar directamente por WhatsApp productos, promociones y servicios de cercanía sin pagar comisiones adicionales.
-            </p>
-            <p>
-              Te invitamos a seguir informado con todas las novedades comerciales, actividades culturales y lanzamientos de toda la provincia.
-            </p>
+            {article.fullStory ? (
+              article.fullStory
+                .replace(/<!--[\s\S]*?-->/g, '')
+                .split('\n\n')
+                .map((p) => p.trim())
+                .filter(Boolean)
+                .map((paragraph, idx) => (
+                  <p key={idx}>{paragraph}</p>
+                ))
+            ) : (
+              <>
+                <p>
+                  Nuestra región continúa consolidando su matriz comercial y turística mediante el desarrollo de circuitos integrados que conectan la producción local, la gastronomía y los comercios adheridos.
+                </p>
+                <p>
+                  Productores, comercios, pymes y emprendedores coinciden en el impacto positivo del portal unificado ON MÁS, permitiendo a los usuarios consultar directamente por WhatsApp productos, promociones y servicios de cercanía sin pagar comisiones adicionales.
+                </p>
+                <p>
+                  Te invitamos a seguir informado con todas las novedades comerciales, actividades culturales y lanzamientos de toda la provincia.
+                </p>
+              </>
+            )}
           </div>
 
           {/* Share CTA */}
