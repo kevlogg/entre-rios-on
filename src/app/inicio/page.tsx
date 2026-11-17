@@ -4,7 +4,7 @@ import { ClientHomeContainer } from '@/components/client-portal/ClientHomeContai
 import { ClientFooter } from '@/components/layout/ClientFooter';
 import { getFeaturedProducts } from '@/lib/dal/portal';
 
-export const revalidate = 60;
+export const revalidate = 3600; // 1 hora de caché ISR
 
 export default async function LiveInicioPage() {
   const products = await getFeaturedProducts();

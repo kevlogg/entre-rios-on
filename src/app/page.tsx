@@ -27,7 +27,7 @@ import {
   getCities 
 } from '@/lib/dal/portal';
 
-export const revalidate = 60;
+export const revalidate = 3600; // 1 hora de caché ISR para reducir invocaciones y CPU en Vercel
 
 export const metadata: Metadata = {
   title: 'ON+ Comunidad & Turismo | Agenda Cultural, Sorteos & Guía del Litoral',

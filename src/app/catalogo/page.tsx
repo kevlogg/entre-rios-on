@@ -6,7 +6,7 @@ import { DynamicLayoutWrapper } from '@/components/layout/DynamicLayoutWrapper';
 import { getFeaturedProducts } from '@/lib/dal/portal';
 import { CatalogInteractiveView } from '@/components/catalog/CatalogInteractiveView';
 
-export const revalidate = 60;
+export const revalidate = 3600; // 1 hora de caché ISR
 
 export const metadata: Metadata = {
   title: 'Catálogo de Productos & Ofertas Regionales | ON MÁS Portal',

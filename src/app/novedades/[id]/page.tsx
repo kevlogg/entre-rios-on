@@ -8,7 +8,7 @@ import { Calendar, MapPin, Clock, ArrowLeft, Share2, Newspaper } from 'lucide-re
 import { DynamicLayoutWrapper } from '@/components/layout/DynamicLayoutWrapper';
 import { JsonLd } from '@/components/common/JsonLd';
 
-export const revalidate = 60;
+export const revalidate = 3600; // 1 hora de caché ISR
 
 interface PageProps {
   params: Promise<{ id: string }>;

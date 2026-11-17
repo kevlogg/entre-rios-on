@@ -5,7 +5,7 @@ import { ClientFooter } from '@/components/layout/ClientFooter';
 import { ComingSoonView } from '@/components/common/ComingSoonView';
 import { getFeaturedProducts } from '@/lib/dal/portal';
 
-export const revalidate = 60;
+export const revalidate = 3600; // 1 hora de caché ISR
 
 export const metadata: Metadata = {
   title: 'ON MÁS Portal Comercial | Tu Compra, Directorio Comercial & Catálogo',

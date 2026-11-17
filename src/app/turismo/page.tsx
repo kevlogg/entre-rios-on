@@ -6,7 +6,7 @@ import { Compass, ArrowLeft, MapPin, Sun, Waves, Hotel, MessageCircle } from 'lu
 import { DynamicLayoutWrapper } from '@/components/layout/DynamicLayoutWrapper';
 import { getTourismServices } from '@/lib/dal/portal';
 
-export const revalidate = 60;
+export const revalidate = 3600; // 1 hora de caché ISR
 
 export const metadata: Metadata = {
   title: 'Turismo, Termas, Spas & Paseos del Litoral | ON MÁS Portal',

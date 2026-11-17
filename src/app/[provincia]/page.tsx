@@ -7,7 +7,7 @@ import { ClientFooter } from '@/components/layout/ClientFooter';
 import { getProvinceBySlug, PROVINCES } from '@/lib/constants/locations';
 import { getFeaturedProducts } from '@/lib/dal/portal';
 
-export const revalidate = 60;
+export const revalidate = 3600; // 1 hora de caché ISR
 
 interface ProvincePageProps {
   params: Promise<{ provincia: string }>;
