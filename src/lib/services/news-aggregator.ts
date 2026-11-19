@@ -112,12 +112,45 @@ async function scrapePortalTopStory(portal: RegionalPortalSource): Promise<RawSc
       /clasificados/i, /radio en vivo/i, /vivo/i, /sorteo/i
     ];
 
-    $('article, .nota, .article, .card-noticia, .main-story, .story, .c-story').each((_, el) => {
+    $('article, .nota, .article, .card-noticia, .main-story, .story, .c-story, div[class*="nota"], div[class*="card"]').each((_, el) => {
       if (title) return;
       const heading = $(el).find('h1, h2, h3, .title, .titular').first();
-      const a = heading.is('a') ? heading : heading.find('a').first().length ? heading.find('a').first() : $(el).find('a').first();
       const text = (heading.text() || '').trim().replace(/\s+/g, ' ');
-      const href = a.attr('href');
+
+      // Find valid article link: not empty, not #, not author/tag/static pages
+      let href = '';
+      const headingA = heading.is('a') ? heading : heading.find('a[href]').first();
+      const hA = headingA.attr('href');
+      if (
+        hA &&
+        hA !== '#' &&
+        !hA.startsWith('#') &&
+        !hA.startsWith('javascript:') &&
+        !hA.includes('/autor/') &&
+        !hA.includes('/tag/') &&
+        !hA.includes('/usuario/')
+      ) {
+        href = hA;
+      }
+
+      if (!href) {
+        $(el).find('a[href]').each((_, aEl) => {
+          if (href) return;
+          const h = $(aEl).attr('href');
+          if (
+            h &&
+            h !== '#' &&
+            !h.startsWith('#') &&
+            !h.startsWith('javascript:') &&
+            !h.includes('/autor/') &&
+            !h.includes('/tag/') &&
+            !h.includes('/usuario/') &&
+            (h.includes('/') || h.startsWith('http'))
+          ) {
+            href = h;
+          }
+        });
+      }
 
       if (text.length >= 25 && href && !IGNORE_PATTERNS.some((p) => p.test(text))) {
         title = text;
@@ -131,13 +164,21 @@ async function scrapePortalTopStory(portal: RegionalPortalSource): Promise<RawSc
       }
     });
 
-    // Fallback: search h1 or h2 with anchor
+    // Fallback: search h1 a, h2 a, h3 a
     if (!title) {
-      $('h1 a, h2 a').each((_, el) => {
+      $('h1 a, h2 a, h3 a').each((_, el) => {
         if (title) return;
         const text = $(el).text().trim().replace(/\s+/g, ' ');
         const href = $(el).attr('href');
-        if (text.length >= 25 && href && !IGNORE_PATTERNS.some((p) => p.test(text))) {
+        if (
+          href &&
+          href !== '#' &&
+          !href.startsWith('#') &&
+          !href.includes('/autor/') &&
+          !href.includes('/tag/') &&
+          text.length >= 25 &&
+          !IGNORE_PATTERNS.some((p) => p.test(text))
+        ) {
           title = text;
           link = href.startsWith('http') ? href : new URL(href, portal.url).href;
         }
@@ -241,42 +282,37 @@ Respondé EXCLUSIVAMENTE en formato JSON válido con la siguiente estructura:
   "readTimeMinutes": 3
 }`;
 
-  const models = ['gemini-3.5-flash', 'gemini-3.5-flash-lite'];
+  const models = ['gemini-flash-lite-latest', 'gemini-3.1-flash-lite', 'gemini-3.5-flash-lite'];
 
   for (const model of models) {
-    for (let attempt = 0; attempt < 3; attempt++) {
-      try {
-        const controller = new AbortController();
-        const timeout = setTimeout(() => controller.abort(), 15000);
+    try {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 12000);
 
-        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            contents: [{ parts: [{ text: prompt }] }],
-            generationConfig: { responseMimeType: 'application/json' },
-          }),
-          signal: controller.signal,
-        });
+      const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: prompt }] }],
+          generationConfig: { responseMimeType: 'application/json' },
+        }),
+        signal: controller.signal,
+      });
 
-        clearTimeout(timeout);
+      clearTimeout(timeout);
 
-        if (res.status === 200) {
-          const data = await res.json();
-          const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
-          if (text) {
-            const parsed = JSON.parse(text) as RewrittenStory;
-            return parsed;
-          }
-        } else if (res.status === 503 || res.status === 429) {
-          // Model busy or rate-limited, wait and retry
-          await new Promise((r) => setTimeout(r, 2000 * (attempt + 1)));
-        } else {
-          break; // Try next model
+      if (res.status === 200) {
+        const data = await res.json();
+        const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
+        if (text) {
+          const parsed = JSON.parse(text) as RewrittenStory;
+          return parsed;
         }
-      } catch {
-        await new Promise((r) => setTimeout(r, 1000));
+      } else {
+        console.warn(`[Gemini Rewrite] Model ${model} returned status ${res.status}. Falling back to next model...`);
       }
+    } catch (err) {
+      console.warn(`[Gemini Rewrite] Model ${model} failed:`, (err as Error).message);
     }
   }
 
@@ -294,10 +330,11 @@ async function persistImageToSupabaseStorage(
 ): Promise<string> {
   if (!imageUrl || imageUrl.startsWith('/images/')) return imageUrl;
 
-  // Upgrade El Once image thumbnails (xs_, s_, m_) to original HD (o_)
-  let targetUrl = imageUrl;
+  // Strip hash fragments or cache-busters before fetching
+  const cleanUrl = imageUrl.split('#')[0].trim();
+  let targetUrl = cleanUrl;
   if (portalId === 'elonce') {
-    targetUrl = imageUrl.replace(/\/(xs_|s_|m_|l_)/, '/o_');
+    targetUrl = cleanUrl.replace(/\/(xs_|s_|m_|l_)/, '/o_');
   }
 
   try {
@@ -310,9 +347,9 @@ async function persistImageToSupabaseStorage(
       },
     });
 
-    // Fallback if o_ fails on El Once: retry original imageUrl
-    if (!res.ok && targetUrl !== imageUrl) {
-      res = await fetch(imageUrl, {
+    // Fallback if o_ fails on El Once: retry original cleanUrl
+    if (!res.ok && targetUrl !== cleanUrl) {
+      res = await fetch(cleanUrl, {
         headers: {
           'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
           'Referer': referer,
@@ -386,7 +423,10 @@ export async function syncDailyRegionalNews(force = false): Promise<{
       const match = r.full_story.match(/<!--\s*portal:([a-z0-9_-]+)\s+url:([^\s]+)\s*-->/);
       if (match) {
         const [, portalId, url] = match;
-        if (url) existingUrls.add(url.toLowerCase().trim());
+        const normUrl = (url || '').toLowerCase().trim();
+        if (normUrl && !normUrl.endsWith('/#') && !normUrl.endsWith('#') && normUrl !== 'none') {
+          existingUrls.add(normUrl);
+        }
         const isToday = r.date === today || (r.created_at && r.created_at.startsWith(today));
         if (portalId && isToday) {
           syncedPortalsToday.add(portalId);
@@ -395,41 +435,43 @@ export async function syncDailyRegionalNews(force = false): Promise<{
     }
   });
 
-  for (const portal of REGIONAL_PORTALS) {
+  const processPortal = async (portal: RegionalPortalSource, index: number) => {
+    // Gentle stagger (350ms) to prevent exact microsecond concurrency spikes
+    if (index > 0) {
+      await new Promise((r) => setTimeout(r, index * 350));
+    }
+
     try {
       // If not forced and portal already synced today, skip to ensure 1 daily article per portal
       if (!force && syncedPortalsToday.has(portal.id)) {
-        results.push({
+        return {
           portal: portal.name,
           title: 'Ya sincronizado hoy',
           success: true,
           error: 'Portal ya cuenta con informe publicado para el día de hoy',
-        });
-        continue;
+        };
       }
 
       // 2. Scrape top story
       const scraped = await scrapePortalTopStory(portal);
       if (!scraped) {
-        results.push({ portal: portal.name, title: 'No se pudo obtener noticia', success: false, error: 'Scraping falló' });
-        continue;
+        return { portal: portal.name, title: 'No se pudo obtener noticia', success: false, error: 'Scraping falló' };
       }
 
       // Check if original title, url, or image was already imported
-      if (
-        existingUrls.has(scraped.articleUrl.toLowerCase().trim()) ||
-        (scraped.imageUrl && existingImages.has(scraped.imageUrl)) ||
-        existingTitles.has(scraped.originalTitle.toLowerCase().trim())
-      ) {
-        results.push({ portal: portal.name, title: scraped.originalTitle, success: true, error: 'Ya procesada anteriormente' });
-        continue;
+      const cleanUrl = scraped.articleUrl.toLowerCase().trim();
+      const isUrlDup = cleanUrl && !cleanUrl.endsWith('/#') && !cleanUrl.endsWith('#') && existingUrls.has(cleanUrl);
+      const isImgDup = scraped.imageUrl && existingImages.has(scraped.imageUrl);
+      const isTitleDup = existingTitles.has(scraped.originalTitle.toLowerCase().trim());
+
+      if (isUrlDup || isImgDup || isTitleDup) {
+        return { portal: portal.name, title: scraped.originalTitle, success: true, error: 'Ya procesada anteriormente' };
       }
 
       // 3. Rewrite with Gemini
       const rewritten = await rewriteNewsWithGemini(scraped);
       if (!rewritten || !rewritten.title) {
-        results.push({ portal: portal.name, title: scraped.originalTitle, success: false, error: 'IA no devolvió texto' });
-        continue;
+        return { portal: portal.name, title: scraped.originalTitle, success: false, error: 'IA no devolvió texto' };
       }
 
       // 3.5 Persist image directly into Supabase Storage to avoid hotlinking blocks & ensure HD quality
@@ -468,22 +510,40 @@ export async function syncDailyRegionalNews(force = false): Promise<{
       });
 
       if (insertError) {
-        results.push({ portal: portal.name, title: rewritten.title, success: false, error: insertError.message });
-      } else {
-        importedCount++;
-        existingTitles.add(rewritten.title.toLowerCase().trim());
-        if (scraped.imageUrl) existingImages.add(scraped.imageUrl);
-        existingUrls.add(scraped.articleUrl.toLowerCase().trim());
-        syncedPortalsToday.add(portal.id);
-        results.push({ portal: portal.name, title: rewritten.title, success: true });
+        return { portal: portal.name, title: rewritten.title, success: false, error: insertError.message };
       }
 
-      // Small delay between portals to stay well within Gemini API rate limits
-      await new Promise((r) => setTimeout(r, 2500));
+      existingTitles.add(rewritten.title.toLowerCase().trim());
+      if (scraped.imageUrl) existingImages.add(scraped.imageUrl);
+      if (cleanUrl) existingUrls.add(cleanUrl);
+      syncedPortalsToday.add(portal.id);
+
+      return { portal: portal.name, title: rewritten.title, success: true };
     } catch (err) {
-      results.push({ portal: portal.name, title: '', success: false, error: (err as Error).message });
+      return { portal: portal.name, title: '', success: false, error: (err as Error).message };
     }
-  }
+  };
+
+  // Process all portals concurrently with Promise.allSettled
+  const settled = await Promise.allSettled(
+    REGIONAL_PORTALS.map((portal, idx) => processPortal(portal, idx))
+  );
+
+  settled.forEach((res, i) => {
+    if (res.status === 'fulfilled') {
+      results.push(res.value);
+      if (res.value.success && !res.value.error) {
+        importedCount++;
+      }
+    } else {
+      results.push({
+        portal: REGIONAL_PORTALS[i].name,
+        title: '',
+        success: false,
+        error: res.reason?.message || 'Error desconocido',
+      });
+    }
+  });
 
   return {
     success: importedCount > 0,
