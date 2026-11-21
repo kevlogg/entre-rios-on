@@ -199,10 +199,10 @@ async function scrapePortalTopStory(portal: RegionalPortalSource): Promise<RawSc
         const articleHtml = await articleRes.text();
         const $art = cheerio.load(articleHtml);
         
-        // Grab og:image if missing
-        if (!imageUrl) {
-          const ogImg = $art('meta[property="og:image"]').attr('content') || $art('meta[name="twitter:image"]').attr('content');
-          if (ogImg) imageUrl = ogImg.startsWith('http') ? ogImg : new URL(ogImg, portal.url).href;
+        // Grab og:image / twitter:image (always prioritize over small index thumbnails to ensure crystal-clear HD)
+        const ogImg = $art('meta[property="og:image"]').attr('content') || $art('meta[name="twitter:image"]').attr('content');
+        if (ogImg && !ogImg.includes('logo') && !ogImg.includes('placeholder') && !ogImg.includes('favicon')) {
+          imageUrl = ogImg.startsWith('http') ? ogImg : new URL(ogImg, portal.url).href;
         }
 
         const paragraphs: string[] = [];
@@ -254,7 +254,37 @@ async function rewriteNewsWithGemini(story: RawScrapedStory): Promise<RewrittenS
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) return null;
 
-  const prompt = `Actuá como redactor periodístico profesional del portal regional ON MÁS (de Santa Fe y Entre Ríos).
+  const isReuters = story.portalId === 'reuters';
+
+  const prompt = isReuters
+    ? `Actuá como redactor periodístico profesional de la sección Internacional, Negocios y Sociedad del portal ON MÁS.
+Reescribí la siguiente noticia internacional de alto impacto para nuestro portal con estilo informativo ágil, neutral, claro y atrapante en perfecto español neutro.
+
+REGLAS ESTRICTAS:
+1. NO copies frases textuales idénticas ni plagio literal.
+2. NO menciones cables ni agencias de origen (nunca menciones a Reuters, agencias, emisoras ni fuentes ajenas). Redactá como cobertura propia y cuidada de ON MÁS Internacional.
+3. Generá un título nuevo propio, periodísticamente claro, verídico y de alto impacto en español.
+4. Redactá un copete/resumen de 2 líneas informativas.
+5. Redactá el cuerpo de la nota en 3 o 4 párrafos bien desarrollados, fluidos y de excelente calidad periodística.
+6. La categoría DEBE ser exactamente UNA de las siguientes 6: 'Emprendedores' (para Economía, Mercados, Empresas y Finanzas), 'Cultura' (para Sociedad, Política y Mundo), 'Deportes' (para Deportes), 'Turismo' (para Geopolítica y Destinos), 'Gastronomía', 'Festival'.
+7. Identificá la ciudad como "${story.defaultCityName}".
+
+NOTICIA DE REFERENCIA:
+Título: ${story.originalTitle}
+Texto:
+${story.rawText}
+
+Respondé EXCLUSIVAMENTE en formato JSON válido con la siguiente estructura:
+{
+  "title": "string",
+  "category": "Emprendedores",
+  "cityName": "${story.defaultCityName}",
+  "cityId": "${story.defaultCityId}",
+  "excerpt": "string",
+  "content": "string",
+  "readTimeMinutes": 3
+}`
+    : `Actuá como redactor periodístico profesional del portal regional ON MÁS (de Santa Fe y Entre Ríos).
 Reescribí la siguiente noticia para nuestro portal con estilo informativo ágil, neutral, claro y atrapante.
 
 REGLAS ESTRICTAS:
@@ -335,6 +365,12 @@ async function persistImageToSupabaseStorage(
   let targetUrl = cleanUrl;
   if (portalId === 'elonce') {
     targetUrl = cleanUrl.replace(/\/(xs_|s_|m_|l_)/, '/o_');
+  } else if (portalId === 'ellitoral') {
+    // Reemplazar thumbnails de 300x200 o 248x166 por el banner maestro 1300x655
+    targetUrl = cleanUrl.replace(/_([0-9]+x[0-9]+)__/, '_1300x655__');
+  } else if (portalId === 'reuters' && targetUrl.includes('bing.com/th')) {
+    // Asegurar máxima resolución 1200x630 para notas de Reuters
+    targetUrl = `${cleanUrl.split('&')[0]}&w=1200&h=630&c=14`;
   }
 
   try {
@@ -360,7 +396,7 @@ async function persistImageToSupabaseStorage(
     if (!res.ok) return imageUrl;
 
     const buffer = Buffer.from(await res.arrayBuffer());
-    if (buffer.length < 500) return imageUrl; // Too small or error response
+    if (buffer.length < 500) return imageUrl; // Demasiado pequeño o respuesta vacía
 
     const contentType = res.headers.get('content-type') || 'image/jpeg';
     const ext = contentType.includes('webp') ? 'webp' : contentType.includes('png') ? 'png' : 'jpg';
@@ -387,8 +423,75 @@ async function persistImageToSupabaseStorage(
 }
 
 /**
- * Main function: Syncs exactly 5 news articles daily (1 per portal),
- * rewrites them with Gemini and saves them to Supabase.
+ * Scrapes top stories from Reuters in Spanish via authenticated Bing News RSS wire,
+ * extracting high-resolution 1200x630 photos and clean Reuters URLs.
+ */
+export async function scrapeReutersTopStories(limit: number = 5): Promise<RawScrapedStory[]> {
+  try {
+    const rssUrl = 'https://www.bing.com/news/search?q=site:reuters.com&format=rss&mkt=es-ar';
+    const res = await fetch(rssUrl, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
+        'Accept': 'application/xml,text/xml,*/*',
+      },
+      next: { revalidate: 0 },
+    });
+
+    if (!res.ok) return [];
+    const xml = await res.text();
+    const $ = cheerio.load(xml, { xmlMode: true });
+
+    const rawStories: RawScrapedStory[] = [];
+
+    $('item').each((_, el) => {
+      if (rawStories.length >= limit) return;
+
+      const title = $(el).find('title').text().trim().replace(/\s+/g, ' ');
+      const rawLink = $(el).find('link').text().trim();
+      const rawDesc = $(el).find('description').text().trim().replace(/\s+/g, ' ');
+      const rawImg = $(el).find('News\\:Image, image').text().trim();
+
+      // Desempaquetar URL directa de Reuters
+      let articleUrl = rawLink;
+      const urlMatch = rawLink.match(/[?&]url=([^&]+)/);
+      if (urlMatch) {
+        try {
+          articleUrl = decodeURIComponent(urlMatch[1]);
+        } catch {}
+      }
+
+      let imageUrl = rawImg;
+      if (imageUrl && imageUrl.includes('bing.com/th')) {
+        imageUrl = `${imageUrl.split('&')[0]}&w=1200&h=630&c=14`;
+      }
+
+      if (title && articleUrl && articleUrl.includes('reuters.com')) {
+        rawStories.push({
+          portalId: 'reuters',
+          portalName: 'Reuters',
+          originalTitle: title,
+          articleUrl,
+          imageUrl: imageUrl || 'https://images.unsplash.com/photo-1585829365295-ab7cd400c167?w=1200&q=85',
+          rawText: `${title}\n\n${rawDesc}`,
+          defaultCityName: 'Internacional / Reuters',
+          defaultCityId: 'santa-fe-capital',
+          provinceId: 'santa-fe',
+        });
+      }
+    });
+
+    return rawStories;
+  } catch (err) {
+    console.warn('Error scraping Reuters stories:', (err as Error).message);
+    return [];
+  }
+}
+
+/**
+ * Main function: Syncs exactly 10 news articles daily:
+ * - 5 from Regional Portals (El Once, El Litoral, Aire de Santa Fe, Rosario3, Uno Santa Fe)
+ * - 5 from Reuters (Internacional, Finanzas & Actualidad)
+ * Rewrites them with Gemini and saves them to Supabase.
  */
 export async function syncDailyRegionalNews(force = false): Promise<{
   success: boolean;
@@ -399,13 +502,13 @@ export async function syncDailyRegionalNews(force = false): Promise<{
   const results: Array<{ portal: string; title: string; success: boolean; error?: string }> = [];
   let importedCount = 0;
 
-  // 1. Get recent records from DB to avoid inserting exact duplicates or repeating portals today
+  // 1. Get recent records from DB to avoid inserting exact duplicates
   const today = new Date().toISOString().split('T')[0];
   const { data: existingRows } = await supabase
     .from('community_events')
     .select('title, image_url, full_story, date, created_at')
     .order('created_at', { ascending: false })
-    .limit(60);
+    .limit(100);
 
   const existingTitles = new Set(
     (existingRows || []).map((r: { title: string }) => r.title.toLowerCase().trim())
@@ -417,6 +520,7 @@ export async function syncDailyRegionalNews(force = false): Promise<{
   );
   const existingUrls = new Set<string>();
   const syncedPortalsToday = new Set<string>();
+  let reutersSyncedToday = 0;
 
   (existingRows || []).forEach((r: any) => {
     if (r.full_story) {
@@ -428,21 +532,97 @@ export async function syncDailyRegionalNews(force = false): Promise<{
           existingUrls.add(normUrl);
         }
         const isToday = r.date === today || (r.created_at && r.created_at.startsWith(today));
-        if (portalId && isToday) {
-          syncedPortalsToday.add(portalId);
+        if (isToday) {
+          if (portalId === 'reuters') {
+            reutersSyncedToday++;
+          } else if (portalId) {
+            syncedPortalsToday.add(portalId);
+          }
         }
       }
     }
   });
 
+  // Helper para procesar y guardar una noticia
+  const processStory = async (scraped: RawScrapedStory) => {
+    try {
+      const cleanUrl = scraped.articleUrl.toLowerCase().trim();
+      const isUrlDup = cleanUrl && !cleanUrl.endsWith('/#') && !cleanUrl.endsWith('#') && existingUrls.has(cleanUrl);
+      const isImgDup = scraped.imageUrl && existingImages.has(scraped.imageUrl);
+      const isTitleDup = existingTitles.has(scraped.originalTitle.toLowerCase().trim());
+
+      if (isUrlDup || isImgDup || isTitleDup) {
+        return { portal: scraped.portalName, title: scraped.originalTitle, success: true, error: 'Ya procesada anteriormente' };
+      }
+
+      // Reescribir con IA (Gemini)
+      const rewritten = await rewriteNewsWithGemini(scraped);
+      if (!rewritten || !rewritten.title) {
+        return { portal: scraped.portalName, title: scraped.originalTitle, success: false, error: 'IA no devolvió texto' };
+      }
+
+      // Persistir imagen en Supabase Storage en máxima calidad
+      const persistedImageUrl = await persistImageToSupabaseStorage(
+        scraped.imageUrl || '',
+        scraped.portalId === 'reuters' ? 'https://www.reuters.com/' : scraped.articleUrl,
+        scraped.portalId
+      );
+
+      const formattedDate = new Date().toLocaleDateString('es-AR', {
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric',
+      });
+
+      const storyWithTracking = `${rewritten.content}\n\n<!-- portal:${scraped.portalId} url:${scraped.articleUrl} -->`;
+
+      const VALID_CITY_IDS = new Set([
+        'santa-fe-capital', 'rosario', 'rafaela', 'reconquista', 'santo-tome', 'esperanza',
+        'venado-tuerto', 'sauce-viejo', 'parana', 'concordia', 'gualeguaychu', 'colon',
+        'concepcion-del-uruguay', 'victoria', 'federacion', 'villaguay', 'chajari', 'la-paz'
+      ]);
+      const resolvedCityId = VALID_CITY_IDS.has(rewritten.cityId) ? rewritten.cityId : scraped.defaultCityId;
+
+      const { error: insertError } = await supabase.from('community_events').insert({
+        title: rewritten.title,
+        category: sanitizeCategory(rewritten.category),
+        date: today,
+        formatted_date: formattedDate,
+        location: rewritten.cityName || scraped.defaultCityName,
+        province_id: scraped.provinceId,
+        city_id: resolvedCityId,
+        city_name: rewritten.cityName || scraped.defaultCityName,
+        image_url: persistedImageUrl || FALLBACK_IMAGES[scraped.defaultCityId] || FALLBACK_IMAGES.default,
+        read_time_minutes: rewritten.readTimeMinutes || 3,
+        excerpt: rewritten.excerpt,
+        full_story: storyWithTracking,
+        is_featured: true,
+        author_name: scraped.portalId === 'reuters' ? 'ON MÁS Internacional' : 'Redacción ON MÁS',
+        author_avatar_url: '/images/avatar-author.jpg',
+        status: 'APPROVED',
+      });
+
+      if (insertError) {
+        return { portal: scraped.portalName, title: rewritten.title, success: false, error: insertError.message };
+      }
+
+      existingTitles.add(rewritten.title.toLowerCase().trim());
+      if (scraped.imageUrl) existingImages.add(scraped.imageUrl);
+      if (cleanUrl) existingUrls.add(cleanUrl);
+
+      return { portal: scraped.portalName, title: rewritten.title, success: true };
+    } catch (err) {
+      return { portal: scraped.portalName, title: scraped.originalTitle, success: false, error: (err as Error).message };
+    }
+  };
+
+  // 2. Procesar Portales Regionales (5 noticias)
   const processPortal = async (portal: RegionalPortalSource, index: number) => {
-    // Gentle stagger (350ms) to prevent exact microsecond concurrency spikes
     if (index > 0) {
-      await new Promise((r) => setTimeout(r, index * 350));
+      await new Promise((r) => setTimeout(r, index * 300));
     }
 
     try {
-      // If not forced and portal already synced today, skip to ensure 1 daily article per portal
       if (!force && syncedPortalsToday.has(portal.id)) {
         return {
           portal: portal.name,
@@ -452,84 +632,26 @@ export async function syncDailyRegionalNews(force = false): Promise<{
         };
       }
 
-      // 2. Scrape top story
       const scraped = await scrapePortalTopStory(portal);
       if (!scraped) {
         return { portal: portal.name, title: 'No se pudo obtener noticia', success: false, error: 'Scraping falló' };
       }
 
-      // Check if original title, url, or image was already imported
-      const cleanUrl = scraped.articleUrl.toLowerCase().trim();
-      const isUrlDup = cleanUrl && !cleanUrl.endsWith('/#') && !cleanUrl.endsWith('#') && existingUrls.has(cleanUrl);
-      const isImgDup = scraped.imageUrl && existingImages.has(scraped.imageUrl);
-      const isTitleDup = existingTitles.has(scraped.originalTitle.toLowerCase().trim());
-
-      if (isUrlDup || isImgDup || isTitleDup) {
-        return { portal: portal.name, title: scraped.originalTitle, success: true, error: 'Ya procesada anteriormente' };
+      const res = await processStory(scraped);
+      if (res.success && !res.error) {
+        syncedPortalsToday.add(portal.id);
       }
-
-      // 3. Rewrite with Gemini
-      const rewritten = await rewriteNewsWithGemini(scraped);
-      if (!rewritten || !rewritten.title) {
-        return { portal: portal.name, title: scraped.originalTitle, success: false, error: 'IA no devolvió texto' };
-      }
-
-      // 3.5 Persist image directly into Supabase Storage to avoid hotlinking blocks & ensure HD quality
-      const persistedImageUrl = await persistImageToSupabaseStorage(
-        scraped.imageUrl || '',
-        portal.url,
-        portal.id
-      );
-
-      // 4. Insert into Supabase `community_events`
-      const formattedDate = new Date().toLocaleDateString('es-AR', {
-        day: 'numeric',
-        month: 'long',
-        year: 'numeric',
-      });
-
-      const storyWithTracking = `${rewritten.content}\n\n<!-- portal:${portal.id} url:${scraped.articleUrl} -->`;
-
-      const { error: insertError } = await supabase.from('community_events').insert({
-        title: rewritten.title,
-        category: sanitizeCategory(rewritten.category),
-        date: today,
-        formatted_date: formattedDate,
-        location: rewritten.cityName || portal.defaultCityName,
-        province_id: portal.provinceId,
-        city_id: rewritten.cityId || portal.defaultCityId,
-        city_name: rewritten.cityName || portal.defaultCityName,
-        image_url: persistedImageUrl || FALLBACK_IMAGES[portal.defaultCityId] || FALLBACK_IMAGES.default,
-        read_time_minutes: rewritten.readTimeMinutes || 3,
-        excerpt: rewritten.excerpt,
-        full_story: storyWithTracking,
-        is_featured: true,
-        author_name: 'Redacción ON MÁS',
-        author_avatar_url: '/images/avatar-author.jpg',
-        status: 'APPROVED',
-      });
-
-      if (insertError) {
-        return { portal: portal.name, title: rewritten.title, success: false, error: insertError.message };
-      }
-
-      existingTitles.add(rewritten.title.toLowerCase().trim());
-      if (scraped.imageUrl) existingImages.add(scraped.imageUrl);
-      if (cleanUrl) existingUrls.add(cleanUrl);
-      syncedPortalsToday.add(portal.id);
-
-      return { portal: portal.name, title: rewritten.title, success: true };
+      return res;
     } catch (err) {
       return { portal: portal.name, title: '', success: false, error: (err as Error).message };
     }
   };
 
-  // Process all portals concurrently with Promise.allSettled
-  const settled = await Promise.allSettled(
+  const settledRegional = await Promise.allSettled(
     REGIONAL_PORTALS.map((portal, idx) => processPortal(portal, idx))
   );
 
-  settled.forEach((res, i) => {
+  settledRegional.forEach((res, i) => {
     if (res.status === 'fulfilled') {
       results.push(res.value);
       if (res.value.success && !res.value.error) {
@@ -544,6 +666,41 @@ export async function syncDailyRegionalNews(force = false): Promise<{
       });
     }
   });
+
+  // 3. Procesar Noticias de Reuters (5 noticias internacionales)
+  try {
+    const reutersNeeded = force ? 5 : Math.max(0, 5 - reutersSyncedToday);
+    if (reutersNeeded > 0) {
+      const scrapedReuters = await scrapeReutersTopStories(8); // obtener pool de 8 para filtrar hasta 5
+      let reutersImported = 0;
+
+      for (let i = 0; i < scrapedReuters.length && reutersImported < reutersNeeded; i++) {
+        const item = scrapedReuters[i];
+        const res = await processStory(item);
+        results.push(res);
+        if (res.success && !res.error) {
+          reutersImported++;
+          importedCount++;
+        }
+        // Breve pausa para respetar rate limit de Gemini
+        await new Promise((r) => setTimeout(r, 400));
+      }
+    } else {
+      results.push({
+        portal: 'Reuters',
+        title: 'Ya sincronizadas hoy',
+        success: true,
+        error: 'Reuters ya cuenta con sus 5 informes publicados para el día de hoy',
+      });
+    }
+  } catch (err) {
+    results.push({
+      portal: 'Reuters',
+      title: '',
+      success: false,
+      error: (err as Error).message,
+    });
+  }
 
   return {
     success: importedCount > 0,

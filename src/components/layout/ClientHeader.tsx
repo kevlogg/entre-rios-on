@@ -38,6 +38,7 @@ import { useActiveProvinces, getPersistedProvince, setPersistedProvince } from '
 import { CATEGORIES_LIST } from '@/lib/constants/categories';
 import { getFeaturedProducts, getAllCommerces } from '@/lib/dal/portal';
 import { Product, Commerce } from '@/types';
+import { MarketWeatherWidget } from '@/components/common/MarketWeatherWidget';
 
 // Categorías del desplegable con estructura visual exacta a la imagen de referencia
 const HEADER_DROPDOWN_CATEGORIES = [
@@ -648,119 +649,126 @@ export function ClientHeader({ withBackground = false, portal = 'auto' }: Client
               </div>
             </Link>
 
-            {/* Selector de Provincia Prominente */}
-            <div ref={provinceContainerRef} className="relative flex items-center min-w-0">
-              <button
-                type="button"
-                onClick={() => setIsProvinceDropdownOpen(!isProvinceDropdownOpen)}
-                style={currentProvinceObj?.badgeColor ? { backgroundColor: currentProvinceObj.badgeColor, borderColor: 'rgba(255, 255, 255, 0.35)' } : undefined}
-                className={`relative flex items-center gap-1.5 sm:gap-2.5 px-2 sm:px-4 h-9 sm:h-14 lg:h-[62px] rounded-xl sm:rounded-2xl ${
-                  currentProvinceObj?.badgeColor
-                    ? 'text-white shadow-md'
-                    : currentProvinceObj
-                      ? `${currentTheme.gradientClass} ${currentTheme.borderClass} ${currentTheme.shadowClass}`
-                      : 'bg-gradient-to-r from-[#002878] via-[#0047BA] to-[#00ADB5] border-cyan-400/40 hover:border-cyan-300 shadow-md shadow-blue-950/20'
-                } border transition-all duration-200 cursor-pointer group hover:scale-[1.02] active:scale-[0.98] min-w-0 max-w-[130px] min-[390px]:max-w-[160px] sm:max-w-none text-white select-none`}
-                title="Cambiar Provincia o Región"
-              >
-                <div 
-                  className="w-6 h-6 sm:w-9 sm:h-9 lg:w-10 lg:h-10 rounded-lg sm:rounded-xl flex items-center justify-center shrink-0 border border-white/20 bg-white/20 group-hover:bg-white/30 transition-colors shadow-2xs"
+            {/* Selector de Provincia Prominente (Solo en Comercial; en Comunidad se oculta y se muestra Dólar y Clima Santa Fe) */}
+            {effectivePortal !== 'comunidad' ? (
+              <div ref={provinceContainerRef} className="relative flex items-center min-w-0">
+                <button
+                  type="button"
+                  onClick={() => setIsProvinceDropdownOpen(!isProvinceDropdownOpen)}
+                  style={currentProvinceObj?.badgeColor ? { backgroundColor: currentProvinceObj.badgeColor, borderColor: 'rgba(255, 255, 255, 0.35)' } : undefined}
+                  className={`relative flex items-center gap-1.5 sm:gap-2.5 px-2 sm:px-4 h-9 sm:h-14 lg:h-[62px] rounded-xl sm:rounded-2xl ${
+                    currentProvinceObj?.badgeColor
+                      ? 'text-white shadow-md'
+                      : currentProvinceObj
+                        ? `${currentTheme.gradientClass} ${currentTheme.borderClass} ${currentTheme.shadowClass}`
+                        : 'bg-gradient-to-r from-[#002878] via-[#0047BA] to-[#00ADB5] border-cyan-400/40 hover:border-cyan-300 shadow-md shadow-blue-950/20'
+                  } border transition-all duration-200 cursor-pointer group hover:scale-[1.02] active:scale-[0.98] min-w-0 max-w-[130px] min-[390px]:max-w-[160px] sm:max-w-none text-white select-none`}
+                  title="Cambiar Provincia o Región"
                 >
-                  <MapPin className="w-3 h-3 sm:w-4 sm:h-4 lg:w-5 lg:h-5 text-white drop-shadow-xs" />
-                </div>
-                <div className="flex flex-col text-left justify-center min-w-0 pr-0.5 sm:pr-1">
-                  <span className="hidden sm:block text-[8px] sm:text-[9px] lg:text-[10px] font-black uppercase tracking-wider text-white/80 leading-none">
-                    {activeCityObj ? currentProvinceObj?.name.toUpperCase() : (currentProvinceObj ? currentTheme.sublabel : 'UBICACIÓN')}
-                  </span>
-                  <span className="text-xs sm:text-sm lg:text-[15px] font-black text-white leading-tight truncate drop-shadow-xs">
-                    {activeCityObj ? activeCityObj.name : (currentProvinceObj ? currentProvinceObj.name : (
-                      selectedProvince === 'all' ? (
-                        <>
-                          <span className="sm:hidden">General</span>
-                          <span className="hidden sm:inline">Portada General</span>
-                        </>
-                      ) : (
-                        <>
-                          <span className="sm:hidden">Provincia</span>
-                          <span className="hidden sm:inline">Selecciona tu provincia</span>
-                        </>
-                      )
-                    ))}
-                  </span>
-                </div>
-                <ChevronDown className={`w-3 h-3 sm:w-4 sm:h-4 text-white/80 shrink-0 transition-transform duration-200 ${isProvinceDropdownOpen ? 'rotate-180' : ''}`} />
-              </button>
-
-              {isProvinceDropdownOpen && (
-                <div className="absolute top-full left-0 mt-2 w-64 bg-white border border-slate-200 rounded-2xl shadow-2xl py-2 z-50 animate-in fade-in duration-100 divide-y divide-slate-100">
-                  <div className="px-3.5 py-1.5 text-[10px] font-black text-slate-400 uppercase tracking-wider">
-                    Selecciona tu Provincia
+                  <div 
+                    className="w-6 h-6 sm:w-9 sm:h-9 lg:w-10 lg:h-10 rounded-lg sm:rounded-xl flex items-center justify-center shrink-0 border border-white/20 bg-white/20 group-hover:bg-white/30 transition-colors shadow-2xs"
+                  >
+                    <MapPin className="w-3 h-3 sm:w-4 sm:h-4 lg:w-5 lg:h-5 text-white drop-shadow-xs" />
                   </div>
-                  <div className="py-1">
-                    {/* Opción Portada General (Sin provincia específica) */}
-                    <button
-                      type="button"
-                      onClick={() => handleProvinceSelect('all')}
-                      className={`w-full text-left px-3.5 py-2.5 text-xs font-bold flex items-center justify-between hover:bg-slate-50 transition-colors cursor-pointer border-b border-slate-100 ${
-                        !selectedProvince || selectedProvince === 'all'
-                          ? 'text-slate-900 bg-slate-50 font-black'
-                          : 'text-slate-700'
-                      }`}
-                    >
-                      <div className="flex items-center gap-2.5 min-w-0">
-                        <span
-                          className="w-3.5 h-3.5 rounded-full shrink-0 shadow-xs border border-white"
-                          style={{ backgroundColor: '#00ADB5' }}
-                        />
-                        <span className="truncate">Portada General (Todas)</span>
-                      </div>
-                      <span
-                        className={`text-[9px] font-black px-2 py-0.5 rounded-full text-white shadow-2xs ${
-                          !selectedProvince || selectedProvince === 'all' ? 'ring-2 ring-white/60' : 'opacity-90'
+                  <div className="flex flex-col text-left justify-center min-w-0 pr-0.5 sm:pr-1">
+                    <span className="hidden sm:block text-[8px] sm:text-[9px] lg:text-[10px] font-black uppercase tracking-wider text-white/80 leading-none">
+                      {activeCityObj ? currentProvinceObj?.name.toUpperCase() : (currentProvinceObj ? currentTheme.sublabel : 'UBICACIÓN')}
+                    </span>
+                    <span className="text-xs sm:text-sm lg:text-[15px] font-black text-white leading-tight truncate drop-shadow-xs">
+                      {activeCityObj ? activeCityObj.name : (currentProvinceObj ? currentProvinceObj.name : (
+                        selectedProvince === 'all' ? (
+                          <>
+                            <span className="sm:hidden">General</span>
+                            <span className="hidden sm:inline">Portada General</span>
+                          </>
+                        ) : (
+                          <>
+                            <span className="sm:hidden">Provincia</span>
+                            <span className="hidden sm:inline">Selecciona tu provincia</span>
+                          </>
+                        )
+                      ))}
+                    </span>
+                  </div>
+                  <ChevronDown className={`w-3 h-3 sm:w-4 sm:h-4 text-white/80 shrink-0 transition-transform duration-200 ${isProvinceDropdownOpen ? 'rotate-180' : ''}`} />
+                </button>
+
+                {isProvinceDropdownOpen && (
+                  <div className="absolute top-full left-0 mt-2 w-64 bg-white border border-slate-200 rounded-2xl shadow-2xl py-2 z-50 animate-in fade-in duration-100 divide-y divide-slate-100">
+                    <div className="px-3.5 py-1.5 text-[10px] font-black text-slate-400 uppercase tracking-wider">
+                      Selecciona tu Provincia
+                    </div>
+                    <div className="py-1">
+                      {/* Opción Portada General (Sin provincia específica) */}
+                      <button
+                        type="button"
+                        onClick={() => handleProvinceSelect('all')}
+                        className={`w-full text-left px-3.5 py-2.5 text-xs font-bold flex items-center justify-between hover:bg-slate-50 transition-colors cursor-pointer border-b border-slate-100 ${
+                          !selectedProvince || selectedProvince === 'all'
+                            ? 'text-slate-900 bg-slate-50 font-black'
+                            : 'text-slate-700'
                         }`}
-                        style={{ backgroundColor: '#00ADB5' }}
                       >
-                        Nacional
-                      </span>
-                    </button>
-
-                    {activeProvinces.map((prov) => {
-                      const theme = PROVINCE_THEMES[prov.id] || PROVINCE_THEMES['santa-fe'];
-                      const isSelected = selectedProvince === prov.id || selectedProvince === prov.slug;
-                      const color = prov.badgeColor || theme.accentHex;
-                      return (
-                        <button
-                          key={prov.id}
-                          type="button"
-                          onClick={() => handleProvinceSelect(prov.id)}
-                          className={`w-full text-left px-3.5 py-2.5 text-xs font-bold flex items-center justify-between hover:bg-slate-50 transition-colors cursor-pointer ${
-                            isSelected
-                              ? 'text-slate-900 bg-slate-50 font-black'
-                              : 'text-slate-700'
-                          }`}
-                        >
-                          <div className="flex items-center gap-2.5 min-w-0">
-                            <span
-                              className="w-3.5 h-3.5 rounded-full shrink-0 shadow-xs border border-white"
-                              style={{ backgroundColor: color }}
-                            />
-                            <span className="truncate">{prov.name}</span>
-                          </div>
+                        <div className="flex items-center gap-2.5 min-w-0">
                           <span
-                            className={`text-[9px] font-black px-2 py-0.5 rounded-full text-white shadow-2xs ${
-                              isSelected ? 'ring-2 ring-white/60' : 'opacity-90'
+                            className="w-3.5 h-3.5 rounded-full shrink-0 shadow-xs border border-white"
+                            style={{ backgroundColor: '#00ADB5' }}
+                          />
+                          <span className="truncate">Portada General (Todas)</span>
+                        </div>
+                        <span
+                          className={`text-[9px] font-black px-2 py-0.5 rounded-full text-white shadow-2xs ${
+                            !selectedProvince || selectedProvince === 'all' ? 'ring-2 ring-white/60' : 'opacity-90'
+                          }`}
+                          style={{ backgroundColor: '#00ADB5' }}
+                        >
+                          Nacional
+                        </span>
+                      </button>
+
+                      {activeProvinces.map((prov) => {
+                        const theme = PROVINCE_THEMES[prov.id] || PROVINCE_THEMES['santa-fe'];
+                        const isSelected = selectedProvince === prov.id || selectedProvince === prov.slug;
+                        const color = prov.badgeColor || theme.accentHex;
+                        return (
+                          <button
+                            key={prov.id}
+                            type="button"
+                            onClick={() => handleProvinceSelect(prov.id)}
+                            className={`w-full text-left px-3.5 py-2.5 text-xs font-bold flex items-center justify-between hover:bg-slate-50 transition-colors cursor-pointer ${
+                              isSelected
+                                ? 'text-slate-900 bg-slate-50 font-black'
+                                : 'text-slate-700'
                             }`}
-                            style={{ backgroundColor: color }}
                           >
-                            {prov.isActive ? 'Activa' : 'Próximamente'}
-                          </span>
-                        </button>
-                      );
-                    })}
+                            <div className="flex items-center gap-2.5 min-w-0">
+                              <span
+                                className="w-3.5 h-3.5 rounded-full shrink-0 shadow-xs border border-white"
+                                style={{ backgroundColor: color }}
+                              />
+                              <span className="truncate">{prov.name}</span>
+                            </div>
+                            <span
+                              className={`text-[9px] font-black px-2 py-0.5 rounded-full text-white shadow-2xs ${
+                                isSelected ? 'ring-2 ring-white/60' : 'opacity-90'
+                              }`}
+                              style={{ backgroundColor: color }}
+                            >
+                              {prov.isActive ? 'Activa' : 'Próximamente'}
+                            </span>
+                          </button>
+                        );
+                      })}
+                    </div>
                   </div>
-                </div>
-              )}
-            </div>
+                )}
+              </div>
+            ) : (
+              /* En Sección Comunidad: No va selector de provincia, mostramos cotización Dólar y Clima Santa Fe */
+              <div className="flex items-center min-w-0">
+                <MarketWeatherWidget variant="compact" />
+              </div>
+            )}
           </div>
 
           {/* Center: Buscador Centrado */}
@@ -1155,34 +1163,40 @@ export function ClientHeader({ withBackground = false, portal = 'auto' }: Client
       {/* Mobile Drawer Menu */}
       {isMobileMenuOpen && (
         <div className="lg:hidden bg-[#e2e8f0] border-b border-slate-300 px-4 pt-3 pb-5 space-y-3 animate-in fade-in duration-200 text-slate-800">
-          <div className="flex flex-col gap-1.5 border-b border-slate-300/80 pb-3">
-            <label className="text-[10px] font-black uppercase tracking-wider text-slate-600">Provincia</label>
-            <div className="flex flex-wrap gap-2">
-              {activeProvinces.map((prov) => {
-                const theme = PROVINCE_THEMES[prov.id] || PROVINCE_THEMES['santa-fe'];
-                const isSelected = selectedProvince === prov.id || selectedProvince === prov.slug;
-                const color = prov.badgeColor || theme.accentHex;
-                return (
-                  <button
-                    key={prov.id}
-                    onClick={() => handleProvinceSelect(prov.id)}
-                    style={isSelected && prov.badgeColor ? { backgroundColor: prov.badgeColor, borderColor: 'transparent' } : undefined}
-                    className={`px-3 py-2 rounded-xl text-xs font-bold border flex items-center gap-2 transition-all cursor-pointer ${
-                      isSelected
-                        ? `${prov.badgeColor ? '' : theme.gradientClass} text-white border-transparent shadow-xs`
-                        : 'border-slate-300 text-slate-700 bg-slate-100 hover:bg-slate-200'
-                    }`}
-                  >
-                    <span
-                      className="w-2.5 h-2.5 rounded-full shrink-0 border border-white/60"
-                      style={{ backgroundColor: color }}
-                    />
-                    <span>{prov.name}</span>
-                  </button>
-                );
-              })}
+          {effectivePortal !== 'comunidad' ? (
+            <div className="flex flex-col gap-1.5 border-b border-slate-300/80 pb-3">
+              <label className="text-[10px] font-black uppercase tracking-wider text-slate-600">Provincia</label>
+              <div className="flex flex-wrap gap-2">
+                {activeProvinces.map((prov) => {
+                  const theme = PROVINCE_THEMES[prov.id] || PROVINCE_THEMES['santa-fe'];
+                  const isSelected = selectedProvince === prov.id || selectedProvince === prov.slug;
+                  const color = prov.badgeColor || theme.accentHex;
+                  return (
+                    <button
+                      key={prov.id}
+                      onClick={() => handleProvinceSelect(prov.id)}
+                      style={isSelected && prov.badgeColor ? { backgroundColor: prov.badgeColor, borderColor: 'transparent' } : undefined}
+                      className={`px-3 py-2 rounded-xl text-xs font-bold border flex items-center gap-2 transition-all cursor-pointer ${
+                        isSelected
+                          ? `${prov.badgeColor ? '' : theme.gradientClass} text-white border-transparent shadow-xs`
+                          : 'border-slate-300 text-slate-700 bg-slate-100 hover:bg-slate-200'
+                      }`}
+                    >
+                      <span
+                        className="w-2.5 h-2.5 rounded-full shrink-0 border border-white/60"
+                        style={{ backgroundColor: color }}
+                      />
+                      <span>{prov.name}</span>
+                    </button>
+                  );
+                })}
+              </div>
             </div>
-          </div>
+          ) : (
+            <div className="border-b border-slate-300/80 pb-3">
+              <MarketWeatherWidget variant="banner" />
+            </div>
+          )}
 
           <div className="flex flex-col gap-1">
             {subNavLinks.map((item) => {

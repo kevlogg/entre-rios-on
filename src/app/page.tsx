@@ -68,7 +68,7 @@ export default async function CommunityHomePage() {
       {/* Contenido Principal */}
       <main className="w-full flex-1 max-w-[1480px] mx-auto px-3 sm:px-6 lg:px-8 py-5 space-y-10">
         
-        {/* Las 5 Noticias del Día (Santa Fe & Región - Opción B) */}
+        {/* Las 10 Noticias del Día (Santa Fe, Región & Reuters) */}
         <FeaturedDailyNews articles={events} />
 
         {/* Barra de Accesos Rápidos a Secciones Comunitarias */}
